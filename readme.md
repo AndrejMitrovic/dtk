@@ -2,6 +2,8 @@
 
 This is a D wrapper of the Tcl/Tk graphics library. It's based on Tcl/Tk v8.6.0.0.
 
+This code was originally based on lysevi's [dkinter](https://github.com/lysevi/dkinter) project, which has been stale for many years.
+
 Currently it's only tested on Windows 7.
 
 ## Building
