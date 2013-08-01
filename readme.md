@@ -1,6 +1,6 @@
 # dtk
 
-This is a D wrapper of the Tcl/Tk graphics library.
+This is a D wrapper of the Tcl/Tk graphics library. It's based on Tcl/Tk v8.6.0.0.
 
 Currently it's only tested on Windows 7.
 
@@ -10,6 +10,10 @@ Make sure you're using the latest compiler. Sometimes that even means using the 
 (sorry about that).
 
 Run the `build.bat` file to both run the unittests and generate a static library in the `bin` subfolder.
+
+## Links
+
+ActiveTcl Tcl/Tk distribution: http://www.activestate.com/activetcl/downloads
 
 ## License
 
