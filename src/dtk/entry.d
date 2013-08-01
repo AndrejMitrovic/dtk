@@ -18,42 +18,13 @@ class Entry : Widget
     {
         Options o;
         o["text"] = text;
-        super(master, "entry", o);
-    }
-
-    /// Возращает введенный текст.
-    string text()
-    {
-        return eval("get");
-    }
-
-    override void clean()
-    {
-        int len = text().length;
-        eval("delete 0 " ~ to!string(len));
-    }
-
-    void text(string txt)
-    {
-        clean();
-        eval(" insert 0 \"" ~ txt ~ "\"");
-    }
-}
-
-class TTKEntry : Widget
-{
-    this(Widget master, string text = "")
-    {
-        Options o;
-        o["text"] = text;
         super(master, "ttk::entry", o);
     }
 
-    /// Возращает введенный текст.
-    string text()
-    {
-        return eval("get");
-    }
+    //~ string text()
+    //~ {
+        //~ return eval("get");
+    //~ }
 
     override void clean()
     {
@@ -61,9 +32,9 @@ class TTKEntry : Widget
         eval("delete 0 " ~ to!string(len));
     }
 
-    void text(string txt)
-    {
-        clean();
-        eval(" insert 0 \"" ~ txt ~ "\"");
-    }
+    //~ void text(string txt)
+    //~ {
+        //~ clean();
+        //~ eval(" insert 0 \"" ~ txt ~ "\"");
+    //~ }
 }

@@ -9,7 +9,9 @@ void main()
     auto root = new Tk();
 
     Button button1;
-    button1 = new Button(root, "Flash",
+    button1 = new Button(root, "Flash");
+
+    button1.onEvent =
         (Widget, Event)
         {
             assert(button1.isActive &&
@@ -17,23 +19,40 @@ void main()
                    !button1.isPressed &&
                    !button1.isSelected &&
                    button1.isHovered);
-        });
+
+            button1.text = "Flash";
+            assert(button1.text == "Flash");
+        };
 
     button1.pack();
 
+    testStandard(button1);
     testButton(button1);
 
     root.mainloop();
 }
 
-void testButton(Button button)
+// test standard widget states
+void testStandard(Widget button)
 {
-    /** Options tests. */
     assert(button.underline == -1);
     button.underline = 2;
     assert(button.underline == 2);
 
-    /** State tests. */
+    assert(button.width == 0);  // natural width
+    button.width = -50;  // set minimum 50 units
+    assert(button.width == -50);
+
+    button.width = 0;
+    assert(button.width == 0);
+
+    button.width = 50;   // set maximum 50 units
+    assert(button.width == 50);
+
+    assert(button.text == "Flash");
+    button.text = "this is some long text";
+    assert(button.text == "this is some long text", button.text);
+
     assert(button.isEnabled);
     assert(!button.isDisabled);
 
@@ -54,4 +73,10 @@ void testButton(Button button)
     assert(!button.isAlternate);
     assert(!button.isInvalid);
     assert(!button.isHovered);
+}
+
+// test button-specific options
+void testButton(Button button)
+{
+
 }

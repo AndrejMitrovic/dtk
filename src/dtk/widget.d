@@ -13,12 +13,14 @@ import std.conv;
 
 import dtk.options;
 import dtk.event;
-import dtk.callback;
 import dtk.utils;
 import dtk.tcl;
 
 public const string HORIZONTAL = "horizontal";
 public const string VERTICAL   = "vertical";
+
+/** The callback type of a D event listener. */
+alias DtkCallback = void delegate(Widget, Event);
 
 /**
    The main class for all DTK widgets.
@@ -45,22 +47,22 @@ abstract class Widget
         Tcl_Eval(_interp, cast(char*)toStringz(wname ~ " " ~ _name ~ " " ~ options2string(opt)));
     }
 
-    this(Widget master, string wname, Options opt, Callback c)
-    {
-        _lastWidgetID++;  // todo: this should be shared
-        _interp = master._interp;
-        int  num  = addCallback(this, c);
-        auto mopt = opt;
-        mopt["command"] = "" ~ callbackPrefix ~ to!string(num) ~ "";
+    //~ this(Widget master, string wname, Options opt, Callback c)
+    //~ {
+        //~ _lastWidgetID++;  // todo: this should be shared
+        //~ _interp = master._interp;
+        //~ int  num  = addCallback(this, c);
+        //~ auto mopt = opt;
+        //~ mopt["command"] = "" ~ callbackPrefix ~ to!string(num) ~ "";
 
-        if (master._name == ".")
-            _name = "." ~ wname ~ to!string(_lastWidgetID);
-        else
-            _name = master._name ~ "." ~ wname ~ to!string(_lastWidgetID);
+        //~ if (master._name == ".")
+            //~ _name = "." ~ wname ~ to!string(_lastWidgetID);
+        //~ else
+            //~ _name = master._name ~ "." ~ wname ~ to!string(_lastWidgetID);
 
-        stderr.writefln("tcl_eval { %s }", wname ~ " " ~ _name ~ " " ~ options2string(mopt));
-        Tcl_Eval(_interp, cast(char*)toStringz(wname ~ " " ~ _name ~ " " ~ options2string(mopt)));
-    }
+        //~ stderr.writefln("tcl_eval { %s }", wname ~ " " ~ _name ~ " " ~ options2string(mopt));
+        //~ Tcl_Eval(_interp, cast(char*)toStringz(wname ~ " " ~ _name ~ " " ~ options2string(mopt)));
+    //~ }
 
     /// implemented in derived classes
     public void exit() { }
@@ -72,6 +74,60 @@ abstract class Widget
     public final void pack()
     {
         eval("pack " ~ _name);
+    }
+
+    /** Options: */
+
+    /** Get the 0-based index of the underlined character, or -1 if no character is underlined. */
+    @property int underline()
+    {
+        return this.getOption!int("underline");
+    }
+
+    /** Set the underlined character at the 0-based index. */
+    @property void underline(int charIndex)
+    {
+        this.setOption("underline", charIndex);
+    }
+
+    /** Get the text string displayed in the widget. */
+    @property string text()
+    {
+        return this.getOption!string("text");
+    }
+
+    /** Set the text string displayed in the widget. */
+    @property void text(string newText)
+    {
+        this.setOption("text", newText);
+    }
+
+    /**
+        Get the text label space width currently set.
+        If no specific text width is set, 0 is returned,
+        which implies a natural text space width is used.
+    */
+    @property int width()
+    {
+        try
+        {
+            return this.getOption!int("width");
+        }
+        catch (ConvException)
+        {
+            return 0;
+        }
+    }
+
+    /**
+        Set the text label space width. If greater than zero, specifies how much space
+        in character widths to allocate for the text label. If less than zero,
+        specifies a minimum width. If zero or unspecified, the natural width of
+        the text label is used.
+    */
+    @property void width(int newWidth)
+    {
+        this.setOption("width", newWidth);
     }
 
     /** State modifiers: */
@@ -214,7 +270,84 @@ package:
         eval(cmd);
     }
 
+    final T getOption(T)(string option)
+    {
+        string cmd = format("%s cget -%s", _name, option);
+        return to!T(eval(cmd));
+    }
+
+    final void setOption(T)(string option, T value)
+    {
+        string cmd = format(`%s configure -%s %s`, _name, option, value._enquote);
+        stderr.writeln(cmd);
+        eval(cmd);
+    }
+
+    final string createCallback(DtkCallback clb)
+    {
+        int newSlotID = _lastCallbackID++;  // todo: unsafe with threading
+
+        Command command = Command(this, clb);
+        ClientData clientData = cast(ClientData)newSlotID;
+        string callbackName = format("%s%s", callbackPrefix, newSlotID);
+
+        Tcl_CreateObjCommand(_interp,
+                             cast(char*)callbackName.toStringz,
+                             &callbackHandler,
+                             clientData,
+                             &callbackDeleter);
+
+        _callbackMap[newSlotID] = command;
+        return callbackName;
+    }
+
+    static extern(C)
+    void callbackDeleter(ClientData clientData)
+    {
+        int slotID = cast(int)clientData;
+        _callbackMap.remove(slotID);
+    }
+
+
+    static extern(C)
+    int callbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
+    {
+        int slotID = cast(int)clientData;
+
+        if (auto callback = slotID in _callbackMap)
+        {
+            Event event;
+
+            if (objc > 1)  // todo: objc is the objv count, not sure if we should always assign all fields
+            {
+                // http://tmml.sourceforge.net/doc/tcl/CrtObjCmd.html
+                event.x       = safeToInt(Tcl_GetString(objv[1]));
+                event.y       = safeToInt(Tcl_GetString(objv[2]));
+                event.keycode = safeToInt(Tcl_GetString(objv[3]));
+                event.width   = safeToInt(Tcl_GetString(objv[4]));
+                event.height  = safeToInt(Tcl_GetString(objv[5]));
+                event.width   = safeToInt(Tcl_GetString(objv[6]));
+                event.height  = safeToInt(Tcl_GetString(objv[7]));
+            }
+
+            callback.c(callback.w, event);
+            return TCL_OK;
+        }
+        else
+        {
+            Tcl_SetResult(interp, cast(char*)"Trying to invoke non-existent callback", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    }
+
 package:
+
+    static struct Command
+    {
+        Widget w;
+        DtkCallback c;
+    }
+
     Tcl_Interp* _interp;
 
     /** Unique widget name. */
@@ -222,4 +355,12 @@ package:
 
     /** Counter to create a unique widget name. */
     static int _lastWidgetID = 0;
+
+    /** Coiunter to create unique callback IDs */
+    static int _lastCallbackID;
+
+    enum callbackPrefix = "dtk::call";
+
+    /** All active callbacks. */
+    __gshared Command[int] _callbackMap;
 }

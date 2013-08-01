@@ -11,6 +11,7 @@ import std.algorithm;
 import std.functional;
 import std.stdio;
 import std.string;
+import std.traits;
 
 alias spaceJoin = pipe!(map!(to!string), reduce!("a ~ ' ' ~ b"));
 
@@ -41,4 +42,9 @@ package string _makeAggregateAliases(T)()
         result ~= format("alias %s = %s.%s;", member, enumName, member);
 
     return result.join("\n");
+}
+
+package string _enquote(T)(T option)
+{
+    return format(`"%s"`, option);
 }

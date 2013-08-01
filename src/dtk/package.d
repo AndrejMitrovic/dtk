@@ -9,7 +9,6 @@ module dtk;
 public
 {
     import dtk.button;
-    import dtk.callback;
     import dtk.canvas;
     import dtk.dkinter;
     import dtk.entry;

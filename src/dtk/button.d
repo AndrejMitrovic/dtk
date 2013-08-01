@@ -9,7 +9,6 @@ module dtk.button;
 import std.conv;
 import std.string;
 
-import dtk.callback;
 import dtk.options;
 import dtk.widget;
 
@@ -25,26 +24,17 @@ struct ButtonOptions
 
 class Button : Widget
 {
-    this(Widget master, string text, Callback callback)
+    this(Widget master, string text)
     {
-        Options o;
-        o["text"] = text;
-        super(master, "ttk::button", o, callback);
+        Options options;
+        options["text"] = text;
+        super(master, "ttk::button", options);
     }
 
-    /** Options. */
-
-    /** Get the 0-based index of the underlined character, or -1 if no character is underlined. */
-    @property int underline()
+    /** Set the callback to evaluate when this button is invoked. */
+    @property void onEvent(DtkCallback callback)
     {
-        string cmd = format("%s cget -underline", _name);
-        return to!int(eval(cmd));
-    }
-
-    /** Set the underlined character at the 0-based index. */
-    @property void underline(int charIndex)
-    {
-        string cmd = format("%s configure -underline %s", _name, charIndex);
-        eval(cmd);
+        string callbackName = this.createCallback(callback);
+        this.setOption("command", callbackName);
     }
 }
