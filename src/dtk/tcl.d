@@ -213,4 +213,5 @@ version (Windows)
         Tcl_FindExecutable(AppName.toStringz);
     }
 }
-
+else
+static assert(0, "OS not yet supported.");
