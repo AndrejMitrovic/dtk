@@ -79,7 +79,7 @@ package int addCallback(Widget wid, Callback clb)
     ClientData d = cast(ClientData)newSlotID;
     char* name   = cast(char*)(callbackPrefix ~ to!string(newSlotID));
 
-    Tcl_CreateObjCommand(wid.interp(),
+    Tcl_CreateObjCommand(wid._interp,
                          name,
                          &callbackHandler,
                          d,

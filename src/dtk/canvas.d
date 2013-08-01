@@ -21,8 +21,8 @@ class Tag : Widget
     this(Canvas parent, string tag)
     {
         super();
-        m_interp = parent.interp;
-        m_name   = tag;
+        _interp = parent._interp;
+        _name   = tag;
         m_canvas = parent;
     }
 protected:
@@ -97,6 +97,6 @@ class Canvas : Widget
 
     string cdelete(Tag tag)
     {
-        return cdelete(tag.name());
+        return cdelete(tag._name);
     }
 }

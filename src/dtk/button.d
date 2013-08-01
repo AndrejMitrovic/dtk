@@ -29,21 +29,22 @@ class Button : Widget
     {
         Options o;
         o["text"] = text;
-        //~ o["underline"] = "0";
         super(master, "ttk::button", o, callback);
     }
 
-    /** Set the underline option */
-    @property void underline(int charIndex)
-    {
-        string cmd = format("%s configure -underline %s", m_name, charIndex);
-        eval(cmd);
-    }
+    /** Options. */
 
-    /** Get the underline option */
+    /** Get the 0-based index of the underlined character, or -1 if no character is underlined. */
     @property int underline()
     {
-        string cmd = format("%s cget -underline", m_name);
+        string cmd = format("%s cget -underline", _name);
         return to!int(eval(cmd));
+    }
+
+    /** Set the underlined character at the 0-based index. */
+    @property void underline(int charIndex)
+    {
+        string cmd = format("%s configure -underline %s", _name, charIndex);
+        eval(cmd);
     }
 }

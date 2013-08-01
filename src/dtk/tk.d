@@ -24,23 +24,23 @@ class Tk : Widget
 {
     this()
     {
-        m_interp = enforce(Tcl_CreateInterp());
+        _interp = enforce(Tcl_CreateInterp());
 
-        if (Tcl_Init(m_interp) != TCL_OK || Tk_Init(m_interp) != TCL_OK)
+        if (Tcl_Init(_interp) != TCL_OK || Tk_Init(_interp) != TCL_OK)
         {
-            if (*m_interp.result)
+            if (*_interp.result)
             {
-                stderr.writeln(to!string(m_interp.result));
+                stderr.writeln(to!string(_interp.result));
             }
 
             .exit(1);  // todo: replace with exceptions for stack-unwinding
         }
 
-        m_window = Tk_MainWindow(m_interp);
+        m_window = Tk_MainWindow(_interp);
 
         if (m_window == null)
         {
-            stderr.writeln(to!string(m_interp.result));
+            stderr.writeln(to!string(_interp.result));
             .exit(1);  // todo: replace with exceptions for stack-unwinding
         }
     }
@@ -49,17 +49,17 @@ class Tk : Widget
     // workaround: call exit() after Tk_MainLoop is done.
     ~this()
     {
-        //~ Tcl_DeleteInterp(m_interp);
+        //~ Tcl_DeleteInterp(_interp);
     }
 
     override void exit()
     {
-        Tcl_DeleteInterp(m_interp);
+        Tcl_DeleteInterp(_interp);
     }
 
     void exit(Widget, Event)
     {
-        Tcl_DeleteInterp(m_interp);
+        Tcl_DeleteInterp(_interp);
     }
 
     void mainloop()  // todo: replace with run()

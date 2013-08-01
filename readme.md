@@ -22,6 +22,7 @@ ActiveTcl Tcl/Tk distribution: http://www.activestate.com/activetcl/downloads
 Tcl v8.6 reference links: http://www.tcl.tk/man/tcl8.6/
 Tcl v8.6 Tcl commands: http://www.tcl.tk/man/tcl8.6/TclCmd/contents.htm
 Tcl v8.6 Tk commands: http://www.tcl.tk/man/tcl8.6/TkCmd/contents.htm
+Tcl Wiki book: http://en.wikibooks.org/wiki/Tcl_Programming/Tk
 
 ## License
 
