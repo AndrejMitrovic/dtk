@@ -25,7 +25,7 @@ class Text : Widget
 {
     this(Widget master)
     {
-        Options o;
+        DtkOptions o;
         super(master, "text", o);
     }
 }
@@ -34,7 +34,7 @@ class Frame : Widget
 {
     this(Widget master)
     {
-        Options o;
+        DtkOptions o;
         super(master, "frame", o);
     }
 }

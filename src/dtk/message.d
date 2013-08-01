@@ -13,7 +13,7 @@ class Message : Widget
 {
     this(Widget master, string text)
     {
-        Options o;
+        DtkOptions o;
         o["text"] = text;
         super(master, "message", o);
     }

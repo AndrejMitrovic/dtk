@@ -33,7 +33,7 @@ class Canvas : Widget
 {
     this(Widget master, int width = 100, int height = 100)
     {
-        Options o;
+        DtkOptions o;
         o["width"]  = to!string(width);
         o["height"] = to!string(height);
         super(master, "canvas", o);

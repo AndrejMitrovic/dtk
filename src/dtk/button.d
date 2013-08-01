@@ -26,7 +26,7 @@ class Button : Widget
 {
     this(Widget master, string text)
     {
-        Options options;
+        DtkOptions options;
         options["text"] = text;
         super(master, "ttk::button", options);
     }
@@ -36,5 +36,12 @@ class Button : Widget
     {
         string callbackName = this.createCallback(callback);
         this.setOption("command", callbackName);
+    }
+
+    /** Invoke the callback which was set with a call to $(D onEvent). */
+    void fireEvent()
+    {
+        string cmd = format("%s invoke", _name);
+        eval(cmd);
     }
 }

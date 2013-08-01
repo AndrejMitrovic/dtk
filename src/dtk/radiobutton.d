@@ -15,7 +15,7 @@ class Radiobutton : Widget
 {
     this(Widget master, string text, int value)
     {
-        Options o;
+        DtkOptions o;
         o["text"]  = text;
         o["value"] = to!string(value);
         super(master, "radiobutton", o);

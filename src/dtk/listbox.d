@@ -15,7 +15,7 @@ class Listbox : Widget
 {
     this(Widget master)
     {
-        Options o;
+        DtkOptions o;
         super(master, "listbox", o);
     }
 

@@ -9,11 +9,10 @@ module dtk.options;
 import std.array;
 import std.string;
 
-alias Options = string[string];
+/** Convenience. */
+alias DtkOptions = string[string];
 
-// todo: we've added a \0, it seems to have missed this.
-// not sure if it was buggy or not.
-string options2string(Options opts)
+package string options2string(DtkOptions opts)
 {
     Appender!(string[]) result;
 

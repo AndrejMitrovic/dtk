@@ -13,7 +13,7 @@ class Spinbox : Widget
 {
     this(Widget master)
     {
-        Options o;
+        DtkOptions o;
         o["from"] = "0";
         o["to"]   = "10";
         super(master, "spinbox", o);

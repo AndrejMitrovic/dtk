@@ -16,7 +16,7 @@ class Scale : Widget
 {
     this(Widget master, string text)
     {
-        Options o;
+        DtkOptions o;
         o["label"] = text;
         super(master, "scale", o);
     }

@@ -14,14 +14,31 @@ void main()
     button1.onEvent =
         (Widget, Event)
         {
-            assert(button1.isActive &&
-                   button1.isFocused &&
-                   !button1.isPressed &&
-                   !button1.isSelected &&
-                   button1.isHovered);
+            static int counter;
+            counter++;
+
+            // the first time the invocation is explicit via fireEvent
+            if (counter == 1)
+            {
+                assert(!button1.isActive &&
+                       !button1.isFocused &&
+                       !button1.isPressed &&
+                       !button1.isSelected &&
+                       !button1.isHovered);
+            }
+            else  // invocation via mouse click
+            {
+                assert(button1.isActive &&
+                       button1.isFocused &&
+                       !button1.isPressed &&
+                       !button1.isSelected &&
+                       button1.isHovered);
+            }
 
             button1.text = "Flash";
             assert(button1.text == "Flash");
+
+            stderr.writefln("onEvent called %s times.", counter);
         };
 
     button1.pack();
@@ -78,5 +95,5 @@ void testStandard(Widget button)
 // test button-specific options
 void testButton(Button button)
 {
-
+    button.fireEvent();
 }

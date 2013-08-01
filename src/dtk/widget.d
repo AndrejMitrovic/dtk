@@ -6,6 +6,8 @@
  */
 module dtk.widget;
 
+import core.thread;
+
 import std.stdio;
 import std.string;
 import std.c.stdlib;
@@ -33,36 +35,18 @@ abstract class Widget
     }
 
     // todo: insert writeln's here to figure out what syntax is called
-    this(Widget master, string wname, Options opt)
+    this(Widget master, string wname, DtkOptions opt)
     {
-        if (master._name == ".")
-            _name = "." ~ wname ~ to!string(_lastWidgetID);
-        else
-            _name = master._name ~ "." ~ wname ~ to!string(_lastWidgetID);
+        string prefix;
+        if (master._name != ".")
+            prefix = master._name;
 
-        _lastWidgetID++;
+        _name = format("%s.%s%s%s", prefix, wname, _threadID, _lastWidgetID++);
         _interp = master._interp;
 
         stderr.writefln("tcl_eval { %s }", wname ~ " " ~ _name ~ " " ~ options2string(opt));
         Tcl_Eval(_interp, cast(char*)toStringz(wname ~ " " ~ _name ~ " " ~ options2string(opt)));
     }
-
-    //~ this(Widget master, string wname, Options opt, Callback c)
-    //~ {
-        //~ _lastWidgetID++;  // todo: this should be shared
-        //~ _interp = master._interp;
-        //~ int  num  = addCallback(this, c);
-        //~ auto mopt = opt;
-        //~ mopt["command"] = "" ~ callbackPrefix ~ to!string(num) ~ "";
-
-        //~ if (master._name == ".")
-            //~ _name = "." ~ wname ~ to!string(_lastWidgetID);
-        //~ else
-            //~ _name = master._name ~ "." ~ wname ~ to!string(_lastWidgetID);
-
-        //~ stderr.writefln("tcl_eval { %s }", wname ~ " " ~ _name ~ " " ~ options2string(mopt));
-        //~ Tcl_Eval(_interp, cast(char*)toStringz(wname ~ " " ~ _name ~ " " ~ options2string(mopt)));
-    //~ }
 
     /// implemented in derived classes
     public void exit() { }
@@ -283,9 +267,10 @@ package:
         eval(cmd);
     }
 
+    /** Create a callback that will refrence this widget. */
     final string createCallback(DtkCallback clb)
     {
-        int newSlotID = _lastCallbackID++;  // todo: unsafe with threading
+        int newSlotID = _lastCallbackID++;
 
         Command command = Command(this, clb);
         ClientData clientData = cast(ClientData)newSlotID;
@@ -307,7 +292,6 @@ package:
         int slotID = cast(int)clientData;
         _callbackMap.remove(slotID);
     }
-
 
     static extern(C)
     int callbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
@@ -342,25 +326,34 @@ package:
 
 package:
 
+    static this()
+    {
+        _threadID = cast(size_t)cast(void*)Thread.getThis;
+    }
+
+    /** Unique Thread ID. Needed to create thread-global unique identifiers for Tcl/Tk. */
+    static size_t _threadID;
+
+    Tcl_Interp* _interp;
+
+    /** This widget's unique name. */
+    string _name;
+
+    /** Counter to create a thread-global unique widget name (_threadID is used in mangling). */
+    static int _lastWidgetID = 0;
+
+    /** Counter to create a unique thread-local callback ID. */
+    static int _lastCallbackID;
+
+    /** Prefix to avoid name clashes. */
+    enum callbackPrefix = "dtk::call";
+
     static struct Command
     {
         Widget w;
         DtkCallback c;
     }
 
-    Tcl_Interp* _interp;
-
-    /** Unique widget name. */
-    string _name;
-
-    /** Counter to create a unique widget name. */
-    static int _lastWidgetID = 0;
-
-    /** Coiunter to create unique callback IDs */
-    static int _lastCallbackID;
-
-    enum callbackPrefix = "dtk::call";
-
-    /** All active callbacks. */
-    __gshared Command[int] _callbackMap;
+    /** All thread-local active callbacks. */
+    static Command[int] _callbackMap;
 }
