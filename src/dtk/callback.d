@@ -25,21 +25,17 @@ struct Command
     Callback c;
 }
 
-alias Command[int] CallbackMap;
+alias CallbackMap = Command[int];
 
 // major todo: these need to be synchronized
 __gshared CallbackMap callbackMap;
 __gshared int callbackID;
 enum callbackPrefix = "dkinter::call";
 
-version = Profile;
-version(Profile) import std.datetime;
-
 // called from Tcl
 extern (C)
 int callbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
 {
-    version(Profile) auto sw = StopWatch(AutoStart.yes);
     int slotID = cast(int)clientData;
 
     if (auto callback = slotID in callbackMap)
@@ -59,7 +55,6 @@ int callbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const T
         }
 
         callback.c(callback.w, event);
-        version(Profile) sw.stop(); writefln("usecs: %s", sw.peek.usecs);
         return TCL_OK;
     }
     else
@@ -69,7 +64,6 @@ int callbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const T
     }
 }
 
-// called from Tcl
 extern (C)
 void callbackDeleter(ClientData clientData)
 {
@@ -77,7 +71,7 @@ void callbackDeleter(ClientData clientData)
     callbackMap.remove(slotID);
 }
 
-int addCallback(Widget wid, Callback clb)
+package int addCallback(Widget wid, Callback clb)
 {
     int newSlotID = callbackID;
     callbackID++;  // note: unsafe with threading

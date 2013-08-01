@@ -6,9 +6,22 @@
  */
 module dtk.button;
 
+import std.conv;
+import std.string;
+
 import dtk.callback;
 import dtk.options;
 import dtk.widget;
+
+struct ButtonOptions
+{
+    /**
+        If set, specifies the integer index (0-based) of a
+        character to underline in the text string.
+        The underlined character is used for mnemonic activation.
+    */
+    int underline = -1;
+}
 
 class Button : Widget
 {
@@ -16,76 +29,21 @@ class Button : Widget
     {
         Options o;
         o["text"] = text;
-        super(master, "button", o, callback);
-    }
-
-    void flash()
-    {
-        eval("flash");
-    }
-
-    void tkButtonEnter()
-    {
-        pure_eval("tkButtonEnter " ~ m_name);
-    }
-
-    void tkButtonLeave()
-    {
-        pure_eval("tkButtonLeave " ~ m_name);
-    }
-
-    void tkButtonDown()
-    {
-        pure_eval("tkButtonDown " ~ m_name);
-    }
-
-    void tkButtonUp()
-    {
-        pure_eval("tkButtonUp " ~ m_name);
-    }
-
-    void tkButtonInvoke()
-    {
-        pure_eval("tkButtonInvoke " ~ m_name);
-    }
-}
-
-class TTKButton : Widget
-{
-    this(Widget master, string text, Callback callback)
-    {
-        Options o;
-        o["text"] = text;
+        //~ o["underline"] = "0";
         super(master, "ttk::button", o, callback);
     }
 
-    void flash()
+    /** Set the underline option */
+    @property void underline(int charIndex)
     {
-        eval("flash");
+        string cmd = format("%s configure -underline %s", m_name, charIndex);
+        eval(cmd);
     }
 
-    void tkButtonEnter()
+    /** Get the underline option */
+    @property int underline()
     {
-        pure_eval("tkButtonEnter " ~ m_name);
-    }
-
-    void tkButtonLeave()
-    {
-        pure_eval("tkButtonLeave " ~ m_name);
-    }
-
-    void tkButtonDown()
-    {
-        pure_eval("tkButtonDown " ~ m_name);
-    }
-
-    void tkButtonUp()
-    {
-        pure_eval("tkButtonUp " ~ m_name);
-    }
-
-    void tkButtonInvoke()
-    {
-        pure_eval("tkButtonInvoke " ~ m_name);
+        string cmd = format("%s cget -underline", m_name);
+        return to!int(eval(cmd));
     }
 }

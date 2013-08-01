@@ -36,7 +36,7 @@ class Widget
         m_cur_widget++;
         m_interp = master.m_interp;
 
-        writefln("tcl_eval { %s }", wname ~ " " ~ m_name ~ " " ~ options2string(opt));
+        stderr.writefln("tcl_eval { %s }", wname ~ " " ~ m_name ~ " " ~ options2string(opt));
         Tcl_Eval(m_interp, cast(char*)toStringz(wname ~ " " ~ m_name ~ " " ~ options2string(opt)));
     }
 
@@ -53,7 +53,7 @@ class Widget
         else
             m_name = master.m_name ~ "." ~ wname ~ to!string(m_cur_widget);
 
-        writefln("tcl_eval { %s }", wname ~ " " ~ m_name ~ " " ~ options2string(mopt));
+        stderr.writefln("tcl_eval { %s }", wname ~ " " ~ m_name ~ " " ~ options2string(mopt));
         Tcl_Eval(m_interp, cast(char*)toStringz(wname ~ " " ~ m_name ~ " " ~ options2string(mopt)));
     }
 
@@ -78,7 +78,7 @@ class Widget
 
     void pack()
     {
-        pure_eval("pack " ~ m_name);
+        eval("pack " ~ m_name);
     }
 
     string pack(string a1, string a2, string args ...)
@@ -88,21 +88,15 @@ class Widget
         if (args.length >= 2)
             return a ~ " " ~ args;
         else
-            return pure_eval("pack  " ~ m_name ~ " " ~ a);
-    }
-
-    string pure_eval(string cmd)
-    {
-        writefln("tcl_eval { %s }", cmd);
-        // todo: insert writeln's here to figure out what syntax is called
-        Tcl_Eval(m_interp, cast(char*)toStringz(cmd));
-        return to!string(m_interp.result);
+            return eval("pack  " ~ m_name ~ " " ~ a);
     }
 
     string eval(string cmd)
     {
-        //~ writefln("eval called with `%s`.", cmd);
-        return pure_eval(m_name ~ " " ~ cmd);
+        stderr.writefln("tcl_eval { %s }", cmd);
+
+        Tcl_Eval(m_interp, cast(char*)toStringz(cmd));
+        return to!string(m_interp.result);
     }
 
     string cget(string key)
@@ -128,11 +122,15 @@ class Widget
     void bind(string event, Callback cb)
     {
         int num = addCallback(this, cb);
-        writeln(pure_eval(" bind " ~ m_name ~ " " ~ event ~ " {" ~ callbackPrefix ~ to!string(num) ~ " %x %y %k %K %w %h %X %Y}"));
+        writeln(eval(" bind " ~ m_name ~ " " ~ event ~ " {" ~ callbackPrefix ~ to!string(num) ~ " %x %y %k %K %w %h %X %Y}"));
     }
 
 protected:
     Tcl_Interp* m_interp;
+
+    /** Unique widget name. */
     string m_name = "";
+
+    /** Counter to create a unique widget name. */
     static int m_cur_widget = 0;
 }

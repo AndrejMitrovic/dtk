@@ -183,8 +183,6 @@ version (Windows)
     import std.c.windows.windows;
     import std.string;
 
-    // Safe symbol loader. Pass a DLL handle, the exported function name,
-    // and a static field at CT. The function will throw if the symbol name is not found.
     private void loadSymbol(alias field)(HANDLE handle)
     {
         enum string symbolName = __traits(identifier, field);

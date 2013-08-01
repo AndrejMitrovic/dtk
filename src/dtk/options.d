@@ -6,16 +6,19 @@
  */
 module dtk.options;
 
+import std.array;
+import std.string;
+
 alias Options = string[string];
 
 // todo: we've added a \0, it seems to have missed this.
 // not sure if it was buggy or not.
-char[] options2string(Options opt)
+string options2string(Options opts)
 {
-    char[] result;
+    Appender!(string[]) result;
 
-    foreach (k; opt.keys)
-        result ~= "-" ~ k ~ " \"" ~ opt[k] ~ "\" ";
+    foreach (key, val; opts)
+        result ~= format(`-%s "%s"`, key, val);
 
-    return result;
+    return result.data.join(" ");
 }

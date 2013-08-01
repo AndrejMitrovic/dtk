@@ -19,6 +19,10 @@ Run the `build.bat` file to both run the unittests and generate a static library
 
 ActiveTcl Tcl/Tk distribution: http://www.activestate.com/activetcl/downloads
 
+Tcl v8.6 reference links: http://www.tcl.tk/man/tcl8.6/
+Tcl v8.6 Tcl commands: http://www.tcl.tk/man/tcl8.6/TclCmd/contents.htm
+Tcl v8.6 Tk commands: http://www.tcl.tk/man/tcl8.6/TkCmd/contents.htm
+
 ## License
 
 Distributed under the Boost Software License, Version 1.0.
