@@ -8,20 +8,12 @@ module dtk;
 
 public
 {
+    import dtk.app;
     import dtk.button;
-    import dtk.canvas;
-    import dtk.dkinter;
-    import dtk.entry;
     import dtk.event;
-    import dtk.label;
-    import dtk.listbox;
-    import dtk.message;
+    import dtk.loader;
     import dtk.options;
-    import dtk.radiobutton;
-    import dtk.scale;
-    import dtk.spinbox;
-    import dtk.tcl;
-    import dtk.tk;
+    import dtk.types;
     import dtk.utils;
     import dtk.widget;
 }

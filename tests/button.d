@@ -1,15 +1,16 @@
 module button;
 
 import std.stdio;
+import std.range;
 
 import dtk;
 
 void main()
 {
-    auto root = new Tk();
+    auto app = new App();
 
     Button button1;
-    button1 = new Button(root, "Flash");
+    button1 = new Button(app, "Flash");
 
     button1.onEvent =
         (Widget, Event)
@@ -46,7 +47,7 @@ void main()
     testStandard(button1);
     testButton(button1);
 
-    root.mainloop();
+    app.run();
 }
 
 // test standard widget states
@@ -90,10 +91,20 @@ void testStandard(Widget button)
     assert(!button.isAlternate);
     assert(!button.isInvalid);
     assert(!button.isHovered);
+
+    assert(button.genericStyle.empty);
+    button.genericStyle = "Toolbutton";
+    assert(button.genericStyle == "Toolbutton");
+    button.genericStyle = "";
 }
 
 // test button-specific options
 void testButton(Button button)
 {
     button.fireEvent();
+
+    assert(button.style == ButtonStyle.none);
+    button.style = ButtonStyle.toolButton;
+    assert(button.style == ButtonStyle.toolButton);
+    button.style = ButtonStyle.none;
 }

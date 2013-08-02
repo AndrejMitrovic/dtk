@@ -15,18 +15,13 @@ import std.conv;
 
 import dtk.options;
 import dtk.event;
+import dtk.types;
 import dtk.utils;
-import dtk.tcl;
-
-public const string HORIZONTAL = "horizontal";
-public const string VERTICAL   = "vertical";
 
 /** The callback type of a D event listener. */
 alias DtkCallback = void delegate(Widget, Event);
 
-/**
-   The main class for all DTK widgets.
-*/
+/** The main class of all Dtk widgets. */
 abstract class Widget
 {
     this()
@@ -34,27 +29,28 @@ abstract class Widget
         _name = ".";
     }
 
-    // todo: insert writeln's here to figure out what syntax is called
-    this(Widget master, string wname, DtkOptions opt)
+    // todo: replace tkType with an enum
+    this(Widget master, string tkType, DtkOptions opt)
     {
         string prefix;
         if (master._name != ".")
             prefix = master._name;
 
-        _name = format("%s.%s%s%s", prefix, wname, _threadID, _lastWidgetID++);
+        _name = format("%s.%s%s%s", prefix, tkType, _threadID, _lastWidgetID++);
         _interp = master._interp;
 
-        stderr.writefln("tcl_eval { %s }", wname ~ " " ~ _name ~ " " ~ options2string(opt));
-        Tcl_Eval(_interp, cast(char*)toStringz(wname ~ " " ~ _name ~ " " ~ options2string(opt)));
+        stderr.writefln("tcl_eval { %s }", tkType ~ " " ~ _name ~ " " ~ options2string(opt));
+        Tcl_Eval(_interp, cast(char*)toStringz(tkType ~ " " ~ _name ~ " " ~ options2string(opt)));
     }
 
     /// implemented in derived classes
     public void exit() { }
 
-    /// ditto
+    /// implemented in derived classes
     public void clean() { }
 
-    /** Commands. */
+    /** Commands: */
+
     public final void pack()
     {
         eval("pack " ~ _name);
@@ -128,6 +124,28 @@ abstract class Widget
         this.setState("disabled");
     }
 
+    /**
+        Get the current widget style.
+
+        Use the derived-class $(D style)
+        properties to get a specific style.
+    */
+    @property string genericStyle()
+    {
+        return this.getOption!string("style");
+    }
+
+    /**
+        Set the widget style.
+
+        Use the derived-class $(D style)
+        properties to set a specific style.
+    */
+    @property void genericStyle(string newStyle)
+    {
+        this.setOption("style", newStyle);
+    }
+
     /** State checks: */
 
     /**
@@ -171,6 +189,12 @@ abstract class Widget
         return this.checkState("selected");
     }
 
+    /** Check whether this widget is a foreground widget. */
+    public final @property bool isInForeground()
+    {
+        return !this.isInBackground;
+    }
+
     /**
         Check whether this widget is a background widget.
         Windows and the Mac have a notion of an "active" or
@@ -181,12 +205,6 @@ abstract class Widget
     public final @property bool isInBackground()
     {
         return this.checkState("background");
-    }
-
-    /** Check whether this widget is a foreground widget. */
-    public final @property bool isInForeground()
-    {
-        return !this.isInBackground;
     }
 
     /** Check whether this widget does not allow user modification. */
@@ -205,6 +223,12 @@ abstract class Widget
         return this.checkState("alternate");
     }
 
+    /** ditto */
+    public final @property bool isValid()
+    {
+        return !this.isInvalid;
+    }
+
     /**
         The widget's value is invalid.
         Potential uses: scale widget value out of bounds,
@@ -213,12 +237,6 @@ abstract class Widget
     public final @property bool isInvalid()
     {
         return this.checkState("invalid");
-    }
-
-    /** ditto */
-    public final @property bool isValid()
-    {
-        return !this.isInvalid;
     }
 
     /**
@@ -356,4 +374,23 @@ package:
 
     /** All thread-local active callbacks. */
     static Command[int] _callbackMap;
+}
+
+
+class Text : Widget
+{
+    this(Widget master)
+    {
+        DtkOptions o;
+        super(master, "text", o);
+    }
+}
+
+class Frame : Widget
+{
+    this(Widget master)
+    {
+        DtkOptions o;
+        super(master, "frame", o);
+    }
 }

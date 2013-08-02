@@ -8,5 +8,12 @@ module dtk.event;
 
 struct Event
 {
-    int x, y, keycode, character, width, height, root_x, root_y;
+    int x;
+    int y;
+    int keycode;
+    int character;
+    int width;
+    int height;
+    int root_x;
+    int root_y;
 }
