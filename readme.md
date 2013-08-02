@@ -1,10 +1,12 @@
-# dtk
+# Dtk
 
 This is a D wrapper of the Tcl/Tk graphics library. It's based on Tcl/Tk v8.6.0.0.
 
-**Note:** The project is still in pre-alpha quality condition.
+**Note:** The project is a work-in-progress and is in pre-alpha quality condition. Do not use yet.
 
-This code was originally based on lysevi's [dkinter](https://github.com/lysevi/dkinter) project, which has been stale for many years.
+A previous porting attempt was lysevi's [dkinter](https://github.com/lysevi/dkinter) project, which has been stale for many years.
+
+Dtk uses the Tcl interpreter to invoke GUI-related commands. Although Dtk partially uses the Tk C API, most of its functionality is implemented by using the Tcl interpreter. The Tcl/Tk C API does not expose functionality to various high-level tk and ttk (themed tk) widgets.
 
 Currently it's only tested on Windows 7.
 
