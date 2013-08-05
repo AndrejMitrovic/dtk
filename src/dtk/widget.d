@@ -19,8 +19,6 @@ import dtk.event;
 import dtk.types;
 import dtk.utils;
 
-enum Widget NullParent = null;
-
 /** The callback type of a D event listener. */
 alias DtkCallback = void delegate(Widget, Event);
 
@@ -41,8 +39,7 @@ abstract class Widget
             prefix = parent._name;
 
         _name = format("%s.%s%s%s", prefix, tkType, _threadID, _lastWidgetID++);
-        string cmd = format("%s %s %s", tkType, _name, options2string(opt));
-        eval(cmd);
+        evalFmt("%s %s %s", tkType, _name, options2string(opt));
         _widgetPathMap[_name] = this;
     }
 
@@ -54,10 +51,10 @@ abstract class Widget
 
     /** Commands: */
 
-    public final void pack()
-    {
-        eval("pack " ~ _name);
-    }
+    //~ public final void pack()
+    //~ {
+        //~ evalFmt("pack %s", _name);
+    //~ }
 
     /** Options: */
 
@@ -253,6 +250,11 @@ abstract class Widget
         return this.checkState("hover");
     }
 
+    package final string evalFmt(T...)(string fmt, T args)
+    {
+        return eval(format(fmt, args));
+    }
+
     package final string eval(string cmd)
     {
         return App.eval(cmd);
@@ -262,27 +264,22 @@ package:
 
     final bool checkState(string state)
     {
-        string cmd = format("%s instate %s", _name, state);
-        return cast(bool)to!int(eval(cmd));
+        return cast(bool)to!int(evalFmt("%s instate %s", _name, state));
     }
 
     final void setState(string state)
     {
-        string cmd = format("%s state %s", _name, state);
-        eval(cmd);
+        evalFmt("%s state %s", _name, state);
     }
 
     final T getOption(T)(string option)
     {
-        string cmd = format("%s cget -%s", _name, option);
-        return to!T(eval(cmd));
+        return to!T(evalFmt("%s cget -%s", _name, option));
     }
 
     final void setOption(T)(string option, T value)
     {
-        string cmd = format(`%s configure -%s %s`, _name, option, value._enquote);
-        stderr.writeln(cmd);
-        eval(cmd);
+        evalFmt(`%s configure -%s %s`, _name, option, value._enquote);
     }
 
     /** Create a callback that will refrence this widget. */

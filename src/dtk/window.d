@@ -24,22 +24,22 @@ import dtk.widget;
 class Window : Widget
 {
     /** Instantiate a new Window. */
-    this(int width, int height)
+    this(Window parent, int width, int height)
     {
         DtkOptions options;
         options["width"] = to!string(width);
         options["height"] = to!string(height);
-        super(NullParent, "tk::toplevel", options);
+        super(parent, "tk::toplevel", options);
 
         // wait for the window to show up before we issue any commands
-        eval(format("tkwait visibility %s", _name));
+        evalFmt("tkwait visibility %s", _name);
     }
 
     /** Used for the initial implicitly-created Tk root window. */
     package this(Tk_Window window)
     {
         super(".");
-        eval(format("tkwait visibility %s", _name));
+        evalFmt("tkwait visibility %s", _name);
     }
 
     /**
@@ -48,8 +48,8 @@ class Window : Widget
     */
     @property Point position()
     {
-        string x = eval(format("winfo x %s", _name));
-        string y = eval(format("winfo y %s", _name));
+        string x = evalFmt("winfo x %s", _name);
+        string y = evalFmt("winfo y %s", _name);
         return Point(to!int(x), to!int(y));
     }
 
@@ -68,8 +68,8 @@ class Window : Widget
     /** Get the current window size. */
     @property Size size()
     {
-        string width = eval(format("winfo width %s", _name));
-        string height = eval(format("winfo height %s", _name));
+        string width = evalFmt("winfo width %s", _name);
+        string height = evalFmt("winfo height %s", _name);
         return Size(to!int(width), to!int(height));
     }
 
@@ -84,12 +84,18 @@ class Window : Widget
         this.geometry = rect;
     }
 
+    /** Return the size of the screen on which this window is currently displayed on. */
+    @property Size screenSize()
+    {
+        string width = evalFmt("winfo screenwidth %s", _name);
+        string height = evalFmt("winfo screenheight %s", _name);
+        return Size(to!int(width), to!int(height));
+    }
+
     /** Get the current window geometry. */
     @property Rect geometry()
     {
-        string cmd = format("wm geometry %s", _name);
-        string result = eval(cmd);
-        return result.toGeometry();
+        return evalFmt("wm geometry %s", _name).toGeometry();
     }
 
     /**
@@ -98,8 +104,18 @@ class Window : Widget
     */
     @property void geometry(Rect newGeometry)
     {
-        eval(format("wm geometry %s %s", _name, newGeometry.toEvalString));
+        evalFmt("wm geometry %s %s", _name, newGeometry.toEvalString);
         eval("update idletasks");
+    }
+
+    /**
+        Set a specific alpha value for this window within the range [0.0, 1.0].
+        A value of 0.0 indicates a fully-transparent window,
+        while a value of 1.0 is a fully-opaque window.
+    */
+    void setAlpha(float alpha = 1.0)
+    {
+        //~ wm attributes window
     }
 
     /**
@@ -109,8 +125,15 @@ class Window : Widget
     */
     @property auto childWidgets()
     {
-        string paths = eval(format("winfo children %s", _name));
+        string paths = evalFmt("winfo children %s", _name);
         return map!(a => Widget.lookupWidgetPath(a))(paths.splitter);
+    }
+
+    /** Return the parent window of this window, or $(D null) if this window is the main window. */
+    @property Window parentWindow()
+    {
+        string windowPath = evalFmt("winfo parent %s", _name);
+        return cast(Window)Widget.lookupWidgetPath(windowPath);
     }
 }
 
