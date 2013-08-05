@@ -20,6 +20,7 @@ import dtk.options;
 import dtk.types;
 import dtk.widget;
 
+///
 class Window : Widget
 {
     /** Instantiate a new Window. */

@@ -26,12 +26,12 @@ final class App
     /** Create the app and a main window. */
     this()
     {
-        interp = enforce(Tcl_CreateInterp());
+        _interp = enforce(Tcl_CreateInterp());
 
-        enforce(Tcl_Init(interp) == TCL_OK, to!string(interp.result));
-        enforce(Tk_Init(interp) == TCL_OK, to!string(interp.result));
+        enforce(Tcl_Init(_interp) == TCL_OK, to!string(_interp.result));
+        enforce(Tk_Init(_interp) == TCL_OK, to!string(_interp.result));
 
-        _window = new Window(enforce(Tk_MainWindow(interp)));
+        _window = new Window(enforce(Tk_MainWindow(_interp)));
     }
 
     /** Start the App event loop. */
@@ -49,15 +49,23 @@ final class App
         return _window;
     }
 
+    /** Evaluate any Tcl command and return its result. */
+    public static string eval(string cmd)
+    {
+        stderr.writefln("tcl_eval { %s }", cmd);
+        Tcl_Eval(_interp, cast(char*)toStringz(cmd));
+        return to!string(_interp.result);
+    }
+
 private:
     void exit()
     {
-        Tcl_DeleteInterp(interp);
+        Tcl_DeleteInterp(_interp);
     }
 
 package:
     /** Only one interpreter is allowed. */
-    __gshared Tcl_Interp* interp;
+    __gshared Tcl_Interp* _interp;
 
 private:
     Window _window;

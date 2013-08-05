@@ -253,11 +253,9 @@ abstract class Widget
         return this.checkState("hover");
     }
 
-    public final string eval(string cmd)
+    package final string eval(string cmd)
     {
-        stderr.writefln("tcl_eval { %s }", cmd);
-        Tcl_Eval(App.interp, cast(char*)toStringz(cmd));
-        return to!string(App.interp.result);
+        return App.eval(cmd);
     }
 
 package:
@@ -296,7 +294,7 @@ package:
         ClientData clientData = cast(ClientData)newSlotID;
         string callbackName = format("%s%s", callbackPrefix, newSlotID);
 
-        Tcl_CreateObjCommand(App.interp,
+        Tcl_CreateObjCommand(App._interp,
                              cast(char*)callbackName.toStringz,
                              &callbackHandler,
                              clientData,

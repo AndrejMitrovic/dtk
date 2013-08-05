@@ -10,3 +10,5 @@ Standard options to port:
     -style, style, Style
     -takefocus, takeFocus, TakeFocus
     -textvariable, textVariable, Variable
+
+Put place, pack, and grid commands into a separate layout file.
