@@ -30,10 +30,10 @@ struct Size
     int height;
 }
 
-struct Geometry
+struct Rect
 {
-    int xOffset;
-    int yOffset;
+    int x;
+    int y;
     int width;
     int height;
 }
@@ -70,16 +70,39 @@ class Window : Widget
         return Point(to!int(x), to!int(y));
     }
 
-    /** Get the last requested size for this window. */
-    @property Size requestedSize()
+    /**
+        Set a new window position, relative to its parent.
+        The parent is either another window, or the desktop.
+    */
+    @property void position(Point newPoint)
     {
-        string width = eval(format("winfo reqwidth %s", _name));
-        string height = eval(format("winfo reqheight %s", _name));
+        auto rect = this.geometry;
+        rect.x = newPoint.x;
+        rect.y = newPoint.y;
+        this.geometry = rect;
+    }
+
+    /** Get the current window size. */
+    @property Size size()
+    {
+        string width = eval(format("winfo width %s", _name));
+        string height = eval(format("winfo height %s", _name));
         return Size(to!int(width), to!int(height));
     }
 
+    /**
+        Set a new window size.
+    */
+    @property void size(Size newSize)
+    {
+        auto rect = this.geometry;
+        rect.width = newSize.width;
+        rect.height = newSize.height;
+        this.geometry = rect;
+    }
+
     /** Get the current window geometry. */
-    @property Geometry geometry()
+    @property Rect geometry()
     {
         string cmd = format("wm geometry %s", _name);
         string result = eval(cmd);
@@ -90,7 +113,7 @@ class Window : Widget
         Set a new window geometry.
         $(RED bug): See http://stackoverflow.com/questions/18043720/odd-results-for-wm-geometry
     */
-    @property void geometry(Geometry newGeometry)
+    @property void geometry(Rect newGeometry)
     {
         eval(format("wm geometry %s %s", _name, newGeometry.toEvalString));
         eval("update idletasks");
@@ -109,27 +132,24 @@ class Window : Widget
 }
 
 /** Phobos parse functions can't use a custom delimiter. */
-private Geometry toGeometry(string input)
+private Rect toGeometry(string input)
 {
     typeof(return) result;
 
-    string width = input[0 .. input.countUntil("x")];
-    input.findSkip("x");
+    sizediff_t xOffset = input.countUntil("x");
+    sizediff_t firstPlus = input.countUntil("+");
+    sizediff_t secondPlus = input.countUntil("+") + 1 + input[input.countUntil("+") + 1 .. $].countUntil("+");
 
-    auto idx = input.countUntil!(a => a == '+' || a == '-');
-    string height = input[0 .. idx];
-    input.popFrontN(idx);
+    string width = input[0 .. xOffset];
+    string height = input[xOffset + 1 .. firstPlus];
 
-    auto idx2 = input.countUntil!(a => a == '+' || a == '-');
-    auto idx3 = idx2 + 1 + input[idx2 + 1 .. $].countUntil!(a => a == '+' || a == '-');
+    string x = input[firstPlus + 1 .. secondPlus];
+    string y = input[secondPlus + 1 .. $];
 
-    string xOffset = input[0 .. idx3];
-    string yOffset = input[idx3 .. $];
-
+    result.x = to!int(x);
+    result.y = to!int(y);
     result.width = to!int(width);
     result.height = to!int(height);
-    result.xOffset = to!int(xOffset);
-    result.yOffset = to!int(yOffset);
 
     return result;
 }
@@ -137,18 +157,18 @@ private Geometry toGeometry(string input)
 ///
 unittest
 {
-    assert("200x200+88-88".toGeometry == Geometry(88, -88, 200, 200));
-    assert("200x200-88+88".toGeometry == Geometry(-88, 88, 200, 200));
-    assert("200x200+88+88".toGeometry == Geometry(88, 88, 200, 200));
+    assert("200x200+88+-88".toGeometry == Rect(88, -88, 200, 200));
+    assert("200x200+-88+88".toGeometry == Rect(-88, 88, 200, 200));
+    assert("200x200+88+88".toGeometry == Rect(88, 88, 200, 200));
 }
 
-private string toEvalString(Geometry geometry)
+private string toEvalString(Rect geometry)
 {
     string width = to!string(geometry.width);
     string height = to!string(geometry.height);
 
-    string xOffset = format("%s%s", geometry.xOffset < 0 ? "" : "+", geometry.xOffset);
-    string yOffset = format("%s%s", geometry.yOffset < 0 ? "" : "+", geometry.yOffset);
+    string xOffset = format("+%s", geometry.x);
+    string yOffset = format("+%s", geometry.y);
 
     return format("%sx%s%s%s", width, height, xOffset, yOffset);
 }
@@ -156,7 +176,7 @@ private string toEvalString(Geometry geometry)
 ///
 unittest
 {
-    assert("200x200+88-88" == Geometry(88, -88, 200, 200).toEvalString);
-    assert("200x200-88+88" == Geometry(-88, 88, 200, 200).toEvalString);
-    assert("200x200+88+88" == Geometry(88, 88, 200, 200).toEvalString);
+    assert(Rect(88, -88, 200, 200).toEvalString == "200x200+88+-88");
+    assert(Rect(-88, 88, 200, 200).toEvalString == "200x200+-88+88");
+    assert(Rect(88, 88, 200, 200).toEvalString  == "200x200+88+88");
 }
