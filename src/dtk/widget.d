@@ -13,10 +13,13 @@ import std.string;
 import std.c.stdlib;
 import std.conv;
 
+import dtk.app;
 import dtk.options;
 import dtk.event;
 import dtk.types;
 import dtk.utils;
+
+enum Widget NullParent = null;
 
 /** The callback type of a D event listener. */
 alias DtkCallback = void delegate(Widget, Event);
@@ -24,23 +27,23 @@ alias DtkCallback = void delegate(Widget, Event);
 /** The main class of all Dtk widgets. */
 abstract class Widget
 {
-    this()
+    this(string name)
     {
-        _name = ".";
+        _name = name;
+        _widgetPathMap[_name] = this;
     }
 
     // todo: replace tkType with an enum
-    this(Widget master, string tkType, DtkOptions opt)
+    this(Widget parent, string tkType, DtkOptions opt)
     {
-        string prefix;
-        if (master._name != ".")
-            prefix = master._name;
+        string prefix;  // '.' is the root window
+        if (parent !is null && parent._name != ".")
+            prefix = parent._name;
 
         _name = format("%s.%s%s%s", prefix, tkType, _threadID, _lastWidgetID++);
-        _interp = master._interp;
-
-        stderr.writefln("tcl_eval { %s }", tkType ~ " " ~ _name ~ " " ~ options2string(opt));
-        Tcl_Eval(_interp, cast(char*)toStringz(tkType ~ " " ~ _name ~ " " ~ options2string(opt)));
+        string cmd = format("%s %s %s", tkType, _name, options2string(opt));
+        eval(cmd);
+        _widgetPathMap[_name] = this;
     }
 
     /// implemented in derived classes
@@ -250,15 +253,14 @@ abstract class Widget
         return this.checkState("hover");
     }
 
-package:
-
-    final string eval(string cmd)
+    public final string eval(string cmd)
     {
         stderr.writefln("tcl_eval { %s }", cmd);
-
-        Tcl_Eval(_interp, cast(char*)toStringz(cmd));
-        return to!string(_interp.result);
+        Tcl_Eval(App.interp, cast(char*)toStringz(cmd));
+        return to!string(App.interp.result);
     }
+
+package:
 
     final bool checkState(string state)
     {
@@ -294,7 +296,7 @@ package:
         ClientData clientData = cast(ClientData)newSlotID;
         string callbackName = format("%s%s", callbackPrefix, newSlotID);
 
-        Tcl_CreateObjCommand(_interp,
+        Tcl_CreateObjCommand(App.interp,
                              cast(char*)callbackName.toStringz,
                              &callbackHandler,
                              clientData,
@@ -342,6 +344,14 @@ package:
         }
     }
 
+    static Widget lookupWidgetPath(string path)
+    {
+        if (auto widget = path in _widgetPathMap)
+            return *widget;
+
+        return null;
+    }
+
 package:
 
     static this()
@@ -351,8 +361,6 @@ package:
 
     /** Unique Thread ID. Needed to create thread-global unique identifiers for Tcl/Tk. */
     static size_t _threadID;
-
-    Tcl_Interp* _interp;
 
     /** This widget's unique name. */
     string _name;
@@ -374,23 +382,7 @@ package:
 
     /** All thread-local active callbacks. */
     static Command[int] _callbackMap;
-}
 
-
-class Text : Widget
-{
-    this(Widget master)
-    {
-        DtkOptions o;
-        super(master, "text", o);
-    }
-}
-
-class Frame : Widget
-{
-    this(Widget master)
-    {
-        DtkOptions o;
-        super(master, "frame", o);
-    }
+    /** All widget paths -> widget maps */
+    static Widget[string] _widgetPathMap;
 }

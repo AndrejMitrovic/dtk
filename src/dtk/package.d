@@ -16,4 +16,5 @@ public
     import dtk.types;
     import dtk.utils;
     import dtk.widget;
+    import dtk.window;
 }

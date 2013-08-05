@@ -18,31 +18,47 @@ import dtk.event;
 import dtk.loader;
 import dtk.types;
 import dtk.widget;
+import dtk.window;
 
-/** The main Dtk application. */
-class App : Widget
+/** The main Dtk application. Once instantiated a main window will be created. */
+final class App
 {
+    /** Create the app and a main window. */
     this()
     {
-        _interp = enforce(Tcl_CreateInterp());
+        interp = enforce(Tcl_CreateInterp());
 
-        enforce(Tcl_Init(_interp) == TCL_OK, to!string(_interp.result));
-        enforce(Tk_Init(_interp) == TCL_OK, to!string(_interp.result));
+        enforce(Tcl_Init(interp) == TCL_OK, to!string(interp.result));
+        enforce(Tk_Init(interp) == TCL_OK, to!string(interp.result));
 
-        _window = enforce(Tk_MainWindow(_interp));
+        _window = new Window(enforce(Tk_MainWindow(interp)));
     }
 
-    override void exit()
-    {
-        Tcl_DeleteInterp(_interp);
-    }
-
+    /** Start the App event loop. */
     void run()
     {
+        scope(exit)
+            this.exit();
+
         Tk_MainLoop();
-        this.exit();
     }
 
-protected:
-    Tk_Window _window;
+    /** Return the main app window. */
+    @property Window mainWindow()
+    {
+        return _window;
+    }
+
+private:
+    void exit()
+    {
+        Tcl_DeleteInterp(interp);
+    }
+
+package:
+    /** Only one interpreter is allowed. */
+    __gshared Tcl_Interp* interp;
+
+private:
+    Window _window;
 }
