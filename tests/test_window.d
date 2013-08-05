@@ -42,6 +42,13 @@ void main()
     assert(mainWin.parentWindow is null);
     assert(childWin.parentWindow is mainWin);
 
+    childWin.setAlpha(0.5);
+    assert(childWin.getAlpha() < 0.6);
+    childWin.setAlpha(1.0);
+
+    childWin.maximizeWindow();
+    childWin.unmaximizeWindow();
+
     auto button1 = new Button(mainWin, "FooButton");
     auto button2 = new Button(mainWin, "BarButton");
 
@@ -51,6 +58,15 @@ void main()
     assert(children.front is button1);
     children.popFront();
     assert(children.front is button2);
+
+    mainWin.setTopWindow();
+    childWin.setTopWindow();
+
+    mainWin.minimizeWindow();
+    mainWin.unminimizeWindow();
+
+    mainWin.title = "my window";
+    assert(mainWin.title == "my window");
 
     app.run();
 }

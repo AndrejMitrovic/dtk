@@ -18,6 +18,7 @@ alias splitter = std.algorithm.splitter;
 
 import dtk.options;
 import dtk.types;
+import dtk.utils;
 import dtk.widget;
 
 ///
@@ -40,6 +41,18 @@ class Window : Widget
     {
         super(".");
         evalFmt("tkwait visibility %s", _name);
+    }
+
+    /** Return the current window title. */
+    @property string title()
+    {
+        return evalFmt("wm title %s", _name);
+    }
+
+    /** Set a new window title. */
+    @property void title(string newTitle)
+    {
+        evalFmt("wm title %s %s", _name, newTitle._enquote);
     }
 
     /**
@@ -109,13 +122,53 @@ class Window : Widget
     }
 
     /**
+        Get the current alpha value for this window.
+        A value of 0.0 indicates a fully-transparent window,
+        while a value of 1.0 is a fully-opaque window.
+    */
+    float getAlpha()
+    {
+        return to!float(evalFmt("wm attributes %s -alpha", _name));
+    }
+
+    /**
         Set a specific alpha value for this window within the range [0.0, 1.0].
         A value of 0.0 indicates a fully-transparent window,
         while a value of 1.0 is a fully-opaque window.
     */
     void setAlpha(float alpha = 1.0)
     {
-        //~ wm attributes window
+        evalFmt("wm attributes %s -alpha %s", _name, alpha);
+    }
+
+    /** Place the window in a mode that takes up the entire screen. */
+    void maximizeWindow()
+    {
+        evalFmt("wm attributes %s -fullscreen 1", _name);
+    }
+
+    /** Restore the maximized window back to its original size. */
+    void unmaximizeWindow()
+    {
+        evalFmt("wm attributes %s -fullscreen 0", _name);
+    }
+
+    /** Minimize the window. */
+    void minimizeWindow()
+    {
+        evalFmt("wm iconify %s", _name);
+    }
+
+    /** Restore the minimized window. */
+    void unminimizeWindow()
+    {
+        evalFmt("wm deiconify %s", _name);
+    }
+
+    /** Make this the topmost window which will be displayed above all other windows. */
+    void setTopWindow()
+    {
+        evalFmt("wm attributes %s -topmost 1", _name);
     }
 
     /**
