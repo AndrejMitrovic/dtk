@@ -11,6 +11,7 @@ public
     import dtk.app;
     import dtk.button;
     import dtk.event;
+    import dtk.geometry;
     import dtk.loader;
     import dtk.options;
     import dtk.types;

@@ -6,6 +6,8 @@
  */
 module dtk.window;
 
+import dtk.geometry;
+
 import std.range;
 import std.stdio;
 import std.algorithm;
@@ -17,26 +19,6 @@ alias splitter = std.algorithm.splitter;
 import dtk.options;
 import dtk.types;
 import dtk.widget;
-
-struct Point
-{
-    int x;
-    int y;
-}
-
-struct Size
-{
-    int width;
-    int height;
-}
-
-struct Rect
-{
-    int x;
-    int y;
-    int width;
-    int height;
-}
 
 class Window : Widget
 {
