@@ -250,17 +250,17 @@ abstract class Widget
         return this.checkState("hover");
     }
 
-    package final string evalFmt(T...)(string fmt, T args)
+package:
+
+    final string evalFmt(T...)(string fmt, T args)
     {
         return eval(format(fmt, args));
     }
 
-    package final string eval(string cmd)
+    final string eval(string cmd)
     {
         return App.eval(cmd);
     }
-
-package:
 
     final bool checkState(string state)
     {
@@ -339,6 +339,10 @@ package:
         }
     }
 
+    /**
+        Find the binding of a Tcl widget path and return the mapped widget,
+        or return null if there is no such path mapping.
+    */
     static Widget lookupWidgetPath(string path)
     {
         if (auto widget = path in _widgetPathMap)
@@ -349,6 +353,7 @@ package:
 
 package:
 
+    // invoked per-thread: store a unique integral identifier
     static this()
     {
         _threadID = cast(size_t)cast(void*)Thread.getThis;
@@ -366,7 +371,7 @@ package:
     /** Counter to create a unique thread-local callback ID. */
     static int _lastCallbackID;
 
-    /** Prefix to avoid name clashes. */
+    /** Prefix for callbacks to avoid name clashes. */
     enum callbackPrefix = "dtk::call";
 
     static struct Command

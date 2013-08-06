@@ -18,3 +18,11 @@ this via opDispatch, to ensure that calling these functions in D doesn't break
 cross-compilation. Instead of breaking compilation, we could issue a pragma(msg)
 for the unsupported OS calls, and tell the user to use version(Windows) statements.
 
+Include the new signals implementation, and make buttons emit signals instead of
+invoke a specific function or delegate.
+
+We could create our own animation framework, by creating tcl scripts which call
+the 'after' tcl command.
+Animation examples: http://wiki.tcl.tk/14082
+http://wiki.tcl.tk/_/search?S=%20animation
+
