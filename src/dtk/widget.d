@@ -189,6 +189,19 @@ abstract class Widget
         return this.checkState("focus");
     }
 
+    /**
+        Make this widget have the keyboard focus.
+
+        Todo note: this could be used to iterate
+        automatically through a set of widgets,
+        e.g. on key Release we set focus to another
+        widget.
+    */
+    void focus()
+    {
+        evalFmt("focus %s", _name);
+    }
+
     /** Check whether this widget is being pressed. */
     public final @property bool isPressed()
     {

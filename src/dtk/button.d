@@ -32,6 +32,9 @@ enum ButtonStyle
 
     $(RED Note:) Currently this option is not usable anywhere yet,
     see: http://stackoverflow.com/q/18093608/279684
+
+    However you may use $(D widget.focus()) to set the active keyboard
+    focus to a widget.
 */
 enum DefaultMode
 {

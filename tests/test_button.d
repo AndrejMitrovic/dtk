@@ -43,6 +43,8 @@ void main()
             stderr.writefln("onEvent called %s times - for widget %s - event is: %s.", counter, widget, event);
         });
 
+    button1.focus();
+
     button1.onMouseEnter.connect(
         (Widget w, Event e)
         {
