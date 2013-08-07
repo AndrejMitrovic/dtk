@@ -20,7 +20,7 @@ import dtk.types;
 import dtk.widget;
 import dtk.window;
 
-/** The main Dtk application. Once instantiated a main window will be created. */
+/** The main dtk application. Once instantiated a main window will be created. */
 final class App
 {
     /** Create the app and a main window. */

@@ -16,16 +16,27 @@ import std.conv;
 import dtk.app;
 import dtk.options;
 import dtk.event;
+import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
-/** The callback type of a D event listener. */
-alias DtkCallback = void delegate(Widget, Event);
+/**
+    Each signal has to carry this signature.
+
+    $(RED Note:) When connecting the signal make sure you
+    fully specify your parameter names, e.g.:
+
+    button.onPress.connect((Widget w, Event _) { });  // ok
+    button.onPress.connect((Widget  , Event  ) { });  // fails at compile-time
+
+    This is a result of Issue 7198: http://d.puremagic.com/issues/show_bug.cgi?id=7198
+*/
+public alias DtkSignal = Signal!(Widget, Event);
 
 /** The main class of all Dtk widgets. */
 abstract class Widget
 {
-    this(string name)
+    package this(string name)
     {
         _name = name;
         _widgetPathMap[_name] = this;
@@ -51,10 +62,11 @@ abstract class Widget
 
     /** Commands: */
 
-    //~ public final void pack()
-    //~ {
-        //~ evalFmt("pack %s", _name);
-    //~ }
+    // todo: this should be moved to a layout module
+    public final void pack()
+    {
+        evalFmt("pack %s", _name);
+    }
 
     /** Options: */
 
@@ -282,12 +294,11 @@ package:
         evalFmt(`%s configure -%s %s`, _name, option, value._enquote);
     }
 
-    /** Create a callback that will refrence this widget. */
-    final string createCallback(DtkCallback clb)
+    /** Create a Tcl callback which will fire an event. */
+    final string createCallback(DtkSignal* signal)
     {
         int newSlotID = _lastCallbackID++;
 
-        Command command = Command(this, clb);
         ClientData clientData = cast(ClientData)newSlotID;
         string callbackName = format("%s%s", callbackPrefix, newSlotID);
 
@@ -297,7 +308,7 @@ package:
                              clientData,
                              &callbackDeleter);
 
-        _callbackMap[newSlotID] = command;
+        _callbackMap[newSlotID] = Callback(this, signal);
         return callbackName;
     }
 
@@ -329,7 +340,7 @@ package:
                 event.height  = safeToInt(Tcl_GetString(objv[7]));
             }
 
-            callback.c(callback.w, event);
+            callback.signal.emit(callback.widget, event);
             return TCL_OK;
         }
         else
@@ -374,14 +385,14 @@ package:
     /** Prefix for callbacks to avoid name clashes. */
     enum callbackPrefix = "dtk::call";
 
-    static struct Command
+    static struct Callback
     {
-        Widget w;
-        DtkCallback c;
+        Widget widget;
+        DtkSignal* signal;
     }
 
     /** All thread-local active callbacks. */
-    static Command[int] _callbackMap;
+    static Callback[int] _callbackMap;
 
     /** All widget paths -> widget maps */
     static Widget[string] _widgetPathMap;

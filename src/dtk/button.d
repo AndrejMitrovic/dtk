@@ -9,6 +9,7 @@ module dtk.button;
 import std.conv;
 import std.string;
 
+import dtk.signals;
 import dtk.options;
 import dtk.widget;
 
@@ -26,16 +27,25 @@ class Button : Widget
         DtkOptions options;
         options["text"] = text;
         super(master, "ttk::button", options);
-    }
 
-    /** Set the callback to invoke when this button is triggered. */
-    @property void onEvent(DtkCallback callback)
-    {
-        string callbackName = this.createCallback(callback);
+        string callbackName = this.createCallback(&onPress);
         this.setOption("command", callbackName);
     }
 
-    /** Invoke the callback if one was set with a call to $(D onEvent). */
+    /**
+        This signal is emitted every time the button is pressed.
+
+        $(RED Note:) When connecting the signal make sure you
+        fully specify your parameter names, e.g.:
+
+        button.onPress.connect((Widget w, Event _) { });  // ok
+        button.onPress.connect((Widget  , Event  ) { });  // fails at compile-time
+
+        This is a result of Issue 7198: http://d.puremagic.com/issues/show_bug.cgi?id=7198
+    */
+    public DtkSignal onPress;
+
+    /** Invoke all callbacks associated with this button.. */
     void fireEvent()
     {
         string cmd = format("%s invoke", _name);
@@ -48,7 +58,7 @@ class Button : Widget
         return this.getOption!string("style").toButtonStyle;
     }
 
-    /** Set the button style. */
+    /** Set a new button style. */
     @property void style(ButtonStyle newStyle)
     {
         this.setOption("style", newStyle.toString);
@@ -61,7 +71,6 @@ package ButtonStyle toButtonStyle(string style)
     {
         case "":           return none;
         case "Toolbutton": return toolButton;
-
         default: assert(0, format("Unhandled style: '%s'", style));
     }
 }

@@ -10,10 +10,11 @@ void main()
     auto app = new App();
 
     Button button1;
-    button1 = new Button(app, "Flash");
+    button1 = new Button(app.mainWindow, "Flash");
 
-    button1.onEvent =
-        (Widget, Event)
+    // note: be wary of Issue 7198 http://d.puremagic.com/issues/show_bug.cgi?id=7198
+    button1.onPress.connect(
+        (Widget widget, Event event)
         {
             static int counter;
             counter++;
@@ -39,8 +40,8 @@ void main()
             button1.text = "Flash";
             assert(button1.text == "Flash");
 
-            stderr.writefln("onEvent called %s times.", counter);
-        };
+            stderr.writefln("onEvent called %s times - for widget %s - event is: %s.", counter, widget, event);
+        });
 
     button1.pack();
 
@@ -48,6 +49,17 @@ void main()
     testButton(button1);
 
     app.run();
+}
+
+// test button-specific options
+void testButton(Button button)
+{
+    button.fireEvent();
+
+    assert(button.style == ButtonStyle.none);
+    button.style = ButtonStyle.toolButton;
+    assert(button.style == ButtonStyle.toolButton);
+    button.style = ButtonStyle.none;
 }
 
 // test standard widget states
@@ -96,15 +108,4 @@ void testStandard(Widget button)
     button.genericStyle = "Toolbutton";
     assert(button.genericStyle == "Toolbutton");
     button.genericStyle = "";
-}
-
-// test button-specific options
-void testButton(Button button)
-{
-    button.fireEvent();
-
-    assert(button.style == ButtonStyle.none);
-    button.style = ButtonStyle.toolButton;
-    assert(button.style == ButtonStyle.toolButton);
-    button.style = ButtonStyle.none;
 }
