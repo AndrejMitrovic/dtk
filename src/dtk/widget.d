@@ -23,8 +23,8 @@ import dtk.utils;
 /**
     Each signal has to carry this signature.
 
-    $(RED Note:) When connecting the signal make sure you
-    fully specify your parameter names, e.g.:
+    $(RED Note:) When connecting the signal with a lambda
+    make sure you fully specify your parameter names, e.g.:
 
     button.onPress.connect((Widget w, Event _) { });  // ok
     button.onPress.connect((Widget  , Event  ) { });  // fails at compile-time
@@ -294,7 +294,7 @@ package:
         evalFmt(`%s configure -%s %s`, _name, option, value._enquote);
     }
 
-    /** Create a Tcl callback which will fire an event. */
+    /** Create a Tcl callback. */
     final string createCallback(DtkSignal* signal)
     {
         int newSlotID = _lastCallbackID++;
@@ -319,6 +319,9 @@ package:
         _callbackMap.remove(slotID);
     }
 
+    // all the event types capture by the bind command
+    package immutable string eventArgs = "%x %y %k %K %w %h %X %Y";
+
     static extern(C)
     int callbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
     {
@@ -330,14 +333,30 @@ package:
 
             if (objc > 1)  // todo: objc is the objv count, not sure if we should always assign all fields
             {
+                foreach (idx, field; event.tupleof)
+                static if (idx != 0)  // first element is the callback name
+                {
+                    if (objc > idx)
+                    {
+                        //~ stderr.writefln("arg %s: %s", idx, to!string(Tcl_GetString(objv[idx])));
+                        event.tupleof[idx - 1] = safeToInt(Tcl_GetString(objv[idx]));
+                    }
+                }
+
+                //~ import std.stdio;
                 // http://tmml.sourceforge.net/doc/tcl/CrtObjCmd.html
-                event.x       = safeToInt(Tcl_GetString(objv[1]));
-                event.y       = safeToInt(Tcl_GetString(objv[2]));
-                event.keycode = safeToInt(Tcl_GetString(objv[3]));
-                event.width   = safeToInt(Tcl_GetString(objv[4]));
-                event.height  = safeToInt(Tcl_GetString(objv[5]));
-                event.width   = safeToInt(Tcl_GetString(objv[6]));
-                event.height  = safeToInt(Tcl_GetString(objv[7]));
+
+                //~ int len;
+                //~ Tcl_GetStringFromObj(objv[1], &len)
+                //~ stderr.writefln("arg 1: %s", to!string(Tcl_GetString(objv[1])));
+
+                //~ event.x       = safeToInt(Tcl_GetString(objv[1]));
+                //~ event.y       = safeToInt(Tcl_GetString(objv[2]));
+                //~ event.keycode = safeToInt(Tcl_GetString(objv[3]));
+                //~ event.width   = safeToInt(Tcl_GetString(objv[4]));
+                //~ event.height  = safeToInt(Tcl_GetString(objv[5]));
+                //~ event.width   = safeToInt(Tcl_GetString(objv[6]));
+                //~ event.height  = safeToInt(Tcl_GetString(objv[7]));
             }
 
             callback.signal.emit(callback.widget, event);

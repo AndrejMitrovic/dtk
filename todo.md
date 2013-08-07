@@ -26,3 +26,11 @@ the 'after' tcl command.
 Animation examples: http://wiki.tcl.tk/14082
 http://wiki.tcl.tk/_/search?S=%20animation
 
+Use custom binding substitution or formatting arguments for each signal type:
+http://www.tcl.tk/man/tcl8.6/TkCmd/bind.htm#M24
+
+Could also use custom event types instead of a generic Event class, that way
+we don't have to store everything into one giant event structure. This will
+require some metaprogramming at the callback site.
+
+This will enable us to use a single onMouseEvent instead of onMouseEnter+onMouseLeave
