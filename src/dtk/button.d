@@ -9,6 +9,7 @@ module dtk.button;
 import std.conv;
 import std.string;
 
+import dtk.event;
 import dtk.signals;
 import dtk.utils;
 import dtk.options;
@@ -51,70 +52,27 @@ class Button : Widget
         options["text"] = text;
         super(master, "ttk::button", options);
 
-        this.setOption("command", this.createCallback(&onPress));
+        // invoke calls 'command'
         this.evalFmt("bind %s <Return> { %s invoke }", _name, _name);
 
-        this.evalFmt("bind %s <Enter> { %s %s }", _name, this.createCallback(&onMouseEnter), eventArgs);
-        this.evalFmt("bind %s <Leave> { %s %s }", _name, this.createCallback(&onMouseLeave), eventArgs);
+        // 'command' calls onEvent
+        this.setOption("command", format("%s %s", _eventCallbackIdent, EventType.TkButtonPush));
     }
 
-    /** Signals: */
-
     /**
-        This signal is emitted when this button is pressed.
-        The button may either be pressed via the mouse, or
-        the Enter key if the button is currently selected.
-
-        $(B Note:) The Event parameter will not hold any interesting state.
-
-        Example:
-
-        ----
-        auto button = new Button(...);
-        button.onPress.connect((Widget w, Event e) {  }
-        ----
+        Physically push the button and emit the TkButtonPush event.
+        The button is automatically released after ~200 milliseconds.
     */
-    public DtkSignal onPress;
-
-    /**
-        This signal is emitted when the mouse cursor enters the button area.
-
-        $(B Note:) The Event parameter will not hold any interesting state.
-
-        Example:
-
-        ----
-        auto button = new Button(...);
-        button.onMouseEnter.connect((Widget w, Event e) {  }
-        ----
-    */
-    public DtkSignal onMouseEnter;
-
-    /**
-        This signal is emitted when the mouse cursor leaves the button area.
-
-        $(B Note:) The Event parameter will not hold any interesting state.
-
-        $(RED Behavior note:) If the mouse cursor leaves the button area
-        too quickly, and at the same time leaves the window area, the
-        signal may be emitted with a delay of several ~100 milliseconds.
-        To make sure the signal is emmitted as soon as the cursor leaves
-        the button area, ensure that the button does not lay directly on
-        an edge of a window (e.g. add some padding space to the button).
-
-        Example:
-
-        ----
-        auto button = new Button(...);
-        button.onMouseLeave.connect((Widget w, Event e) {  }
-        ----
-    */
-    public DtkSignal onMouseLeave;
-
-    /** Invoke all callbacks associated with this button. */
-    void fireEvent()
+    void push()
     {
-        evalFmt("%s invoke", _name);
+        // push the button
+        this.evalFmt("%s state pressed", _name);
+
+        // queue unpush for later
+        this.evalFmt("after 200 { %s state !pressed }", _name);
+
+        // meanwhile emit the TkButtonPush event
+        this.evalFmt("%s invoke", _name);
     }
 
     /** Get the current button style. */

@@ -15,13 +15,14 @@ import std.traits;
 
 alias spaceJoin = pipe!(map!(to!string), reduce!("a ~ ' ' ~ b"));
 
-auto safeToInt(T)(T* val)
+/** Convert a Tcl string value into a D type. */
+T tclConv(T)(const(char)* input)
 {
-    auto res = to!string(val);
+    auto res = to!string(input);
     if (res == "??")  // note: edge-case, but there might be more of them
-        return 0;    // note2: "0" is just a guess, not sure what else to set it to.
+        return T.init;
 
-    return to!int(res);
+    return to!T(res);
 }
 
 /**

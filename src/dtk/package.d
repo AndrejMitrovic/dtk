@@ -11,6 +11,7 @@ public
     import dtk.app;
     import dtk.button;
     import dtk.event;
+    import dtk.frame;
     import dtk.geometry;
     import dtk.loader;
     import dtk.options;

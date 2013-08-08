@@ -1,7 +1,10 @@
 module button;
 
-import std.stdio;
+import core.thread;
+
 import std.range;
+import std.stdio;
+import std.string;
 
 import dtk;
 
@@ -12,51 +15,33 @@ void main()
     Button button1;
     button1 = new Button(app.mainWindow, "Flash");
 
-    // note: be wary of Issue 7198 http://d.puremagic.com/issues/show_bug.cgi?id=7198
-    button1.onPress.connect(
+    button1.onEvent.connect(
         (Widget widget, Event event)
         {
-            static int counter;
-            counter++;
+            static size_t pressCount;
 
-            // the first time the invocation is explicit via fireEvent
-            //~ if (counter == 1)
-            //~ {
-                //~ assert(!button1.isActive &&
-                       //~ !button1.isFocused &&
-                       //~ !button1.isPressed &&
-                       //~ !button1.isSelected &&
-                       //~ !button1.isHovered);
-            //~ }
-            //~ else  // invocation via mouse click
-            //~ {
-                //~ assert(button1.isActive &&
-                       //~ button1.isFocused &&
-                       //~ !button1.isPressed &&
-                       //~ !button1.isSelected &&
-                       //~ button1.isHovered);
-            //~ }
+            switch (event.type) with (EventType)
+            {
+                case Enter:
+                    stderr.writefln("Mouse entered button area, event: %s.", event);
+                    break;
 
-            button1.text = "Flash";
-            assert(button1.text == "Flash");
+                case Leave:
+                    stderr.writefln("Mouse left button area, event: %s.", event);
+                    (cast(Button)widget).push();
+                    break;
 
-            stderr.writefln("onEvent called %s times - for widget %s - event is: %s.", counter, widget, event);
+                case TkButtonPush:
+                    stderr.writefln("Button was pressed %s times.", ++pressCount);
+                    break;
+
+                default: assert(0, format("Unhandled event type: %s", event.type));
+            }
+
+            stderr.writefln("Event: %s", event);
         });
 
     button1.focus();
-
-    button1.onMouseEnter.connect(
-        (Widget w, Event e)
-        {
-            stderr.writefln("Mouse entered button area, event: %s.", e);
-        });
-
-    button1.onMouseLeave.connect(
-        (Widget w, Event e)
-        {
-            stderr.writefln("Mouse leaved button area, event: %s.", e);
-        });
-
     button1.pack();
 
     testStandard(button1);
@@ -68,8 +53,6 @@ void main()
 // test button-specific options
 void testButton(Button button)
 {
-    button.fireEvent();
-
     assert(button.style == ButtonStyle.none);
     button.style = ButtonStyle.toolButton;
     assert(button.style == ButtonStyle.toolButton);

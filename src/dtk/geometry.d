@@ -6,6 +6,8 @@
  */
 module dtk.geometry;
 
+import std.string;
+
 ///
 struct Point
 {
@@ -27,4 +29,19 @@ struct Rect
     int y;
     int width;
     int height;
+}
+
+///
+struct Padding
+{
+    int left;
+    int top;
+    int right;
+    int bottom;
+}
+
+///
+string toString(Padding padding)
+{
+    return format("%s %s %s %s", padding.left, padding.top, padding.right, padding.bottom);
 }

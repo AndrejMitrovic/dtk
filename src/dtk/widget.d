@@ -31,17 +31,14 @@ import dtk.utils;
 
     This is a result of Issue 7198: http://d.puremagic.com/issues/show_bug.cgi?id=7198
 */
-public alias DtkSignal = Signal!(Widget, Event);
+//~ public alias DtkSignal = Signal!(Widget, Event);
+
+// all the event types capture by the bind command
+package immutable string eventArgs = "%x %y %k %K %w %h %X %Y";
 
 /** The main class of all Dtk widgets. */
 abstract class Widget
 {
-    package this(string name)
-    {
-        _name = name;
-        _widgetPathMap[_name] = this;
-    }
-
     // todo: replace tkType with an enum
     this(Widget parent, string tkType, DtkOptions opt)
     {
@@ -49,10 +46,39 @@ abstract class Widget
         if (parent !is null && parent._name != ".")
             prefix = parent._name;
 
-        _name = format("%s.%s%s%s", prefix, tkType, _threadID, _lastWidgetID++);
-        evalFmt("%s %s %s", tkType, _name, options2string(opt));
-        _widgetPathMap[_name] = this;
+        import std.array;
+        string name = format("%s.%s%s%s", prefix, tkType.replace(":", "_"), _threadID, _lastWidgetID++);
+        evalFmt("%s %s %s", tkType, name, options2string(opt));
+        this(name);
     }
+
+    package this(string name)
+    {
+        _name = name;
+        _widgetPathMap[_name] = this;
+        _eventCallbackIdent = this.createCallback(&onEvent);
+        this.evalFmt("bind %s <Enter> { %s %s %s }", _name, _eventCallbackIdent, EventType.Enter, eventArgs);
+        this.evalFmt("bind %s <Leave> { %s %s %s }", _name, _eventCallbackIdent, EventType.Leave, eventArgs);
+    }
+
+    /**
+        Signal emitted for various widget events.
+
+        $(RED Behavior note:) If the mouse cursor leaves the button area
+        too quickly, and at the same time leaves the window area, the
+        signal may be emitted with a delay of several ~100 milliseconds.
+        To make sure the signal is emmitted as soon as the cursor leaves
+        the button area, ensure that the button does not lay directly on
+        an edge of a window (e.g. add some padding space to the button).
+
+        Example:
+
+        ----
+        auto button = new Button(...);
+        button.onEvent.connect((Widget w, Event e) {  }
+        ----
+    */
+    public Signal!(Widget, Event) onEvent;
 
     /// implemented in derived classes
     public void exit() { }
@@ -308,7 +334,7 @@ package:
     }
 
     /** Create a Tcl callback. */
-    final string createCallback(DtkSignal* signal)
+    final string createCallback(Signal!(Widget, Event)* signal)
     {
         int newSlotID = _lastCallbackID++;
 
@@ -332,9 +358,6 @@ package:
         _callbackMap.remove(slotID);
     }
 
-    // all the event types capture by the bind command
-    package immutable string eventArgs = "%x %y %k %K %w %h %X %Y";
-
     static extern(C)
     int callbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
     {
@@ -342,7 +365,7 @@ package:
 
         if (auto callback = slotID in _callbackMap)
         {
-            Event event;
+            Event event;  // todo: update
 
             if (objc > 1)  // todo: objc is the objv count, not sure if we should always assign all fields
             {
@@ -352,7 +375,7 @@ package:
                     if (objc > idx)
                     {
                         //~ stderr.writefln("arg %s: %s", idx, to!string(Tcl_GetString(objv[idx])));
-                        event.tupleof[idx - 1] = safeToInt(Tcl_GetString(objv[idx]));
+                        event.tupleof[idx - 1] = tclConv!(typeof(event.tupleof[idx - 1]))(Tcl_GetString(objv[idx]));
                     }
                 }
 
@@ -372,6 +395,7 @@ package:
                 //~ event.height  = safeToInt(Tcl_GetString(objv[7]));
             }
 
+            //~ stderr.writefln("emitting: %s %s", callback.widget, event);
             callback.signal.emit(callback.widget, event);
             return TCL_OK;
         }
@@ -395,6 +419,9 @@ package:
     }
 
 package:
+
+    /** The Tcl identifier for the onEvent signal callback. */
+    string _eventCallbackIdent;
 
     // invoked per-thread: store a unique integral identifier
     static this()
@@ -420,7 +447,7 @@ package:
     static struct Callback
     {
         Widget widget;
-        DtkSignal* signal;
+        Signal!(Widget, Event)* signal;
     }
 
     /** All thread-local active callbacks. */

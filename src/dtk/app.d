@@ -52,7 +52,7 @@ final class App
     /** Evaluate any Tcl command and return its result. */
     public static string eval(string cmd)
     {
-        stderr.writefln("tcl_eval { %s }", cmd);
+        stderr.writefln("tcl_eval %s", cmd);
         Tcl_Eval(_interp, cast(char*)toStringz(cmd));
         return to!string(_interp.result);
     }
