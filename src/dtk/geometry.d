@@ -6,9 +6,14 @@
  */
 module dtk.geometry;
 
+import core.exception;
+
 import std.algorithm;
 import std.conv;
+import std.exception;
 import std.string;
+import std.traits;
+import std.typetuple;
 
 ///
 struct Point
@@ -52,9 +57,16 @@ package Padding toPadding(string input)
     Padding result;
     size_t idx;
 
+    static assert(is(FieldTypeTuple!(typeof(result)) == TypeTuple!(int, int, int, int)));
+    static assert(typeof(result).sizeof == (int[4]).sizeof);
+
     // .tupleof won't work due to idx being a runtime value
     foreach (value; input.splitter())
+    {
+        assert(idx < FieldTypeTuple!(typeof(result)).length);
+
         (*(cast(int[4]*)&result))[idx++] = to!int(value);
+    }
 
     return result;
 }
@@ -87,4 +99,6 @@ unittest
 
     padding = Padding(10, 20, 30, 40);
     assert(padding.toString.toPadding == Padding(10, 20, 30, 40));
+
+    assertThrown!AssertError("10 20 30 40 50".toPadding);
 }

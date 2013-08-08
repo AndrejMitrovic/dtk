@@ -36,7 +36,7 @@ void main()
     frame.borderStyle = BorderStyle.sunken;
     assert(frame.borderStyle == BorderStyle.sunken);
 
-    stderr.writeln(frame.padding);
+    assert(frame.padding == Padding());
 
     frame.padding = Padding(10);
     assert(frame.padding == Padding(10));
@@ -61,6 +61,8 @@ void main()
 
     frame.padding = Padding(10, 20, 30, 40);
     assert(frame.padding == Padding(10, 20, 30, 40));
+
+    frame.padding = Padding(10, 10, 10, 10);
 
     app.run();
 }
