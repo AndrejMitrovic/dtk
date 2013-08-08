@@ -15,7 +15,7 @@ void main()
 
     auto window = app.mainWindow;
 
-    auto frame = new Frame(window, Padding(10, 10, 10, 10));
+    auto frame = new Frame(window);
 
     auto button1 = new Button(frame, "Flash");
     frame.pack();
@@ -35,6 +35,32 @@ void main()
 
     frame.borderStyle = BorderStyle.sunken;
     assert(frame.borderStyle == BorderStyle.sunken);
+
+    stderr.writeln(frame.padding);
+
+    frame.padding = Padding(10);
+    assert(frame.padding == Padding(10));
+
+    frame.padding = Padding(10, 20);
+    assert(frame.padding == Padding(10, 20));
+
+    frame.padding = Padding(10, 20, 30);
+    assert(frame.padding == Padding(10, 20, 30));
+
+    frame.padding = Padding(10, 20, 30, 40);
+    assert(frame.padding == Padding(10, 20, 30, 40));
+
+    frame.padding = Padding(0, 0, 0, 10);
+    assert(frame.padding == Padding(0, 0, 0, 10));
+
+    frame.padding = Padding(0, 0, 10, 20);
+    assert(frame.padding == Padding(0, 0, 10, 20));
+
+    frame.padding = Padding(0, 10, 20, 30);
+    assert(frame.padding == Padding(0, 10, 20, 30));
+
+    frame.padding = Padding(10, 20, 30, 40);
+    assert(frame.padding == Padding(10, 20, 30, 40));
 
     app.run();
 }

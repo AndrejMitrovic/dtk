@@ -6,6 +6,8 @@
  */
 module dtk.geometry;
 
+import std.algorithm;
+import std.conv;
 import std.string;
 
 ///
@@ -34,14 +36,50 @@ struct Rect
 ///
 struct Padding
 {
-    int left;
-    int top;
-    int right;
-    int bottom;
+    int left = 0;
+    int top = 0;
+    int right = 0;
+    int bottom = 0;
 }
 
-///
-string toString(Padding padding)
+package string toString(Padding padding)
 {
     return format("%s %s %s %s", padding.left, padding.top, padding.right, padding.bottom);
+}
+
+package Padding toPadding(string input)
+{
+    Padding result;
+
+    size_t idx;
+
+    // nogo
+    /+ foreach (value; input.splitter())
+        result.tupleof[idx++] = to!int(value); +/
+
+    auto values = input.splitter();
+    if (values.empty)
+        return result;
+
+    result.left = to!int(values.front);
+
+    values.popFront();
+    if (values.empty)
+        return result;
+
+    result.top = to!int(values.front);
+
+    values.popFront();
+    if (values.empty)
+        return result;
+
+    result.right = to!int(values.front);
+
+    values.popFront();
+    if (values.empty)
+        return result;
+
+    result.bottom = to!int(values.front);
+
+    return result;
 }

@@ -28,13 +28,13 @@ enum BorderStyle
 
 class Frame : Widget
 {
-    this(Widget master, Padding padding)
+    this(Widget master)
     {
         DtkOptions options;
-        options["padding"] = padding.toString;
+        //~ options["padding"] = "10 20";
         super(master, "ttk::frame", options);
 
-        this.setOption("borderwidth", 2);
+        //~ this.setOption("borderwidth", 2);
         this.setOption("relief ", "sunken");
     }
 
@@ -56,10 +56,22 @@ class Frame : Widget
         return this.getOption!BorderStyle("relief");
     }
 
-    /** Set a new border style. */
+    /** Set the border style. */
     @property void borderStyle(BorderStyle newBorderStyle)
     {
         this.setOption("relief", newBorderStyle.text);
+    }
+
+    /** Get the current padding that's included inside the border. */
+    @property Padding padding()
+    {
+        return this.getOption!string("padding").toPadding;
+    }
+
+    /** Set the padding that's included inside the border. */
+    @property void padding(Padding newPadding)
+    {
+        this.setOption("padding", newPadding.toString);
     }
 
     /**
