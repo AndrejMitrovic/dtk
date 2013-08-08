@@ -50,36 +50,41 @@ package string toString(Padding padding)
 package Padding toPadding(string input)
 {
     Padding result;
-
     size_t idx;
 
-    // nogo
-    /+ foreach (value; input.splitter())
-        result.tupleof[idx++] = to!int(value); +/
-
-    auto values = input.splitter();
-    if (values.empty)
-        return result;
-
-    result.left = to!int(values.front);
-
-    values.popFront();
-    if (values.empty)
-        return result;
-
-    result.top = to!int(values.front);
-
-    values.popFront();
-    if (values.empty)
-        return result;
-
-    result.right = to!int(values.front);
-
-    values.popFront();
-    if (values.empty)
-        return result;
-
-    result.bottom = to!int(values.front);
+    // .tupleof won't work due to idx being a runtime value
+    foreach (value; input.splitter())
+        (*(cast(int[4]*)&result))[idx++] = to!int(value);
 
     return result;
+}
+
+///
+unittest
+{
+    Padding padding;
+
+    padding = Padding(10);
+    assert(padding.toString.toPadding == Padding(10));
+
+    padding = Padding(10, 20);
+    assert(padding.toString.toPadding == Padding(10, 20));
+
+    padding = Padding(10, 20, 30);
+    assert(padding.toString.toPadding == Padding(10, 20, 30));
+
+    padding = Padding(10, 20, 30, 40);
+    assert(padding.toString.toPadding == Padding(10, 20, 30, 40));
+
+    padding = Padding(0, 0, 0, 10);
+    assert(padding.toString.toPadding == Padding(0, 0, 0, 10));
+
+    padding = Padding(0, 0, 10, 20);
+    assert(padding.toString.toPadding == Padding(0, 0, 10, 20));
+
+    padding = Padding(0, 10, 20, 30);
+    assert(padding.toString.toPadding == Padding(0, 10, 20, 30));
+
+    padding = Padding(10, 20, 30, 40);
+    assert(padding.toString.toPadding == Padding(10, 20, 30, 40));
 }
