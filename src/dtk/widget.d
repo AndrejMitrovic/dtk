@@ -37,16 +37,20 @@ abstract class Widget
         import std.array;
         string name = format("%s.%s%s%s", prefix, tkType, _threadID, _lastWidgetID++);
         evalFmt("%s %s %s", tkType, name, options2string(opt));
-        this(name);
+        this(name, EmitGenericSignals.yes);
     }
 
-    package this(string name)
+    package this(string name, EmitGenericSignals emitGenericSignals)
     {
         _name = name;
         _widgetPathMap[_name] = this;
         _eventCallbackIdent = this.createCallback(&onEvent);
-        this.evalFmt("bind %s <Enter> { %s %s %s }", _name, _eventCallbackIdent, EventType.Enter, eventArgs);
-        this.evalFmt("bind %s <Leave> { %s %s %s }", _name, _eventCallbackIdent, EventType.Leave, eventArgs);
+
+        if (emitGenericSignals == EmitGenericSignals.yes)
+        {
+            this.evalFmt("bind %s <Enter> { %s %s %s }", _name, _eventCallbackIdent, EventType.Enter, eventArgs);
+            this.evalFmt("bind %s <Leave> { %s %s %s }", _name, _eventCallbackIdent, EventType.Leave, eventArgs);
+        }
     }
 
     /**
@@ -319,7 +323,7 @@ package:
     }
 
     /** Create a Tcl callback. */
-    final string createCallback(Signal!(Widget, Event)* signal)
+    string createCallback(Signal!(Widget, Event)* signal)
     {
         int newSlotID = _lastCallbackID++;
 
@@ -359,6 +363,7 @@ package:
                 switch (event.type) with (EventType)
                 {
                     case TkCheckButtonToggle:
+                    case TkRadioButtonSelect:
                     {
                         event.state = to!string(Tcl_GetString(objv[2]));
                         break;
@@ -391,7 +396,7 @@ package:
     }
 
     /** Create a Tcl variable name. */
-    final string createVariableName()
+    static string createVariableName()
     {
         int newSlotID = _lastVariableID++;
         return format("%s%s_%s", variablePrefix, _threadID, newSlotID);

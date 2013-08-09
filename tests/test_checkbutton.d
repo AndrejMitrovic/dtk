@@ -44,8 +44,13 @@ void main()
     button1.pack();
 
     button1.toggleOn();
+    assert(button1.getValue() == button1.onValue());
+
     button1.toggleOff();
+    assert(button1.getValue() == button1.offValue());
+
     button1.toggle();
+    assert(button1.getValue() == button1.onValue());
 
     testStandard(button1);
     testButton(button1);

@@ -9,11 +9,13 @@ module dtk.checkbutton;
 import std.conv;
 import std.string;
 
+import dtk.app;
 import dtk.button;
 import dtk.event;
 import dtk.signals;
 import dtk.utils;
 import dtk.options;
+import dtk.types;
 import dtk.widget;
 
 ///
@@ -36,7 +38,6 @@ class CheckButton : Widget
         // tracer used instead of -command
         this.evalFmt(
             `
-            # We instantiate one of these
             proc tracer {varname args} {
                 upvar #0 $varname var
                 %s %s $var
@@ -73,6 +74,12 @@ class CheckButton : Widget
     void toggle()
     {
         this.evalFmt("%s invoke", _name);
+    }
+
+    /** Get the current state of the checkbutton. It should equal to either onValue or offValue. */
+    string getValue()
+    {
+        return to!string(Tcl_GetVar(App._interp, cast(char*)_toggleVarName.toStringz, 0));
     }
 
     /** Return the value that's emitted when the check button is toggled on. */

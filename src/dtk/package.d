@@ -19,6 +19,7 @@ public
     import dtk.label;
     import dtk.loader;
     import dtk.options;
+    import dtk.radiobutton;
     import dtk.types;
     import dtk.utils;
     import dtk.widget;

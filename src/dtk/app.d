@@ -49,6 +49,11 @@ final class App
         return _window;
     }
 
+    public static string evalFmt(T...)(string fmt, T args)
+    {
+        return eval(format(fmt, args));
+    }
+
     /** Evaluate any Tcl command and return its result. */
     public static string eval(string cmd)
     {

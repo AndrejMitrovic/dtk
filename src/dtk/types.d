@@ -72,6 +72,8 @@ __gshared extern(C):
     Tcl_Interp* function() Tcl_CreateInterp;
     char* function(Tcl_Obj * objPtr, int* lengthPtr) Tcl_GetStringFromObj;
     char* function(const Tcl_Obj * objPtr) Tcl_GetString;
+    char* function(Tcl_Interp* interp, char* str, int flags) Tcl_GetVar;
+    char* function(Tcl_Interp* interp, char* str, char* newValue, int flags) Tcl_SetVar;
     void function(Tcl_Interp* interp, char* str, Tcl_FreeProc* freeProc) Tcl_SetResult;
     Tcl_Command function(Tcl_Interp* interp, char* cmdName,
                                       Tcl_ObjCmdProc proc, ClientData clientData,

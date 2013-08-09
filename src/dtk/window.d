@@ -16,6 +16,7 @@ import std.string;
 
 alias splitter = std.algorithm.splitter;
 
+import dtk.event;
 import dtk.options;
 import dtk.types;
 import dtk.utils;
@@ -39,7 +40,7 @@ class Window : Widget
     /** Used for the initial implicitly-created Tk root window. */
     package this(Tk_Window window)
     {
-        super(".");
+        super(".", EmitGenericSignals.yes);
         evalFmt("tkwait visibility %s", _name);
     }
 
