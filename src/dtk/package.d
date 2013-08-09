@@ -10,6 +10,7 @@ public
 {
     import dtk.app;
     import dtk.button;
+    import dtk.checkbutton;
     import dtk.color;
     import dtk.event;
     import dtk.font;

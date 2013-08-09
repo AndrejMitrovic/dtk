@@ -47,6 +47,7 @@ enum EventType
     Deactivate,
 
     TkButtonPush,
+    TkCheckButtonToggle,
 }
 
 struct Event
@@ -61,4 +62,5 @@ struct Event
     int height;
     int root_x;
     int root_y;
+    string state;  // e.g. toggle state
 }

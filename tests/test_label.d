@@ -51,8 +51,8 @@ void main()
     label.font = GenericFont.text;
     assert(label.font == GenericFont.text);
 
-    //~ label.padding = Padding(10, 10, 10, 10);
-    //~ assert(label.padding == Padding(10, 10, 10, 10));
+    label.padding = Padding(10, 10, 10, 10);
+    assert(label.padding == Padding(10, 10, 10, 10));
 
     app.run();
 }

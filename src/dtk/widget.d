@@ -21,19 +21,6 @@ import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
-/**
-    Each signal has to carry this signature.
-
-    $(RED Note:) When connecting the signal with a lambda
-    make sure you fully specify your parameter names, e.g.:
-
-    button.onPress.connect((Widget w, Event _) { });  // ok
-    button.onPress.connect((Widget  , Event  ) { });  // fails at compile-time
-
-    This is a result of Issue 7198: http://d.puremagic.com/issues/show_bug.cgi?id=7198
-*/
-//~ public alias DtkSignal = Signal!(Widget, Event);
-
 // all the event types capture by the bind command
 package immutable string eventArgs = "%x %y %k %K %w %h %X %Y";
 
@@ -337,7 +324,7 @@ package:
         int newSlotID = _lastCallbackID++;
 
         ClientData clientData = cast(ClientData)newSlotID;
-        string callbackName = format("%s%s", callbackPrefix, newSlotID);
+        string callbackName = format("%s%s_%s", callbackPrefix, _threadID, newSlotID);
 
         Tcl_CreateObjCommand(App._interp,
                              cast(char*)callbackName.toStringz,
@@ -367,30 +354,29 @@ package:
 
             if (objc > 1)  // todo: objc is the objv count, not sure if we should always assign all fields
             {
-                foreach (idx, field; event.tupleof)
-                static if (idx != 0)  // first element is the callback name
+                event.type = tclConv!EventType(Tcl_GetString(objv[1]));
+
+                switch (event.type) with (EventType)
                 {
-                    if (objc > idx)
+                    case TkCheckButtonToggle:
                     {
-                        //~ stderr.writefln("arg %s: %s", idx, to!string(Tcl_GetString(objv[idx])));
-                        event.tupleof[idx - 1] = tclConv!(typeof(event.tupleof[idx - 1]))(Tcl_GetString(objv[idx]));
+                        event.state = to!string(Tcl_GetString(objv[2]));
+                        break;
+                    }
+
+                    default:
+                    {
+                        foreach (idx, field; event.tupleof)
+                        static if (idx != 0)  // first element is the callback name
+                        {
+                            if (objc > idx)
+                            {
+                                //~ stderr.writefln("arg %s: %s", idx, to!string(Tcl_GetString(objv[idx])));
+                                event.tupleof[idx - 1] = tclConv!(typeof(event.tupleof[idx - 1]))(Tcl_GetString(objv[idx]));
+                            }
+                        }
                     }
                 }
-
-                //~ import std.stdio;
-                // http://tmml.sourceforge.net/doc/tcl/CrtObjCmd.html
-
-                //~ int len;
-                //~ Tcl_GetStringFromObj(objv[1], &len)
-                //~ stderr.writefln("arg 1: %s", to!string(Tcl_GetString(objv[1])));
-
-                //~ event.x       = safeToInt(Tcl_GetString(objv[1]));
-                //~ event.y       = safeToInt(Tcl_GetString(objv[2]));
-                //~ event.keycode = safeToInt(Tcl_GetString(objv[3]));
-                //~ event.width   = safeToInt(Tcl_GetString(objv[4]));
-                //~ event.height  = safeToInt(Tcl_GetString(objv[5]));
-                //~ event.width   = safeToInt(Tcl_GetString(objv[6]));
-                //~ event.height  = safeToInt(Tcl_GetString(objv[7]));
             }
 
             //~ stderr.writefln("emitting: %s %s", callback.widget, event);
@@ -402,6 +388,13 @@ package:
             Tcl_SetResult(interp, cast(char*)"Trying to invoke non-existent callback", TCL_STATIC);
             return TCL_ERROR;
         }
+    }
+
+    /** Create a Tcl variable name. */
+    final string createVariableName()
+    {
+        int newSlotID = _lastVariableID++;
+        return format("%s%s_%s", variablePrefix, _threadID, newSlotID);
     }
 
     /**
@@ -441,6 +434,12 @@ package:
 
     /** Prefix for callbacks to avoid name clashes. */
     enum callbackPrefix = "dtk::call";
+
+    /** Counter to create a unique thread-local variable ID. */
+    static int _lastVariableID;
+
+    /** Prefix for variables to avoid name clashes. */
+    enum variablePrefix = "::dtk_var";
 
     static struct Callback
     {
