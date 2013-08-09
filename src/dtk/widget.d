@@ -47,7 +47,7 @@ abstract class Widget
             prefix = parent._name;
 
         import std.array;
-        string name = format("%s.%s%s%s", prefix, tkType.replace(":", "_"), _threadID, _lastWidgetID++);
+        string name = format("%s.%s%s%s", prefix, tkType, _threadID, _lastWidgetID++);
         evalFmt("%s %s %s", tkType, name, options2string(opt));
         this(name);
     }

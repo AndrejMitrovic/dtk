@@ -10,9 +10,11 @@ public
 {
     import dtk.app;
     import dtk.button;
+    import dtk.color;
     import dtk.event;
     import dtk.frame;
     import dtk.geometry;
+    import dtk.label;
     import dtk.loader;
     import dtk.options;
     import dtk.types;

@@ -14,27 +14,13 @@ import dtk.utils;
 import dtk.options;
 import dtk.widget;
 
-enum BorderStyle
-{
-    Invalid,  // sentinel
-
-    flat,   ///
-    groove, ///
-    raised, ///
-    ridge,  ///
-    solid,  ///
-    sunken, ///
-}
-
 class Frame : Widget
 {
     this(Widget master)
     {
         DtkOptions options;
-        //~ options["padding"] = "10 20";
         super(master, "ttk::frame", options);
 
-        //~ this.setOption("borderwidth", 2);
         this.setOption("relief ", "sunken");
     }
 

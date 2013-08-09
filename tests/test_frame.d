@@ -1,4 +1,4 @@
-module button;
+module test_button;
 
 import core.thread;
 
