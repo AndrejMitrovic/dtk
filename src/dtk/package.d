@@ -12,6 +12,7 @@ public
     import dtk.button;
     import dtk.color;
     import dtk.event;
+    import dtk.font;
     import dtk.frame;
     import dtk.geometry;
     import dtk.label;

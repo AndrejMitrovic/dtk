@@ -8,6 +8,7 @@ module dtk.widget;
 
 import core.thread;
 
+import std.range;
 import std.stdio;
 import std.string;
 import std.c.stdlib;
@@ -127,14 +128,11 @@ abstract class Widget
     */
     @property int width()
     {
-        try
-        {
-            return this.getOption!int("width");
-        }
-        catch (ConvException)
-        {
+        string input = this.getOption!string("width");
+        if (input.empty)
             return 0;
-        }
+
+        return to!int(input);
     }
 
     /**

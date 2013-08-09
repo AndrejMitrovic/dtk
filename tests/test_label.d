@@ -35,10 +35,21 @@ void main()
     label.fgColor = RGB(0, 128, 255);
     assert(label.fgColor == RGB(0, 128, 255));
 
+    label.bgColorReset();
+    label.fgColorReset();
+
     assert(label.justification == Justification.none);
 
     label.justification = Justification.left;
     assert(label.justification == Justification.left);
+
+    assert(label.wrapLength == 0);
+
+    label.wrapLength = 50;
+    assert(label.wrapLength == 50);
+
+    label.font = GenericFont.text;
+    assert(label.font == GenericFont.text);
 
     //~ label.padding = Padding(10, 10, 10, 10);
     //~ assert(label.padding == Padding(10, 10, 10, 10));

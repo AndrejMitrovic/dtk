@@ -61,6 +61,18 @@ class Frame : Widget
     }
 
     /**
+        Get the current requested Frame size. This often returns Size(0, 0)
+        since a frame typically doesn't explicitly request a specific size.
+    */
+    @property Size size()
+    {
+        Size result;
+        result.width = this.getOption!int("width");
+        result.height = this.getOption!int("height");
+        return result;
+    }
+
+    /**
         Set a requested size for this frame. Note that if the pack, grid, or
         other geometry managers are used to manage the children of the frame
         the geometry manager's requested size will normally take precedence
@@ -72,17 +84,5 @@ class Frame : Widget
     {
         this.setOption("width", newSize.width);
         this.setOption("height", newSize.height);
-    }
-
-    /**
-        Get the current requested Frame size. This often returns Size(0, 0)
-        since a frame typically doesn't explicitly request a specific size.
-    */
-    @property Size size()
-    {
-        Size result;
-        result.width = this.getOption!int("width");
-        result.height = this.getOption!int("height");
-        return result;
     }
 }
