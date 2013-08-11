@@ -15,8 +15,18 @@ IF NOT EXIST %DERELICT3_HOME% do set DERELICT3_HOME=%LIBS_ROOT%\Derelict3
 IF NOT EXIST %DEIMOS_GLFW% do set DEIMOS_GLFW=%LIBS_ROOT%\glfw
 IF NOT EXIST %GLAD_HOME% do set GLAD_HOME=%LIBS_ROOT%\glad
 
+rem List of -version switches:
+rem --------------------------
+rem
+rem DTK_LOG_EVAL
+rem     - Logs all Tcl eval commands.
+rem
+rem DTK_LOG_TESTS
+rem     - Logs all log/logf calls, for use with unittesting.
+rem
+
 set includes=-I%cd%
-rem set debug_versions=DTK_LOG_EVAL
+rem set debug_versions=-version=DTK_LOG_EVAL -version=DTK_LOG_TESTS
 set debug_versions=
 set flags=%includes% -g %debug_versions%
 

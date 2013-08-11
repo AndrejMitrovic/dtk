@@ -60,7 +60,7 @@ final class App
                 ::dtk_early_exit
             }");
 
-            while (runTimeWatch.peek < runTimeDur)
+            do
             {
                 // event found, add some idle time to allow processing
                 if (Tcl_DoOneEvent(TCL_DONT_WAIT) != 0)
@@ -84,13 +84,13 @@ final class App
                     auto timeLeft = runTimeDur - runTimeWatch.peek;
                     stderr.writefln("-- Time left: %s seconds.", (runTimeDur - runTimeWatch.peek).seconds);
                 }
-            }
+            } while (runTimeWatch.peek < runTimeDur);
         }
 
         private void setupExitHandler()
         {
             Tcl_CreateObjCommand(App._interp,
-                                 "::dtk_early_exit\0".dup.ptr,
+                                 cast(char*)"::dtk_early_exit",
                                  &callbackHandler,
                                  null,
                                  &callbackDeleter);
@@ -98,9 +98,7 @@ final class App
 
 
         static extern(C)
-        void callbackDeleter(ClientData clientData)
-        {
-        }
+        void callbackDeleter(ClientData clientData) { }
 
         static extern(C)
         int callbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)

@@ -25,22 +25,22 @@ unittest
             switch (event.type) with (EventType)
             {
                 case Enter:
-                    stderr.writefln("Mouse entered button area, event: %s.", event);
+                    logf("Mouse entered button area, event: %s.", event);
                     break;
 
                 case Leave:
-                    stderr.writefln("Mouse left button area, event: %s.", event);
+                    logf("Mouse left button area, event: %s.", event);
                     (cast(Button)widget).push();
                     break;
 
                 case TkButtonPush:
-                    stderr.writefln("Button was pressed %s times.", ++pressCount);
+                    logf("Button was pressed %s times.", ++pressCount);
                     break;
 
                 default: assert(0, format("Unhandled event type: %s", event.type));
             }
 
-            stderr.writefln("Event: %s", event);
+            logf("Event: %s", event);
         });
 
     button1.focus();
@@ -49,7 +49,7 @@ unittest
     testStandard(button1);
     testButton(button1);
 
-    app.run(2.seconds);
+    app.run(0.seconds);
 }
 
 // test button-specific options
