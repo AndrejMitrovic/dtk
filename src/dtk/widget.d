@@ -294,6 +294,12 @@ abstract class Widget
         return this.checkState("hover");
     }
 
+    /** Destroy this widget. */
+    public void destroy()
+    {
+        this.evalFmt("destroy %s", _name);
+    }
+
 package:
 
     final string evalFmt(T...)(string fmt, T args)

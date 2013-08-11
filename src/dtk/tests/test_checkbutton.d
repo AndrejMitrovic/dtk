@@ -9,11 +9,10 @@ import std.stdio;
 import std.string;
 
 import dtk;
+import dtk.tests.globals;
 
-void main()
+unittest
 {
-    auto app = new App();
-
     CheckButton button1;
     button1 = new CheckButton(app.mainWindow, "Flash");
 
@@ -57,9 +56,8 @@ void main()
     testStandard(button1);
     testButton(button1);
 
-    app.run();
+    app.run(0.seconds);
 }
-
 
 // test button-specific options
 void testButton(CheckButton button)

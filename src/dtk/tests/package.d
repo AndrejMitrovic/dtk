@@ -12,7 +12,7 @@ private
 {
     //~ import dtk.tests.test_app;
     import dtk.tests.test_button;
-    //~ import dtk.tests.test_checkbutton;
+    import dtk.tests.test_checkbutton;
     //~ import dtk.tests.test_color;
     //~ import dtk.tests.test_combobox;
     //~ import dtk.tests.test_entry;

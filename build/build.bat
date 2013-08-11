@@ -16,7 +16,6 @@ IF NOT EXIST %DEIMOS_GLFW% do set DEIMOS_GLFW=%LIBS_ROOT%\glfw
 IF NOT EXIST %GLAD_HOME% do set GLAD_HOME=%LIBS_ROOT%\glad
 
 rem List of -version switches:
-rem --------------------------
 rem
 rem DTK_LOG_EVAL
 rem     - Logs all Tcl eval commands.

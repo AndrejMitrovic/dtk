@@ -85,6 +85,12 @@ final class App
                     stderr.writefln("-- Time left: %s seconds.", (runTimeDur - runTimeWatch.peek).seconds);
                 }
             } while (runTimeWatch.peek < runTimeDur);
+
+            // clean out all widgets for this test run
+            foreach (widget; mainWindow.childWidgets)
+            {
+                widget.destroy();
+            }
         }
 
         private void setupExitHandler()

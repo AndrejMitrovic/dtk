@@ -34,3 +34,5 @@ we don't have to store everything into one giant event structure. This will
 require some metaprogramming at the callback site.
 
 This will enable us to use a single onMouseEvent instead of onMouseEnter+onMouseLeave
+
+Use SendMessage to simulate keyboard and mouse input when unittesting.
