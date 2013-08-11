@@ -16,7 +16,9 @@ IF NOT EXIST %DEIMOS_GLFW% do set DEIMOS_GLFW=%LIBS_ROOT%\glfw
 IF NOT EXIST %GLAD_HOME% do set GLAD_HOME=%LIBS_ROOT%\glad
 
 set includes=-I%cd%
-set flags=%includes% -g
+rem set debug_versions=DTK_LOG_EVAL
+set debug_versions=
+set flags=%includes% -g %debug_versions%
 
 rem set compiler=dmd.exe
 set compiler=dmd_msc.exe

@@ -14,3 +14,8 @@ shared static this()
     app = new App();
     mainWindow = app.mainWindow;
 }
+
+shared static ~this()
+{
+    app.exit();
+}

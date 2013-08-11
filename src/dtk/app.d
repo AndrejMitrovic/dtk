@@ -38,35 +38,74 @@ final class App
     {
         import std.datetime;
 
-        void run(Duration runTime)
+        static string _file;
+        static size_t _line;
+
+        void run(Duration runTime, string file = __FILE__, size_t line = __LINE__)
         {
+            _file = file;
+            _line = line;
             auto displayTimer = StopWatch(AutoStart.yes);
 
             auto runTimeDur = cast(TickDuration)runTime;
             auto runTimeWatch = StopWatch(AutoStart.yes);
 
+            bool idleDurChanged = false;
+
+            this.setupExitHandler();
+
+            // if the user explicitly closes the window while testing, we break out of the whole test-suite.
+            eval("
+            wm protocol . WM_DELETE_WINDOW {
+                ::dtk_early_exit
+            }");
+
             while (runTimeWatch.peek < runTimeDur)
             {
-                if (displayTimer.peek > cast(TickDuration)(1.seconds))
-                {
-                    displayTimer.reset();
-                    auto timeLeft = runTimeDur - runTimeWatch.peek;
-                    stderr.writefln("-- Time left: %s seconds.", (runTimeDur - runTimeWatch.peek).seconds);
-                }
-
                 // event found, add some idle time to allow processing
                 if (Tcl_DoOneEvent(TCL_DONT_WAIT) != 0)
                 {
                     runTime += 200.msecs;
                     runTimeDur = cast(TickDuration)runTime;
+                    idleDurChanged = true;
+                }
 
-                    auto durSecs = runTimeDur.seconds;
-                    auto durMsecs = runTimeDur.msecs - (durSecs * 1000);
-                    stderr.writefln("-- Idle time increased to: %s seconds, %s msecs.", durSecs, durMsecs);
+                if (displayTimer.peek > cast(TickDuration)(1.seconds))
+                {
+                    if (idleDurChanged)
+                    {
+                        idleDurChanged = false;
+                        auto durSecs = runTimeDur.seconds;
+                        auto durMsecs = runTimeDur.msecs - (durSecs * 1000);
+                        stderr.writefln("-- Idle time increased to: %s seconds, %s msecs.", durSecs, durMsecs);
+                    }
+
+                    displayTimer.reset();
+                    auto timeLeft = runTimeDur - runTimeWatch.peek;
+                    stderr.writefln("-- Time left: %s seconds.", (runTimeDur - runTimeWatch.peek).seconds);
                 }
             }
+        }
 
-            this.exit();
+        private void setupExitHandler()
+        {
+            Tcl_CreateObjCommand(App._interp,
+                                 "::dtk_early_exit\0".dup.ptr,
+                                 &callbackHandler,
+                                 null,
+                                 &callbackDeleter);
+        }
+
+
+        static extern(C)
+        void callbackDeleter(ClientData clientData)
+        {
+        }
+
+        static extern(C)
+        int callbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
+        {
+            assert(0, format("User invoked early exit, test-case in %s(%s) failed.", _file, _line));
         }
     }
 
@@ -93,12 +132,13 @@ final class App
     /** Evaluate any Tcl command and return its result. */
     public static string eval(string cmd)
     {
-        stderr.writefln("tcl_eval %s", cmd);
+        version (DTK_LOG_EVAL)
+            stderr.writefln("tcl_eval %s", cmd);
+
         Tcl_Eval(_interp, cast(char*)toStringz(cmd));
         return to!string(_interp.result);
     }
 
-private:
     void exit()
     {
         Tcl_DeleteInterp(_interp);

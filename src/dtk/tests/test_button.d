@@ -13,6 +13,7 @@ import dtk.tests.globals;
 
 unittest
 {
+    stderr.writefln("-- Testing %s", __MODULE__);
     Button button1;
     button1 = new Button(app.mainWindow, "Flash");
 
