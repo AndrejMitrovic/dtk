@@ -41,7 +41,7 @@ final class App
         static string _file;
         static size_t _line;
 
-        void run(Duration runTime, string file = __FILE__, size_t line = __LINE__)
+        void testRun(Duration runTime = 0.seconds, string file = __FILE__, size_t line = __LINE__)
         {
             _file = file;
             _line = line;
@@ -60,12 +60,16 @@ final class App
                 ::dtk_early_exit
             }");
 
+            bool hasEvents = false;
+
             do
             {
+                hasEvents = Tcl_DoOneEvent(TCL_DONT_WAIT) != 0;
+
                 // event found, add some idle time to allow processing
-                if (Tcl_DoOneEvent(TCL_DONT_WAIT) != 0)
+                if (hasEvents)
                 {
-                    runTime += 200.msecs;
+                    runTime += 100.msecs;
                     runTimeDur = cast(TickDuration)runTime;
                     idleDurChanged = true;
                 }
@@ -84,7 +88,7 @@ final class App
                     auto timeLeft = runTimeDur - runTimeWatch.peek;
                     stderr.writefln("-- Time left: %s seconds.", (runTimeDur - runTimeWatch.peek).seconds);
                 }
-            } while (runTimeWatch.peek < runTimeDur);
+            } while (hasEvents || runTimeWatch.peek < runTimeDur);
 
             // clean out all widgets for this test run
             foreach (widget; mainWindow.childWidgets)

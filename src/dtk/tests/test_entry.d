@@ -11,11 +11,10 @@ import std.stdio;
 import std.string;
 
 import dtk;
+import dtk.tests.globals;
 
-void main()
+unittest
 {
-    auto app = new App();
-
     auto entry1 = new Entry(app.mainWindow);
     entry1.pack();
 
@@ -48,8 +47,8 @@ void main()
     entry1.onFailedValidation =
         (Widget widget, ValidateEvent event)
         {
-            stderr.writeln(" -- FAILED VALIDATION --");
+            log(" -- FAILED VALIDATION --");
         };
 
-    app.run();
+    app.testRun();
 }

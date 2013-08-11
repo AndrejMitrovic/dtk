@@ -7,18 +7,17 @@ import std.stdio;
 import std.range;
 
 import dtk;
+import dtk.tests.globals;
 
-void main()
+unittest
 {
-    auto app = new App();
-
     auto mainWin = app.mainWindow;
 
     mainWin.position = Point(200, 200);
     assert(mainWin.position == Point(200, 200));
 
     // e.g. Size(1680, 1050)
-    //~ stderr.writeln(mainWin.screenSize);
+    //~ logf(mainWin.screenSize);
 
     mainWin.position = Point(-200, -200);
     assert(mainWin.position == Point(-200, -200));
@@ -36,10 +35,11 @@ void main()
     assert(mainWin.size == Size(250, 250));
     assert(mainWin.geometry == Rect(100, 100, 250, 250));
 
-    //~ stderr.writeln(mainWin.geometry);
+    //~ logf(mainWin.geometry);
     // @bug: http://stackoverflow.com/questions/18043720/odd-results-for-wm-geometry
 
     assert(mainWin.parentWindow is null);
+
     auto childWin = new Window(mainWin, 100, 100);
     assert(mainWin.parentWindow is null);
     assert(childWin.parentWindow is mainWin);
@@ -70,5 +70,5 @@ void main()
     mainWin.title = "my window";
     assert(mainWin.title == "my window");
 
-    app.run();
+    app.testRun();
 }

@@ -2,14 +2,17 @@ module dtk.tests.globals;
 
 version(unittest):
 
+import std.stdio;
+
 /** One app and one main window for testing. */
 import dtk.app;
+import dtk.geometry;
 import dtk.window;
+
+import dtk.tests.runner;
 
 __gshared App app;
 __gshared Window mainWindow;
-
-import std.stdio;
 
 /// logging for unittests
 void log(Args...)(Args args)
@@ -33,6 +36,8 @@ shared static this()
 {
     app = new App();
     mainWindow = app.mainWindow;
+    mainWindow.position = Point(500, 500);
+    unitTester.setTester();
 }
 
 shared static ~this()

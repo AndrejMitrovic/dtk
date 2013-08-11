@@ -10,15 +10,11 @@ import std.stdio;
 import std.string;
 
 import dtk;
+import dtk.tests.globals;
 
-void main()
+unittest
 {
-    auto app = new App();
-
-    auto window = app.mainWindow;
-    window.size = Size(100, 100);
-
-    auto label = new Label(window);
+    auto label = new Label(mainWindow);
     label.pack();
 
     label.text = "some note\nsome larger note 2\nsmall note";
@@ -56,6 +52,6 @@ void main()
     label.padding = Padding(10, 10, 10, 10);
     assert(label.padding == Padding(10, 10, 10, 10));
 
-    app.run();
+    app.testRun();
 }
 

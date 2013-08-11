@@ -36,3 +36,5 @@ require some metaprogramming at the callback site.
 This will enable us to use a single onMouseEvent instead of onMouseEnter+onMouseLeave
 
 Use SendMessage to simulate keyboard and mouse input when unittesting.
+Note: We'll have to use PostThreadMessage instead since the main thread will
+be blocked in the event loop.

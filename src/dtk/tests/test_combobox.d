@@ -9,11 +9,10 @@ import std.stdio;
 import std.string;
 
 import dtk;
+import dtk.tests.globals;
 
-void main()
+unittest
 {
-    auto app = new App();
-
     auto box1 = new Combobox(app.mainWindow);
 
     box1.onEvent.connect(
@@ -22,7 +21,7 @@ void main()
         switch (event.type) with (EventType)
         {
             case TkComboboxChange:
-                stderr.writefln("Combobox changed value to: %s.", (cast(Combobox)widget).value);
+                logf("Combobox changed value to: %s.", (cast(Combobox)widget).value);
                 break;
 
             default:
@@ -41,5 +40,5 @@ void main()
     box1.readOnly = false;
 
     box1.pack();
-    app.run();
+    app.testRun();
 }

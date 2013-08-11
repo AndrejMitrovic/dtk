@@ -24,13 +24,13 @@ unittest
         switch (event.type) with (EventType)
         {
             case TkCheckButtonToggle:
-                stderr.writefln("Button toggled to: %s.", event.state);
+                logf("Button toggled to: %s.", event.state);
                 break;
 
             default:
         }
 
-        //~ stderr.writefln("Event: %s", event);
+        //~ logf("Event: %s", event);
     });
 
     assert(button1.onValue == "1", button1.onValue);
@@ -56,7 +56,7 @@ unittest
     testStandard(button1);
     testButton(button1);
 
-    app.run(0.seconds);
+    app.testRun();
 }
 
 // test button-specific options

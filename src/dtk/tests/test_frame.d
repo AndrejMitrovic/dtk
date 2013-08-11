@@ -10,14 +10,11 @@ import std.stdio;
 import std.string;
 
 import dtk;
+import dtk.tests.globals;
 
-void main()
+unittest
 {
-    auto app = new App();
-
-    auto window = app.mainWindow;
-
-    auto frame = new Frame(window);
+    auto frame = new Frame(mainWindow);
 
     auto button1 = new Button(frame, "Flash");
     frame.pack();
@@ -26,7 +23,7 @@ void main()
     assert(frame.size == Size(0, 0));
 
     frame.size = Size(100, 100);
-    stderr.writeln(frame.size);
+    log(frame.size);
     assert(frame.size == Size(100, 100));
 
     frame.borderWidth = 10;
@@ -66,6 +63,6 @@ void main()
 
     frame.padding = Padding(10, 10, 10, 10);
 
-    app.run();
+    app.testRun(1.seconds);
 }
 
