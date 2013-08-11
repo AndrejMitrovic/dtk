@@ -23,14 +23,12 @@ import dtk.widget;
 ///
 class Combobox : Widget
 {
-    // todo: add validation
-
     this(Widget master)
     {
         DtkOptions options;
-        string varName = this.createVariableName();
-        options["textvariable"] = varName;
-        super(master, "ttk::entry", options);
+        _varName = this.createVariableName();
+        options["textvariable"] = _varName;
+        super(master, "ttk::combobox", options);
 
         string tracerFunc = format("tracer_%s", this.createCallbackName());
 
@@ -41,46 +39,42 @@ class Combobox : Widget
                 upvar #0 $varname var
                 %s %s $var
             }
-            `, tracerFunc, _eventCallbackIdent, EventType.TkTextChange);
+            `, tracerFunc, _eventCallbackIdent, EventType.TkComboboxChange);
 
         // hook up the tracer for this unique variable
-        this.evalFmt(`trace add variable %s write "%s %s"`, varName, tracerFunc, varName);
+        this.evalFmt(`trace add variable %s write "%s %s"`, _varName, tracerFunc, _varName);
     }
 
-    /** Return the text in this entry. */
+    /** Get the currently selected combobox value. */
     @property string value()
     {
-        return evalFmt("%s get", _name);
+        return this.evalFmt("%s get", _name);
     }
 
-    /** Set the text in this entry. */
-    @property void value(string newText)
+    /** Set the combobox value. */
+    @property void value(string newValue)
     {
-        evalFmt("%s delete 0 end", _name);
-        evalFmt(`%s insert 0 "%s"`, _name, newText);
+        this.evalFmt("%s set %s", _name, newValue);
     }
 
-    /**
-        Get the char symbol that replaces the input characters
-        when displayed in the entry. This is typically used for
-        entries that input passwords, where the char symbol could
-        equal '*'. If no char symbol is set, ' ' is returned.
-    */
-    @property dchar displayChar()
+    /** Get the values in this combobox. */
+    @property string[] values()
     {
-        string res = this.getOption!string("show");
-        if (res.empty)
-            return ' ';
-        else
-            return res.front;
+        return this.getOption!string("values").split(" ");
     }
 
-    /**
-        Set the char symbol that replaces the input characters
-        when displayed in the entry
-    */
-    @property void displayChar(dchar newDisplayChar)
+    /** Set the values for this combobox. */
+    @property void values(string[] newValues)
     {
-        this.setOption("show", newDisplayChar);
+        this.setOption("values", newValues.join(" "));
     }
+
+    /** Allow or disallow inputting custom values to this combobox. */
+    @property void readOnly(bool state)
+    {
+        this.setState(state ? "readonly" : "!readonly");
+    }
+
+private:
+    string _varName;
 }

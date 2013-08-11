@@ -35,16 +35,18 @@ package immutable string validationArgs = "%d %i %P %s %S %v %V %W";
 abstract class Widget
 {
     // todo: replace tkType with an enum
-    this(Widget parent, string tkType, DtkOptions opt)
+    this(Widget parent, string tkType, DtkOptions opt, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes)
     {
         string prefix;  // '.' is the root window
         if (parent !is null && parent._name != ".")
             prefix = parent._name;
 
         import std.array;
-        string name = format("%s.%s%s%s", prefix, tkType, _threadID, _lastWidgetID++);
+        // note: cannot use :: in name because it can sometimes be interpreted in a special way,
+        // e.g. tk sometimes hardcodes methods to ttk::type.func.name
+        string name = format("%s.%s%s%s", prefix, tkType.replace("::", "_"), _threadID, _lastWidgetID++);
         evalFmt("%s %s %s", tkType, name, options2string(opt));
-        this(name, EmitGenericSignals.yes);
+        this(name, emitGenericSignals);
     }
 
     package this(string name, EmitGenericSignals emitGenericSignals)
@@ -386,6 +388,7 @@ package:
                 {
                     case TkCheckButtonToggle:
                     case TkRadioButtonSelect:
+                    case TkComboboxChange:
                     case TkTextChange:
                     {
                         event.state = to!string(Tcl_GetString(objv[2]));

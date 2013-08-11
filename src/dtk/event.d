@@ -50,6 +50,7 @@ enum EventType
     TkButtonPush,
     TkCheckButtonToggle,
     TkRadioButtonSelect,
+    TkComboboxChange,
     TkTextChange,
     TkValidate,
     TkFailedValidation,
