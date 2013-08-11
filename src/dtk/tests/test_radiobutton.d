@@ -1,4 +1,6 @@
-module test_radiobutton;
+module dtk.tests.test_radiobutton;
+
+version(unittest):
 
 import core.thread;
 

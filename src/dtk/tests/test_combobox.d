@@ -1,4 +1,6 @@
-module test_combobox;
+module dtk.tests.test_combobox;
+
+version(unittest):
 
 import core.thread;
 

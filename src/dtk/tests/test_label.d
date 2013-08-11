@@ -1,4 +1,6 @@
-module test_label;
+module dtk.tests.test_label;
+
+version(unittest):
 
 import core.thread;
 

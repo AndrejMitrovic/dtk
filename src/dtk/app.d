@@ -34,6 +34,42 @@ final class App
         _window = new Window(enforce(Tk_MainWindow(_interp)));
     }
 
+    version(unittest)
+    {
+        import std.datetime;
+
+        void run(Duration runTime)
+        {
+            auto displayTimer = StopWatch(AutoStart.yes);
+
+            auto runTimeDur = cast(TickDuration)runTime;
+            auto runTimeWatch = StopWatch(AutoStart.yes);
+
+            while (runTimeWatch.peek < runTimeDur)
+            {
+                if (displayTimer.peek > cast(TickDuration)(1.seconds))
+                {
+                    displayTimer.reset();
+                    auto timeLeft = runTimeDur - runTimeWatch.peek;
+                    stderr.writefln("-- Time left: %s seconds.", (runTimeDur - runTimeWatch.peek).seconds);
+                }
+
+                // event found, add some idle time to allow processing
+                if (Tcl_DoOneEvent(TCL_DONT_WAIT) != 0)
+                {
+                    runTime += 200.msecs;
+                    runTimeDur = cast(TickDuration)runTime;
+
+                    auto durSecs = runTimeDur.seconds;
+                    auto durMsecs = runTimeDur.msecs - (durSecs * 1000);
+                    stderr.writefln("-- Idle time increased to: %s seconds, %s msecs.", durSecs, durMsecs);
+                }
+            }
+
+            this.exit();
+        }
+    }
+
     /** Start the App event loop. */
     void run()
     {

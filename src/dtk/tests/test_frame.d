@@ -1,4 +1,6 @@
-module test_button;
+module dtk.tests.test_frame;
+
+version(unittest):
 
 import core.thread;
 

@@ -1,4 +1,6 @@
-module mainWin;
+module dtk.tests.test_widget;
+
+version(unittest):
 
 import std.conv;
 import std.stdio;

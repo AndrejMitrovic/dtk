@@ -27,3 +27,8 @@ public
     import dtk.widget;
     import dtk.window;
 }
+
+version(unittest)
+{
+    import dtk.tests;
+}

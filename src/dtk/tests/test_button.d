@@ -1,4 +1,6 @@
-module test_checkbutton;
+module dtk.tests.test_button;
+
+version(unittest):
 
 import core.thread;
 
@@ -7,65 +9,59 @@ import std.stdio;
 import std.string;
 
 import dtk;
+import dtk.tests.globals;
 
-void main()
+unittest
 {
-    auto app = new App();
-
-    CheckButton button1;
-    button1 = new CheckButton(app.mainWindow, "Flash");
+    Button button1;
+    button1 = new Button(app.mainWindow, "Flash");
 
     button1.onEvent.connect(
-    (Widget widget, Event event)
-    {
-        static size_t pressCount;
-
-        switch (event.type) with (EventType)
+        (Widget widget, Event event)
         {
-            case TkCheckButtonToggle:
-                stderr.writefln("Button toggled to: %s.", event.state);
-                break;
+            static size_t pressCount;
 
-            default:
-        }
+            switch (event.type) with (EventType)
+            {
+                case Enter:
+                    stderr.writefln("Mouse entered button area, event: %s.", event);
+                    break;
 
-        //~ stderr.writefln("Event: %s", event);
-    });
+                case Leave:
+                    stderr.writefln("Mouse left button area, event: %s.", event);
+                    (cast(Button)widget).push();
+                    break;
 
-    assert(button1.onValue == "1", button1.onValue);
-    button1.onValue = "foo";
-    assert(button1.onValue == "foo");
+                case TkButtonPush:
+                    stderr.writefln("Button was pressed %s times.", ++pressCount);
+                    break;
 
-    assert(button1.offValue == "0");
-    button1.offValue = "bar";
-    assert(button1.offValue == "bar");
+                default: assert(0, format("Unhandled event type: %s", event.type));
+            }
+
+            stderr.writefln("Event: %s", event);
+        });
 
     button1.focus();
     button1.pack();
 
-    button1.toggleOn();
-    assert(button1.getValue() == button1.onValue());
-
-    button1.toggleOff();
-    assert(button1.getValue() == button1.offValue());
-
-    button1.toggle();
-    assert(button1.getValue() == button1.onValue());
-
     testStandard(button1);
     testButton(button1);
 
-    app.run();
+    app.run(2.seconds);
 }
 
-
 // test button-specific options
-void testButton(CheckButton button)
+void testButton(Button button)
 {
     assert(button.style == ButtonStyle.none);
     button.style = ButtonStyle.toolButton;
     assert(button.style == ButtonStyle.toolButton);
     button.style = ButtonStyle.none;
+
+    assert(button.defaultMode == DefaultMode.normal);
+    button.defaultMode = DefaultMode.active;
+    assert(button.defaultMode == DefaultMode.active);
 }
 
 // test standard widget states
@@ -103,7 +99,7 @@ void testStandard(Widget button)
     assert(!button.isActive);
     assert(!button.isFocused);
     assert(!button.isPressed);
-    //~ assert(button.isSelected);
+    assert(!button.isSelected);
     assert(!button.isInBackground);
     assert(!button.isReadOnly);
     assert(!button.isAlternate);

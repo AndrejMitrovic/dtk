@@ -58,6 +58,13 @@ alias Tcl_Command = Tcl_Command_*;
 
 alias extern(C) void function(char* blockPtr) FreeProc;
 
+enum TCL_DONT_WAIT      = (1<<1);
+enum TCL_WINDOW_EVENTS  = (1<<2);
+enum TCL_FILE_EVENTS    = (1<<3);
+enum TCL_TIMER_EVENTS   = (1<<4);
+enum TCL_IDLE_EVENTS    = (1<<5);  /* WAS 0x10 ???? */
+enum TCL_ALL_EVENTS     = (~TCL_DONT_WAIT);
+
 /*
  * Using structs so I can iterate the members via __traits(allMembers, TclProcs).
  * This simplifies loading the symbols dynamically.
@@ -81,6 +88,7 @@ __gshared extern(C):
 
     int function(Tcl_Interp* interp) Tcl_Init;
     void function(Tcl_Interp* interp) Tcl_DeleteInterp;
+    int function(int flags) Tcl_DoOneEvent;
 }
 
 struct TkProcs
