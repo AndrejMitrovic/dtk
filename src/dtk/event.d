@@ -63,7 +63,7 @@ enum ValidationType
     revalidate
 }
 
-ValidationType toValidationType(int input)
+package ValidationType toValidationType(int input)
 {
     switch (input) with (ValidationType)
     {
@@ -122,7 +122,7 @@ struct Event
     ValidateEvent validateEvent;
 }
 
-enum EmitGenericSignals
+package enum EmitGenericSignals
 {
     no,
     yes,

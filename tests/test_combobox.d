@@ -25,8 +25,6 @@ void main()
 
             default:
         }
-
-        //~ stderr.writefln("Event: %s", event);
     });
 
     assert(box1.value.empty);

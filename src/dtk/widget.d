@@ -18,18 +18,12 @@ import std.conv;
 alias splitter = std.algorithm.splitter;
 
 import dtk.app;
-import dtk.options;
 import dtk.entry;
 import dtk.event;
+import dtk.options;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
-
-// all the event arguments captures by the bind command
-package immutable string eventArgs = "%x %y %k %K %w %h %X %Y";
-
-// validation arguments captured by validatecommand
-package immutable string validationArgs = "%d %i %P %s %S %v %V %W";
 
 /** The main class of all Dtk widgets. */
 abstract class Widget
@@ -45,7 +39,8 @@ abstract class Widget
         // note: cannot use :: in name because it can sometimes be interpreted in a special way,
         // e.g. tk sometimes hardcodes methods to ttk::type.func.name
         string name = format("%s.%s%s%s", prefix, tkType.replace("::", "_"), _threadID, _lastWidgetID++);
-        evalFmt("%s %s %s", tkType, name, options2string(opt));
+        this.evalFmt("%s %s %s", tkType, name, options2string(opt));
+
         this(name, emitGenericSignals);
     }
 
@@ -520,3 +515,9 @@ package:
     /** All widget paths -> widget maps */
     static Widget[string] _widgetPathMap;
 }
+
+// all the event arguments captures by the bind command
+package immutable string eventArgs = "%x %y %k %K %w %h %X %Y";
+
+// validation arguments captured by validatecommand
+package immutable string validationArgs = "%d %i %P %s %S %v %V %W";
