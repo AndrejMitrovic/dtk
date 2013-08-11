@@ -35,17 +35,19 @@ class CheckButton : Widget
         // keyboard binding
         this.evalFmt("bind %s <Return> { %s invoke }", _name, _name);
 
+        string tracerFunc = format("tracer_%s", this.createCallbackName());
+
         // tracer used instead of -command
         this.evalFmt(
             `
-            proc tracer {varname args} {
+            proc %s {varname args} {
                 upvar #0 $varname var
                 %s %s $var
             }
-            `, _eventCallbackIdent, EventType.TkCheckButtonToggle);
+            `, tracerFunc, _eventCallbackIdent, EventType.TkCheckButtonToggle);
 
         // hook up the tracer for this unique variable
-        this.evalFmt(`trace add variable %s write "tracer %s"`, _toggleVarName, _toggleVarName);
+        this.evalFmt(`trace add variable %s write "%s %s"`, _toggleVarName, tracerFunc, _toggleVarName);
     }
 
     /**

@@ -112,7 +112,7 @@ class Label : Widget
         return this.getOption!string("justify").toJustification();
     }
 
-    /** Set the padding. */
+    /** Set the justification. */
     @property void justification(Justification newJustification)
     {
         this.setOption("justify", newJustification.toString());

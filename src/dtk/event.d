@@ -49,6 +49,8 @@ enum EventType
     TkButtonPush,
     TkCheckButtonToggle,
     TkRadioButtonSelect,
+    TkTextChange,
+    TkValidate,
 }
 
 struct Event
@@ -64,6 +66,8 @@ struct Event
     int root_x;
     int root_y;
     string state;  // e.g. toggle state
+
+
 }
 
 enum EmitGenericSignals

@@ -12,6 +12,8 @@ public
     import dtk.button;
     import dtk.checkbutton;
     import dtk.color;
+    import dtk.combobox;
+    import dtk.entry;
     import dtk.event;
     import dtk.font;
     import dtk.frame;

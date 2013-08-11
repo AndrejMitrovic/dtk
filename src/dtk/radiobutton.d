@@ -7,6 +7,7 @@
 module dtk.radiobutton;
 
 import std.conv;
+import std.exception;
 import std.range;
 import std.string;
 
@@ -28,17 +29,19 @@ class RadioGroup : Widget
         _varName = this.createVariableName();
         super(null, EmitGenericSignals.no);  // not an actual widget
 
+        string tracerFunc = format("tracer_%s", this.createCallbackName());
+
         // tracer used instead of -command
         this.evalFmt(
             `
-            proc tracer {varname args} {
+            proc %s {varname args} {
                 upvar #0 $varname var
                 %s %s $var
             }
-            `, _eventCallbackIdent, EventType.TkRadioButtonSelect);
+            `, tracerFunc, _eventCallbackIdent, EventType.TkRadioButtonSelect);
 
         // hook up the tracer for this unique variable
-        this.evalFmt(`trace add variable %s write "tracer %s"`, _varName, _varName);
+        this.evalFmt(`trace add variable %s write "%s %s"`, _varName, tracerFunc, _varName);
     }
 
     /**
@@ -80,6 +83,8 @@ class RadioButton : Widget
 {
     this(Widget master, RadioGroup radioGroup, string text, string value)
     {
+        enforce(radioGroup !is null, "radioGroup argument must not be null.");
+
         DtkOptions options;
         options["text"] = text;
         options["variable"] = radioGroup._varName;
@@ -109,6 +114,12 @@ class RadioButton : Widget
 
         if (_radioGroup.value == oldValue)
             _radioGroup.value = newValue;
+    }
+
+    /** Select this radio button. */
+    void select()
+    {
+        _radioGroup.value = this.value;
     }
 
     /** Get the current button style. */

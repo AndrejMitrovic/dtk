@@ -21,8 +21,11 @@ import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
-// all the event types capture by the bind command
+// all the event arguments captures by the bind command
 package immutable string eventArgs = "%x %y %k %K %w %h %X %Y";
+
+// validation arguments captured by validatecommand
+package immutable string validationArgs = "%d %i %P %s %S %v %V %W";
 
 /** The main class of all Dtk widgets. */
 abstract class Widget
@@ -322,6 +325,13 @@ package:
         evalFmt(`%s configure -%s %s`, _name, option, value._enquote);
     }
 
+    /** Create a unique new callback name. */
+    static string createCallbackName()
+    {
+        int newSlotID = _lastCallbackID++;
+        return format("%s%s_%s", callbackPrefix, _threadID, newSlotID).replace(":", "_");
+    }
+
     /** Create a Tcl callback. */
     string createCallback(Signal!(Widget, Event)* signal)
     {
@@ -358,14 +368,44 @@ package:
 
             if (objc > 1)  // todo: objc is the objv count, not sure if we should always assign all fields
             {
-                event.type = tclConv!EventType(Tcl_GetString(objv[1]));
+                try
+                {
+                    event.type = tclConv!EventType(Tcl_GetString(objv[1]));
+                }
+                catch (ConvException ce)
+                {
+                    stderr.writefln("Couldn't convert: `%s`", to!string(Tcl_GetString(objv[1])));
+                    throw ce;
+                }
 
                 switch (event.type) with (EventType)
                 {
                     case TkCheckButtonToggle:
                     case TkRadioButtonSelect:
+                    case TkTextChange:
                     {
                         event.state = to!string(Tcl_GetString(objv[2]));
+                        break;
+                    }
+
+                    case TkValidate:
+                    {
+                        event.state = to!string(Tcl_GetString(objv[2]));
+
+                        //~ event.validate.action = to!string(Tcl_GetString(objv[3]));
+                        //~ event.validate.index = to!string(Tcl_GetString(objv[4]));
+                        //~ event.validate.value = to!string(Tcl_GetString(objv[5]));
+                        //~ event.validate.prevValue = to!string(Tcl_GetString(objv[6]));
+                        //~ event.validate.curValue = to!string(Tcl_GetString(objv[6]));
+
+                        //~ %d  Type of action: 1 for insert prevalidation, 0 for delete prevalidation, or -1 for revalidation.
+                        //~ %i  Index of character string to be inserted/deleted, if any, otherwise -1.
+                        //~ %P  In prevalidation, the new value of the entry if the edit is accepted. In revalidation, the current value of the entry.
+                        //~ %s  The current value of entry prior to editing.
+                        //~ %S  The text string being inserted/deleted, if any, {} otherwise.
+                        //~ %v  The current value of the -validate option.
+                        //~ %V  The validation condition that triggered the callback (key, focusin, focusout, or forced).
+                        //~ %W  The name of the entry widget.
                         break;
                     }
 
@@ -400,6 +440,12 @@ package:
     {
         int newSlotID = _lastVariableID++;
         return format("%s%s_%s", variablePrefix, _threadID, newSlotID);
+    }
+
+    /** Create a Tcl variable. */
+    static void createTclVariable(string varName)
+    {
+        App.evalFmt("set %s true", varName);
     }
 
     /**
