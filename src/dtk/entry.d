@@ -10,6 +10,8 @@ import std.conv;
 import std.exception;
 import std.range;
 import std.string;
+import std.traits;
+import std.typetuple;
 
 import dtk.app;
 import dtk.button;
@@ -30,6 +32,20 @@ enum ValidationMode
     focusOut,   ///
     key,        ///
     all,        ///
+}
+
+ValidationMode toValidationMode(string input)
+{
+    switch (input) with (ValidationMode)
+    {
+        case "none":     return none;
+        case "focus":    return focus;
+        case "focusin":  return focusIn;
+        case "focusout": return focusOut;
+        case "key":      return key;
+        case "all":      return all;
+        default:         assert(0, format("Unhandled validation input: '%s'", input));
+    }
 }
 
 ///
@@ -65,8 +81,34 @@ class Entry : Widget
         // hook up the tracer for this unique variable
         this.evalFmt(`trace add variable %s write "%s %s"`, varName, tracerFunc, varName);
 
+        /* Validation */
         _validateVar = this.createVariableName();
         createTclVariable(_validateVar);
+
+        string callValidator = format("%s %s", _eventCallbackIdent, validationArgs);
+        string validateFunc = format("validate_%s", this.createCallbackName());
+
+        /**
+            // Note: unreliable, { } gets removed for empty arguments.
+
+            proc %s {type args} {
+                array set arg $args
+                %s $type {*}[array get arg]
+                return $%s
+            }
+        */
+
+        this.evalFmt(
+            `
+            proc %s {type args} {
+                %s $type $args
+                return $%s
+            }
+            `, validateFunc,
+               _eventCallbackIdent,
+               _validateVar);
+
+        this.evalFmt("%s configure -validatecommand { %s %s %s }", _name, validateFunc, EventType.TkValidate, validationArgs);
     }
 
     /** Return the text in this entry. */
@@ -127,35 +169,30 @@ class Entry : Widget
         return this.setOption("validate", to!string(newValidationMode));
     }
 
-    /** */
-    void setValidator()
+    /** Set the validator function */
+    @property void validator(Validator)(Validator validator)
+        if (isSomeFunction!Validator &&
+            is(ReturnType!Validator == IsValidated) &&
+            is(ParameterTypeTuple!Validator == TypeTuple!(Widget, ValidateEvent)))
     {
-        //~ this.evalFmt("%s configure -validatecommand { %s %s %s }", _name, _eventCallbackIdent, EventType.TkValidate, validationArgs);
+        // hook up the validator
+        this.onEvent.connect(
+        (Widget widget, Event event)
+        {
+            switch (event.type) with (EventType)
+            {
+                case TkValidate:
+                    this.setValidState(validator(widget, event.validateEvent));
+                    break;
 
-        // todo: this should call the d callback, and then return a global variable
-
-        string callValidator = format("%s %s", _eventCallbackIdent, validationArgs);
-
-        string validateFunc = format("validate_%s", this.createCallbackName());
-
-        // tracer used instead of -command
-        this.evalFmt(
-            `
-            proc %s {type args} {
-                array set arg $args
-                %s $type {*}[array get arg]
-                return $%s
+                default:
             }
-            `, validateFunc,
-               _eventCallbackIdent,
-               _validateVar);
-
-        this.evalFmt("%s configure -validatecommand { %s %s %s }", _name, validateFunc, EventType.TkValidate, validationArgs);
+        });
     }
 
-    void setValidState(bool state)
+    private void setValidState(IsValidated isValidated)
     {
-        this.evalFmt("set %s %s", _validateVar, state);
+        this.evalFmt("set %s %s", _validateVar, cast(bool)isValidated);
     }
 
     /** Get the current justification. */

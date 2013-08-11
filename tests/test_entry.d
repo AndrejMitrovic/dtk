@@ -2,6 +2,8 @@ module test_entry;
 
 import core.thread;
 
+import std.ascii;
+import std.algorithm;
 import std.range;
 import std.stdio;
 import std.string;
@@ -13,29 +15,6 @@ void main()
     auto app = new App();
 
     auto entry1 = new Entry(app.mainWindow);
-
-    entry1.onEvent.connect(
-    (Widget widget, Event event)
-    {
-        static size_t pressCount;
-
-        switch (event.type) with (EventType)
-        {
-            case TkTextChange:
-                stderr.writefln("Text change: %s.", event.state);
-                entry1.setValidState(false);
-                break;
-
-            case TkValidate:
-                stderr.writeln("Validating.");
-                break;
-
-            default:
-        }
-
-        //~ stderr.writefln("Event: %s", event);
-    });
-
     entry1.pack();
 
     assert(entry1.value.empty);
@@ -47,16 +26,22 @@ void main()
     assert(entry1.displayChar == '*');
 
     entry1.resetDisplayChar();
-    entry1.value = "foo\nfoo bar\n foo bar doo";
+    entry1.value = "foo";
     entry1.justification = Justification.right;
 
     assert(entry1.validationMode == ValidationMode.none);
 
-    entry1.validationMode = ValidationMode.key;
-    assert(entry1.validationMode == ValidationMode.key);
+    entry1.validationMode = ValidationMode.all;
+    assert(entry1.validationMode == ValidationMode.all);
 
     entry1.value = "123";
-    entry1.setValidator();
+
+    entry1.validator =
+        (Widget widget, ValidateEvent event)
+        {
+            // only allow isDigit
+            return all!isDigit(event.changeValue) ? IsValidated.yes : IsValidated.no;
+        };
 
     app.run();
 }

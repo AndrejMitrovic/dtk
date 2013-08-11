@@ -8,14 +8,18 @@ module dtk.widget;
 
 import core.thread;
 
+import std.algorithm;
 import std.range;
 import std.stdio;
 import std.string;
 import std.c.stdlib;
 import std.conv;
 
+alias splitter = std.algorithm.splitter;
+
 import dtk.app;
 import dtk.options;
+import dtk.entry;
 import dtk.event;
 import dtk.signals;
 import dtk.types;
@@ -390,22 +394,31 @@ package:
 
                     case TkValidate:
                     {
-                        event.state = to!string(Tcl_GetString(objv[2]));
+                        string validEventArgs = to!string(Tcl_GetString(objv[2]));
+                        //~ stderr.writefln("-- validEventArgs: %s", validEventArgs);
 
-                        //~ event.validate.action = to!string(Tcl_GetString(objv[3]));
-                        //~ event.validate.index = to!string(Tcl_GetString(objv[4]));
-                        //~ event.validate.value = to!string(Tcl_GetString(objv[5]));
-                        //~ event.validate.prevValue = to!string(Tcl_GetString(objv[6]));
-                        //~ event.validate.curValue = to!string(Tcl_GetString(objv[6]));
+                        auto args = validEventArgs.splitter(" ");
 
-                        //~ %d  Type of action: 1 for insert prevalidation, 0 for delete prevalidation, or -1 for revalidation.
-                        //~ %i  Index of character string to be inserted/deleted, if any, otherwise -1.
-                        //~ %P  In prevalidation, the new value of the entry if the edit is accepted. In revalidation, the current value of the entry.
-                        //~ %s  The current value of entry prior to editing.
-                        //~ %S  The text string being inserted/deleted, if any, {} otherwise.
-                        //~ %v  The current value of the -validate option.
-                        //~ %V  The validation condition that triggered the callback (key, focusin, focusout, or forced).
-                        //~ %W  The name of the entry widget.
+                        event.validateEvent.type = toValidationType(to!int(args.front));
+                        args.popFront();
+
+                        event.validateEvent.charIndex = to!sizediff_t(args.front);
+                        args.popFront();
+
+                        event.validateEvent.newValue = args.front == "{}" ? null : args.front;
+                        args.popFront();
+
+                        event.validateEvent.curValue = args.front == "{}" ? null : args.front;
+                        args.popFront();
+
+                        event.validateEvent.changeValue = args.front == "{}" ? null : args.front;
+                        args.popFront();
+
+                        event.validateEvent.validationMode = toValidationMode(args.front);
+                        args.popFront();
+
+                        event.validateEvent.validationCondition = toValidationMode(args.front);
+                        args.popFront();
                         break;
                     }
 
