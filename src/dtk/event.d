@@ -52,6 +52,7 @@ enum EventType
     TkRadioButtonSelect,
     TkTextChange,
     TkValidate,
+    TkFailedValidation,
 }
 
 enum ValidationType

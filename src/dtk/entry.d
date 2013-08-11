@@ -23,6 +23,11 @@ import dtk.utils;
 import dtk.options;
 import dtk.widget;
 
+/** Check whether type $(D T) is a validator function. */
+public enum isValidator(T) = isSomeFunction!T &&
+                             is(ReturnType!T == IsValidated) &&
+                             is(ParameterTypeTuple!T == TypeTuple!(Widget, ValidateEvent));
+
 ///
 enum ValidationMode
 {
@@ -58,8 +63,6 @@ enum IsValidated
 ///
 class Entry : Widget
 {
-    // todo: add validation
-
     this(Widget master)
     {
         DtkOptions options;
@@ -109,6 +112,7 @@ class Entry : Widget
                _validateVar);
 
         this.evalFmt("%s configure -validatecommand { %s %s %s }", _name, validateFunc, EventType.TkValidate, validationArgs);
+        this.evalFmt("%s configure -invalidcommand { %s %s %s }", _name, validateFunc, EventType.TkFailedValidation, validationArgs);
     }
 
     /** Return the text in this entry. */
@@ -169,25 +173,28 @@ class Entry : Widget
         return this.setOption("validate", to!string(newValidationMode));
     }
 
-    /** Set the validator function */
-    @property void validator(Validator)(Validator validator)
-        if (isSomeFunction!Validator &&
-            is(ReturnType!Validator == IsValidated) &&
-            is(ParameterTypeTuple!Validator == TypeTuple!(Widget, ValidateEvent)))
+    /** Set the function to use for validation. */
+    @property void onValidation(Validator)(Validator validator)
+        if (isValidator!Validator)
     {
-        // hook up the validator
         this.onEvent.connect(
-        (Widget widget, Event event)
-        {
-            switch (event.type) with (EventType)
+            (Widget widget, Event event)
             {
-                case TkValidate:
+                if (event.type == EventType.TkValidate)
                     this.setValidState(validator(widget, event.validateEvent));
-                    break;
+            });
+    }
 
-                default:
-            }
-        });
+    /** Set the function to invoke on a failed validation. */
+    @property void onFailedValidation(Func)(Func func)
+        if (isSomeFunction!Func && is(ParameterTypeTuple!Func == TypeTuple!(Widget, ValidateEvent)))
+    {
+        this.onEvent.connect(
+            (Widget widget, Event event)
+            {
+                if (event.type == EventType.TkFailedValidation)
+                    func(widget, event.validateEvent);
+            });
     }
 
     private void setValidState(IsValidated isValidated)

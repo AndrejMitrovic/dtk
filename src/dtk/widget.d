@@ -393,9 +393,9 @@ package:
                     }
 
                     case TkValidate:
+                    case TkFailedValidation:
                     {
                         string validEventArgs = to!string(Tcl_GetString(objv[2]));
-                        //~ stderr.writefln("-- validEventArgs: %s", validEventArgs);
 
                         auto args = validEventArgs.splitter(" ");
 

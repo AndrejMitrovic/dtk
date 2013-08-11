@@ -36,11 +36,17 @@ void main()
 
     entry1.value = "123";
 
-    entry1.validator =
+    entry1.onValidation =
         (Widget widget, ValidateEvent event)
         {
             // only allow isDigit
             return all!isDigit(event.changeValue) ? IsValidated.yes : IsValidated.no;
+        };
+
+    entry1.onFailedValidation =
+        (Widget widget, ValidateEvent event)
+        {
+            stderr.writeln(" -- FAILED VALIDATION --");
         };
 
     app.run();
