@@ -7,19 +7,10 @@
 module dtk.listbox;
 
 import std.conv;
-//~ import std.exception;
 import std.range;
 import std.string;
-//~ import std.traits;
-//~ import std.typetuple;
 
-//~ import dtk.app;
-//~ import dtk.button;
 import dtk.event;
-//~ import dtk.geometry;
-//~ import dtk.signals;
-//~ import dtk.types;
-//~ import dtk.utils;
 import dtk.options;
 import dtk.widget;
 
@@ -32,10 +23,11 @@ enum SelectMode
     old_multiple,  /// deprecated
 }
 
-// todo: could replace a tk::listbox with a simple ttk::treeview
 ///
 class Listbox : Widget
 {
+    // todo: could implelent a listbox with a ttk::treeview rather than tk::listbox
+
     ///
     this(Widget master)
     {

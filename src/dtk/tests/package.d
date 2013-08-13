@@ -20,6 +20,7 @@ private
     import dtk.tests.test_label;
     import dtk.tests.test_listbox;
     import dtk.tests.test_radiobutton;
+    import dtk.tests.test_scrollbar;
     //~ import dtk.tests.test_widget;  // todo: implement
     import dtk.tests.test_window;
 }
