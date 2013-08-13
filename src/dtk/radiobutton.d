@@ -51,7 +51,7 @@ class RadioGroup : Widget
     */
     @property string value()
     {
-        return to!string(Tcl_GetVar(App._interp, cast(char*)_varName.toStringz, 0));
+        return this.getVar!string(_varName);
     }
 
     /**
@@ -59,9 +59,9 @@ class RadioGroup : Widget
         It should equal to the $(D value) property of one of
         the radio buttons that are part of this radio group.
     */
-    @property string value(string newValue)
+    @property void value(string newValue)
     {
-        return to!string(Tcl_SetVar(App._interp, cast(char*)_varName.toStringz, cast(char*)newValue.toStringz, 0));
+        this.setVar(_varName, newValue);
     }
 
     private void add(RadioButton button)

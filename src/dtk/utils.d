@@ -6,6 +6,7 @@
  */
 module dtk.utils;
 
+import std.array;
 import std.conv;
 import std.algorithm;
 import std.functional;

@@ -54,6 +54,7 @@ enum EventType
     TkTextChange,
     TkValidate,
     TkFailedValidation,
+    TkListboxChange,
 }
 
 ///

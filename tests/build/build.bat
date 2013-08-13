@@ -19,4 +19,4 @@ goto :eof
 set FileName=%1
 set SourceFile=%2
 
-rdmd -version=DTK_LOG_EVAL -unittest -I..\src -of%binPath%\%FileName%.exe %SourceFile%
+rdmd -g -version=DTK_LOG_EVAL -unittest -I..\src -of%binPath%\%FileName%.exe %SourceFile%

@@ -9,11 +9,14 @@ module dtk.widget;
 import core.thread;
 
 import std.algorithm;
+import std.exception;
 import std.range;
 import std.stdio;
 import std.string;
-import std.c.stdlib;
+import std.traits;
 import std.conv;
+
+import std.c.stdlib;
 
 alias splitter = std.algorithm.splitter;
 
@@ -24,41 +27,6 @@ import dtk.options;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
-
-/// Tk and Ttk widget types
-package enum TkType
-{
-    button = "ttk::button",
-    checkbutton = "ttk::checkbutton",
-    combobox = "ttk::combobox",
-    entry = "ttk::entry",
-    frame = "ttk::frame",
-    label = "ttk::label",
-    radiobutton = "ttk::radiobutton",
-    toplevel = "tk::toplevel"
-}
-
-///
-package string toString(TkType tkType)
-{
-    // note: cannot use :: in name because it can sometimes be
-    // interpreted in a special way, e.g. tk hardcodes some
-    // methods to ttk::type.func.name
-    return tkType.replace(":", "_");
-}
-
-///
-package template EnumBaseType(E) if (is(E == enum))
-{
-    static if (is(E B == enum))
-        alias EnumBaseType = B;
-}
-
-/// required due to Issue 10814 - Formatting string-based enum prints its name instead of its value
-package T toBaseType(E, T = EnumBaseType!E)(E val)
-{
-    return cast(T)val;
-}
 
 /** The main class of all Dtk widgets. */
 abstract class Widget
@@ -369,6 +337,54 @@ package:
         evalFmt(`%s configure -%s %s`, _name, option, value._enquote);
     }
 
+    final T getVar(T)(string varName)
+    {
+        // todo: use TCL_LEAVE_ERR_MSG
+        // todo: check _interp error
+        // tood: check all interpreter error codes
+
+        enum getFlags = 0;
+        static if (isArray!T)
+        {
+            Appender!T result;
+
+            auto tclObj = Tcl_GetVar2Ex(App._interp, cast(char*)varName.toStringz, null, getFlags);
+            enforce(tclObj !is null);
+
+            int arrCount;
+            Tcl_Obj **array;
+            enforce(Tcl_ListObjGetElements(App._interp, tclObj, &arrCount, &array) != TCL_ERROR);
+
+            foreach (index; 0 .. arrCount)
+                result ~= to!string(Tcl_GetString(array[index]));
+
+            return result.data;
+        }
+        else
+        {
+            version (DTK_LOG_EVAL)
+                stderr.writefln("Tcl_GetVar(%s)", varName);
+
+            return to!T(Tcl_GetVar(App._interp, cast(char*)varName.toStringz, getFlags));
+        }
+    }
+
+    final void setVar(T)(string varName, T value)
+    {
+        static if (isArray!T && !isSomeString!T)
+        {
+            this.evalFmt("set %s [list %s]", varName, value.join(" "));
+        }
+        else
+        {
+            version (DTK_LOG_EVAL)
+                stderr.writefln("Tcl_SetVar(%s, %s)", varName, to!string(value));
+
+            enum setFlags = 0;
+            Tcl_SetVar(App._interp, cast(char*)varName.toStringz, cast(char*)(value.toStringz), setFlags);
+        }
+    }
+
     /** Create a unique new callback name. */
     static string createCallbackName()
     {
@@ -428,6 +444,7 @@ package:
                     case TkRadioButtonSelect:
                     case TkComboboxChange:
                     case TkTextChange:
+                    case TkListboxChange:
                     {
                         event.state = to!string(Tcl_GetString(objv[2]));
                         break;
@@ -564,3 +581,39 @@ package immutable string eventArgs = "%x %y %k %K %w %h %X %Y";
 
 // validation arguments captured by validatecommand
 package immutable string validationArgs = "%d %i %P %s %S %v %V %W";
+
+/// Tk and Ttk widget types
+package enum TkType : string
+{
+    button = "ttk::button",
+    checkbutton = "ttk::checkbutton",
+    combobox = "ttk::combobox",
+    entry = "ttk::entry",
+    frame = "ttk::frame",
+    label = "ttk::label",
+    listbox = "tk::listbox",  // note: no ttk::listbox yet in v8.6
+    radiobutton = "ttk::radiobutton",
+    toplevel = "tk::toplevel"
+}
+
+///
+package string toString(TkType tkType)
+{
+    // note: cannot use :: in name because it can sometimes be
+    // interpreted in a special way, e.g. tk hardcodes some
+    // methods to ttk::type.func.name
+    return tkType.replace(":", "_");
+}
+
+///
+package template EnumBaseType(E) if (is(E == enum))
+{
+    static if (is(E B == enum))
+        alias EnumBaseType = B;
+}
+
+/// required due to Issue 10814 - Formatting string-based enum prints its name instead of its value
+package T toBaseType(E, T = EnumBaseType!E)(E val)
+{
+    return cast(T)val;
+}
