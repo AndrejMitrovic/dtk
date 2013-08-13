@@ -328,18 +328,18 @@ abstract class Widget
         return _name;
     }
 
-    /** Set a scrollbar for this widget. */
-    void setScrollbar(Scrollbar scrollbar, Orientation orientation)
+package:
+
+    /* Set a scrollbar for this widget. */
+    package void setScrollbar(Scrollbar scrollbar)
     {
         assert(!scrollbar._name.empty);
-        string scrollCommand = format("%sscrollcommand", (orientation == Orientation.horizontal) ? "h" : "y");
+        string scrollCommand = format("%sscrollcommand", (scrollbar.orientation == Orientation.horizontal) ? "h" : "y");
         this.setOption(scrollCommand, format("%s set", scrollbar._name));
 
-        string viewTarget = (orientation == Orientation.horizontal) ? "hview" : "yview";
+        string viewTarget = (scrollbar.orientation == Orientation.horizontal) ? "hview" : "yview";
         scrollbar.setOption("command", format("%s %s", this._name, viewTarget));
     }
-
-package:
 
     final string evalFmt(T...)(string fmt, T args)
     {
