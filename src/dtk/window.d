@@ -118,8 +118,8 @@ class Window : Widget
     */
     @property void geometry(Rect newGeometry)
     {
-        evalFmt("wm geometry %s %s", _name, newGeometry.toEvalString);
-        eval("update idletasks");
+        this.evalFmt("wm geometry %s %s", _name, newGeometry.toEvalString);
+        this.eval("update idletasks");
     }
 
     /**

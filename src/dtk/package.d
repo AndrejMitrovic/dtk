@@ -23,6 +23,7 @@ public
     import dtk.loader;
     import dtk.options;
     import dtk.radiobutton;
+    import dtk.scrollbar;
     import dtk.types;
     import dtk.utils;
     import dtk.widget;
