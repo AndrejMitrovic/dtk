@@ -202,3 +202,10 @@ package string toString(Justification justification)
         case Invalid:       assert(0, format("Uninitialized justification: '%s'", justification));
     }
 }
+
+///
+enum Orientation
+{
+    horizontal,  ///
+    vertical     ///
+}

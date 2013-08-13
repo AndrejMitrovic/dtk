@@ -7,20 +7,12 @@
 module dtk.listbox;
 
 import std.conv;
-//~ import std.exception;
 import std.range;
 import std.string;
-//~ import std.traits;
-//~ import std.typetuple;
 
-//~ import dtk.app;
-//~ import dtk.button;
 import dtk.event;
-//~ import dtk.geometry;
-//~ import dtk.signals;
-//~ import dtk.types;
-//~ import dtk.utils;
 import dtk.options;
+import dtk.utils;
 import dtk.widget;
 
 ///
@@ -32,10 +24,11 @@ enum SelectMode
     old_multiple,  /// deprecated
 }
 
-// todo: could replace a tk::listbox with a simple ttk::treeview
 ///
 class Listbox : Widget
 {
+    // todo: could implelent a listbox with a ttk::treeview rather than tk::listbox
+
     ///
     this(Widget master)
     {
@@ -71,10 +64,38 @@ class Listbox : Widget
         this.setVar(_varName, newValues);
     }
 
+    /** Add an item to the end of the list. */
+    void add(string value)
+    {
+        this.evalFmt("%s insert end %s", _name, value._enquote);
+    }
+
     /** Clear out all items in the listbox. */
     void clear()
     {
         values = [];
+    }
+
+    /** Return the height of the listbox, in line count. */
+    @property int height()
+    {
+        return this.getOption!int("height");
+    }
+
+    /**
+        Set the height of the listbox, in line count.
+        If the requested height is zero or less, the
+        height for the listbox will be made large enough to
+        hold all the values in the listbox.
+
+        Note that the actual height may be scheduled to be
+        updated at a later time, so .height may not reflect
+        the new state immediately after it is set.
+    */
+    @property void height(int newHeight)
+    {
+        this.setOption("height", newHeight);
+        this.eval("update idletasks");
     }
 
     /** Get the current selection mode. */

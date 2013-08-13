@@ -23,10 +23,27 @@ alias splitter = std.algorithm.splitter;
 import dtk.app;
 import dtk.entry;
 import dtk.event;
+import dtk.geometry;
 import dtk.options;
 import dtk.signals;
+import dtk.scrollbar;
 import dtk.types;
 import dtk.utils;
+
+/// Tk and Ttk widget types
+package enum TkType : string
+{
+    button = "ttk::button",
+    checkbutton = "ttk::checkbutton",
+    combobox = "ttk::combobox",
+    entry = "ttk::entry",
+    frame = "ttk::frame",
+    label = "ttk::label",
+    listbox = "tk::listbox",  // note: no ttk::listbox yet in v8.6
+    radiobutton = "ttk::radiobutton",
+    scrollbar = "ttk::scrollbar",
+    toplevel = "tk::toplevel"
+}
 
 /** The main class of all Dtk widgets. */
 abstract class Widget
@@ -305,7 +322,24 @@ abstract class Widget
         this.evalFmt("destroy %s", _name);
     }
 
+    /** Get the underlying Tcl widget name. Use with debugging and eval calls. */
+    public string getTclName()
+    {
+        return _name;
+    }
+
 package:
+
+    /* Set a scrollbar for this widget. */
+    package void setScrollbar(Scrollbar scrollbar)
+    {
+        assert(!scrollbar._name.empty);
+        string scrollCommand = format("%sscrollcommand", (scrollbar.orientation == Orientation.horizontal) ? "h" : "y");
+        this.setOption(scrollCommand, format("%s set", scrollbar._name));
+
+        string viewTarget = (scrollbar.orientation == Orientation.horizontal) ? "hview" : "yview";
+        scrollbar.setOption("command", format("%s %s", this._name, viewTarget));
+    }
 
     final string evalFmt(T...)(string fmt, T args)
     {
@@ -581,20 +615,6 @@ package immutable string eventArgs = "%x %y %k %K %w %h %X %Y";
 
 // validation arguments captured by validatecommand
 package immutable string validationArgs = "%d %i %P %s %S %v %V %W";
-
-/// Tk and Ttk widget types
-package enum TkType : string
-{
-    button = "ttk::button",
-    checkbutton = "ttk::checkbutton",
-    combobox = "ttk::combobox",
-    entry = "ttk::entry",
-    frame = "ttk::frame",
-    label = "ttk::label",
-    listbox = "tk::listbox",  // note: no ttk::listbox yet in v8.6
-    radiobutton = "ttk::radiobutton",
-    toplevel = "tk::toplevel"
-}
 
 ///
 package string toString(TkType tkType)
