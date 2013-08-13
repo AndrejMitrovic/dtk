@@ -23,12 +23,13 @@ import dtk.widget;
 ///
 class Combobox : Widget
 {
+    ///
     this(Widget master)
     {
         DtkOptions options;
         _varName = this.createVariableName();
         options["textvariable"] = _varName;
-        super(master, "ttk::combobox", options);
+        super(master, TkType.combobox, options);
 
         string tracerFunc = format("tracer_%s", this.createCallbackName());
 
@@ -70,9 +71,9 @@ class Combobox : Widget
     }
 
     /** Allow or disallow inputting custom values to this combobox. */
-    @property void readOnly(bool state)
+    @property void readOnly(bool doDisableWrite)
     {
-        this.setState(state ? "readonly" : "!readonly");
+        this.setState(doDisableWrite ? "readonly" : "!readonly");
     }
 
 private:

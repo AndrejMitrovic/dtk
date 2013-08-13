@@ -1,6 +1,7 @@
 module dtk.tests.globals;
 
 version(unittest):
+version(DTK_UNITTEST):
 
 import std.stdio;
 

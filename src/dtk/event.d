@@ -56,6 +56,7 @@ enum EventType
     TkFailedValidation,
 }
 
+///
 enum ValidationType
 {
     preInsert,
@@ -74,6 +75,7 @@ package ValidationType toValidationType(int input)
     }
 }
 
+///
 struct ValidateEvent
 {
     /** type of validation action. */
@@ -106,6 +108,7 @@ struct ValidateEvent
     ValidationMode validationCondition;
 }
 
+///
 struct Event
 {
     EventType type;

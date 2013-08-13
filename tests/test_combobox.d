@@ -1,6 +1,4 @@
-module dtk.tests.test_label;
-
-version(unittest):
+module test_combobox;
 
 import core.thread;
 
@@ -14,7 +12,8 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto label = new Label(mainWindow);
+    auto app = new App;
+    auto label = new Label(app.mainWindow);
     label.pack();
 
     label.text = "some note\nsome larger note 2\nsmall note";
@@ -53,6 +52,9 @@ unittest
     label.padding = Padding(10, 10, 10, 10);
     assert(label.padding == Padding(10, 10, 10, 10));
 
-    app.testRun();
+    app.run();
 }
 
+void main()
+{
+}

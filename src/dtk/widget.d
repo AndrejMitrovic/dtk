@@ -25,21 +25,53 @@ import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
+/// Tk and Ttk widget types
+package enum TkType
+{
+    button = "ttk::button",
+    checkbutton = "ttk::checkbutton",
+    combobox = "ttk::combobox",
+    entry = "ttk::entry",
+    frame = "ttk::frame",
+    label = "ttk::label",
+    radiobutton = "ttk::radiobutton",
+    toplevel = "tk::toplevel"
+}
+
+///
+package string toString(TkType tkType)
+{
+    // note: cannot use :: in name because it can sometimes be
+    // interpreted in a special way, e.g. tk hardcodes some
+    // methods to ttk::type.func.name
+    return tkType.replace(":", "_");
+}
+
+///
+package template EnumBaseType(E) if (is(E == enum))
+{
+    static if (is(E B == enum))
+        alias EnumBaseType = B;
+}
+
+/// required due to Issue 10814 - Formatting string-based enum prints its name instead of its value
+package T toBaseType(E, T = EnumBaseType!E)(E val)
+{
+    return cast(T)val;
+}
+
 /** The main class of all Dtk widgets. */
 abstract class Widget
 {
     // todo: replace tkType with an enum
-    this(Widget parent, string tkType, DtkOptions opt, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes)
+    this(Widget parent, TkType tkType, DtkOptions opt, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes)
     {
         string prefix;  // '.' is the root window
         if (parent !is null && parent._name != ".")
             prefix = parent._name;
 
-        import std.array;
-        // note: cannot use :: in name because it can sometimes be interpreted in a special way,
-        // e.g. tk sometimes hardcodes methods to ttk::type.func.name
-        string name = format("%s.%s%s%s", prefix, tkType.replace("::", "_"), _threadID, _lastWidgetID++);
-        this.evalFmt("%s %s %s", tkType, name, options2string(opt));
+        string name = format("%s.%s%s%s", prefix, tkType.toString(), _threadID, _lastWidgetID++);
+        this.evalFmt("%s %s %s", tkType.toBaseType(), name, options2string(opt));
 
         this(name, emitGenericSignals);
     }

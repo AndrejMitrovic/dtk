@@ -1,6 +1,7 @@
 module dtk.tests.test_window;
 
 version(unittest):
+version(DTK_UNITTEST):
 
 import std.conv;
 import std.stdio;

@@ -21,6 +21,7 @@ import dtk.widget;
 ///
 class CheckButton : Widget
 {
+    ///
     this(Widget master, string text)
     {
         DtkOptions options;
@@ -28,7 +29,7 @@ class CheckButton : Widget
         _toggleVarName = this.createVariableName();
         options["variable"] = _toggleVarName;
 
-        super(master, "ttk::checkbutton", options);
+        super(master, TkType.checkbutton, options);
 
         this.toggleOff();
 
@@ -79,7 +80,7 @@ class CheckButton : Widget
     }
 
     /** Get the current state of the checkbutton. It should equal to either onValue or offValue. */
-    string getValue()
+    @property string value()
     {
         return to!string(Tcl_GetVar(App._interp, cast(char*)_toggleVarName.toStringz, 0));
     }

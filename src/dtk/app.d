@@ -35,6 +35,7 @@ final class App
     }
 
     version(unittest)
+    version(DTK_UNITTEST)
     {
         import std.datetime;
 

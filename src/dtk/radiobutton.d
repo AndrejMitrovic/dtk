@@ -81,6 +81,7 @@ private:
 ///
 class RadioButton : Widget
 {
+    ///
     this(Widget master, RadioGroup radioGroup, string text, string value)
     {
         enforce(radioGroup !is null, "radioGroup argument must not be null.");
@@ -90,7 +91,7 @@ class RadioButton : Widget
         options["variable"] = radioGroup._varName;
         options["value"] = value;
 
-        super(master, "ttk::radiobutton", options);
+        super(master, TkType.radiobutton, options);
 
         // keyboard binding
         this.evalFmt("bind %s <Return> { %s invoke }", _name, _name);

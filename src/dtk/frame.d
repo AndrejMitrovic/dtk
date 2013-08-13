@@ -14,13 +14,15 @@ import dtk.utils;
 import dtk.options;
 import dtk.widget;
 
+///
 class Frame : Widget
 {
+    ///
     this(Widget master)
     {
         DtkOptions options;
-        super(master, "ttk::frame", options);
-
+        //~ options["relief"] = "sunken";
+        super(master, TkType.frame, options);
         this.setOption("relief ", "sunken");
     }
 

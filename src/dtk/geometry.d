@@ -155,6 +155,7 @@ package string toString(Anchor anchor)
     }
 }
 
+///
 enum BorderStyle
 {
     Invalid,  // sentinel

@@ -1,6 +1,7 @@
 module dtk.tests.test_entry;
 
 version(unittest):
+version(DTK_UNITTEST):
 
 import core.thread;
 

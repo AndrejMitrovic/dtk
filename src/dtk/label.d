@@ -16,12 +16,14 @@ import dtk.utils;
 import dtk.options;
 import dtk.widget;
 
+///
 class Label : Widget
 {
+    ///
     this(Widget master)
     {
         DtkOptions options;
-        super(master, "ttk::label", options);
+        super(master, TkType.label, options);
     }
 
     /**

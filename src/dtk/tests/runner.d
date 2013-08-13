@@ -7,6 +7,7 @@
 module dtk.tests.runner;
 
 version(unittest):
+version(DTK_UNITTEST):
 
 import core.exception;
 import core.runtime;

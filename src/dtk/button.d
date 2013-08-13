@@ -44,13 +44,15 @@ enum DefaultMode
     disabled, /// this button cannot become the default button
 }
 
+///
 class Button : Widget
 {
+    ///
     this(Widget master, string text)
     {
         DtkOptions options;
         options["text"] = text;
-        super(master, "ttk::button", options);
+        super(master, TkType.button, options);
 
         // invoke calls 'command'
         this.evalFmt("bind %s <Return> { %s invoke }", _name, _name);

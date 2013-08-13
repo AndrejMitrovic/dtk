@@ -31,7 +31,7 @@ class Window : Widget
         DtkOptions options;
         options["width"] = to!string(width);
         options["height"] = to!string(height);
-        super(parent, "tk::toplevel", options);
+        super(parent, TkType.toplevel, options);
 
         // wait for the window to show up before we issue any commands
         evalFmt("tkwait visibility %s", _name);

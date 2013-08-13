@@ -1,6 +1,7 @@
 module dtk.tests.test_checkbutton;
 
 version(unittest):
+version(DTK_UNITTEST):
 
 import core.thread;
 
@@ -45,13 +46,13 @@ unittest
     button1.pack();
 
     button1.toggleOn();
-    assert(button1.getValue() == button1.onValue());
+    assert(button1.value == button1.onValue());
 
     button1.toggleOff();
-    assert(button1.getValue() == button1.offValue());
+    assert(button1.value == button1.offValue());
 
     button1.toggle();
-    assert(button1.getValue() == button1.onValue());
+    assert(button1.value == button1.onValue());
 
     testStandard(button1);
     testButton(button1);

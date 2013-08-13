@@ -39,7 +39,7 @@ enum ValidationMode
     all,        ///
 }
 
-ValidationMode toValidationMode(string input)
+package ValidationMode toValidationMode(string input)
 {
     switch (input) with (ValidationMode)
     {
@@ -63,12 +63,13 @@ enum IsValidated
 ///
 class Entry : Widget
 {
+    ///
     this(Widget master)
     {
         DtkOptions options;
         string varName = this.createVariableName();
         options["textvariable"] = varName;
-        super(master, "ttk::entry", options);
+        super(master, TkType.entry, options);
 
         string tracerFunc = format("tracer_%s", this.createCallbackName());
 
@@ -131,8 +132,8 @@ class Entry : Widget
     /**
         Get the char symbol that replaces the input characters
         when displayed in the entry. This is typically used for
-        entries that input passwords, where the char symbol could
-        equal '*'. If no char symbol is set, ' ' is returned.
+        entries that input passwords where the char symbol could
+        e.g. equal '*'. If no char symbol is set, ' ' is returned.
     */
     @property dchar displayChar()
     {
