@@ -22,8 +22,7 @@ class Label : Widget
     ///
     this(Widget master)
     {
-        DtkOptions options;
-        super(master, TkType.label, options);
+        super(master, TkType.label);
     }
 
     /**

@@ -63,15 +63,20 @@ package T toBaseType(E, T = EnumBaseType!E)(E val)
 /** The main class of all Dtk widgets. */
 abstract class Widget
 {
-    // todo: replace tkType with an enum
     this(Widget parent, TkType tkType, DtkOptions opt, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes)
+    {
+        this(parent, tkType, emitGenericSignals, opt.options2string);
+    }
+
+    // ctor with formatted options
+    this(Widget parent, TkType tkType, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes, string opts = "")
     {
         string prefix;  // '.' is the root window
         if (parent !is null && parent._name != ".")
             prefix = parent._name;
 
         string name = format("%s.%s%s%s", prefix, tkType.toString(), _threadID, _lastWidgetID++);
-        this.evalFmt("%s %s %s", tkType.toBaseType(), name, options2string(opt));
+        this.evalFmt("%s %s %s", tkType.toBaseType(), name, opts);
 
         this(name, emitGenericSignals);
     }
