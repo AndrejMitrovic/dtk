@@ -80,11 +80,16 @@ __gshared extern(C):
     char* function(Tcl_Obj * objPtr, int* lengthPtr) Tcl_GetStringFromObj;
     char* function(const Tcl_Obj * objPtr) Tcl_GetString;
     char* function(Tcl_Interp* interp, char* str, int flags) Tcl_GetVar;
+    Tcl_Obj* function(Tcl_Interp* interp, char* name1, char* name2, int flags) Tcl_GetVar2Ex;
+    //~ Tcl_Obj* function(Tcl_Interp* interp, char* name1, char* name2, int flags) Tcl_SetVar2Ex;
     char* function(Tcl_Interp* interp, char* str, char* newValue, int flags) Tcl_SetVar;
+    char* function(Tcl_Interp* interp, char* name1, char* name2, char* newValue, int flags) Tcl_SetVar2;
     void function(Tcl_Interp* interp, char* str, Tcl_FreeProc* freeProc) Tcl_SetResult;
     Tcl_Command function(Tcl_Interp* interp, char* cmdName,
                                       Tcl_ObjCmdProc proc, ClientData clientData,
                                       Tcl_CmdDeleteProc deleteProc) Tcl_CreateObjCommand;
+
+    int function(Tcl_Interp* interp, Tcl_Obj* listPtr, int* objcPtr, Tcl_Obj*** objvPtr) Tcl_ListObjGetElements;
 
     int function(Tcl_Interp* interp) Tcl_Init;
     void function(Tcl_Interp* interp) Tcl_DeleteInterp;

@@ -19,6 +19,7 @@ public
     import dtk.frame;
     import dtk.geometry;
     import dtk.label;
+    import dtk.listbox;
     import dtk.loader;
     import dtk.options;
     import dtk.radiobutton;
@@ -29,6 +30,7 @@ public
 }
 
 version(unittest)
+version(DTK_UNITTEST)
 {
     import dtk.tests;
 }
