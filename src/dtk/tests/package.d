@@ -19,6 +19,7 @@ private
     import dtk.tests.test_frame;
     import dtk.tests.test_label;
     import dtk.tests.test_listbox;
+    import dtk.tests.test_progressbar;
     import dtk.tests.test_radiobutton;
     import dtk.tests.test_sizegrip;
     import dtk.tests.test_scrollbar;

@@ -40,6 +40,7 @@ package enum TkType : string
     frame = "ttk::frame",
     label = "ttk::label",
     listbox = "tk::listbox",     // note: no ttk::listbox yet in v8.6
+    progressbar = "ttk::progressbar",
     radiobutton = "ttk::radiobutton",
     sizegrip = "ttk::sizegrip",
     scrollbar = "ttk::scrollbar",
@@ -380,7 +381,7 @@ package:
         // tood: check all interpreter error codes
 
         enum getFlags = 0;
-        static if (isArray!T)
+        static if (isArray!T && !isSomeString!T)
         {
             Appender!T result;
 
@@ -417,7 +418,7 @@ package:
                 stderr.writefln("Tcl_SetVar(%s, %s)", varName, to!string(value));
 
             enum setFlags = 0;
-            Tcl_SetVar(App._interp, cast(char*)varName.toStringz, cast(char*)(value.toStringz), setFlags);
+            Tcl_SetVar(App._interp, cast(char*)varName.toStringz, cast(char*)(to!string(value).toStringz), setFlags);
         }
     }
 
@@ -481,6 +482,7 @@ package:
                     case TkComboboxChange:
                     case TkTextChange:
                     case TkListboxChange:
+                    case TkProgressbarChange:
                     {
                         event.state = to!string(Tcl_GetString(objv[2]));
                         break;

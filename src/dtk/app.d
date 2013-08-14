@@ -42,7 +42,7 @@ final class App
         static string _file;
         static size_t _line;
 
-        void testRun(Duration runTime = 0.seconds, string file = __FILE__, size_t line = __LINE__)
+        void testRun(Duration runTime = 0.seconds, SkipIdleTime skipIdleTime = SkipIdleTime.no, string file = __FILE__, size_t line = __LINE__)
         {
             _file = file;
             _line = line;
@@ -68,7 +68,7 @@ final class App
                 hasEvents = Tcl_DoOneEvent(TCL_DONT_WAIT) != 0;
 
                 // event found, add some idle time to allow processing
-                if (hasEvents)
+                if (skipIdleTime == skipIdleTime.no && hasEvents)
                 {
                     runTime += 100.msecs;
                     runTimeDur = cast(TickDuration)runTime;
@@ -159,4 +159,14 @@ package:
 
 private:
     Window _window;
+}
+
+version(unittest)
+version(DTK_UNITTEST)
+{
+    enum SkipIdleTime
+    {
+        no,
+        yes
+    }
 }

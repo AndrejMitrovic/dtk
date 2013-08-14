@@ -22,6 +22,7 @@ public
     import dtk.listbox;
     import dtk.loader;
     import dtk.options;
+    import dtk.progressbar;
     import dtk.radiobutton;
     import dtk.sizegrip;
     import dtk.scrollbar;
