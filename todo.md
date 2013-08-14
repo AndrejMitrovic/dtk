@@ -11,6 +11,14 @@ Standard options to port:
     -takefocus, takeFocus, TakeFocus
     -textvariable, textVariable, Variable
 
+Remove 'text' from Widget class because it's confusing, e.g. some widgets
+use text via 'configure -text', but other widgets don't -- the text widget
+uses 'get' and 'set' methods, and 'configure -text' doesn't work for it
+because it's not a ttk widget.
+
+Also try removing other generic methods in the Widget class that might have
+a different behavior in each subclass.
+
 Put place, pack, and grid commands into a separate layout file.
 
 The wm attributes command has OS-specific commands. We could ideally implement
@@ -40,3 +48,5 @@ Note: We'll have to use PostThreadMessage instead since the main thread will
 be blocked in the event loop.
 
 Make a 'createTracedVar' which will simplify creating traced variables.
+
+Could implement a setOptions, for multiple options. We can call ".widget configure -width 100 -height 100" instead of using two separate configure calls.

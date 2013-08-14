@@ -25,6 +25,7 @@ public
     import dtk.radiobutton;
     import dtk.sizegrip;
     import dtk.scrollbar;
+    import dtk.text;
     import dtk.types;
     import dtk.utils;
     import dtk.widget;

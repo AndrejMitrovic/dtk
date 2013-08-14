@@ -39,11 +39,12 @@ package enum TkType : string
     entry = "ttk::entry",
     frame = "ttk::frame",
     label = "ttk::label",
-    listbox = "tk::listbox",  // note: no ttk::listbox yet in v8.6
+    listbox = "tk::listbox",     // note: no ttk::listbox yet in v8.6
     radiobutton = "ttk::radiobutton",
     sizegrip = "ttk::sizegrip",
     scrollbar = "ttk::scrollbar",
-    toplevel = "tk::toplevel"
+    text = "tk::text",           // note: no ttk::text
+    toplevel = "tk::toplevel",   // note: no ttk::toplevel
 }
 
 /** The main class of all Dtk widgets. */
