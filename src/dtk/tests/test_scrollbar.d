@@ -12,7 +12,6 @@ import std.string;
 import dtk;
 import dtk.tests.globals;
 
-
 unittest
 {
     auto listbox = new Listbox(app.mainWindow);

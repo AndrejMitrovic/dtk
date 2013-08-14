@@ -20,6 +20,9 @@ unittest
 
     app.evalFmt("grid %s -column 0 -row 0 -sticky nwes", listbox.getTclName());
     app.evalFmt("grid %s -column 1 -row 0 -sticky ns", sbar.getTclName());
+
+    app.eval("grid [ttk::sizegrip .sz] -column 1 -row 1 -sticky se");
+
     app.eval("grid columnconfigure . 0 -weight 1");
     app.eval("grid rowconfigure . 0 -weight 1");
 

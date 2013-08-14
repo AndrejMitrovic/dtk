@@ -20,9 +20,7 @@ class Frame : Widget
     ///
     this(Widget master)
     {
-        DtkOptions options;
-        options["relief"] = "sunken";
-        super(master, TkType.frame, options);
+        super(master, TkType.frame);
     }
 
     /** Get the current width of the border. */

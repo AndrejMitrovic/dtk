@@ -18,6 +18,7 @@ alias splitter = std.algorithm.splitter;
 
 import dtk.event;
 import dtk.options;
+import dtk.sizegrip;
 import dtk.types;
 import dtk.utils;
 import dtk.widget;
@@ -96,6 +97,22 @@ class Window : Widget
         rect.width = newSize.width;
         rect.height = newSize.height;
         this.geometry = rect;
+    }
+
+    /** Set a sizegrip for the window. */
+    void enableSizegrip()
+    {
+        _sizegrip = new Sizegrip(this);
+    }
+
+    /** Remove any sizegrip in the window. */
+    void disableSizegrip()
+    {
+        if (_sizegrip !is null)
+        {
+            _sizegrip.destroy();
+            _sizegrip = null;
+        }
     }
 
     /** Return the size of the screen on which this window is currently displayed on. */
@@ -189,6 +206,9 @@ class Window : Widget
         string windowPath = evalFmt("winfo parent %s", _name);
         return cast(Window)Widget.lookupWidgetPath(windowPath);
     }
+
+private:
+    Sizegrip _sizegrip;
 }
 
 /** Phobos parse functions can't use a custom delimiter. */

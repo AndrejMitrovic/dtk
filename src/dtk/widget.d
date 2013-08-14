@@ -41,6 +41,7 @@ package enum TkType : string
     label = "ttk::label",
     listbox = "tk::listbox",  // note: no ttk::listbox yet in v8.6
     radiobutton = "ttk::radiobutton",
+    sizegrip = "ttk::sizegrip",
     scrollbar = "ttk::scrollbar",
     toplevel = "tk::toplevel"
 }
