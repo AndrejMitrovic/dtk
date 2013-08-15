@@ -25,6 +25,7 @@ public
     import dtk.progressbar;
     import dtk.radiobutton;
     import dtk.scale;
+    import dtk.spinbox;
     import dtk.sizegrip;
     import dtk.scrollbar;
     import dtk.text;

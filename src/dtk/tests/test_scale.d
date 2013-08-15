@@ -29,7 +29,7 @@ unittest
         {
             if (event.type == EventType.TkScaleChange)
             {
-                stderr.writefln("Current scale value: %s.", event.state);
+                logf("Current scale value: %s.", event.state);
             }
         }
     );

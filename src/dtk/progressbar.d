@@ -74,9 +74,6 @@ class Progressbar : Widget
         if (res.empty)
             return 0.0;
 
-        import std.stdio;
-        stderr.writefln("value result: '%s'", res);
-
         return to!float(res);
     }
 

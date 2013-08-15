@@ -114,7 +114,14 @@ final class App
         static extern(C)
         int callbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
         {
-            assert(0, format("User invoked early exit, test-case in %s(%s) failed.", _file, _line));
+            stderr.writefln("\nError: User invoked early exit, test-case in %s(%s) failed.", _file, _line);
+
+            import std.c.process;
+
+            // technically unsafe but don't know of a better way to stop unittests (assert(0) won't work)
+            exit(1);
+
+            return 0;
         }
     }
 

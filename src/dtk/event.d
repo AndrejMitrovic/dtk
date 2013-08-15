@@ -57,6 +57,7 @@ enum EventType
     TkListboxChange,
     TkProgressbarChange,
     TkScaleChange,
+    TkSpinboxChange,
 }
 
 ///

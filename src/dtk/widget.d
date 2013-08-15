@@ -45,6 +45,7 @@ package enum TkType : string
     sizegrip = "ttk::sizegrip",
     scale = "ttk::scale",
     scrollbar = "ttk::scrollbar",
+    spinbox = "ttk::spinbox",
     text = "tk::text",           // note: no ttk::text
     toplevel = "tk::toplevel",   // note: no ttk::toplevel
 }
@@ -485,6 +486,7 @@ package:
                     case TkListboxChange:
                     case TkProgressbarChange:
                     case TkScaleChange:
+                    case TkSpinboxChange:
                     {
                         event.state = to!string(Tcl_GetString(objv[2]));
                         break;
