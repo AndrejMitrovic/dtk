@@ -424,6 +424,35 @@ package:
         }
     }
 
+    /**
+        Create a tracec Tcl variable, which will invoke the
+        generic onEvent signal handler and pass the variable
+        value and a special tag.
+
+        The function returns the variable name.
+    */
+    string createTracedTaggedVariable(EventType eventType)
+    {
+        assert(!_eventCallbackIdent.empty);
+
+        string varName = this.createVariableName();
+        string tracerFunc = format("tracer_%s", this.createCallbackName());
+
+        // tracer used instead of -command
+        this.evalFmt(
+            `
+            proc %s {varname args} {
+                upvar #0 $varname var
+                %s %s $var
+            }
+            `, tracerFunc, _eventCallbackIdent, eventType);
+
+        // hook up the tracer for this unique variable
+        this.evalFmt(`trace add variable %s write "%s %s"`, varName, tracerFunc, varName);
+
+        return varName;
+    }
+
     /** Create a unique new callback name. */
     static string createCallbackName()
     {

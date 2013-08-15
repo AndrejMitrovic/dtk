@@ -26,29 +26,15 @@ class CheckButton : Widget
     {
         DtkOptions options;
         options["text"] = text;
-        _toggleVarName = this.createVariableName();
-        options["variable"] = _toggleVarName;
-
         super(master, TkType.checkbutton, options);
+
+        _toggleVarName = this.createTracedTaggedVariable(EventType.TkCheckButtonToggle);
+        this.setOption("variable", _toggleVarName);
 
         this.toggleOff();
 
         // keyboard binding
         this.evalFmt("bind %s <Return> { %s invoke }", _name, _name);
-
-        string tracerFunc = format("tracer_%s", this.createCallbackName());
-
-        // tracer used instead of -command
-        this.evalFmt(
-            `
-            proc %s {varname args} {
-                upvar #0 $varname var
-                %s %s $var
-            }
-            `, tracerFunc, _eventCallbackIdent, EventType.TkCheckButtonToggle);
-
-        // hook up the tracer for this unique variable
-        this.evalFmt(`trace add variable %s write "%s %s"`, _toggleVarName, tracerFunc, _toggleVarName);
     }
 
     /**

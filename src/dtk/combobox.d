@@ -26,24 +26,10 @@ class Combobox : Widget
     ///
     this(Widget master)
     {
-        DtkOptions options;
-        _varName = this.createVariableName();
-        options["textvariable"] = _varName;
-        super(master, TkType.combobox, options);
+        super(master, TkType.combobox);
 
-        string tracerFunc = format("tracer_%s", this.createCallbackName());
-
-        // tracer used instead of -command
-        this.evalFmt(
-            `
-            proc %s {varname args} {
-                upvar #0 $varname var
-                %s %s $var
-            }
-            `, tracerFunc, _eventCallbackIdent, EventType.TkComboboxChange);
-
-        // hook up the tracer for this unique variable
-        this.evalFmt(`trace add variable %s write "%s %s"`, _varName, tracerFunc, _varName);
+        _varName = this.createTracedTaggedVariable(EventType.TkComboboxChange);
+        this.setOption("textvariable", _varName);
     }
 
     /** Get the currently selected combobox value. */

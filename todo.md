@@ -50,3 +50,7 @@ be blocked in the event loop.
 Make a 'createTracedVar' which will simplify creating traced variables.
 
 Could implement a setOptions, for multiple options. We can call ".widget configure -width 100 -height 100" instead of using two separate configure calls.
+
+Consider using command instead of variable tracing for some widgets, since we might
+want to separate events into those triggered by the OS (e.g. user interaction),
+and those by internal user code.

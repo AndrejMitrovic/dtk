@@ -29,26 +29,12 @@ class Scale : Widget
         options["from"] = to!string(minValue);
         options["to"] = to!string(maxValue);
 
-        _varName = this.createVariableName();
-        options["variable"] = _varName;
-
         _minValue = minValue;
         _maxValue = maxValue;
         super(master, TkType.scale, options);
 
-        string tracerFunc = format("tracer_%s", this.createCallbackName());
-
-        // tracer used instead of -command
-        this.evalFmt(
-            `
-            proc %s {varname args} {
-                upvar #0 $varname var
-                %s %s $var
-            }
-            `, tracerFunc, _eventCallbackIdent, EventType.TkScaleChange);
-
-        // hook up the tracer for this unique variable
-        this.evalFmt(`trace add variable %s write "%s %s"`, _varName, tracerFunc, _varName);
+        _varName = this.createTracedTaggedVariable(EventType.TkScaleChange);
+        this.setOption("variable", _varName);
     }
 
     /** Get the current value of the scale. */

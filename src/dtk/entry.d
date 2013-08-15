@@ -66,24 +66,10 @@ class Entry : Widget
     ///
     this(Widget master)
     {
-        DtkOptions options;
-        string varName = this.createVariableName();
-        options["textvariable"] = varName;
-        super(master, TkType.entry, options);
+        super(master, TkType.entry);
 
-        string tracerFunc = format("tracer_%s", this.createCallbackName());
-
-        // tracer used instead of -command
-        this.evalFmt(
-            `
-            proc %s {varname args} {
-                upvar #0 $varname var
-                %s %s $var
-            }
-            `, tracerFunc, _eventCallbackIdent, EventType.TkTextChange);
-
-        // hook up the tracer for this unique variable
-        this.evalFmt(`trace add variable %s write "%s %s"`, varName, tracerFunc, varName);
+        string varName = this.createTracedTaggedVariable(EventType.TkTextChange);
+        this.setOption("textvariable", varName);
 
         /* Validation */
         _validateVar = this.createVariableName();

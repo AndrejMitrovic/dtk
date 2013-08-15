@@ -32,24 +32,10 @@ class Listbox : Widget
     ///
     this(Widget master)
     {
-        DtkOptions options;
-        _varName = this.createVariableName();
-        options["listvariable"] = _varName;
-        super(master, TkType.listbox, options);
+        super(master, TkType.listbox);
 
-        string tracerFunc = format("tracer_%s", this.createCallbackName());
-
-        // tracer used instead of -command
-        this.evalFmt(
-            `
-            proc %s {varname args} {
-                upvar #0 $varname var
-                %s %s $var
-            }
-            `, tracerFunc, _eventCallbackIdent, EventType.TkListboxChange);
-
-        // hook up the tracer for this unique variable
-        this.evalFmt(`trace add variable %s write "%s %s"`, _varName, tracerFunc, _varName);
+        _varName = this.createTracedTaggedVariable(EventType.TkListboxChange);
+        this.setOption("listvariable", _varName);
     }
 
     /** Get the current list in the listbox. */
