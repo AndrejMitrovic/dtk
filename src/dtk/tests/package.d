@@ -21,6 +21,7 @@ private
     import dtk.tests.test_listbox;
     import dtk.tests.test_progressbar;
     import dtk.tests.test_radiobutton;
+    import dtk.tests.test_scale;
     import dtk.tests.test_sizegrip;
     import dtk.tests.test_scrollbar;
     import dtk.tests.test_text;

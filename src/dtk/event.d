@@ -56,6 +56,7 @@ enum EventType
     TkFailedValidation,
     TkListboxChange,
     TkProgressbarChange,
+    TkScaleChange,
 }
 
 ///

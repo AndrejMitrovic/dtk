@@ -43,6 +43,7 @@ package enum TkType : string
     progressbar = "ttk::progressbar",
     radiobutton = "ttk::radiobutton",
     sizegrip = "ttk::sizegrip",
+    scale = "ttk::scale",
     scrollbar = "ttk::scrollbar",
     text = "tk::text",           // note: no ttk::text
     toplevel = "tk::toplevel",   // note: no ttk::toplevel
@@ -483,6 +484,7 @@ package:
                     case TkTextChange:
                     case TkListboxChange:
                     case TkProgressbarChange:
+                    case TkScaleChange:
                     {
                         event.state = to!string(Tcl_GetString(objv[2]));
                         break;

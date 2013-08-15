@@ -164,6 +164,10 @@ private:
 version(unittest)
 version(DTK_UNITTEST)
 {
+    /**
+        Some test-cases create a lot of idle events (e.g. an indeterminate progress bar).
+        In such cases an event should not increase the waiting time before the app is closed.
+    */
     enum SkipIdleTime
     {
         no,

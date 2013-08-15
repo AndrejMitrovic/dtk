@@ -24,6 +24,7 @@ public
     import dtk.options;
     import dtk.progressbar;
     import dtk.radiobutton;
+    import dtk.scale;
     import dtk.sizegrip;
     import dtk.scrollbar;
     import dtk.text;
