@@ -14,7 +14,10 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto text = new Text(app.mainWindow);
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
+
+    auto text = new Text(testWindow);
     text.pack();
 
     text.size = Size(50, 10);

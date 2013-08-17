@@ -32,12 +32,13 @@ abstract class MenuClass : Widget
     {
         DtkOptions options;
         options["tearoff"] = "0";  // disable tearoff by default
-        this.initialize(master, TkType.menu, options);
+        this.initialize(master, TkType.menu, options, EmitGenericSignals.no);
     }
 
     /** Add a menu to this menu. */
     final void addMenu(Menu menu)
     {
+        assert(!_name.empty);
         menu.initParent(this);
         this.evalFmt("%s add cascade -menu %s -label %s", _name, menu._name, menu._label._enquote);
     }
@@ -45,6 +46,7 @@ abstract class MenuClass : Widget
     /** Insert a menu at a specific position. */
     final void insertMenu(Menu menu, int index)
     {
+        assert(!_name.empty);
         menu.initParent(this);
         this.evalFmt("%s insert %s cascade -menu %s -label %s", _name, index, menu._name, menu._label._enquote);
     }
@@ -52,30 +54,36 @@ abstract class MenuClass : Widget
     /** Add an item to this menu. */
     final void addItem(MenuItem menuItem)
     {
+        assert(!_name.empty);
         this.evalFmt("%s add command -label %s -command { %s %s }", _name, menuItem._label, menuItem._eventCallbackIdent, EventType.TkMenuItemSelect);
     }
 
     /** Insert an item at a specific position. */
     final void insertItem(MenuItem menuItem, int index)
     {
+        assert(!_name.empty);
         this.evalFmt("%s insert %s command -label %s -command { %s %s }", _name, index, menuItem._label._enquote, menuItem._eventCallbackIdent, EventType.TkMenuItemSelect);
     }
 
     /** Add a check menu item to this menu. */
     final void addItem(CheckMenuItem menuItem)
     {
+        assert(!_name.empty);
         this.evalFmt("%s add checkbutton -label %s -variable %s -onvalue %s -offvalue %s", _name, menuItem._label._enquote, menuItem._toggleVarName, menuItem._onValue._enquote, menuItem._offValue._enquote);
     }
 
     /** Insert a check menu item at a specific position. */
     final void insertItem(CheckMenuItem menuItem, int index)
     {
+        assert(!_name.empty);
         this.evalFmt("%s insert %s checkbutton -label %s -variable %s -onvalue %s -offvalue %s", _name, index, menuItem._label._enquote, menuItem._toggleVarName, menuItem._onValue._enquote, menuItem._offValue._enquote);
     }
 
     /** Add a radio menu group to this menu. */
     final void addItem(RadioGroupMenu menuItem)
     {
+        assert(!_name.empty);
+
         foreach (radioMenuItem; menuItem.items)
         {
             this.evalFmt("%s add radiobutton -label %s -variable %s -value %s",
@@ -86,6 +94,8 @@ abstract class MenuClass : Widget
     /** Insert a radio menu group at a specific position. */
     final void insertItem(RadioGroupMenu menuItem, int index)
     {
+        assert(!_name.empty);
+
         foreach (radioMenuItem; menuItem.items)
         {
             this.evalFmt("%s insert %s radiobutton -label %s -variable %s -value %s",

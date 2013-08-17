@@ -15,14 +15,15 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto window = app.mainWindow;
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
 
-    assert(window.menubar is null);
+    assert(testWindow.menubar is null);
 
     auto menuBar = new MenuBar();
 
-    window.menubar = menuBar;
-    assert(window.menubar is menuBar);
+    testWindow.menubar = menuBar;
+    assert(testWindow.menubar is menuBar);
 
     auto helpMenu = new Menu("Help");
     assert(helpMenu.label == "Help");

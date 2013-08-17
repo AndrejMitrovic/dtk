@@ -14,7 +14,10 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto box1 = new Combobox(app.mainWindow);
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
+
+    auto box1 = new Combobox(testWindow);
 
     box1.onEvent.connect(
     (Widget widget, Event event)

@@ -15,7 +15,10 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto frame = new Frame(mainWindow);
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
+
+    auto frame = new Frame(testWindow);
 
     auto button1 = new Button(frame, "Flash");
     frame.pack();

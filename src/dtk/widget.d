@@ -76,7 +76,13 @@ abstract class Widget
         E.g. a widget such as a check menu is implicitly created through a
         parent menu object and doesn't have a widget path.
     */
-    this(CreateFakeWidget)
+    this(CreateFakeWidget createFakeWidget)
+    {
+        this.initialize(createFakeWidget);
+    }
+
+    // ditto
+    void initialize(CreateFakeWidget)
     {
         string name = format("%s%s%s", _fakeWidgetPrefix, _threadID, _lastWidgetID++);
         this.initialize(name, EmitGenericSignals.no);
@@ -104,6 +110,8 @@ abstract class Widget
             this.evalFmt("bind %s <Enter> { %s %s %s }", _name, _eventCallbackIdent, EventType.Enter, eventArgs);
             this.evalFmt("bind %s <Leave> { %s %s %s }", _name, _eventCallbackIdent, EventType.Leave, eventArgs);
         }
+
+        _isInitialized = true;
     }
 
     this(Widget parent, TkType tkType, DtkOptions opt, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes)
@@ -698,6 +706,12 @@ package:
 
     /** All widget paths -> widget maps */
     static Widget[string] _widgetPathMap;
+
+    /**
+        Set when the widget has been initialized. Some delayed-initialized widgets
+        can be initialized after construction until initialize is called.
+    */
+    bool _isInitialized;
 }
 
 // all the event arguments captures by the bind command

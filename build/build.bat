@@ -23,7 +23,6 @@ rem
 
 set includes=-I%cd%
 rem set debug_versions=-version=DTK_LOG_EVAL
-set debug_versions=
 set flags=%includes% -g %debug_versions%
 
 rem set compiler=dmd.exe

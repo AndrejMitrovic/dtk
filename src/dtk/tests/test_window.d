@@ -12,38 +12,38 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto mainWin = app.mainWindow;
+    auto testWindow = new Window(app.mainWindow, 200, 200);
 
-    mainWin.position = Point(200, 200);
-    assert(mainWin.position == Point(200, 200));
+    testWindow.position = Point(200, 200);
+    assert(testWindow.position == Point(200, 200));
 
     // e.g. Size(1680, 1050)
-    //~ logf(mainWin.screenSize);
+    //~ logf(testWindow.screenSize);
 
-    mainWin.position = Point(-200, -200);
-    assert(mainWin.position == Point(-200, -200));
+    testWindow.position = Point(-200, -200);
+    assert(testWindow.position == Point(-200, -200));
 
-    mainWin.size = Size(300, 400);
-    assert(mainWin.size == Size(300, 400));
+    testWindow.size = Size(300, 400);
+    assert(testWindow.size == Size(300, 400));
 
-    mainWin.geometry = Rect(-100, 100, 250, 250);
-    assert(mainWin.position == Point(-100, 100));
-    assert(mainWin.size == Size(250, 250));
-    assert(mainWin.geometry == Rect(-100, 100, 250, 250));
+    testWindow.geometry = Rect(-100, 100, 250, 250);
+    assert(testWindow.position == Point(-100, 100));
+    assert(testWindow.size == Size(250, 250));
+    assert(testWindow.geometry == Rect(-100, 100, 250, 250));
 
-    mainWin.geometry = Rect(100, 100, 250, 250);
-    assert(mainWin.position == Point(100, 100));
-    assert(mainWin.size == Size(250, 250));
-    assert(mainWin.geometry == Rect(100, 100, 250, 250));
+    testWindow.geometry = Rect(100, 100, 250, 250);
+    assert(testWindow.position == Point(100, 100));
+    assert(testWindow.size == Size(250, 250));
+    assert(testWindow.geometry == Rect(100, 100, 250, 250));
 
-    //~ logf(mainWin.geometry);
+    //~ logf(testWindow.geometry);
     // @bug: http://stackoverflow.com/questions/18043720/odd-results-for-wm-geometry
 
-    assert(mainWin.parentWindow is null);
+    assert(testWindow.parentWindow is app.mainWindow);
 
-    auto childWin = new Window(mainWin, 100, 100);
-    assert(mainWin.parentWindow is null);
-    assert(childWin.parentWindow is mainWin);
+    auto childWin = new Window(testWindow, 100, 100);
+    assert(testWindow.parentWindow is app.mainWindow);
+    assert(childWin.parentWindow is testWindow);
 
     childWin.setAlpha(0.5);
     assert(childWin.getAlpha() < 0.6);
@@ -52,24 +52,24 @@ unittest
     childWin.maximizeWindow();
     childWin.unmaximizeWindow();
 
-    auto button1 = new Button(mainWin, "FooButton");
-    auto button2 = new Button(mainWin, "BarButton");
+    auto button1 = new Button(testWindow, "FooButton");
+    auto button2 = new Button(testWindow, "BarButton");
 
-    auto children = mainWin.childWidgets;
+    auto children = testWindow.childWidgets;
     assert(children.front is childWin);
     children.popFront();
     assert(children.front is button1);
     children.popFront();
     assert(children.front is button2);
 
-    mainWin.setTopWindow();
+    testWindow.setTopWindow();
     childWin.setTopWindow();
 
-    mainWin.minimizeWindow();
-    mainWin.unminimizeWindow();
+    testWindow.minimizeWindow();
+    testWindow.unminimizeWindow();
 
-    mainWin.title = "my window";
-    assert(mainWin.title == "my window");
+    testWindow.title = "my window";
+    assert(testWindow.title == "my window");
 
     app.testRun();
 }

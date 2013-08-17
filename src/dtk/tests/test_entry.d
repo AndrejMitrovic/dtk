@@ -16,7 +16,10 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto entry1 = new Entry(app.mainWindow);
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
+
+    auto entry1 = new Entry(testWindow);
     entry1.pack();
 
     assert(entry1.value.empty);

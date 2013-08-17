@@ -14,7 +14,10 @@ import dtk.tests.globals;
 
 unittest
 {
-    app.mainWindow.disableSizegrip();
-    app.mainWindow.enableSizegrip();
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
+
+    testWindow.disableSizegrip();
+    testWindow.enableSizegrip();
     app.testRun();
 }

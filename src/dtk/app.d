@@ -42,7 +42,7 @@ final class App
         static string _file;
         static size_t _line;
 
-        void testRun(Duration runTime = 0.seconds, SkipIdleTime skipIdleTime = SkipIdleTime.no, string file = __FILE__, size_t line = __LINE__)
+        void testRun(Duration runTime = 0.seconds, SkipIdleTime skipIdleTime = SkipIdleTime.yes, string file = __FILE__, size_t line = __LINE__)
         {
             _file = file;
             _line = line;
@@ -89,16 +89,26 @@ final class App
                     auto timeLeft = runTimeDur - runTimeWatch.peek;
                     stderr.writefln("-- Time left: %s seconds.", (runTimeDur - runTimeWatch.peek).seconds);
                 }
+
             } while (hasEvents || runTimeWatch.peek < runTimeDur);
 
             // clean out all widgets for this test run
+
+            // @bug: Strange hash symbol for menus on default "." top-level window, e.g. .#mymenu:
+            // See: http://stackoverflow.com/q/18290171/279684
             foreach (widget; mainWindow.childWidgets)
             {
-                // @bug: Strange hash symbol for menus on default "." top-level window, e.g. .#mymenu:
-                // See: http://stackoverflow.com/q/18290171/279684
                 if (widget !is null)
                     widget.destroy();
             }
+
+            // @bug: still doesn't work, we still can't destroy the .#mymenu for some reason, likely a Tk bug
+            /+ string paths = evalFmt("winfo children %s", mainWindow._name);
+            foreach (path; paths.splitter)
+            {
+                stderr.writefln("path: %s", path);
+                evalFmt("destroy %s", path);
+            } +/
         }
 
         private void setupExitHandler()

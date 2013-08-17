@@ -15,7 +15,10 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto listbox = new Listbox(app.mainWindow);
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
+
+    auto listbox = new Listbox(testWindow);
 
     assert(listbox.values.empty);
 

@@ -15,14 +15,17 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto bar1 = new Progressbar(app.mainWindow, Orientation.horizontal, 200, ProgressMode.determinate);
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
+
+    auto bar1 = new Progressbar(testWindow, Orientation.horizontal, 200, ProgressMode.determinate);
 
     assert(bar1.maxValue > 99.0 && bar1.maxValue < 101.0);
 
     assert(bar1.value == 0.0);
     bar1.value = 50.0;
 
-    auto bar2 = new Progressbar(app.mainWindow, Orientation.horizontal, 200, ProgressMode.indeterminate);
+    auto bar2 = new Progressbar(testWindow, Orientation.horizontal, 200, ProgressMode.indeterminate);
 
     bar2.start(20);
 

@@ -15,7 +15,10 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto label = new Label(mainWindow);
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
+
+    auto label = new Label(testWindow);
     label.pack();
 
     label.text = "some note\nsome larger note 2\nsmall note";

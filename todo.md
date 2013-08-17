@@ -69,3 +69,7 @@ Add mnemonic support to menu items via "&", e.g. "&File". But make sure we allow
 
 Make sure we're quoting all strings right. Add checks to each constructor or function taking a string and
 ensure strings with spaces work.
+
+Check all 'todo' sections in the codebase.
+
+Check all filed bugs.

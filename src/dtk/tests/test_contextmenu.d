@@ -1,4 +1,7 @@
-module test_menu;
+module dtk.tests.test_contextmenu;
+
+version(unittest):
+version(DTK_UNITTEST):
 
 import core.thread;
 
@@ -12,19 +15,37 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto app = new App;
-    auto window = app.mainWindow;
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
 
-    assert(window.menubar is null);
+    assert(testWindow.menubar is null);
+    assert(testWindow.contextMenu is null);
 
     auto menuBar = new MenuBar();
 
-    window.menubar = menuBar;
-    assert(window.menubar is menuBar);
+    /** Using both menus for the main menu and the context menu */
+    testWindow.menubar = menuBar;
+    assert(testWindow.menubar is menuBar);
+
+    testWindow.contextMenu = menuBar;
+    assert(testWindow.contextMenu is menuBar);
 
     auto helpMenu = new Menu("Help");
     assert(helpMenu.label == "Help");
 
+    /*
+        major todo: we cannot add these child widgets until the parent is initialized,
+        but the parent is only initialized when we assign the menu to the parent.
+
+        Some possible workarounds:
+
+        - Only allow instantiating MenuBars from within the window, e.g. window.createMenuBar,
+        and context menus via window.createContextMenu.
+
+        - Make a more sophisticated delayed initialization mechanism, which only instantiates
+        widgets from parent to child once they're all properly linked together. This could end
+        up being arbitrarily hard to implement.
+    */
     menuBar.addMenu(helpMenu);
 
     // put the file menu before the help menu
@@ -135,9 +156,5 @@ unittest
     fileMenu.insertSeparator(7);
     fileMenu.insertItem(n_radioMenuGroup, 8);
 
-    app.run();
-}
-
-void main()
-{
+    app.testRun();
 }

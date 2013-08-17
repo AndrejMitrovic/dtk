@@ -224,7 +224,44 @@ class Window : Widget
         this.setOption("menu", newMenubar._name);
     }
 
+    /** Get the context menu, or $(D null) if one isn't set for this window. */
+    @property MenuBar contextMenu()
+    {
+        return _contextMenu;
+    }
+
+    /** Set a context menu for this window. */
+    @property void contextMenu(MenuBar newContextMenu)
+    {
+        // todo: if the menu is already parented to this widget, we should not call
+        // init parent. This means we need a more sophisticated parenting check mechanism,
+        // and also to think about reparenting.
+        // note: for now we'll ignore reparenting and only check if the widget has already
+        // been parented.
+
+        if (!newContextMenu._isInitialized)
+            newContextMenu.initParent(this);
+
+        assert(!newContextMenu._name.empty);
+
+        version (OSX)
+        {
+            // right click on osx => second mouse button => context menu
+            this.evalFmt(`bind %s <2> "tk_popup %s %s"`, _name, newContextMenu._name, "%X %Y");
+
+            // ctrl+left click on osx => context menu
+            this.evalFmt(`bind %s <Control-1> "tk_popup %s %s"`, _name, newContextMenu._name, "%X %Y");
+        }
+        else
+        {
+            this.evalFmt(`bind %s <3> "tk_popup %s %s"`, _name, newContextMenu._name, "%X %Y");
+        }
+
+        _contextMenu = newContextMenu;
+    }
+
 private:
+    MenuBar _contextMenu;
     Sizegrip _sizegrip;
 }
 

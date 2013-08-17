@@ -16,6 +16,7 @@ private
 
     import dtk.tests.test_button;
     import dtk.tests.test_checkbutton;
+    import dtk.tests.test_contextmenu;
     import dtk.tests.test_combobox;
     import dtk.tests.test_entry;
     import dtk.tests.test_frame;

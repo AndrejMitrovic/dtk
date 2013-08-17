@@ -15,7 +15,10 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto spinbox1 = new ScalarSpinbox(app.mainWindow);
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
+
+    auto spinbox1 = new ScalarSpinbox(testWindow);
     spinbox1.pack();
 
     assert(spinbox1.value == 0.0);

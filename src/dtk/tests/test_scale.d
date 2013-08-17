@@ -15,7 +15,10 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto scale = new Scale(app.mainWindow, Orientation.horizontal, 200);
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
+
+    auto scale = new Scale(testWindow, Orientation.horizontal, 200);
     scale.pack();
 
     assert(scale.minValue > -1.0 && scale.minValue < 1.0);

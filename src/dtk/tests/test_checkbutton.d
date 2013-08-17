@@ -14,8 +14,11 @@ import dtk.tests.globals;
 
 unittest
 {
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
+
     CheckButton button1;
-    button1 = new CheckButton(app.mainWindow, "Flash");
+    button1 = new CheckButton(testWindow, "Flash");
 
     button1.onEvent.connect(
     (Widget widget, Event event)

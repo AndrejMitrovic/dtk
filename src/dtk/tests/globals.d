@@ -13,7 +13,6 @@ import dtk.window;
 import dtk.tests.runner;
 
 __gshared App app;
-__gshared Window mainWindow;
 
 /// logging for unittests
 void log(Args...)(Args args)
@@ -36,8 +35,7 @@ void logf(Args...)(Args args)
 shared static this()
 {
     app = new App();
-    mainWindow = app.mainWindow;
-    mainWindow.position = Point(500, 500);
+    app.mainWindow.position = Point(500, 500);
     unitTester.setTester();
 }
 

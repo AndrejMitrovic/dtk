@@ -1,4 +1,4 @@
-module test_menu;
+module test_contextmenu;
 
 import core.thread;
 
@@ -16,15 +16,33 @@ unittest
     auto window = app.mainWindow;
 
     assert(window.menubar is null);
+    assert(window.contextMenu is null);
 
     auto menuBar = new MenuBar();
 
+    /** Using both menus for the main menu and the context menu */
     window.menubar = menuBar;
     assert(window.menubar is menuBar);
+
+    window.contextMenu = menuBar;
+    assert(window.contextMenu is menuBar);
 
     auto helpMenu = new Menu("Help");
     assert(helpMenu.label == "Help");
 
+    /*
+        major todo: we cannot add these child widgets until the parent is initialized,
+        but the parent is only initialized when we assign the menu to the parent.
+
+        Some possible workarounds:
+
+        - Only allow instantiating MenuBars from within the window, e.g. window.createMenuBar,
+        and context menus via window.createContextMenu.
+
+        - Make a more sophisticated delayed initialization mechanism, which only instantiates
+        widgets from parent to child once they're all properly linked together. This could end
+        up being arbitrarily hard to implement.
+    */
     menuBar.addMenu(helpMenu);
 
     // put the file menu before the help menu

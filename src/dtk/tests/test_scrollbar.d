@@ -14,9 +14,12 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto listbox = new Listbox(app.mainWindow);
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
 
-    auto sbar = new Scrollbar(app.mainWindow, listbox, Orientation.vertical);
+    auto listbox = new Listbox(testWindow);
+
+    auto sbar = new Scrollbar(testWindow, listbox, Orientation.vertical);
 
     app.evalFmt("grid %s -column 0 -row 0 -sticky nwes", listbox.getTclName());
     app.evalFmt("grid %s -column 1 -row 0 -sticky ns", sbar.getTclName());
