@@ -197,8 +197,8 @@ private:
             }
             catch (Throwable e)
             {
-                string path = format("\n%s%s%s", absPath("."), dirSep, e.file).normPath;
-                e.msg = format("%s(%s) : %s", path, e.line, e.msg);
+                //~ string path = format("\n%s%s%s", absPath("."), dirSep, e.file).normPath;
+                //~ e.msg = format("%s(%s) : %s", path, e.line, e.msg);
                 failCount++;
                 throw e;
             }

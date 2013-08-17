@@ -54,3 +54,18 @@ Could implement a setOptions, for multiple options. We can call ".widget configu
 Consider using command instead of variable tracing for some widgets, since we might
 want to separate events into those triggered by the OS (e.g. user interaction),
 and those by internal user code.
+
+Turn package methods into public methods, since they can be useful for people who write
+extensions in Tcl and want to provide a D wrapper for them. As a last resort we could
+move these functions into a helper module.
+
+We might have to delay-initialize all widgets to avoid having to pass a parent widget in a widget constructor.
+However this means we have to check if a widget is initialized before attempting to call one of its methods,
+so maybe it's better if we avoid delay-initializing widgets except those which would be awkward to use otherwise,
+for example menus and menu items should not take parents since they can be inserted at arbitrary places.
+Todo: See which other Tk widget types have an insert method, which would require delay initialization.
+
+Add mnemonic support to menu items via "&", e.g. "&File". But make sure we allow escaping via "&&File", which would produce "&File" in the menu.
+
+Make sure we're quoting all strings right. Add checks to each constructor or function taking a string and
+ensure strings with spaces work.

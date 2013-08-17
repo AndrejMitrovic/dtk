@@ -99,6 +99,15 @@ class Progressbar : Widget
         $(RED Bugs:) Currently this function does not work
         inside of an event handler.
         See bug report: https://core.tcl.tk/tk/tktview/c597acdab39212f2b5557e69e38eb3191f4a5927
+
+        Note: The bug was fixed in ttk-head.
+
+        Todo: Provide ttk patches with dtk, or distribute latest
+        ttk sources. Ttk is a source-only distribution (no binaries),
+        so this should be easy.
+
+        Todo2: Alternatively provide our own .tcl widgets we can use
+        by distributing these files with fixes with dtk.
     */
     void stop()
     {

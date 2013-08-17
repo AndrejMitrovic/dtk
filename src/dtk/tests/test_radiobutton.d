@@ -14,6 +14,7 @@ import dtk.tests.globals;
 
 unittest
 {
+    // todo: radiogroup should take a list of radio buttons instead of passing it like this
     auto radioGroup = new RadioGroup();
     auto radio1 = new RadioButton(app.mainWindow, radioGroup, "Set On", "on");
     auto radio2 = new RadioButton(app.mainWindow, radioGroup, "Set Off", "off");

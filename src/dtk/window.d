@@ -12,11 +12,13 @@ import std.range;
 import std.stdio;
 import std.algorithm;
 import std.conv;
+import std.range;
 import std.string;
 
 alias splitter = std.algorithm.splitter;
 
 import dtk.event;
+import dtk.menu;
 import dtk.options;
 import dtk.sizegrip;
 import dtk.types;
@@ -205,6 +207,21 @@ class Window : Widget
     {
         string windowPath = evalFmt("winfo parent %s", _name);
         return cast(Window)Widget.lookupWidgetPath(windowPath);
+    }
+
+    /** Get the menu bar, or $(D null) if one isn't set for this window. */
+    @property MenuBar menubar()
+    {
+        auto menubar = this.getOption!string("menu");
+        return cast(MenuBar)Widget.lookupWidgetPath(menubar);
+    }
+
+    /** Set a menu bar for this window. */
+    @property void menubar(MenuBar newMenubar)
+    {
+        newMenubar.initParent(this);
+        assert(!newMenubar._name.empty);
+        this.setOption("menu", newMenubar._name);
     }
 
 private:

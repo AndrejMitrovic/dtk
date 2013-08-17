@@ -40,6 +40,7 @@ package enum TkType : string
     frame = "ttk::frame",
     label = "ttk::label",
     listbox = "tk::listbox",     // note: no ttk::listbox yet in v8.6
+    menu = "menu",           // note: no ttk::menu
     progressbar = "ttk::progressbar",
     radiobutton = "ttk::radiobutton",
     sizegrip = "ttk::sizegrip",
@@ -50,29 +51,50 @@ package enum TkType : string
     toplevel = "tk::toplevel",   // note: no ttk::toplevel
 }
 
+package struct InitLater { }
+package struct CreateFakeWidget { }
+
 /** The main class of all Dtk widgets. */
 abstract class Widget
 {
-    this(Widget parent, TkType tkType, DtkOptions opt, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes)
+    /**
+        Delayed initialization. Some widgets in Tk must be parented (e.g. menus),
+        but only receive their parent information once they're assigned to another
+        widget (e.g. when a menubar is assigned to a window, or submenu to a menu).
+
+        Once the parent is set they should call the initialize method.
+    */
+    this(InitLater)
     {
-        this(parent, tkType, emitGenericSignals, opt.options2string);
     }
 
-    // ctor with formatted options
-    this(Widget parent, TkType tkType, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes, string opts = "")
+    /**
+        Fake widgets which have event handlers but no actual Tk path name.
+        Since each event handler uses a name mapping, this widget must end
+        up having a valid name.
+
+        E.g. a widget such as a check menu is implicitly created through a
+        parent menu object and doesn't have a widget path.
+    */
+    this(CreateFakeWidget)
     {
-        string prefix;  // '.' is the root window
-        if (parent !is null && parent._name != ".")
-            prefix = parent._name;
-
-        string name = format("%s.%s%s%s", prefix, tkType.toString(), _threadID, _lastWidgetID++);
-        this.evalFmt("%s %s %s", tkType.toBaseType(), name, opts);
-
-        this(name, emitGenericSignals);
+        string name = format("%s%s%s", _fakeWidgetPrefix, _threadID, _lastWidgetID++);
+        this.initialize(name, EmitGenericSignals.no);
     }
 
+    /**
+        Ctor for widgets which are implicitly created by Tk,
+        such as the toplevel "." window.
+    */
     package this(string name, EmitGenericSignals emitGenericSignals)
     {
+        this.initialize(name, emitGenericSignals);
+    }
+
+    /** Required to be a method instead of a ctor to allow delayed initialization. */
+    package void initialize(string name, EmitGenericSignals emitGenericSignals)
+    {
+        enforce(!name.empty);
         _name = name;
         _widgetPathMap[_name] = this;
         _eventCallbackIdent = this.createCallback(&onEvent);
@@ -82,6 +104,33 @@ abstract class Widget
             this.evalFmt("bind %s <Enter> { %s %s %s }", _name, _eventCallbackIdent, EventType.Enter, eventArgs);
             this.evalFmt("bind %s <Leave> { %s %s %s }", _name, _eventCallbackIdent, EventType.Leave, eventArgs);
         }
+    }
+
+    this(Widget parent, TkType tkType, DtkOptions opt, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes)
+    {
+        this.initialize(parent, tkType, emitGenericSignals, opt.options2string);
+    }
+
+    this(Widget parent, TkType tkType, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes, string opts = "")
+    {
+        this.initialize(parent, tkType, emitGenericSignals, opts);
+    }
+
+    package void initialize(Widget parent, TkType tkType, DtkOptions opt, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes)
+    {
+        this.initialize(parent, tkType, emitGenericSignals, opt.options2string);
+    }
+
+    package void initialize(Widget parent, TkType tkType, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes, string opts = "")
+    {
+        string prefix;  // '.' is the root window
+        if (parent !is null && parent._name != ".")
+            prefix = parent._name;
+
+        string name = format("%s.%s%s%s", prefix, tkType.toString(), _threadID, _lastWidgetID++);
+        this.evalFmt("%s %s %s", tkType.toBaseType(), name, opts);
+
+        this.initialize(name, emitGenericSignals);
     }
 
     /**
@@ -457,7 +506,7 @@ package:
     static string createCallbackName()
     {
         int newSlotID = _lastCallbackID++;
-        return format("%s%s_%s", callbackPrefix, _threadID, newSlotID).replace(":", "_");
+        return format("%s%s_%s", _callbackPrefix, _threadID, newSlotID).replace(":", "_");
     }
 
     /** Create a Tcl callback. */
@@ -466,7 +515,7 @@ package:
         int newSlotID = _lastCallbackID++;
 
         ClientData clientData = cast(ClientData)newSlotID;
-        string callbackName = format("%s%s_%s", callbackPrefix, _threadID, newSlotID);
+        string callbackName = format("%s%s_%s", _callbackPrefix, _threadID, newSlotID);
 
         Tcl_CreateObjCommand(App._interp,
                              cast(char*)callbackName.toStringz,
@@ -516,6 +565,8 @@ package:
                     case TkProgressbarChange:
                     case TkScaleChange:
                     case TkSpinboxChange:
+                    case TkCheckMenuItemToggle:
+                    case TkRadioMenuSelect:
                     {
                         event.state = to!string(Tcl_GetString(objv[2]));
                         break;
@@ -581,7 +632,7 @@ package:
     static string createVariableName()
     {
         int newSlotID = _lastVariableID++;
-        return format("%s%s_%s", variablePrefix, _threadID, newSlotID);
+        return format("%s%s_%s", _variablePrefix, _threadID, newSlotID);
     }
 
     /** Create a Tcl variable. */
@@ -625,14 +676,16 @@ package:
     /** Counter to create a unique thread-local callback ID. */
     static int _lastCallbackID;
 
+    enum _fakeWidgetPrefix = "dtk_fake_widget";
+
     /** Prefix for callbacks to avoid name clashes. */
-    enum callbackPrefix = "dtk::call";
+    enum _callbackPrefix = "dtk::call";
 
     /** Counter to create a unique thread-local variable ID. */
     static int _lastVariableID;
 
     /** Prefix for variables to avoid name clashes. */
-    enum variablePrefix = "::dtk_var";
+    enum _variablePrefix = "::dtk_var";
 
     static struct Callback
     {

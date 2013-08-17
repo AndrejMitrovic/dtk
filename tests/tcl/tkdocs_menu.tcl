@@ -8,7 +8,10 @@ toplevel .win
 menu .win.menubar
 .win configure -menu .win.menubar
 
+#~ . configure -menu .menubar
+
 set m .win.menubar
+#~ set m .menubar
 menu $m.file
 menu $m.edit
 $m add cascade -menu $m.file -label File

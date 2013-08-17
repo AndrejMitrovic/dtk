@@ -12,6 +12,8 @@ version(DTK_UNITTEST):
 private
 {
     //~ import dtk.tests.test_app;  // todo: implement
+    //~ import dtk.tests.test_widget;  // todo: implement
+
     import dtk.tests.test_button;
     import dtk.tests.test_checkbutton;
     import dtk.tests.test_combobox;
@@ -19,6 +21,7 @@ private
     import dtk.tests.test_frame;
     import dtk.tests.test_label;
     import dtk.tests.test_listbox;
+    import dtk.tests.test_menu;
     import dtk.tests.test_progressbar;
     import dtk.tests.test_radiobutton;
     import dtk.tests.test_scale;
@@ -26,6 +29,5 @@ private
     import dtk.tests.test_sizegrip;
     import dtk.tests.test_scrollbar;
     import dtk.tests.test_text;
-    //~ import dtk.tests.test_widget;  // todo: implement
     import dtk.tests.test_window;
 }

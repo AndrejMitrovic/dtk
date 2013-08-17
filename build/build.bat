@@ -22,7 +22,7 @@ rem     - Logs all log/logf calls, for use with unittesting.
 rem
 
 set includes=-I%cd%
-rem set debug_versions=-version=DTK_LOG_EVAL -version=DTK_LOG_TESTS
+rem set debug_versions=-version=DTK_LOG_EVAL
 set debug_versions=
 set flags=%includes% -g %debug_versions%
 

@@ -26,7 +26,7 @@ class RadioGroup : Widget
     // todo: this is not really a Widget, but it needs to have a callback mechanism
     this()
     {
-        super(null, EmitGenericSignals.no);  // not an actual widget
+        super(CreateFakeWidget.init);
         _varName = this.createTracedTaggedVariable(EventType.TkRadioButtonSelect);
     }
 

@@ -58,6 +58,9 @@ enum EventType
     TkProgressbarChange,
     TkScaleChange,
     TkSpinboxChange,
+    TkMenuItemSelect,
+    TkCheckMenuItemToggle,
+    TkRadioMenuSelect,
 }
 
 ///

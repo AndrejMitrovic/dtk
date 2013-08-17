@@ -21,6 +21,7 @@ public
     import dtk.label;
     import dtk.listbox;
     import dtk.loader;
+    import dtk.menu;
     import dtk.options;
     import dtk.progressbar;
     import dtk.radiobutton;

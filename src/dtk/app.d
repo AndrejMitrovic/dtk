@@ -94,7 +94,10 @@ final class App
             // clean out all widgets for this test run
             foreach (widget; mainWindow.childWidgets)
             {
-                widget.destroy();
+                // @bug: Strange hash symbol for menus on default "." top-level window, e.g. .#mymenu:
+                // See: http://stackoverflow.com/q/18290171/279684
+                if (widget !is null)
+                    widget.destroy();
             }
         }
 
