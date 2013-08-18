@@ -13,6 +13,7 @@ public
     import dtk.checkbutton;
     import dtk.color;
     import dtk.combobox;
+    import dtk.dialog;
     import dtk.entry;
     import dtk.event;
     import dtk.font;

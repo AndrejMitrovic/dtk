@@ -54,5 +54,5 @@ unittest
     bar1.pack();
     bar2.pack();
 
-    app.testRun(2.seconds, SkipIdleTime.yes);  // avoid infinite running time
+    app.testRun(1.seconds, SkipIdleTime.yes);  // avoid infinite running time
 }
