@@ -197,6 +197,8 @@ private:
             }
             catch (Throwable e)
             {
+                stderr.writeln();
+                stderr.writeln(e);
                 //~ string path = format("\n%s%s%s", absPath("."), dirSep, e.file).normPath;
                 //~ e.msg = format("%s(%s) : %s", path, e.line, e.msg);
                 failCount++;

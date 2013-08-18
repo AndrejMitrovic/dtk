@@ -44,7 +44,7 @@ class Window : Widget
     package this(Tk_Window window)
     {
         super(".", EmitGenericSignals.yes);
-        //~ evalFmt("tkwait visibility %s", _name);
+        evalFmt("tkwait visibility %s", _name);
     }
 
     /** Return the current window title. */

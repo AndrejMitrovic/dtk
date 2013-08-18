@@ -21,19 +21,19 @@ import dtk.options;
 import dtk.widget;
 
 ///
-class OpenFileDialog : Widget
-{
+//~ class OpenFileDialog : Widget
+//~ {
     ///
-    this(Widget master)
-    {
-        super(master, TkType.combobox);
+    //~ this(Widget master)
+    //~ {
+        //~ super(master, TkType.combobox);
 
-        _varName = this.createTracedTaggedVariable(EventType.TkComboboxChange);
-        this.setOption("textvariable", _varName);
-    }
+        //~ _varName = this.createTracedTaggedVariable(EventType.TkComboboxChange);
+        //~ this.setOption("textvariable", _varName);
+    //~ }
 
-    /** */
-    void show()
-    {
-    }
-}
+    //~ /** */
+    //~ void show()
+    //~ {
+    //~ }
+//~ }

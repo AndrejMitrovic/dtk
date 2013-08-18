@@ -107,8 +107,8 @@ abstract class Widget
 
         if (emitGenericSignals == EmitGenericSignals.yes)
         {
-            //~ this.evalFmt("bind %s <Enter> { %s %s %s }", _name, _eventCallbackIdent, EventType.Enter, eventArgs);
-            //~ this.evalFmt("bind %s <Leave> { %s %s %s }", _name, _eventCallbackIdent, EventType.Leave, eventArgs);
+            this.evalFmt("bind %s <Enter> { %s %s %s }", _name, _eventCallbackIdent, EventType.Enter, eventArgs);
+            this.evalFmt("bind %s <Leave> { %s %s %s }", _name, _eventCallbackIdent, EventType.Leave, eventArgs);
         }
 
         _isInitialized = true;

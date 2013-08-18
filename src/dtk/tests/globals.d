@@ -32,9 +32,29 @@ void logf(Args...)(Args args)
     }
 }
 
+version (Windows)
+{
+    import core.sys.windows.windows;
+    extern(Windows) HWND GetConsoleWindow();
+}
+
 shared static this()
 {
+    version (Windows)
+    {
+        // no console when using subsystem:windows
+        if (!GetConsoleWindow())
+        {
+            stdout.open(r".\..\build\dtktest_stdout.log", "w");
+            stderr.open(r".\..\build\dtktest_stderr.log", "w");
+        }
+    }
+
     app = new App();
+
+    // @bug: explicit check necessary since the info field of a
+    // Throwable isn't propery set in a module constructor.
+    assert(app.mainWindow !is null);
     app.mainWindow.position = Point(500, 500);
     unitTester.setTester();
 }
