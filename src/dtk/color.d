@@ -19,11 +19,11 @@ struct RGB
     ubyte r;
     ubyte g;
     ubyte b;
-}
 
-package string toString(RGB rgb)
-{
-    return format("#%02X%02X%02X", rgb.r, rgb.g, rgb.b);
+    package string toString()
+    {
+        return format("#%02X%02X%02X", this.r, this.g, this.b);
+    }
 }
 
 package RGB toRGB(string input)

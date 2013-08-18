@@ -91,3 +91,8 @@ https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Faldacron%2FDerelict3%2Fi
 
 The .#widget issue has been resolved, see the reply on SO:
 http://stackoverflow.com/questions/18290171/strange-result-when-calling-winfo-children-on-implicitly-generated-toplevel-wi
+
+We'll need to call _escapePath for any Tk API which takes paths (or even plain strings), since backslashes are problematic due to required escaping.
+
+Instead of returning .init for canceled operations, return a struct with an ok/cancel value
+and the field with the result.

@@ -15,6 +15,7 @@ import std.string;
 
 import dtk.app;
 import dtk.button;
+import dtk.color;
 import dtk.event;
 import dtk.signals;
 import dtk.types;
@@ -31,50 +32,14 @@ struct FileType
     string macType;  /// only required on OSX
 }
 
-///
-class OpenFileDialog : Widget
+/// Common code for open and save dialogs
+package class GenericDialog : Widget
 {
     ///
     this()
     {
         super(CreateFakeWidget.init);
         _defaultFileTypeVar = this.createTracedTaggedVariable(EventType.TkComboboxChange);
-    }
-
-    /**
-        Show the dialog using the configured settings and return
-        the file the user selected, or an empty string if the
-        dialog box was cancelled.
-    */
-    string show()
-    {
-        this.setVar(_defaultFileTypeVar, _defaultFileType.typeName);
-
-        version (OSX)
-            string msg = format("-message %s", osxMessage._enquote);
-        else
-            enum string msg = null;
-
-        string newDefFileTypeName = this.getVar!string(_defaultFileTypeVar);
-        foreach (fileType; fileTypes)
-        {
-            if (fileType.typeName == newDefFileTypeName)
-            {
-                _defaultFileType = fileType;
-                break;
-            }
-        }
-
-        return this.evalFmt("tk_getOpenFile -filetypes %s -initialdir %s -initialfile %s %s -multiple %s %s -title %s -typevariable %s",
-            fileTypes.toString(),
-            initialDir._enquote,
-            initialFile._enquote,
-            msg,
-            allowMultiSelect,
-            (parent is null) ? "" : format("-parent %s", parent._name._enquote),
-            title._enquote,
-            _defaultFileTypeVar
-        ).buildNormalizedPath;
     }
 
     /**
@@ -123,6 +88,21 @@ class OpenFileDialog : Widget
         this.setVar(_defaultFileTypeVar, defFileType.typeName);
     }
 
+    package void updateDefaultFileType()
+    {
+        this.setVar(_defaultFileTypeVar, _defaultFileType.typeName);
+
+        string newDefFileTypeName = this.getVar!string(_defaultFileTypeVar);
+        foreach (fileType; fileTypes)
+        {
+            if (fileType.typeName == newDefFileTypeName)
+            {
+                _defaultFileType = fileType;
+                break;
+            }
+        }
+    }
+
     public FileType[] fileTypes;
 
     public string initialDir;
@@ -130,8 +110,6 @@ class OpenFileDialog : Widget
     public string initialFile;
 
     public string osxMessage;  /// OSX-specific
-
-    public bool allowMultiSelect;
 
     public Window parent;
 
@@ -142,8 +120,68 @@ private:
     string _defaultFileTypeVar;
 }
 
-class SaveFileDialog
+///
+class OpenFileDialog : GenericDialog
 {
+    /**
+        Show the dialog using the configured settings and return
+        the file the user selected, or an empty string if the
+        dialog box was cancelled.
+    */
+    string show()
+    {
+        version (OSX)
+            string msg = format("-message %s", osxMessage._enquote);
+        else
+            enum string msg = null;
+
+        this.updateDefaultFileType();
+
+        return this.evalFmt("tk_getOpenFile -filetypes %s -initialdir %s -initialfile %s %s -multiple %s %s -title %s -typevariable %s",
+            fileTypes.toString(),
+            initialDir._escapePath._enquote,
+            initialFile._escapePath._enquote,
+            msg,
+            allowMultiSelect,
+            (parent is null) ? "" : format("-parent %s", parent._name._enquote),
+            title._enquote,
+            _defaultFileTypeVar
+        ).buildNormalizedPath;
+    }
+
+    public bool allowMultiSelect;
+}
+
+///
+class SaveFileDialog : GenericDialog
+{
+    /**
+        Show the dialog using the configured settings and return
+        the file the user specified, or an empty string if the
+        dialog box was cancelled.
+    */
+    string show()
+    {
+        version (OSX)
+            string msg = format("-message %s", osxMessage._enquote);
+        else
+            enum string msg = null;
+
+        this.updateDefaultFileType();
+
+        return this.evalFmt("tk_getSaveFile -filetypes %s -confirmoverwrite %s -defaultextension %s  -initialdir %s -initialfile %s %s %s -title %s -typevariable %s",
+            fileTypes.toString(),
+            confirmOverwrite,
+            defaultExtension,
+            initialDir._escapePath._enquote,
+            initialFile._escapePath._enquote,
+            msg,
+            (parent is null) ? "" : format("-parent %s", parent._name._enquote),
+            title._enquote,
+            _defaultFileTypeVar
+        ).buildNormalizedPath;
+    }
+
     /**
         Configures how the Save dialog reacts when the
         selected file already exists, and saving would
@@ -154,9 +192,98 @@ class SaveFileDialog
     */
     public bool confirmOverwrite = true;
 
-
     public string defaultExtension = "";
+}
 
+///
+class SelectDirDialog : Widget
+{
+    ///
+    this()
+    {
+        super(CreateFakeWidget.init);
+    }
+
+    /**
+        Show the dialog using the configured settings and return
+        the directory the user selected, or an empty string if the
+        dialog box was cancelled.
+    */
+    string show()
+    {
+        return this.evalFmt("tk_chooseDirectory -initialdir %s -mustexist %s %s -title %s",
+            initialDir._escapePath._enquote,
+            mustExist,
+            (parent is null) ? "" : format("-parent %s", parent._name._enquote),
+            title._enquote,
+        ).buildNormalizedPath;
+    }
+
+    public string initialDir;
+
+    public bool mustExist;
+
+    public Window parent;
+
+    public string title;
+}
+
+class SelectColorDialog : Widget
+{
+    ///
+    this()
+    {
+        super(CreateFakeWidget.init);
+    }
+
+    /**
+        Show the dialog using the configured settings and return
+        the color the user selected.
+    */
+    Result show()
+    {
+        Result result;
+
+        string output = this.evalFmt("tk_chooseColor %s %s -title %s",
+            !_useInitColor ? "" : format("-initialcolor %s", _initColor.toString()),
+            (parent is null) ? "" : format("-parent %s", parent._name._enquote),
+            title._enquote,
+        ).buildNormalizedPath;
+
+        if (!output.empty)
+        {
+            result.hasAccepted = true;
+            result.color = output.toRGB;
+        }
+
+        return result;
+    }
+
+    ///
+    static struct Result
+    {
+        bool hasAccepted;
+        RGB color;
+    }
+
+    public Window parent;
+
+    public string title;
+
+    @property RGB initialColor()
+    {
+        return _initColor;
+    }
+
+    @property void initialColor(RGB newInitColor)
+    {
+        _useInitColor = true;
+        _initColor = newInitColor;
+    }
+
+private:
+    bool _useInitColor;
+    RGB _initColor;
 }
 
 package string toString(FileType[] fileTypes)

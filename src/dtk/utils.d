@@ -50,3 +50,9 @@ package string _enquote(T)(T option)
 {
     return format(`"%s"`, option);
 }
+
+// Couldn't find Tcl equivalent of raw strings, need to escape backslashes
+package string _escapePath(string input)
+{
+    return input.replace(r"\", r"\\");
+}

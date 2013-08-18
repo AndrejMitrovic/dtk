@@ -40,5 +40,39 @@ unittest
     //~ string result = openFile.show();
     //~ stderr.writeln(result);
 
+    /** Test save file dialog */
+    auto saveFile = new SaveFileDialog();
+
+    assert(saveFile.fileTypes.empty);
+    assert(saveFile.defaultFileType == FileType.init);
+
+    saveFile.fileTypes ~= textFileType;
+    assert(!saveFile.fileTypes.empty);
+    assert(saveFile.defaultFileType == textFileType);
+
+    saveFile.fileTypes = null;
+    assert(saveFile.fileTypes.empty);
+    assert(saveFile.defaultFileType == FileType.init);
+
+    saveFile.defaultFileType = textFileType;
+    assert(!saveFile.fileTypes.empty);
+    assert(saveFile.defaultFileType == textFileType);
+
+    saveFile.fileTypes ~= FileType("All files", "*");
+
+    saveFile.defaultExtension = "myext";
+
+    // ditto note as above
+    //~ string result = saveFile.show();
+    //~ stderr.writeln(result);
+
+    auto colorSelect = new SelectColorDialog();
+    colorSelect.initialColor = RGB(0, 0, 255);
+    colorSelect.title = "Pick a color";
+
+    // ditto note as above
+    //~ auto res = colorSelect.show();
+    //~ stderr.writefln("res: %s", res);
+
     app.testRun();
 }
