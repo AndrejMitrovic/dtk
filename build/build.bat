@@ -25,10 +25,10 @@ set includes=-I%cd%
 rem set debug_versions=-version=DTK_LOG_EVAL
 set flags=%includes% -g %debug_versions%
 
-rem set compiler=dmd.exe
-set compiler=dmd_msc.exe
+set compiler=dmd.exe
+rem set compiler=dmd_msc.exe
 rem set compiler=ldmd2.exe
 
-set dtest=rdmd -of%binPath%\dtk_test.exe --main -version=DTK_UNITTEST -unittest -g --force --compiler=%compiler% %flags% dtk\package.d
+set dtest=rdmd -of%binPath%\dtk_test.exe --main -version=DTK_UNITTEST -L/SUBSYSTEM:WINDOWS:5.01 -unittest -g --force --compiler=%compiler% %flags% dtk\package.d
 
 %dtest% && echo Success: dtk tested. && %compiler% -g -of%binPath%\dtk.lib -lib %flags% %files% && echo Success: dtk built.

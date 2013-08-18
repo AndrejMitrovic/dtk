@@ -44,7 +44,7 @@ class Window : Widget
     package this(Tk_Window window)
     {
         super(".", EmitGenericSignals.yes);
-        evalFmt("tkwait visibility %s", _name);
+        //~ evalFmt("tkwait visibility %s", _name);
     }
 
     /** Return the current window title. */
@@ -99,6 +99,21 @@ class Window : Widget
         rect.width = newSize.width;
         rect.height = newSize.height;
         this.geometry = rect;
+    }
+
+    /**
+        Set whether the window can be resized horizontally and/or vertically by the user.
+
+        $(B Note:) This still allows resizing of the window by using the $(D size) property,
+        it only disallows the user to resize the window externally (e.g. with a mouse).
+
+        $(B Note:) As a visual aid to the user you should call $(D disableSizegrip())
+        if you've enabled a size grip but disabled the window to be resized in
+        all directions.
+    */
+    void setResizable(bool canResizeWidth, bool canResizeHeight)
+    {
+        this.evalFmt("wm resizable %s %s %s", _name, canResizeWidth, canResizeHeight);
     }
 
     /** Set a sizegrip for the window. */
@@ -185,10 +200,48 @@ class Window : Widget
         evalFmt("wm deiconify %s", _name);
     }
 
-    /** Make this the topmost window which will be displayed above all other windows. */
+    /** Return true if this window is minimized. */
+    bool isMinimized()
+    {
+        return this.evalFmt("wm state %s", _name) == "iconic";
+    }
+
+    /** Note: Minimized windows don't behave nicely with respect to setting their stacking order. */
+
+    /** Make this the top-most window which will be displayed above all other windows. */
     void setTopWindow()
     {
-        evalFmt("wm attributes %s -topmost 1", _name);
+        this.evalFmt("raise %s", _name);
+    }
+
+    /** Make this the bottom-most window which will be displayed below all other windows. */
+    void setBottomWindow()
+    {
+        this.evalFmt("lower %s", _name);
+    }
+
+    /** Set this window above another window. */
+    void setAbove(Window otherWindow)
+    {
+        this.evalFmt("raise %s %s", _name, otherWindow._name);
+    }
+
+    /** Set this window below another window. */
+    void setBelow(Window otherWindow)
+    {
+        this.evalFmt("lower %s %s", _name, otherWindow._name);
+    }
+
+    /** Return true if this window is above another window. */
+    bool isAbove(Window otherWindow)
+    {
+        return this.evalFmt("wm stackorder %s isabove %s", _name, otherWindow._name) == "1";
+    }
+
+    /** Return true if this window is below another window. */
+    bool isBelow(Window otherWindow)
+    {
+        return this.evalFmt("wm stackorder %s isbelow %s", _name, otherWindow._name) == "1";
     }
 
     /**

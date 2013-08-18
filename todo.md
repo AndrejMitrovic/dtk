@@ -73,3 +73,21 @@ ensure strings with spaces work.
 Check all 'todo' sections in the codebase.
 
 Check all filed bugs.
+
+Fix up signals so removal while iterating is handled properly:
+http://d.puremagic.com/issues/show_bug.cgi?id=10821
+Also make sure to document these issues.
+
+Remove methods from Widget class that should be in derived classes, this should avoid confusion
+on their meaning.
+
+Add Typed equivalents to most widgets which can have options set. E.g. we could have:
+
+auto button = new TypedCheckButton!float("label", 0.0, 1.0);
+auto button = new TypedCheckButton!char("label", 'a', 'z');
+
+Make a big note about having to use either -L/SUBSYSTEM:WINDOWS:5.01 (32bit) or -L/SUBSYSTEM:WINDOWS:5.02 (64bit) when compiling DTK apps on windows, or alternatively using WinMain. Otherwise some weird resizing behavior happens with windows instantiated by Tk. See also:
+https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Faldacron%2FDerelict3%2Fissues%2F143&sa=D&sntz=1&usg=AFQjCNFtkKTqxiUWj-46VmMxsKuTJr8ZJA
+
+The .#widget issue has been resolved, see the reply on SO:
+http://stackoverflow.com/questions/18290171/strange-result-when-calling-winfo-children-on-implicitly-generated-toplevel-wi
