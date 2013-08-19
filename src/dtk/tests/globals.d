@@ -52,11 +52,12 @@ shared static this()
 
     app = new App();
 
-    // @bug: explicit check necessary since the info field of a
-    // Throwable isn't propery set in a module constructor.
+    // @bug: No stack trace for null object access in module ctor
+    // http://d.puremagic.com/issues/show_bug.cgi?id=10851
     assert(app.mainWindow !is null);
     app.mainWindow.position = Point(500, 500);
     unitTester.setTester();
+
 }
 
 shared static ~this()
