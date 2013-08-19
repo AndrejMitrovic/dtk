@@ -24,6 +24,7 @@ Run the `build.bat` file to both run the unittests and generate a static library
 - Tcl v8.6 Tcl commands: http://www.tcl.tk/man/tcl8.6/TclCmd/contents.htm
 - Tcl v8.6 Tk commands: http://www.tcl.tk/man/tcl8.6/TkCmd/contents.htm
 - Tcl Wiki book: http://en.wikibooks.org/wiki/Tcl_Programming/Tk
+- Tk tutorial: http://http://www.tkdocs.com/
 
 ## License
 
