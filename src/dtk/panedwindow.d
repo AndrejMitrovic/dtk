@@ -97,7 +97,7 @@ class PanedWindow : Widget
         this.evalFmt("%s pane %s -width %s", _name, index, width);
     }
 
-    /** Get all panes that are part of this paned window. */
+    /** Get all widgets that are part of this paned window. */
     @property Widget[] panes()
     {
         string result = this.evalFmt("%s panes", _name);

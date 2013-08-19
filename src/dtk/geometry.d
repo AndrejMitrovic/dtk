@@ -103,9 +103,32 @@ unittest
 }
 
 ///
+enum Sticky
+{
+    none,
+    n,
+    ns,
+    nse,
+    nsew,
+}
+
+package Sticky toSticky(string sticky)
+{
+    switch (sticky) with (Sticky)
+    {
+        case "":            return none;
+        case "n":           return n;
+        case "ns":          return ns;
+        case "nse":         return nse;
+        case "nsew":        return nsew;
+        default:            assert(0, format("Unhandled sticky: '%s'", sticky));
+    }
+}
+
+///
 enum Anchor
 {
-    Invalid,  // sentinel
+    invalid,  // sentinel
 
     none,       ///
     north,      ///
@@ -151,14 +174,14 @@ package string toString(Anchor anchor)
         case west:          return "w";
         case northWest:     return "nw";
         case center:        return "center";
-        case Invalid:       assert(0, format("Uninitialized anchor: '%s'", anchor));
+        case invalid:       assert(0, format("Uninitialized anchor: '%s'", anchor));
     }
 }
 
 ///
 enum BorderStyle
 {
-    Invalid,  // sentinel
+    invalid,  // sentinel
 
     flat,   ///
     groove, ///
@@ -171,7 +194,7 @@ enum BorderStyle
 /// If there are multiple lines of text, specifies how the lines are laid out relative to one another.
 enum Justification
 {
-    Invalid,  // sentinel
+    invalid,  // sentinel
 
     none,   ///
     left,   ///
@@ -199,7 +222,7 @@ package string toString(Justification justification)
         case left:          return "left";
         case center:        return "center";
         case right:         return "right";
-        case Invalid:       assert(0, format("Uninitialized justification: '%s'", justification));
+        case invalid:       assert(0, format("Uninitialized justification: '%s'", justification));
     }
 }
 

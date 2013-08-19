@@ -42,6 +42,7 @@ package enum TkType : string
     labelframe = "ttk::labelframe",
     listbox = "tk::listbox",     // note: no ttk::listbox yet in v8.6
     menu = "menu",           // note: no ttk::menu
+    notebook = "ttk::notebook",
     panedwindow = "ttk::panedwindow",
     progressbar = "ttk::progressbar",
     radiobutton = "ttk::radiobutton",

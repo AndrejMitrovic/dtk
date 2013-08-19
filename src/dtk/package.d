@@ -24,6 +24,7 @@ public
     import dtk.listbox;
     import dtk.loader;
     import dtk.menu;
+    import dtk.notebook;
     import dtk.options;
     import dtk.panedwindow;
     import dtk.progressbar;
