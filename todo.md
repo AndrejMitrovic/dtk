@@ -27,7 +27,12 @@ cross-compilation. Instead of breaking compilation, we could issue a pragma(msg)
 for the unsupported OS calls, and tell the user to use version(Windows) statements.
 
 Include the new signals implementation, and make buttons emit signals instead of
-invoke a specific function or delegate.
+invoke a specific function or delegate. Update: We should avoid using signals
+for now, due to the complicated nature of adding/removing signal handlers
+while they're being called. Instead we should provide simple callbacks such as:
+button1.onClick(&handler);
+This is similar to GTKD, we should check it out there. Then, if the user wants
+he can use his own signals in a derived class or a supertype.
 
 We could create our own animation framework, by creating tcl scripts which call
 the 'after' tcl command.
@@ -47,8 +52,6 @@ Use SendMessage to simulate keyboard and mouse input when unittesting.
 Note: We'll have to use PostThreadMessage instead since the main thread will
 be blocked in the event loop.
 
-Make a 'createTracedVar' which will simplify creating traced variables.
-
 Could implement a setOptions, for multiple options. We can call ".widget configure -width 100 -height 100" instead of using two separate configure calls.
 
 Consider using command instead of variable tracing for some widgets, since we might
@@ -57,7 +60,7 @@ and those by internal user code.
 
 Turn package methods into public methods, since they can be useful for people who write
 extensions in Tcl and want to provide a D wrapper for them. As a last resort we could
-move these functions into a helper module.
+move these functions into a helper module or helper package.
 
 We might have to delay-initialize all widgets to avoid having to pass a parent widget in a widget constructor.
 However this means we have to check if a widget is initialized before attempting to call one of its methods,
@@ -87,7 +90,7 @@ auto button = new TypedCheckButton!float("label", 0.0, 1.0);
 auto button = new TypedCheckButton!char("label", 'a', 'z');
 
 Make a big note about having to use either -L/SUBSYSTEM:WINDOWS:5.01 (32bit) or -L/SUBSYSTEM:WINDOWS:5.02 (64bit) when compiling DTK apps on windows, or alternatively using WinMain. Otherwise some weird resizing behavior happens with windows instantiated by Tk. See also:
-https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Faldacron%2FDerelict3%2Fissues%2F143&sa=D&sntz=1&usg=AFQjCNFtkKTqxiUWj-46VmMxsKuTJr8ZJA
+https://github.com/aldacron/Derelict3/issues/143
 
 The .#widget issue has been resolved, see the reply on SO:
 http://stackoverflow.com/questions/18290171/strange-result-when-calling-winfo-children-on-implicitly-generated-toplevel-wi
@@ -97,10 +100,10 @@ We'll need to call _escapePath for any Tk API which takes paths (or even plain s
 Instead of returning .init for canceled operations, return a struct with an ok/cancel value
 and the field with the result.
 
-Some widgets have an identity function which return the widget under position X and Y.
+Some widgets have an identity function which returns the widget under position X and Y.
 We could try and generalize this by adding an event callback for onMouseMove or
 onMousePress, which would return the normal X/Y coordinates but also the widget under the
 mouse cursor.
 
-Error checking: must check all eval calls and throw exceptions on any errors received.
+Error checking: must check all eval calls and throw D exceptions on any errors received.
 There should be an error state stored in the interpreter struct. See the eval docs.
