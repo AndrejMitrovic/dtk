@@ -158,12 +158,11 @@ package SelectMode toSelectMode(string input)
 
 package string toString(SelectMode selectMode)
 {
-    switch (selectMode) with (SelectMode)
+    final switch (selectMode) with (SelectMode)
     {
         case single:        return "browse";
         case multiple:      return "extended";
         case old_single:    return "single";
         case old_multiple:  return "multiple";
-        default:            assert(0, format("Unhandled select mode: %s", selectMode));
     }
 }

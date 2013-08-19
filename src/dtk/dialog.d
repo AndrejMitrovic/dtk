@@ -286,6 +286,82 @@ private:
     RGB _initColor;
 }
 
+/** The types of button groups usable in a message box. */
+enum MessageBoxType
+{
+    abort_retry_ignore, ///
+    ok,                 ///
+    ok_cancel,          ///
+    retry_cancel,       ///
+    yes_no,             ///
+    yes_no_cancel,      ///
+}
+
+/** The type of a button that is placeable and selectable in a message box. */
+enum MessageButtonType
+{
+    none,
+    abort,
+    retry,
+    ignore,
+    ok,
+    cancel,
+    yes,
+    no,
+}
+
+enum MessageBoxIcon
+{
+    info,
+    question,
+    warning,
+    error,
+}
+
+class MessageBox : Widget
+{
+    ///
+    this()
+    {
+        super(CreateFakeWidget.init);
+    }
+
+    /**
+        Show the message using the configured settings and return
+        the button the the user selected.
+    */
+    MessageButtonType show()
+    {
+        string strDefault = (defaultButtonType == MessageButtonType.none)
+                          ? "" : format("-default %s", defaultButtonType);
+
+        string result = this.evalFmt("tk_messageBox %s -detail %s -icon %s -message %s %s -title %s -type %s",
+            strDefault,
+            extraMessage._enquote,
+            messageBoxIcon,
+            message._enquote,
+            (parent is null) ? "" : format("-parent %s", parent._name._enquote),
+            title._enquote,
+            messageBoxType.toString());
+
+        return to!MessageButtonType(result);
+    }
+
+    public MessageButtonType defaultButtonType;
+
+    public MessageBoxIcon messageBoxIcon;
+
+    public string message;
+
+    public string extraMessage;
+
+    public Window parent;
+
+    public string title;
+
+    public MessageBoxType messageBoxType;
+}
+
 package string toString(FileType[] fileTypes)
 {
     Appender!string result;
@@ -331,4 +407,17 @@ unittest
 
     assert(fileTypes.toString() ==
         "{ { {Text Files}  {.txt}  } { {Tcl Scripts}  {.tcl}  } { {C Source Files}  {.c}  TEXT } }");
+}
+
+package string toString(MessageBoxType messageBoxType)
+{
+    final switch (messageBoxType) with (MessageBoxType)
+    {
+        case abort_retry_ignore: return "abortretryignore";
+        case ok:                 return "ok";
+        case ok_cancel:          return "okcancel";
+        case retry_cancel:       return "retrycancel";
+        case yes_no:             return "yesno";
+        case yes_no_cancel:      return "yesnocancel";
+    }
 }

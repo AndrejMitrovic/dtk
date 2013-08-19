@@ -74,8 +74,18 @@ unittest
     colorSelect.initialColor = RGB(0, 0, 255);
     colorSelect.title = "Pick a color";
 
-    auto res = colorSelect.show();
-    stderr.writefln("res: %s", res);
+    //~ auto res = colorSelect.show();
+    //~ stderr.writefln("res: %s", res);
+
+    auto msgBox = new MessageBox();
+    msgBox.messageBoxType = MessageBoxType.ok;
+    msgBox.title = "Hello!";
+    msgBox.message = "Informative message.";
+    msgBox.extraMessage = "Another informative message.";
+    msgBox.defaultButtonType = MessageButtonType.ok;
+    msgBox.messageBoxIcon = MessageBoxIcon.info;
+
+    //~ stderr.writeln(msgBox.show());
 
     app.run();
 }

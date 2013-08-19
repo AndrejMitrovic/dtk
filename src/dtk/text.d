@@ -91,11 +91,10 @@ package WrapMode toWrapMode(string input)
 
 package string toString(WrapMode wrapMode)
 {
-    switch (wrapMode) with (WrapMode)
+    final switch (wrapMode) with (WrapMode)
     {
         case none:      return "none";
         case character: return "char";
         case word:      return "word";
-        default:        assert(0, format("Unhandled wrap mode: '%s'", wrapMode));
     }
 }
