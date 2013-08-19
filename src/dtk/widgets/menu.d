@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.menu;
+module dtk.widgets.menu;
 
 import std.conv;
 import std.exception;
@@ -16,8 +16,9 @@ import dtk.event;
 import dtk.options;
 import dtk.types;
 import dtk.utils;
-import dtk.widget;
-import dtk.window;
+
+import dtk.widgets.widget;
+import dtk.widgets.window;
 
 /// Common code for menu bars and menus
 abstract class MenuClass : Widget

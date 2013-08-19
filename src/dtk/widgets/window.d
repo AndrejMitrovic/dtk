@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.window;
+module dtk.widgets.window;
 
 import dtk.geometry;
 
@@ -18,12 +18,13 @@ import std.string;
 alias splitter = std.algorithm.splitter;
 
 import dtk.event;
-import dtk.menu;
 import dtk.options;
-import dtk.sizegrip;
 import dtk.types;
 import dtk.utils;
-import dtk.widget;
+
+import dtk.widgets.menu;
+import dtk.widgets.sizegrip;
+import dtk.widgets.widget;
 
 ///
 class Window : Widget
@@ -41,7 +42,7 @@ class Window : Widget
     }
 
     /** Used for the initial implicitly-created Tk root window. */
-    package this(Tk_Window window)
+    this(Tk_Window window)
     {
         super(".", EmitGenericSignals.yes);
         evalFmt("tkwait visibility %s", _name);

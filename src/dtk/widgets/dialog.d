@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.dialog;
+module dtk.widgets.dialog;
 
 import std.array;
 import std.conv;
@@ -14,15 +14,16 @@ import std.range;
 import std.string;
 
 import dtk.app;
-import dtk.button;
 import dtk.color;
 import dtk.event;
 import dtk.signals;
+import dtk.options;
 import dtk.types;
 import dtk.utils;
-import dtk.options;
-import dtk.widget;
-import dtk.window;
+
+import dtk.widgets.button;
+import dtk.widgets.widget;
+import dtk.widgets.window;
 
 /** A file type marker for use with dialogs. */
 struct FileType

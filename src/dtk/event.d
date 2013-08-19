@@ -8,9 +8,10 @@ module dtk.event;
 
 import std.string;
 
-import dtk.entry;
 import dtk.geometry;
 import dtk.utils;
+
+import dtk.widgets.entry;
 
 /** All possible Dtk events. */
 enum EventType

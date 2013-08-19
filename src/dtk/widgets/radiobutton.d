@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.radiobutton;
+module dtk.widgets.radiobutton;
 
 import std.conv;
 import std.exception;
@@ -12,13 +12,14 @@ import std.range;
 import std.string;
 
 import dtk.app;
-import dtk.button;
 import dtk.event;
+import dtk.options;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
-import dtk.options;
-import dtk.widget;
+
+import dtk.widgets.button;
+import dtk.widgets.widget;
 
 ///
 class RadioGroup : Widget

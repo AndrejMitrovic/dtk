@@ -4,12 +4,13 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.sizegrip;
+module dtk.widgets.sizegrip;
 
 import dtk.app;
 import dtk.event;
-import dtk.widget;
-import dtk.window;
+
+import dtk.widgets.widget;
+import dtk.widgets.window;
 
 ///
 class Sizegrip : Widget

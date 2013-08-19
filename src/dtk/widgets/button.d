@@ -4,16 +4,17 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.button;
+module dtk.widgets.button;
 
 import std.conv;
 import std.string;
 
 import dtk.event;
 import dtk.signals;
-import dtk.utils;
 import dtk.options;
-import dtk.widget;
+import dtk.utils;
+
+import dtk.widgets.widget;
 
 /// Various button styles
 enum ButtonStyle

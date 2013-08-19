@@ -4,29 +4,29 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.scrollbar;
+module dtk.widgets.separator;
 
 import std.conv;
-import std.range;
 import std.string;
+import std.range;
 
+import dtk.app;
 import dtk.event;
 import dtk.geometry;
 import dtk.options;
-import dtk.widget;
+import dtk.utils;
+
+import dtk.widgets.widget;
 
 ///
-class Scrollbar : Widget
+class Separator : Widget
 {
     ///
-    this(Widget master, Widget target, Orientation orientation)
+    this(Widget master, Orientation orientation)
     {
         DtkOptions options;
         options["orient"] = to!string(orientation);
-        super(master, TkType.scrollbar, options);
-
-        // note: super ctor must be called first to get the _name field
-        target.setScrollbar(this);
+        super(master, TkType.separator, options, EmitGenericSignals.no);
     }
 
     /** Get the orientation of this scrollbar. */

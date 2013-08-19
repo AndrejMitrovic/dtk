@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.scale;
+module dtk.widgets.scale;
 
 import std.conv;
 import std.string;
@@ -15,7 +15,8 @@ import dtk.event;
 import dtk.geometry;
 import dtk.options;
 import dtk.utils;
-import dtk.widget;
+
+import dtk.widgets.widget;
 
 ///
 class Scale : Widget

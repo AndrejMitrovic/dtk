@@ -9,36 +9,16 @@ module dtk;
 public
 {
     import dtk.app;
-    import dtk.button;
-    import dtk.checkbutton;
     import dtk.color;
-    import dtk.combobox;
-    import dtk.dialog;
-    import dtk.entry;
     import dtk.event;
     import dtk.font;
-    import dtk.frame;
     import dtk.geometry;
-    import dtk.label;
-    import dtk.labelframe;
-    import dtk.listbox;
     import dtk.loader;
-    import dtk.menu;
-    import dtk.notebook;
     import dtk.options;
-    import dtk.panedwindow;
-    import dtk.progressbar;
-    import dtk.radiobutton;
-    import dtk.scale;
-    import dtk.separator;
-    import dtk.spinbox;
-    import dtk.sizegrip;
-    import dtk.scrollbar;
-    import dtk.text;
     import dtk.types;
     import dtk.utils;
-    import dtk.widget;
-    import dtk.window;
+
+    import dtk.widgets;
 }
 
 version(unittest)

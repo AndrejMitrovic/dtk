@@ -17,8 +17,9 @@ import std.path;
 import dtk.event;
 import dtk.loader;
 import dtk.types;
-import dtk.widget;
-import dtk.window;
+
+import dtk.widgets.widget;
+import dtk.widgets.window;
 
 /** The main dtk application. Once instantiated a main window will be created. */
 final class App

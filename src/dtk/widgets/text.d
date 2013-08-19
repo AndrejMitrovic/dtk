@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.text;
+module dtk.widgets.text;
 
 import std.string;
 
@@ -12,7 +12,8 @@ import dtk.app;
 import dtk.event;
 import dtk.geometry;
 import dtk.utils;
-import dtk.widget;
+
+import dtk.widgets.widget;
 
 ///
 enum WrapMode

@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.widget;
+module dtk.widgets.widget;
 
 import core.thread;
 
@@ -21,14 +21,15 @@ import std.c.stdlib;
 alias splitter = std.algorithm.splitter;
 
 import dtk.app;
-import dtk.entry;
 import dtk.event;
 import dtk.geometry;
 import dtk.options;
 import dtk.signals;
-import dtk.scrollbar;
 import dtk.types;
 import dtk.utils;
+
+import dtk.widgets.entry;
+import dtk.widgets.scrollbar;
 
 /// Tk and Ttk widget types
 package enum TkType : string
@@ -53,6 +54,7 @@ package enum TkType : string
     spinbox = "ttk::spinbox",
     text = "tk::text",           // note: no ttk::text
     toplevel = "tk::toplevel",   // note: no ttk::toplevel
+    tree = "ttk::tree",
 }
 
 package struct InitLater { }

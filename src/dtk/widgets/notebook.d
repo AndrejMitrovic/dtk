@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.notebook;
+module dtk.widgets.notebook;
 
 import std.array;
 import std.conv;
@@ -13,9 +13,10 @@ import std.range;
 import std.string;
 
 import dtk.geometry;
-import dtk.utils;
 import dtk.options;
-import dtk.widget;
+import dtk.utils;
+
+import dtk.widgets.widget;
 
 ///
 enum TabState
@@ -27,6 +28,7 @@ enum TabState
 
 // todo: add these to add/insert methods.
 // note: could use typeof(TabOptions.tupleof) in an argument list.
+///
 struct TabOptions
 {
     string text;

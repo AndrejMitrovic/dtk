@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.panedwindow;
+module dtk.widgets.panedwindow;
 
 import std.array;
 import std.conv;
@@ -13,9 +13,10 @@ import std.range;
 import std.string;
 
 import dtk.geometry;
-import dtk.utils;
 import dtk.options;
-import dtk.widget;
+import dtk.utils;
+
+import dtk.widgets.widget;
 
 ///
 class PanedWindow : Widget

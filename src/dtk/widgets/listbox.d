@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.listbox;
+module dtk.widgets.listbox;
 
 import std.conv;
 import std.range;
@@ -13,7 +13,8 @@ import std.string;
 import dtk.event;
 import dtk.options;
 import dtk.utils;
-import dtk.widget;
+
+import dtk.widgets.widget;
 
 ///
 enum SelectMode

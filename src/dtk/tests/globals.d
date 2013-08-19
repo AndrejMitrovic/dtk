@@ -8,7 +8,8 @@ import std.stdio;
 /** One app and one main window for testing. */
 import dtk.app;
 import dtk.geometry;
-import dtk.window;
+
+import dtk.widgets.window;
 
 import dtk.tests.runner;
 

@@ -4,19 +4,20 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.checkbutton;
+module dtk.widgets.checkbutton;
 
 import std.conv;
 import std.string;
 
 import dtk.app;
-import dtk.button;
 import dtk.event;
 import dtk.signals;
 import dtk.utils;
 import dtk.options;
 import dtk.types;
-import dtk.widget;
+
+import dtk.widgets.button;
+import dtk.widgets.widget;
 
 ///
 class CheckButton : Widget

@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.entry;
+module dtk.widgets.entry;
 
 import std.conv;
 import std.exception;
@@ -14,14 +14,15 @@ import std.traits;
 import std.typetuple;
 
 import dtk.app;
-import dtk.button;
 import dtk.event;
 import dtk.geometry;
+import dtk.options;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
-import dtk.options;
-import dtk.widget;
+
+import dtk.widgets.button;
+import dtk.widgets.widget;
 
 /** Check whether type $(D T) is a validator function. */
 public enum isValidator(T) = isSomeFunction!T &&
