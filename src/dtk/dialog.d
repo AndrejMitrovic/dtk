@@ -335,13 +335,18 @@ class MessageBox : Widget
         string strDefault = (defaultButtonType == MessageButtonType.none)
                           ? "" : format("-default %s", defaultButtonType);
 
-        string result = this.evalFmt("tk_messageBox %s -detail %s -icon %s -message %s %s -title %s -type %s",
+        version (OSX)
+            enum titleStr = "";  // title unused on OSX
+        else
+            string titleStr = format("-title %s", title._enquote);
+
+        string result = this.evalFmt("tk_messageBox %s -detail %s -icon %s -message %s %s %s -type %s",
             strDefault,
             extraMessage._enquote,
             messageBoxIcon,
             message._enquote,
             (parent is null) ? "" : format("-parent %s", parent._name._enquote),
-            title._enquote,
+            titleStr,
             messageBoxType.toString());
 
         return to!MessageButtonType(result);

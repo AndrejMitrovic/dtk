@@ -20,13 +20,16 @@ public
     import dtk.frame;
     import dtk.geometry;
     import dtk.label;
+    import dtk.labelframe;
     import dtk.listbox;
     import dtk.loader;
     import dtk.menu;
     import dtk.options;
+    import dtk.panedwindow;
     import dtk.progressbar;
     import dtk.radiobutton;
     import dtk.scale;
+    import dtk.separator;
     import dtk.spinbox;
     import dtk.sizegrip;
     import dtk.scrollbar;

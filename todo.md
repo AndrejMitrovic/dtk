@@ -96,3 +96,11 @@ We'll need to call _escapePath for any Tk API which takes paths (or even plain s
 
 Instead of returning .init for canceled operations, return a struct with an ok/cancel value
 and the field with the result.
+
+Some widgets have an identity function which return the widget under position X and Y.
+We could try and generalize this by adding an event callback for onMouseMove or
+onMousePress, which would return the normal X/Y coordinates but also the widget under the
+mouse cursor.
+
+Error checking: must check all eval calls and throw exceptions on any errors received.
+There should be an error state stored in the interpreter struct. See the eval docs.

@@ -39,12 +39,15 @@ package enum TkType : string
     entry = "ttk::entry",
     frame = "ttk::frame",
     label = "ttk::label",
+    labelframe = "ttk::labelframe",
     listbox = "tk::listbox",     // note: no ttk::listbox yet in v8.6
     menu = "menu",           // note: no ttk::menu
+    panedwindow = "ttk::panedwindow",
     progressbar = "ttk::progressbar",
     radiobutton = "ttk::radiobutton",
-    sizegrip = "ttk::sizegrip",
     scale = "ttk::scale",
+    separator = "ttk::separator",
+    sizegrip = "ttk::sizegrip",
     scrollbar = "ttk::scrollbar",
     spinbox = "ttk::spinbox",
     text = "tk::text",           // note: no ttk::text
@@ -388,6 +391,13 @@ abstract class Widget
     public string getTclName()
     {
         return _name;
+    }
+
+    /** Return the parent widget of this widget, or $(D null) if this widget is the main window. */
+    @property Widget parentWidget()
+    {
+        string widgetPath = evalFmt("winfo parent %s", _name);
+        return cast(Widget)Widget.lookupWidgetPath(widgetPath);
     }
 
 package:
