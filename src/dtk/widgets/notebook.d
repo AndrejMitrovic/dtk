@@ -187,7 +187,7 @@ class Notebook : Widget
     }
 
     /** Get the tab options for a widget. */
-    @property TabOptions options(Widget widget)
+    TabOptions options(Widget widget)
     {
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to get the options from must be this notebook."));
@@ -196,7 +196,7 @@ class Notebook : Widget
     }
 
     /** ditto. */
-    @property TabOptions options(int index)
+    TabOptions options(int index)
     {
         return _getTabOptions(index);
     }

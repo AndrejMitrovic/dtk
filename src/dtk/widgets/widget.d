@@ -31,6 +31,38 @@ import dtk.utils;
 import dtk.widgets.entry;
 import dtk.widgets.scrollbar;
 
+///
+enum SelectMode
+{
+    single,        ///
+    multiple,      ///
+    old_single,    /// deprecated
+    old_multiple,  /// deprecated
+}
+
+package SelectMode toSelectMode(string input)
+{
+    switch (input) with (SelectMode)
+    {
+        case "browse":     return single;
+        case "extended":   return multiple;
+        case "single":     return old_single;
+        case "multiple":   return old_multiple;
+        default:           assert(0, format("Unhandled select input: '%s'", input));
+    }
+}
+
+package string toString(SelectMode selectMode)
+{
+    final switch (selectMode) with (SelectMode)
+    {
+        case single:        return "browse";
+        case multiple:      return "extended";
+        case old_single:    return "single";
+        case old_multiple:  return "multiple";
+    }
+}
+
 /// Tk and Ttk widget types
 package enum TkType : string
 {
@@ -54,7 +86,7 @@ package enum TkType : string
     spinbox = "ttk::spinbox",
     text = "tk::text",           // note: no ttk::text
     toplevel = "tk::toplevel",   // note: no ttk::toplevel
-    tree = "ttk::tree",
+    tree = "ttk::treeview",
 }
 
 package struct InitLater { }
@@ -441,9 +473,9 @@ package:
         return to!T(evalFmt("%s cget -%s", _name, option));
     }
 
-    final void setOption(T)(string option, T value)
+    final string setOption(T)(string option, T value)
     {
-        evalFmt(`%s configure -%s %s`, _name, option, value._enquote);
+        return evalFmt(`%s configure -%s %s`, _name, option, value._enquote);
     }
 
     final T getVar(T)(string varName)

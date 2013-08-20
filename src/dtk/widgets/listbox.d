@@ -17,15 +17,6 @@ import dtk.utils;
 import dtk.widgets.widget;
 
 ///
-enum SelectMode
-{
-    single,        ///
-    multiple,      ///
-    old_single,    /// deprecated
-    old_multiple,  /// deprecated
-}
-
-///
 class Listbox : Widget
 {
     // todo: could implelent a listbox with a ttk::treeview rather than tk::listbox
@@ -94,7 +85,7 @@ class Listbox : Widget
     /** Set the selection mode. */
     @property void selectMode(SelectMode newSelectMode)
     {
-        return this.setOption("selectmode", newSelectMode.toString());
+        this.setOption("selectmode", newSelectMode.toString());
     }
 
     /** Get the indices of the selected items. */
@@ -143,27 +134,4 @@ class Listbox : Widget
 
 private:
     string _varName;
-}
-
-package SelectMode toSelectMode(string input)
-{
-    switch (input) with (SelectMode)
-    {
-        case "browse":     return single;
-        case "extended":   return multiple;
-        case "single":     return old_single;
-        case "multiple":   return old_multiple;
-        default:           assert(0, format("Unhandled select input: '%s'", input));
-    }
-}
-
-package string toString(SelectMode selectMode)
-{
-    final switch (selectMode) with (SelectMode)
-    {
-        case single:        return "browse";
-        case multiple:      return "extended";
-        case old_single:    return "single";
-        case old_multiple:  return "multiple";
-    }
 }

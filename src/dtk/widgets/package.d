@@ -28,6 +28,7 @@ public
     import dtk.widgets.sizegrip;
     import dtk.widgets.scrollbar;
     import dtk.widgets.text;
+    import dtk.widgets.tree;
     import dtk.widgets.widget;
     import dtk.widgets.window;
 }

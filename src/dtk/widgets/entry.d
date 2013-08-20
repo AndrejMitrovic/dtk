@@ -158,7 +158,7 @@ class Entry : Widget
     /** Set the validation mode for this entry. */
     @property void validationMode(ValidationMode newValidationMode)
     {
-        return this.setOption("validate", to!string(newValidationMode));
+        this.setOption("validate", to!string(newValidationMode));
     }
 
     /** Set the function to use for validation. */

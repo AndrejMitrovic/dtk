@@ -107,3 +107,13 @@ mouse cursor.
 
 Error checking: must check all eval calls and throw D exceptions on any errors received.
 There should be an error state stored in the interpreter struct. See the eval docs.
+
+Expose all widget options, e.g. we missed some like bbox.
+See all the options for each widget type in the Tk command manual.
+
+Implement toString for widget classes. Could use text option which most widgets have.
+
+Instead of using DtkOptions and a super call, we should try to always call property functions
+in the ctor. This will avoid code duplication and will be more clean.
+
+Could make evalFmt in widgets always prepend _name, since that's how we always use it anyway.
