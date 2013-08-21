@@ -100,7 +100,7 @@ class Tree : Widget
             this.evalFmt(`%s heading %s -text %s`, _name, idx, col._enquote);
 
         _rootTree = this;
-        _treeIDMap["{}"] = this;
+        _treeIDMap[_rootTreeID] = this;
 
         _columnIndexes = cast(int[])iota(0, columns.length).array;
     }
@@ -112,7 +112,7 @@ class Tree : Widget
     private this(Tree rootTree, string name, string treeIdent)
     {
         super(CreateFakeWidget.init);
-        _treeIdent = treeIdent;
+        _treeID = treeIdent;
         _name = name;
         _rootTree = rootTree;
         _rootTree._treeIDMap[treeIdent] = this;
@@ -127,7 +127,7 @@ class Tree : Widget
     */
     Tree add(string text, Image image = null, bool isOpened = false, string[] values = null, string[] tags = null)
     {
-        return new Tree(_rootTree, _name, this.evalFmt("%s insert %s end -text %s", _name, _treeIdent, text._enquote));
+        return new Tree(_rootTree, _name, this.evalFmt("%s insert %s end -text %s", _name, _treeID, text._enquote));
     }
 
     /**
@@ -139,7 +139,111 @@ class Tree : Widget
     */
     Tree insert(int index, string text, Image image = null, bool isOpened = false, string[] values = null, string[] tags = null)
     {
-        return new Tree(_rootTree, _name, this.evalFmt("%s insert %s %s -text %s", _name, _treeIdent, index, text._enquote));
+        return new Tree(_rootTree, _name, this.evalFmt("%s insert %s %s -text %s", _name, _treeID, index, text._enquote));
+    }
+
+    /** Return the index of this tree. */
+    int index()
+    {
+        return this.evalFmt("%s index %s", _name, _treeID).to!int;
+    }
+
+    /** Attach a tree to this tree at the last position. */
+    void attach(Tree tree)
+    {
+        this.evalFmt("%s move %s %s end", _name, tree._treeID, _treeID);
+    }
+
+    /** Attach a tree to this tree at a specific position. */
+    void attach(Tree tree, int index)
+    {
+        this.evalFmt("%s move %s %s %s", _name, tree._treeID, _treeID, index);
+    }
+
+    /**
+        Detach this tree by hiding it. This does not destroy the tree.
+        The tree can be re-attached to its original position by calling
+        the $(D reattach) method. Alternatively it can be re-attached
+        to an arbitrary position with the $(D attach) method.
+    */
+    void detach()
+    {
+        // note: this call must come before calling detach or .parent will return the root identifier
+        _detachInfo = DetachInfo(parent, index, IsDetached.yes);
+
+        this.evalFmt("%s detach %s", _name, _treeID);
+    }
+
+    /**
+        Reattach this tree back to its original position.
+        If the tree was not detached, the function returns early.
+
+        If the parent no longer exists, an exception is thrown.
+        If the index is out of bounds, the tree will be attached
+        to the last position.
+    */
+    void reattach()
+    {
+        // no need to attach
+        if (_detachInfo.isDetached == IsDetached.no)
+            return;
+
+        enforce(!_detachInfo.parent._isDestroyed,
+            "Cannot reattach tree because its parent was destroyed.");
+
+        // todo: provide a better implementation
+        auto treeCount = this.evalFmt("%s children %s", _name, _detachInfo.parent._treeID).splitter(" ").walkLength;
+
+        // readjust index if it's out of bounds
+        if (_detachInfo.index >= treeCount)
+            _detachInfo.index = treeCount - 1;
+
+        _detachInfo.parent.attach(this, _detachInfo.index);
+        _detachInfo.isDetached = IsDetached.no;
+    }
+
+    /** Remove and destroy a tree. */
+    void destroy(Tree tree)
+    {
+        enforce(tree._treeID in _rootTree._treeIDMap,
+            format("Cannot destroy tree which is not part of the root tree of this tree."));
+
+        enforce(tree._treeID != _rootTreeID,
+            format("Cannot destroy root tree."));
+
+        tree._isDestroyed = true;
+
+        _rootTree._treeIDMap.remove(tree._treeID);
+
+        this.evalFmt("%s delete %s", _name, tree._treeID);
+    }
+
+    /** Return the parent of this tree, or null if this is the root tree. */
+    @property Tree parent()
+    {
+        if (this.isRootTree)
+            return null;
+
+        string parentID = this.evalFmt("%s parent %s", _name, _treeID);
+
+        if (parentID.empty)  // nested right in the root tree
+            return _rootTree;
+
+        enforce(parentID in _rootTree._treeIDMap,
+            format("Can't find: %s", parentID));
+
+        auto parent = _rootTree._treeIDMap[parentID];
+
+        enforce(!parent._isDestroyed,
+            "Cannot return parent tree because it was destroyed.");
+
+        return parent;
+    }
+
+    /** Check if this tree is the root tree. */
+    @property bool isRootTree()
+    {
+        return _treeID == _rootTreeID;
     }
 
     /** Return the children of this tree. */
@@ -147,7 +251,7 @@ class Tree : Widget
     {
         Appender!(Tree[]) result;
 
-        string treePaths = this.evalFmt("%s children %s", _name, _treeIdent);
+        string treePaths = this.evalFmt("%s children %s", _name, _treeID);
 
         foreach (treePath; treePaths.splitter(" "))
         {
@@ -351,12 +455,14 @@ class Tree : Widget
     ///
     override string toString()
     {
-        string text = this.evalFmt("%s item %s -text", _name, _treeIdent);
+        string text = this.evalFmt("%s item %s -text", _name, _treeID);
         return format("%s(%s)", typeof(this).stringof, text);
     }
 
 private:
-    string _treeIdent = "{}";
+    enum string _rootTreeID = "{}";
+
+    string _treeID = _rootTreeID;
     Tree _rootTree;  // required to look up the tree list
 
     /**
@@ -370,4 +476,25 @@ private:
         required to get visible columns.
     */
     int[] _columnIndexes;
+
+    enum IsDetached { no, yes }
+
+    /**
+        Note: parent and index are only kept up to date in the last detach
+        call. Only use these in the reattach call, when isDetached
+        equals IsDetached.yes.
+    */
+    static struct DetachInfo
+    {
+        Tree parent;
+        int index;
+        IsDetached isDetached;
+    }
+
+    /**
+        When a tree is detached, it loses its parent and index information.
+        We have to store this before detaching so we can re-attach back
+        to its original place when reattach is called.
+    */
+    DetachInfo _detachInfo;
 }

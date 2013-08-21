@@ -19,9 +19,14 @@ unittest
     testWindow.position = Point(500, 500);
 
     auto tree = new Tree(testWindow, "Directory", ["Filename", "Modified", "Created"]);
+    assert(tree.isRootTree);
     assert(tree.index == 0);
 
     auto root1 = tree.add("Root 1");
+
+    assert(!root1.isRootTree);
+    assert(root1.parent is tree);
+    assert(root1.parent.isRootTree);
 
     auto child1 = root1.add("Child 1");
     auto child2 = root1.add("Child 2");
@@ -96,6 +101,7 @@ unittest
     assert(root1.children.length == 3);
 
     auto parent = child1.parent;
+    assert(parent is root1);
 
     child1.detach();
     assert(root1.children.length == 2);

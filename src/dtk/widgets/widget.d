@@ -420,6 +420,7 @@ abstract class Widget
     public void destroy()
     {
         this.evalFmt("destroy %s", _name);
+        _isDestroyed = true;
     }
 
     /** Get the underlying Tcl widget name. Use with debugging and eval calls. */
@@ -757,6 +758,13 @@ package:
         can be initialized after construction until initialize is called.
     */
     bool _isInitialized;
+
+    /**
+        Set when the widget is destroyed. This either happens when the destroy()
+        method is called, or when a parent widget which manages the lifetime of
+        the object destroys the widget (e.g. $(D Tree.destroy(Tree tree))).
+    */
+    bool _isDestroyed;
 }
 
 // all the event arguments captures by the bind command
