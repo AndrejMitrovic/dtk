@@ -27,6 +27,20 @@ import dtk.widgets.sizegrip;
 import dtk.widgets.widget;
 
 ///
+enum CanResizeWidth
+{
+    no,
+    yes,
+}
+
+///
+enum CanResizeHeight
+{
+    no,
+    yes,
+}
+
+///
 class Window : Widget
 {
     /** Instantiate a new Window. */
@@ -112,7 +126,7 @@ class Window : Widget
         if you've enabled a size grip but disabled the window to be resized in
         all directions.
     */
-    void setResizable(bool canResizeWidth, bool canResizeHeight)
+    void setResizable(CanResizeWidth canResizeWidth, CanResizeHeight canResizeHeight)
     {
         this.evalFmt("wm resizable %s %s %s", _name, canResizeWidth, canResizeHeight);
     }

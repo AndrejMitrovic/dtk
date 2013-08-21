@@ -19,9 +19,36 @@ import dtk.options;
 
 import dtk.widgets.widget;
 
+///
+enum Image NoImage = null;
+
 // todo: move to Image module and implement
 class Image
 {
+}
+
+///
+enum IsOpened
+{
+    no,
+    yes,
+}
+
+///
+enum DoStretch
+{
+    no,
+    yes,
+}
+
+///
+struct RowOptions
+{
+    string text;
+    Image image;
+    string[] values;
+    IsOpened isOpened;
+    string[] tags;
 }
 
 ///
@@ -32,7 +59,7 @@ struct ColumnOptions
         fields via field initialization:
         http://d.puremagic.com/issues/show_bug.cgi?id=10861
     */
-    this(Anchor anchor, int minWidth, bool doStretch, int width)
+    this(Anchor anchor, int minWidth, DoStretch doStretch, int width)
     {
         _anchor = anchor;
         _minWidth = minWidth;
@@ -76,7 +103,7 @@ private:
     string _name;
     Anchor _anchor;
     int _minWidth;
-    bool _doStretch;
+    DoStretch _doStretch;
     int _width;
     bool _userInited;
 }
@@ -135,7 +162,8 @@ class Tree : Widget
         This tree is needed if you want to add a child item
         to this tree.
     */
-    Tree add(string text, Image image = null, bool isOpened = false, string[] values = null, string[] tags = null)
+    // todo: handle all arguments
+    Tree add(string text, Image image = null, IsOpened isOpened = IsOpened.no, string[] values = null, string[] tags = null)
     {
         return new Tree(_rootTree, _name, this.evalFmt("%s insert %s end -text %s", _name, _treeID, text._enquote));
     }
@@ -147,7 +175,8 @@ class Tree : Widget
         This tree is needed if you want to add a child item
         to this tree.
     */
-    Tree insert(int index, string text, Image image = null, bool isOpened = false, string[] values = null, string[] tags = null)
+    // todo: handle all arguments
+    Tree insert(int index, string text, Image image = null, IsOpened isOpened = IsOpened.no, string[] values = null, string[] tags = null)
     {
         return new Tree(_rootTree, _name, this.evalFmt("%s insert %s %s -text %s", _name, _treeID, index, text._enquote));
     }
@@ -180,7 +209,6 @@ class Tree : Widget
     {
         // note: this call must come before calling detach or .parent will return the root identifier
         _detachInfo = DetachInfo(parent, index, IsDetached.yes);
-
         this.evalFmt("%s detach %s", _name, _treeID);
     }
 
@@ -399,6 +427,33 @@ class Tree : Widget
         this.setOption("padding", newPadding.toString);
     }
 
+    /** Get the options for the row this tree belongs to. */
+    @property RowOptions rowOptions()
+    {
+        RowOptions options;
+
+        // todo: image
+        options.text = this.evalFmt("%s item %s -text", _name, _treeID);
+
+        options.values = this.evalFmt("%s item %s -values", _name, _treeID).split;
+
+        string isOpenStr = this.evalFmt("%s item %s -open", _name, _treeID);
+        options.isOpened = (isOpenStr == "1" || isOpenStr == "true") ? IsOpened.yes : IsOpened.no;
+
+        options.tags = this.evalFmt("%s item %s -tags", _name, _treeID).split;
+
+        return options;
+    }
+
+    /** Set the options for the row this tree belongs to. */
+    @property void rowOptions(RowOptions options)
+    {
+        this.evalFmt("%s item %s -text %s", _name, _treeID, options.text._enquote);
+        this.evalFmt("%s item %s -values [list %s]", _name, _treeID, options.values.join(" "));
+        this.evalFmt("%s item %s -open %s", _name, _treeID, cast(int)options.isOpened);
+        this.evalFmt("%s item %s -tags [list %s]", _name, _treeID, options.tags.join(" "));
+    }
+
     /**
         Return the column options of the column at the index.
 
@@ -412,7 +467,7 @@ class Tree : Widget
         options._name = this.evalFmt("%s column %s -id", _name, index);
         options._anchor = this.evalFmt("%s column %s -anchor", _name, index).toAnchor();
         options._minWidth = this.evalFmt("%s column %s -minwidth", _name, index).to!int;
-        options._doStretch = this.evalFmt("%s column %s -stretch", _name, index).to!int == 1;
+        options._doStretch = cast(DoStretch)this.evalFmt("%s column %s -stretch", _name, index).to!int;
         options._width = this.evalFmt("%s column %s -width", _name, index).to!int;
 
         return options;
@@ -428,7 +483,7 @@ class Tree : Widget
     {
         this.evalFmt("%s column %s -anchor %s", _name, index, options._anchor.toString());
         this.evalFmt("%s column %s -minwidth %s", _name, index, options._minWidth);
-        this.evalFmt("%s column %s -stretch %s", _name, index, options._doStretch ? 1 : 0);
+        this.evalFmt("%s column %s -stretch %s", _name, index, cast(int)options._doStretch);
         this.evalFmt("%s column %s -width %s", _name, index, options._width);
     }
 
@@ -440,7 +495,7 @@ class Tree : Widget
         options._name = this.evalFmt("%s column #0 -id", _name);
         options._anchor = this.evalFmt("%s column #0 -anchor", _name).toAnchor();
         options._minWidth = this.evalFmt("%s column #0 -minwidth", _name).to!int;
-        options._doStretch = this.evalFmt("%s column #0 -stretch", _name).to!int == 1;
+        options._doStretch = cast(DoStretch)this.evalFmt("%s column #0 -stretch", _name).to!int;
         options._width = this.evalFmt("%s column #0 -width", _name).to!int;
 
         return options;
@@ -451,7 +506,7 @@ class Tree : Widget
     {
         this.evalFmt("%s column #0 -anchor %s", _name, options._anchor.toString());
         this.evalFmt("%s column #0 -minwidth %s", _name, options._minWidth);
-        this.evalFmt("%s column #0 -stretch %s", _name, options._doStretch ? 1 : 0);
+        this.evalFmt("%s column #0 -stretch %s", _name, cast(int)options._doStretch);
         this.evalFmt("%s column #0 -width %s", _name, options._width);
     }
 

@@ -15,7 +15,7 @@ unittest
 {
     auto app = new App;
 
-    auto testWindow = new Window(app.mainWindow, 200, 200);
+    auto testWindow = new Window(app.mainWindow, 500, 200);
     testWindow.position = Point(500, 500);
 
     auto tree2 = new Tree(testWindow, "Directory", ["Filename", "Modified", "Created"]);
@@ -37,8 +37,8 @@ unittest
 
     auto child1 = root1.add("Child 1");
     auto child2 = root1.add("Child 2");
-    root1.insert(2, "Child 4");
-    root1.insert(2, "Child 3");
+    auto child4 = root1.insert(2, "Child 4");
+    auto child3 = root1.insert(2, "Child 3");
 
     auto ch1_1 = child1.add("Child 1.1");
     auto ch1_3 = child1.insert(1, "Child 1.3");
@@ -46,7 +46,7 @@ unittest
 
     assert(child1.children == [ch1_1, ch1_2, ch1_3]);
 
-    auto treeColOpts = ColumnOptions(Anchor.east, 100, true, 100);
+    auto treeColOpts = ColumnOptions(Anchor.east, 100, DoStretch.yes, 100);
     tree.treeColumnOptions = treeColOpts;
     assert(tree.treeColumnOptions == treeColOpts);
 
@@ -54,7 +54,7 @@ unittest
     assert(tree.columnOptions(1).name == "Modified");
     assert(tree.columnOptions(2).name == "Created");
 
-    auto columnOpts = ColumnOptions(Anchor.east, 100, true, 100);
+    auto columnOpts = ColumnOptions(Anchor.east, 100, DoStretch.yes, 100);
     tree.setColumnOptions(0, columnOpts);
     assert(tree.columnOptions(0) == columnOpts, format("%s != %s", tree.columnOptions(0), columnOpts));
 
@@ -139,6 +139,16 @@ unittest
     auto treeHeadOpts = HeadingOptions("Tree Dir", Anchor.center);
     tree.treeHeadingOptions = treeHeadOpts;
     assert(tree.treeHeadingOptions == treeHeadOpts, format("%s != %s", tree.treeHeadingOptions, treeHeadOpts));
+
+    auto rowOpts1 = RowOptions("Child 1", NoImage, ["2012-04-05", "2012-01-01"], IsOpened.yes);
+    child1.rowOptions = rowOpts1;
+    assert(child1.rowOptions == rowOpts1);
+
+    root1.rowOptions = RowOptions("Root 1", NoImage, [], IsOpened.yes);
+
+    //~ stderr.writeln(child1.rowOptions);
+    //~ stderr.writeln(child3.rowOptions);
+    //~ stderr.writeln(child4.rowOptions);
 
     tree.pack();
 

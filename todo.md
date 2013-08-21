@@ -126,3 +126,5 @@ this to other input widgets and distribute these new widgets.
 
 The _isDestroyed bool we added should likely be checked in most function calls, but this might be
 expensive. Perhaps we should simply use an invariant for this.
+
+Replace all boolean parameters and fields with enums.

@@ -89,131 +89,131 @@ Permutations!(ElementType!R[]) permutations(R)(R r, size_t n)
 
 unittest
 {
-    //~ auto testWindow = new Window(app.mainWindow, 200, 200);
+    auto testWindow = new Window(app.mainWindow, 200, 200);
 
-    //~ testWindow.title = "test window";
-    //~ assert(testWindow.title == "test window");
+    testWindow.title = "test window";
+    assert(testWindow.title == "test window");
 
-    //~ testWindow.position = Point(200, 200);
-    //~ assert(testWindow.position == Point(200, 200));
+    testWindow.position = Point(200, 200);
+    assert(testWindow.position == Point(200, 200));
 
-    //~ testWindow.position = Point(-200, -200);
-    //~ assert(testWindow.position == Point(-200, -200));
+    testWindow.position = Point(-200, -200);
+    assert(testWindow.position == Point(-200, -200));
 
-    //~ testWindow.size = Size(300, 400);
-    //~ assert(testWindow.size == Size(300, 400));
+    testWindow.size = Size(300, 400);
+    assert(testWindow.size == Size(300, 400));
 
-    //~ testWindow.geometry = Rect(-100, 100, 250, 250);
-    //~ assert(testWindow.position == Point(-100, 100));
-    //~ assert(testWindow.size == Size(250, 250));
-    //~ assert(testWindow.geometry == Rect(-100, 100, 250, 250));
+    testWindow.geometry = Rect(-100, 100, 250, 250);
+    assert(testWindow.position == Point(-100, 100));
+    assert(testWindow.size == Size(250, 250));
+    assert(testWindow.geometry == Rect(-100, 100, 250, 250));
 
-    //~ testWindow.geometry = Rect(100, 100, 250, 250);
-    //~ assert(testWindow.position == Point(100, 100));
-    //~ assert(testWindow.size == Size(250, 250));
-    //~ assert(testWindow.geometry == Rect(100, 100, 250, 250));
+    testWindow.geometry = Rect(100, 100, 250, 250);
+    assert(testWindow.position == Point(100, 100));
+    assert(testWindow.size == Size(250, 250));
+    assert(testWindow.geometry == Rect(100, 100, 250, 250));
 
-    //~ // @bug: http://stackoverflow.com/questions/18043720/odd-results-for-wm-geometry
+    // @bug: http://stackoverflow.com/questions/18043720/odd-results-for-wm-geometry
 
-    //~ assert(testWindow.parentWindow is app.mainWindow);
+    assert(testWindow.parentWindow is app.mainWindow);
 
-    //~ auto childWin = new Window(testWindow, 200, 200);
-    //~ childWin.position = Point(250, 250);
-    //~ childWin.title = "child window 1";
-    //~ assert(testWindow.parentWindow is app.mainWindow);
-    //~ assert(childWin.parentWindow is testWindow);
+    auto childWin = new Window(testWindow, 200, 200);
+    childWin.position = Point(250, 250);
+    childWin.title = "child window 1";
+    assert(testWindow.parentWindow is app.mainWindow);
+    assert(childWin.parentWindow is testWindow);
 
-    //~ childWin.setAlpha(0.5);
-    //~ assert(childWin.getAlpha() < 0.6);
-    //~ childWin.setAlpha(1.0);
+    childWin.setAlpha(0.5);
+    assert(childWin.getAlpha() < 0.6);
+    childWin.setAlpha(1.0);
 
-    //~ childWin.maximizeWindow();
-    //~ childWin.unmaximizeWindow();
+    childWin.maximizeWindow();
+    childWin.unmaximizeWindow();
 
-    //~ auto button1 = new Button(testWindow, "FooButton");
-    //~ auto button2 = new Button(testWindow, "BarButton");
+    auto button1 = new Button(testWindow, "FooButton");
+    auto button2 = new Button(testWindow, "BarButton");
 
-    //~ auto children = testWindow.childWidgets;
-    //~ assert(children.front is childWin);
-    //~ children.popFront();
-    //~ assert(children.front is button1);
-    //~ children.popFront();
-    //~ assert(children.front is button2);
+    auto children = testWindow.childWidgets;
+    assert(children.front is childWin);
+    children.popFront();
+    assert(children.front is button1);
+    children.popFront();
+    assert(children.front is button2);
 
-    //~ testWindow.setTopWindow();
-    //~ assert(testWindow.isAbove(childWin));
-    //~ assert(childWin.isBelow(testWindow));
+    testWindow.setTopWindow();
+    assert(testWindow.isAbove(childWin));
+    assert(childWin.isBelow(testWindow));
 
-    //~ childWin.setTopWindow();
-    //~ assert(childWin.isAbove(testWindow));
-    //~ assert(testWindow.isBelow(childWin));
+    childWin.setTopWindow();
+    assert(childWin.isAbove(testWindow));
+    assert(testWindow.isBelow(childWin));
 
-    //~ auto childWin2 = new Window(testWindow, 200, 200);
-    //~ childWin2.position = Point(300, 300);
-    //~ childWin2.title = "child window 2";
+    auto childWin2 = new Window(testWindow, 200, 200);
+    childWin2.position = Point(300, 300);
+    childWin2.title = "child window 2";
 
-    //~ testWindow.setTopWindow();
-    //~ childWin.setTopWindow();
-    //~ childWin2.setTopWindow();
+    testWindow.setTopWindow();
+    childWin.setTopWindow();
+    childWin2.setTopWindow();
 
-    //~ assert(childWin2.isAbove(childWin));
-    //~ assert(childWin2.isAbove(testWindow));
-    //~ assert(childWin.isAbove(testWindow));
+    assert(childWin2.isAbove(childWin));
+    assert(childWin2.isAbove(testWindow));
+    assert(childWin.isAbove(testWindow));
 
-    //~ testWindow.setBottomWindow();
-    //~ childWin.setBottomWindow();
-    //~ childWin2.setBottomWindow();
+    testWindow.setBottomWindow();
+    childWin.setBottomWindow();
+    childWin2.setBottomWindow();
 
-    //~ assert(testWindow.isAbove(childWin));
-    //~ assert(testWindow.isAbove(childWin2));
-    //~ assert(childWin.isAbove(childWin2));
+    assert(testWindow.isAbove(childWin));
+    assert(testWindow.isAbove(childWin2));
+    assert(childWin.isAbove(childWin2));
 
-    //~ childWin2.setBottomWindow();
-    //~ childWin.setBottomWindow();
-    //~ testWindow.setBottomWindow();
+    childWin2.setBottomWindow();
+    childWin.setBottomWindow();
+    testWindow.setBottomWindow();
 
-    //~ assert(childWin2.isAbove(childWin));
-    //~ assert(childWin2.isAbove(testWindow));
-    //~ assert(childWin.isAbove(testWindow));
+    assert(childWin2.isAbove(childWin));
+    assert(childWin2.isAbove(testWindow));
+    assert(childWin.isAbove(testWindow));
 
-    //~ foreach (Window[3] win; [childWin, childWin2, testWindow].permutations)
-    //~ {
-        //~ win[0].setAbove(win[1]);
-        //~ assert(win[0].isAbove(win[1]));
+    foreach (Window[3] win; [childWin, childWin2, testWindow].permutations)
+    {
+        win[0].setAbove(win[1]);
+        assert(win[0].isAbove(win[1]));
 
-        //~ win[1].setAbove(win[2]);
-        //~ assert(win[1].isAbove(win[2]));
+        win[1].setAbove(win[2]);
+        assert(win[1].isAbove(win[2]));
 
-        //~ win[2].setAbove(win[1]);
-        //~ assert(win[2].isAbove(win[1]));
+        win[2].setAbove(win[1]);
+        assert(win[2].isAbove(win[1]));
 
-        //~ win[2].setAbove(win[0]);
-        //~ assert(win[2].isAbove(win[0]));
+        win[2].setAbove(win[0]);
+        assert(win[2].isAbove(win[0]));
 
-        //~ win[0].setBelow(win[1]);
-        //~ assert(win[0].isBelow(win[1]));
+        win[0].setBelow(win[1]);
+        assert(win[0].isBelow(win[1]));
 
-        //~ win[1].setBelow(win[2]);
-        //~ assert(win[1].isBelow(win[2]));
+        win[1].setBelow(win[2]);
+        assert(win[1].isBelow(win[2]));
 
-        //~ win[2].setBelow(win[1]);
-        //~ assert(win[2].isBelow(win[1]));
+        win[2].setBelow(win[1]);
+        assert(win[2].isBelow(win[1]));
 
-        //~ win[2].setBelow(win[0]);
-        //~ assert(win[2].isBelow(win[0]));
-    //~ }
+        win[2].setBelow(win[0]);
+        assert(win[2].isBelow(win[0]));
+    }
 
-    //~ testWindow.minimizeWindow();
-    //~ assert(testWindow.isMinimized);
+    testWindow.minimizeWindow();
+    assert(testWindow.isMinimized);
 
-    //~ testWindow.unminimizeWindow();
-    //~ assert(!testWindow.isMinimized);
+    testWindow.unminimizeWindow();
+    assert(!testWindow.isMinimized);
 
-    //~ testWindow.setResizable(false, false);
+    testWindow.setResizable(CanResizeWidth.no, CanResizeHeight.no);
 
-    //~ // can still be resized through the API
-    //~ testWindow.size = Size(250, 250);
-    //~ assert(testWindow.size == Size(250, 250));
+    // can still be resized through the API
+    testWindow.size = Size(250, 250);
+    assert(testWindow.size == Size(250, 250));
 
-    //~ app.testRun();
+    app.testRun();
 }

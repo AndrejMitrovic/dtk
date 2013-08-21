@@ -206,7 +206,7 @@ unittest
     testWindow.unminimizeWindow();
     assert(!testWindow.isMinimized);
 
-    testWindow.setResizable(false, false);
+    testWindow.setResizable(CanResizeWidth.no, CanResizeHeight.no);
     testWindow.size = Size(250, 250);
     assert(testWindow.size == Size(250, 250));  // can be resized through the API
 
