@@ -19,10 +19,12 @@ unittest
     testWindow.position = Point(500, 500);
 
     auto tree = new Tree(testWindow, "Directory", ["Filename", "Modified", "Created"]);
+    assert(tree.index == 0);
+
     auto root1 = tree.add("Root 1");
 
     auto child1 = root1.add("Child 1");
-    root1.add("Child 2");
+    auto child2 = root1.add("Child 2");
     root1.insert(2, "Child 4");
     root1.insert(2, "Child 3");
 
@@ -87,6 +89,27 @@ unittest
 
     tree.displayAllColumns();
     assert(tree.displayColumns() == [0, 1, 2]);
+
+    assert(root1.children.length == 4, root1.children.length.text);
+
+    tree.destroy(child2);
+    assert(root1.children.length == 3);
+
+    auto parent = child1.parent;
+
+    child1.detach();
+    assert(root1.children.length == 2);
+
+    parent.attach(child1);
+    assert(child1.index == 2, child1.index.text);
+    assert(root1.children.length == 3);
+
+    parent.attach(child1, 0);
+    assert(child1.index == 0, child1.index.text);
+    assert(root1.children.length == 3);
+
+    child1.detach();
+    child1.reattach();
 
     tree.pack();
 

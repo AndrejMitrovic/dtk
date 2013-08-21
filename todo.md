@@ -117,3 +117,9 @@ Instead of using DtkOptions and a super call, we should try to always call prope
 in the ctor. This will avoid code duplication and will be more clean.
 
 Could make evalFmt in widgets always prepend _name, since that's how we always use it anyway.
+
+Find a way to get the win32 cursor blinking time, and then use insertOffTime in the text widget
+to modify the blinking. Try to see if other widgets support this option, otherwise ask in the
+Tcl newsgroups whether these widgets should support this option, or whether they should follow
+system-default settings. Finally, we could try finding how insertOffTime is set in Tcl and apply
+this to other input widgets and distribute these new widgets.
