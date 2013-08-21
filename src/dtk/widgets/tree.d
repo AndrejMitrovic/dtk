@@ -246,6 +246,19 @@ class Tree : Widget
         return _treeID == _rootTreeID;
     }
 
+    /**
+        Check if a tree is present in the entire tree structure that
+        this tree belongs to, anywhere from this tree's root tree
+        through all of its descendants.
+
+        If you only want to check if a tree is a direct child of this tree,
+        use $(D targetTree.parent is containerTree).
+    */
+    @property bool contains(Tree tree)
+    {
+        return this.evalFmt("%s exists %s", _name, tree._treeID) == "1";
+    }
+
     /** Return the children of this tree. */
     @property Tree[] children()
     {
@@ -263,6 +276,29 @@ class Tree : Widget
         }
 
         return result.data;
+    }
+
+    /**
+        Get the current focused tree.
+        If no tree is in focus, returns null.
+    */
+    Tree getFocus()
+    {
+        string treePath = this.evalFmt("%s focus", _name);
+
+        if (treePath.empty)
+            return null;
+
+        enforce(treePath in _rootTree._treeIDMap,
+            format("%s not in %s", treePath, _rootTree._treeIDMap));
+
+        return _rootTree._treeIDMap[treePath];
+    }
+
+    /** Set this tree to be the focused tree. */
+    void setFocus()
+    {
+        this.evalFmt("%s focus %s", _name, _treeID);
     }
 
     /** Get the tree column visibility. */
@@ -451,6 +487,68 @@ class Tree : Widget
     {
         this.setOption("displaycolumns", "#all");
     }
+
+    /**
+        Return the heading options of the column at the index.
+
+        Note: The index does not include the tree column heading,
+        for that use $(D treeHeadingOptions) instead.
+    */
+    //~ HeadingOptions headingOptions(int index)
+    //~ {
+        //~ HeadingOptions options;
+
+        //~ options.text = this.evalFmt("%s column %s -text", _name, index);
+        //~ // todo: image
+        //~ options.anchor = this.evalFmt("%s column %s -anchor", _name, index).toAnchor();
+
+        //~ // todo: command (should be a delegate or signal)
+        //~ options.command = this.evalFmt("%s column %s -anchor", _name, index).toAnchor();
+
+        //~ return options;
+    //~ }
+
+    //~ /**
+        //~ Set the column options for the column at the index.
+
+        //~ Note: The index does not include the tree column,
+        //~ for that use $(D treeColumnOptions) instead.
+    //~ */
+    //~ void setColumnOptions(int index, ColumnOptions options)
+    //~ {
+        //~ this.evalFmt("%s column %s -anchor %s", _name, index, options._anchor.toString());
+        //~ this.evalFmt("%s column %s -minwidth %s", _name, index, options._minWidth);
+        //~ this.evalFmt("%s column %s -stretch %s", _name, index, options._doStretch ? 1 : 0);
+        //~ this.evalFmt("%s column %s -width %s", _name, index, options._width);
+    //~ }
+
+    //~ /** Return the tree column options. */
+    //~ @property ColumnOptions treeColumnOptions()
+    //~ {
+        //~ ColumnOptions options;
+
+        //~ options._name = this.evalFmt("%s column #0 -id", _name);
+        //~ options._anchor = this.evalFmt("%s column #0 -anchor", _name).toAnchor();
+        //~ options._minWidth = this.evalFmt("%s column #0 -minwidth", _name).to!int;
+        //~ options._doStretch = this.evalFmt("%s column #0 -stretch", _name).to!int == 1;
+        //~ options._width = this.evalFmt("%s column #0 -width", _name).to!int;
+
+        //~ return options;
+    //~ }
+
+    //~ /**
+        //~ Set the tree column options.
+
+        //~ Note: The index does not include the tree column,
+        //~ for that use $(D treeColumnOptions) instead.
+    //~ */
+    //~ @property void treeColumnOptions(ColumnOptions options)
+    //~ {
+        //~ this.evalFmt("%s column #0 -anchor %s", _name, options._anchor.toString());
+        //~ this.evalFmt("%s column #0 -minwidth %s", _name, options._minWidth);
+        //~ this.evalFmt("%s column #0 -stretch %s", _name, options._doStretch ? 1 : 0);
+        //~ this.evalFmt("%s column #0 -width %s", _name, options._width);
+    //~ }
 
     ///
     override string toString()

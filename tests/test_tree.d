@@ -18,11 +18,18 @@ unittest
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
+    auto tree2 = new Tree(testWindow, "Directory", ["Filename", "Modified", "Created"]);
+
     auto tree = new Tree(testWindow, "Directory", ["Filename", "Modified", "Created"]);
     assert(tree.isRootTree);
     assert(tree.index == 0);
 
+    assert(tree.getFocus is null);
+
     auto root1 = tree.add("Root 1");
+
+    assert(tree.contains(root1));
+    assert(!tree2.contains(root1));
 
     assert(!root1.isRootTree);
     assert(root1.parent is tree);
@@ -116,6 +123,9 @@ unittest
 
     child1.detach();
     child1.reattach();
+
+    child1.setFocus();
+    assert(tree.getFocus is child1);
 
     tree.pack();
 
