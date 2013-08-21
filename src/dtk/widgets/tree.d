@@ -82,6 +82,16 @@ private:
 }
 
 ///
+struct HeadingOptions
+{
+    string text;
+    Anchor anchor;
+    Image image;
+
+    private void* command;  // do not use yet
+}
+
+///
 class Tree : Widget
 {
     ///
@@ -422,7 +432,7 @@ class Tree : Widget
         this.evalFmt("%s column %s -width %s", _name, index, options._width);
     }
 
-    /** Return the tree column options. */
+    /** Get the tree column options. */
     @property ColumnOptions treeColumnOptions()
     {
         ColumnOptions options;
@@ -436,12 +446,7 @@ class Tree : Widget
         return options;
     }
 
-    /**
-        Set the tree column options.
-
-        Note: The index does not include the tree column,
-        for that use $(D treeColumnOptions) instead.
-    */
+    /** Set the tree column options. */
     @property void treeColumnOptions(ColumnOptions options)
     {
         this.evalFmt("%s column #0 -anchor %s", _name, options._anchor.toString());
@@ -494,61 +499,49 @@ class Tree : Widget
         Note: The index does not include the tree column heading,
         for that use $(D treeHeadingOptions) instead.
     */
-    //~ HeadingOptions headingOptions(int index)
-    //~ {
-        //~ HeadingOptions options;
+    HeadingOptions headingOptions(int index)
+    {
+        HeadingOptions options;
 
-        //~ options.text = this.evalFmt("%s column %s -text", _name, index);
-        //~ // todo: image
-        //~ options.anchor = this.evalFmt("%s column %s -anchor", _name, index).toAnchor();
+        // todo: image and command
+        options.text   = this.evalFmt("%s heading %s -text", _name, index);
+        options.anchor = this.evalFmt("%s heading %s -anchor", _name, index).toAnchor();
 
-        //~ // todo: command (should be a delegate or signal)
-        //~ options.command = this.evalFmt("%s column %s -anchor", _name, index).toAnchor();
+        return options;
+    }
 
-        //~ return options;
-    //~ }
+    /**
+        Set the heading options for the column at the index.
 
-    //~ /**
-        //~ Set the column options for the column at the index.
+        Note: The index does not include the tree column,
+        for that use $(D treeHeadingOptions) instead.
+    */
+    void setHeadingOptions(int index, HeadingOptions options)
+    {
+        // todo: image and command
+        this.evalFmt("%s heading %s -text %s", _name, index, options.text._enquote);
+        this.evalFmt("%s heading %s -anchor %s", _name, index, options.anchor.toString());
+    }
 
-        //~ Note: The index does not include the tree column,
-        //~ for that use $(D treeColumnOptions) instead.
-    //~ */
-    //~ void setColumnOptions(int index, ColumnOptions options)
-    //~ {
-        //~ this.evalFmt("%s column %s -anchor %s", _name, index, options._anchor.toString());
-        //~ this.evalFmt("%s column %s -minwidth %s", _name, index, options._minWidth);
-        //~ this.evalFmt("%s column %s -stretch %s", _name, index, options._doStretch ? 1 : 0);
-        //~ this.evalFmt("%s column %s -width %s", _name, index, options._width);
-    //~ }
+    /** Get the tree column heading options. */
+    @property HeadingOptions treeHeadingOptions()
+    {
+        HeadingOptions options;
 
-    //~ /** Return the tree column options. */
-    //~ @property ColumnOptions treeColumnOptions()
-    //~ {
-        //~ ColumnOptions options;
+        // todo: image and command
+        options.text   = this.evalFmt("%s heading #0 -text", _name);
+        options.anchor = this.evalFmt("%s heading #0 -anchor", _name).toAnchor();
 
-        //~ options._name = this.evalFmt("%s column #0 -id", _name);
-        //~ options._anchor = this.evalFmt("%s column #0 -anchor", _name).toAnchor();
-        //~ options._minWidth = this.evalFmt("%s column #0 -minwidth", _name).to!int;
-        //~ options._doStretch = this.evalFmt("%s column #0 -stretch", _name).to!int == 1;
-        //~ options._width = this.evalFmt("%s column #0 -width", _name).to!int;
+        return options;
+    }
 
-        //~ return options;
-    //~ }
-
-    //~ /**
-        //~ Set the tree column options.
-
-        //~ Note: The index does not include the tree column,
-        //~ for that use $(D treeColumnOptions) instead.
-    //~ */
-    //~ @property void treeColumnOptions(ColumnOptions options)
-    //~ {
-        //~ this.evalFmt("%s column #0 -anchor %s", _name, options._anchor.toString());
-        //~ this.evalFmt("%s column #0 -minwidth %s", _name, options._minWidth);
-        //~ this.evalFmt("%s column #0 -stretch %s", _name, options._doStretch ? 1 : 0);
-        //~ this.evalFmt("%s column #0 -width %s", _name, options._width);
-    //~ }
+    //~ /** Set the tree column heading options. */
+    @property void treeHeadingOptions(HeadingOptions options)
+    {
+        // todo: image and command
+        this.evalFmt("%s heading #0 -text %s", _name, options.text._enquote);
+        this.evalFmt("%s heading #0 -anchor %s", _name, options.anchor.toString());
+    }
 
     ///
     override string toString()

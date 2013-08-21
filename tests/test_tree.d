@@ -127,6 +127,19 @@ unittest
     child1.setFocus();
     assert(tree.getFocus is child1);
 
+    assert(tree.headingOptions(0).text == "Filename");
+    assert(tree.headingOptions(1).text == "Modified");
+
+    auto headOpts = HeadingOptions("Dirname", Anchor.center);
+    tree.setHeadingOptions(0, headOpts);
+    assert(tree.headingOptions(0) == headOpts);
+
+    assert(tree.treeHeadingOptions.text == "Directory");
+
+    auto treeHeadOpts = HeadingOptions("Tree Dir", Anchor.center);
+    tree.treeHeadingOptions = treeHeadOpts;
+    assert(tree.treeHeadingOptions == treeHeadOpts, format("%s != %s", tree.treeHeadingOptions, treeHeadOpts));
+
     tree.pack();
 
     app.run();
