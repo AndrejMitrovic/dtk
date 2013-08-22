@@ -30,7 +30,7 @@ rem set compiler=dmd.exe
 set compiler=dmd_msc.exe
 rem set compiler=ldmd2.exe
 
-set dtest=rdmd -w -of%binPath%\dtk_test.exe --main -version=DTK_UNITTEST -L/SUBSYSTEM:WINDOWS:5.01 -unittest -g --force --compiler=%compiler% %flags% dtk\package.d
+set dtest=rdmd --build-only -w -of%binPath%\dtk_test.exe --main -version=DTK_UNITTEST -L/SUBSYSTEM:WINDOWS:5.01 -unittest -g --force --compiler=%compiler% %flags% dtk\package.d
 
 set stdout_log=%buildPath%\dtktest_stdout.log
 set stderr_log=%buildPath%\dtktest_stderr.log
@@ -40,6 +40,9 @@ echo. > %stderr_log%
 
 %dtest%
 if errorlevel 1 GOTO ERROR
+
+timeit %binPath%\dtk_test.exe
+
 type %stdout_log%
 echo Success: dtk tested.
 

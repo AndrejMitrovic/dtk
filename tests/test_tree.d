@@ -194,7 +194,7 @@ unittest
 
     tree.pack();
 
-    app.run();
+    app.testRun();
 }
 
 void main()
