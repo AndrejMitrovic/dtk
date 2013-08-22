@@ -278,6 +278,119 @@ class Tree : Widget
         return parent;
     }
 
+    /** Return the previous sibling tree, or null if this is the first child of its parent. */
+    Tree prevTree()
+    {
+        string prevID = this.evalFmt("%s prev %s", _name, _treeID);
+
+        if (prevID.empty)
+            return null;
+
+        enforce(prevID in _rootTree._treeIDMap,
+            format("Cannot return previous tree because it was destroyed."));
+
+        return _rootTree._treeIDMap[prevID];
+    }
+
+    /** Return the next sibling tree, or null if this is the last child of its parent. */
+    Tree nextTree()
+    {
+        string nextID = this.evalFmt("%s next %s", _name, _treeID);
+
+        if (nextID.empty)
+            return null;
+
+        enforce(nextID in _rootTree._treeIDMap,
+            format("Cannot return next tree because it was destroyed."));
+
+        return _rootTree._treeIDMap[nextID];
+    }
+
+    /** Get the selected trees. */
+    @property Tree[] selection()
+    {
+        string treeIDs = this.evalFmt("%s selection", _name);
+
+        Appender!(Tree[]) result;
+
+        foreach (treeID; treeIDs.splitter(" "))
+        {
+            enforce(treeID in _rootTree._treeIDMap,
+                format("Cannot return selected tree because it was destroyed."));
+
+            auto tree = _rootTree._treeIDMap[treeID];
+            if (tree !is null)
+                result ~= tree;
+        }
+
+        if (result.data.empty)
+            return null;
+
+        return result.data;
+    }
+
+    /** Select a single tree. */
+    @property void selection(Tree tree)
+    {
+        enforce(tree._treeID in _rootTree._treeIDMap,
+            format("Cannot select tree because it is not part of this root tree."));
+
+        this.evalFmt("%s selection set %s", _name, tree._treeID);
+    }
+
+    /** Select the trees provided. */
+    @property void selection(Tree[] trees)
+    {
+        foreach (tree; trees)
+        {
+            enforce(tree._treeID in _rootTree._treeIDMap,
+                format("Cannot select tree because it is not part of this root tree."));
+        }
+
+        this.evalFmt("%s selection set [list %s]", _name, trees.map!(a => a._treeID).join(" "));
+    }
+
+    /** Add one or more trees to the selection. */
+    void addSelection(Tree[] trees...)
+    {
+        foreach (tree; trees)
+        {
+            enforce(tree._treeID in _rootTree._treeIDMap,
+                format("Cannot add tree to selection because it is not part of this root tree."));
+        }
+
+        this.evalFmt("%s selection add [list %s]", _name, trees.map!(a => a._treeID).join(" "));
+    }
+
+    /** Toggle the select state of one or more trees. */
+    void toggleSelection(Tree[] trees...)
+    {
+        foreach (tree; trees)
+        {
+            enforce(tree._treeID in _rootTree._treeIDMap,
+                format("Cannot toggle selection of tree because it is not part of this root tree."));
+        }
+
+        this.evalFmt("%s selection toggle [list %s]", _name, trees.map!(a => a._treeID).join(" "));
+    }
+
+    /** Remove all selections from this tree. */
+    void deselectAll()
+    {
+        string treeIDs = this.evalFmt("%s selection", _name);
+        foreach (treeID; treeIDs.splitter(" "))
+            this.evalFmt("%s selection remove %s", _name, treeID);
+    }
+
+    /**
+        Set this tree so it's visible. This opens all of this tree's ancestors,
+        and potentially scrolls the widget so this tree is visible to the user.
+    */
+    void setVisible()
+    {
+        this.evalFmt("%s see %s", _name, _treeID);
+    }
+
     /** Check if this tree is the root tree. */
     @property bool isRootTree()
     {
@@ -590,7 +703,7 @@ class Tree : Widget
         return options;
     }
 
-    //~ /** Set the tree column heading options. */
+    /** Set the tree column heading options. */
     @property void treeHeadingOptions(HeadingOptions options)
     {
         // todo: image and command

@@ -40,9 +40,23 @@ unittest
     auto child4 = root1.insert(2, "Child 4");
     auto child3 = root1.insert(2, "Child 3");
 
+    assert(child1.prevTree is null);
+    assert(child2.prevTree is child1);
+    assert(child3.prevTree is child2);
+    assert(child4.prevTree is child3);
+
+    assert(child1.nextTree is child2);
+    assert(child2.nextTree is child3);
+    assert(child3.nextTree is child4);
+    assert(child4.nextTree is null);
+
+    assert(child1.nextTree.prevTree is child1);
+
     auto ch1_1 = child1.add("Child 1.1");
     auto ch1_3 = child1.insert(1, "Child 1.3");
     auto ch1_2 = child1.insert(1, "Child 1.2");
+
+    auto ch1_3_1 = ch1_3.add("Child 1.3.1");
 
     assert(child1.children == [ch1_1, ch1_2, ch1_3]);
 
@@ -146,9 +160,30 @@ unittest
 
     root1.rowOptions = RowOptions("Root 1", NoImage, [], IsOpened.yes);
 
-    //~ stderr.writeln(child1.rowOptions);
-    //~ stderr.writeln(child3.rowOptions);
-    //~ stderr.writeln(child4.rowOptions);
+    ch1_3_1.setVisible();
+
+    assert(tree.selection is null);
+
+    tree.selection = [child1, ch1_3_1];
+    assert(tree.selection == [child1, ch1_3_1]);
+
+    tree.selection = child1;
+    assert(tree.selection == [child1]);
+
+    tree.deselectAll();
+    assert(tree.selection is null);
+
+    tree.addSelection(child1);
+    assert(tree.selection == [child1]);
+
+    tree.addSelection(ch1_3_1);
+    assert(tree.selection == [child1, ch1_3_1]);
+
+    tree.toggleSelection(child1);
+    assert(tree.selection == [ch1_3_1]);
+
+    tree.toggleSelection(child1);
+    assert(tree.selection == [child1, ch1_3_1]);
 
     tree.pack();
 
