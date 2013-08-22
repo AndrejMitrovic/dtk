@@ -122,13 +122,13 @@ class Entry : Widget
         entries that input passwords where the char symbol could
         e.g. equal '*'. If no char symbol is set, ' ' is returned.
     */
-    @property dchar displayChar()
+    @property char displayChar()
     {
         string res = this.getOption!string("show");
         if (res.empty)
             return ' ';
         else
-            return res.front;
+            return cast(char)res.front;
     }
 
     /**
@@ -138,7 +138,7 @@ class Entry : Widget
         Note: Using ' ' will not re-set the display of characters,
         use resetDisplayChar instead.
     */
-    @property void displayChar(dchar newDisplayChar)
+    @property void displayChar(char newDisplayChar)
     {
         this.setOption("show", newDisplayChar);
     }

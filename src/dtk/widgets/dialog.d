@@ -132,7 +132,7 @@ class OpenFileDialog : GenericDialog
     string show()
     {
         version (OSX)
-            string msg = format("-message %s", osxMessage._enquote);
+            string msg = format("-message %s", osxMessage._tclEscape);
         else
             enum string msg = null;
 
@@ -140,12 +140,12 @@ class OpenFileDialog : GenericDialog
 
         return this.evalFmt("tk_getOpenFile -filetypes %s -initialdir %s -initialfile %s %s -multiple %s %s -title %s -typevariable %s",
             fileTypes.toString(),
-            initialDir._escapePath._enquote,
-            initialFile._escapePath._enquote,
+            initialDir._tclEscape,
+            initialFile._tclEscape,
             msg,
             allowMultiSelect,
-            (parent is null) ? "" : format("-parent %s", parent._name._enquote),
-            title._enquote,
+            (parent is null) ? "" : format("-parent %s", parent._name._tclEscape),
+            title._tclEscape,
             _defaultFileTypeVar
         ).buildNormalizedPath;
     }
@@ -164,7 +164,7 @@ class SaveFileDialog : GenericDialog
     string show()
     {
         version (OSX)
-            string msg = format("-message %s", osxMessage._enquote);
+            string msg = format("-message %s", osxMessage._tclEscape);
         else
             enum string msg = null;
 
@@ -174,11 +174,11 @@ class SaveFileDialog : GenericDialog
             fileTypes.toString(),
             confirmOverwrite,
             defaultExtension,
-            initialDir._escapePath._enquote,
-            initialFile._escapePath._enquote,
+            initialDir._tclEscape,
+            initialFile._tclEscape,
             msg,
-            (parent is null) ? "" : format("-parent %s", parent._name._enquote),
-            title._enquote,
+            (parent is null) ? "" : format("-parent %s", parent._name._tclEscape),
+            title._tclEscape,
             _defaultFileTypeVar
         ).buildNormalizedPath;
     }
@@ -213,10 +213,10 @@ class SelectDirDialog : Widget
     string show()
     {
         return this.evalFmt("tk_chooseDirectory -initialdir %s -mustexist %s %s -title %s",
-            initialDir._escapePath._enquote,
+            initialDir._tclEscape,
             mustExist,
-            (parent is null) ? "" : format("-parent %s", parent._name._enquote),
-            title._enquote,
+            (parent is null) ? "" : format("-parent %s", parent._name._tclEscape),
+            title._tclEscape,
         ).buildNormalizedPath;
     }
 
@@ -247,8 +247,8 @@ class SelectColorDialog : Widget
 
         string output = this.evalFmt("tk_chooseColor %s %s -title %s",
             !_useInitColor ? "" : format("-initialcolor %s", _initColor.toString()),
-            (parent is null) ? "" : format("-parent %s", parent._name._enquote),
-            title._enquote,
+            (parent is null) ? "" : format("-parent %s", parent._name._tclEscape),
+            title._tclEscape,
         ).buildNormalizedPath;
 
         if (!output.empty)
@@ -339,14 +339,14 @@ class MessageBox : Widget
         version (OSX)
             enum titleStr = "";  // title unused on OSX
         else
-            string titleStr = format("-title %s", title._enquote);
+            string titleStr = format("-title %s", title._tclEscape);
 
         string result = this.evalFmt("tk_messageBox %s -detail %s -icon %s -message %s %s %s -type %s",
             strDefault,
-            extraMessage._enquote,
+            extraMessage._tclEscape,
             messageBoxIcon,
-            message._enquote,
-            (parent is null) ? "" : format("-parent %s", parent._name._enquote),
+            message._tclEscape,
+            (parent is null) ? "" : format("-parent %s", parent._name._tclEscape),
             titleStr,
             messageBoxType.toString());
 

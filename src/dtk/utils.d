@@ -14,6 +14,8 @@ import std.stdio;
 import std.string;
 import std.traits;
 
+import dtk.loader;
+
 alias spaceJoin = pipe!(map!(to!string), reduce!("a ~ ' ' ~ b"));
 
 /** Convert a Tcl string value into a D type. */
@@ -46,13 +48,15 @@ package string _makeAggregateAliases(T)()
     return result.join("\n");
 }
 
-package string _enquote(T)(T option)
+/** Return an escaped Tcl string literal which can be used in Tcl commands. */
+string _tclEscape(T)(T input)
 {
-    return format(`"%s"`, option);
-}
+    // todo: use a buffer once Issue 10868 is implemented:
+    // http://d.puremagic.com/issues/show_bug.cgi?id=10868
 
-// Couldn't find Tcl equivalent of raw strings, need to escape backslashes
-package string _escapePath(string input)
-{
-    return input.replace(r"\", r"\\");
+    // note: have to use to!string because there is a lot of implicit conversions in D:
+    // char -> int
+    // dchar and int can't be overloaded
+    // enum -> int
+    return format(`"%s"`, to!string(input).translate(_tclTransTable));
 }

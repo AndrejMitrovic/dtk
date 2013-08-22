@@ -75,7 +75,7 @@ class Text : Widget
     @property void value(string newText)
     {
         this.evalFmt("%s delete 1.0 end", _name);
-        this.evalFmt("%s insert 1.0 %s", _name, newText._enquote);
+        this.evalFmt("%s insert 1.0 %s", _name, newText._tclEscape);
     }
 }
 

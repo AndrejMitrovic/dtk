@@ -42,13 +42,13 @@ struct TabOptions
     string toString()
     {
         return format("-text %s %s %s %s -state %s -sticky %s -padding %s",
-            text._enquote,
+            text._tclEscape,
             "", // todo: image
             "", // todo: compound
             (underline == -1) ? "" : format("-underline %s", underline),
             tabState,
             sticky,
-            padding.toString()._enquote);
+            padding.toString()._tclEscape);
     }
 }
 
@@ -76,7 +76,7 @@ class Notebook : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to add must be this notebook."));
 
-        string opts = format("-text %s", text._enquote);
+        string opts = format("-text %s", text._tclEscape);
         this.evalFmt("%s add %s %s", _name, widget._name, opts);
     }
 
@@ -104,7 +104,7 @@ class Notebook : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to insert must be this notebook."));
 
-        string opts = format("-text %s", text._enquote);
+        string opts = format("-text %s", text._tclEscape);
         this.evalFmt("%s insert %s %s %s", _name, index, widget._name, opts);
     }
 

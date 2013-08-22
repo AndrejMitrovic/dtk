@@ -476,7 +476,7 @@ package:
 
     final string setOption(T)(string option, T value)
     {
-        return evalFmt(`%s configure -%s %s`, _name, option, value._enquote);
+        return evalFmt(`%s configure -%s %s`, _name, option, value._tclEscape);
     }
 
     final T getVar(T)(string varName)

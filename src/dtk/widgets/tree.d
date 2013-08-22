@@ -127,14 +127,14 @@ class Tree : Widget
         super(master, TkType.tree);
 
         // create the columns
-        this.evalFmt("%s configure -columns %s", _name, columns.join(" ")._enquote);
+        this.evalFmt("%s configure -columns %s", _name, columns.join(" ")._tclEscape);
 
         // set the tree column label
-        this.evalFmt(`%s heading #0 -text %s`, _name, label._enquote);
+        this.evalFmt(`%s heading #0 -text %s`, _name, label._tclEscape);
 
         // set the column names
         foreach (idx, col; columns)
-            this.evalFmt(`%s heading %s -text %s`, _name, idx, col._enquote);
+            this.evalFmt(`%s heading %s -text %s`, _name, idx, col._tclEscape);
 
         _rootTree = this;
         _treeIDMap[_rootTreeID] = this;
@@ -165,7 +165,7 @@ class Tree : Widget
     // todo: handle all arguments
     Tree add(string text, Image image = null, IsOpened isOpened = IsOpened.no, string[] values = null, string[] tags = null)
     {
-        return new Tree(_rootTree, _name, this.evalFmt("%s insert %s end -text %s", _name, _treeID, text._enquote));
+        return new Tree(_rootTree, _name, this.evalFmt("%s insert %s end -text %s", _name, _treeID, text._tclEscape));
     }
 
     /**
@@ -178,7 +178,7 @@ class Tree : Widget
     // todo: handle all arguments
     Tree insert(int index, string text, Image image = null, IsOpened isOpened = IsOpened.no, string[] values = null, string[] tags = null)
     {
-        return new Tree(_rootTree, _name, this.evalFmt("%s insert %s %s -text %s", _name, _treeID, index, text._enquote));
+        return new Tree(_rootTree, _name, this.evalFmt("%s insert %s %s -text %s", _name, _treeID, index, text._tclEscape));
     }
 
     /** Return the index of this tree. */
@@ -561,10 +561,16 @@ class Tree : Widget
     /** Set the options for the row this tree belongs to. */
     @property void rowOptions(RowOptions options)
     {
-        this.evalFmt("%s item %s -text %s", _name, _treeID, options.text._enquote);
+        this.evalFmt("%s item %s -text %s", _name, _treeID, options.text._tclEscape);
         this.evalFmt("%s item %s -values [list %s]", _name, _treeID, options.values.join(" "));
         this.evalFmt("%s item %s -open %s", _name, _treeID, cast(int)options.isOpened);
         this.evalFmt("%s item %s -tags [list %s]", _name, _treeID, options.tags.join(" "));
+    }
+
+    /** Set the value for the column at the specified index. */
+    void setColumn(int index, string value)
+    {
+        this.evalFmt("%s set %s %s %s", _name, _treeID, index, value._tclEscape);
     }
 
     /**
@@ -687,7 +693,7 @@ class Tree : Widget
     void setHeadingOptions(int index, HeadingOptions options)
     {
         // todo: image and command
-        this.evalFmt("%s heading %s -text %s", _name, index, options.text._enquote);
+        this.evalFmt("%s heading %s -text %s", _name, index, options.text._tclEscape);
         this.evalFmt("%s heading %s -anchor %s", _name, index, options.anchor.toString());
     }
 
@@ -707,7 +713,7 @@ class Tree : Widget
     @property void treeHeadingOptions(HeadingOptions options)
     {
         // todo: image and command
-        this.evalFmt("%s heading #0 -text %s", _name, options.text._enquote);
+        this.evalFmt("%s heading #0 -text %s", _name, options.text._tclEscape);
         this.evalFmt("%s heading #0 -anchor %s", _name, options.anchor.toString());
     }
 

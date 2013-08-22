@@ -185,6 +185,13 @@ unittest
     tree.toggleSelection(child1);
     assert(tree.selection == [child1, ch1_3_1]);
 
+    ch1_3_1.setColumn(0, "Foo Dir");
+    ch1_3_1.setColumn(1, "Modified Date");
+    ch1_3_1.setColumn(2, "Created Date");
+
+    ch1_3_1.setColumn(2, `" Test [ String { $ # Stuff `);
+    ch1_3_1.setColumn(2, "Created Date");
+
     tree.pack();
 
     app.run();

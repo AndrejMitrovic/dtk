@@ -71,7 +71,7 @@ class Window : Widget
     /** Set a new window title. */
     @property void title(string newTitle)
     {
-        evalFmt("wm title %s %s", _name, newTitle._enquote);
+        evalFmt("wm title %s %s", _name, newTitle._tclEscape);
     }
 
     /**

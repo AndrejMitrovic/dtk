@@ -45,7 +45,7 @@ class Listbox : Widget
     /** Add an item to the end of the list. */
     void add(string value)
     {
-        this.evalFmt("%s insert end %s", _name, value._enquote);
+        this.evalFmt("%s insert end %s", _name, value._tclEscape);
     }
 
     /** Clear out all items in the listbox. */

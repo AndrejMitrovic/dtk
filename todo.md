@@ -128,3 +128,6 @@ The _isDestroyed bool we added should likely be checked in most function calls, 
 expensive. Perhaps we should simply use an invariant for this.
 
 Replace all boolean parameters and fields with enums.
+
+Read in detail about Tcl's string escaping and quoting rules because they seem complicated.
+Apparently we should only escape inner curly braces: http://stackoverflow.com/a/5302213/279684

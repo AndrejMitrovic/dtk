@@ -11,6 +11,9 @@ import std.exception;
 import dtk.types;
 import dtk.utils;
 
+/** Used for Tcl string literal escape rules. */
+string[dchar] _tclTransTable;
+
 version (Windows)
 {
     import core.runtime;
@@ -43,6 +46,14 @@ version (Windows)
         // This call is apparently required before all other Tcl/Tk calls on some systems,
         // but we'll call it on all systems to be sure.
         Tcl_FindExecutable(appName.toStringz);
+
+        _tclTransTable['"'] = `\"`;
+        _tclTransTable['$'] = r"\$";
+        _tclTransTable['['] = r"\[";
+        _tclTransTable[']'] = r"\]";
+        _tclTransTable['\\'] = r"\\";
+        _tclTransTable['{'] = r"\{";
+        _tclTransTable['}'] = r"\}";
     }
 }
 else
