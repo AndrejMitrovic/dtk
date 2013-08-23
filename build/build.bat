@@ -41,12 +41,16 @@ echo. > %stderr_log%
 %dtest%
 if errorlevel 1 GOTO ERROR
 
-timeit %binPath%\dtk_test.exe
+%binPath%\dtk_test.exe
+if errorlevel 1 GOTO ERROR
 
 type %stdout_log%
 echo Success: dtk tested.
 
-%compiler% -g -of%binPath%\dtk.lib -lib %flags% %files% && echo Success: dtk built.
+%compiler% -g -of%binPath%\dtk.lib -lib %flags% %files%
+if errorlevel 1 GOTO :eof
+
+echo Success: dtk built.
 goto :eof
 
 :ERROR
