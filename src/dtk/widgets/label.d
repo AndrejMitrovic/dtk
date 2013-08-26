@@ -184,8 +184,8 @@ class Label : Widget
     /**
         Set the font.
         If an empty string is passed the default font will be used.
-        To avoid hardcoding platform-specific fonts, you may use
-        one of the fonts in the GenericFont enumeration.
+        To avoid hardcoding platform-specific fonts, you can use
+        one of the fonts in the $(D GenericFont) enum.
     */
     @property void font(string newFont)
     {

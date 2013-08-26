@@ -10,6 +10,7 @@ import std.conv;
 import std.string;
 
 import dtk.event;
+import dtk.image;
 import dtk.signals;
 import dtk.options;
 import dtk.utils;
@@ -100,6 +101,25 @@ class Button : Widget
     @property void defaultMode(DefaultMode defaultMode)
     {
         this.setOption("default", to!string(defaultMode));
+    }
+
+    /**
+        Get the image associated with this button,
+        or null if no image was set.
+    */
+    @property Image image()
+    {
+        string imagePath = this.getOption!string("image");
+        return cast(Image)Widget.lookupWidgetPath(imagePath);
+    }
+
+    /**
+        Set an image for this button. If image is null,
+        the button is reset to display text only.
+    */
+    @property void image(Image newImage)
+    {
+        this.setOption("image", newImage._name);
     }
 }
 

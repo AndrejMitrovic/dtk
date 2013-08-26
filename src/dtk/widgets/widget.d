@@ -451,7 +451,7 @@ package:
 
     final string evalFmt(T...)(string fmt, T args)
     {
-        return eval(format(fmt, args));
+        return App.evalFmt(fmt, args);
     }
 
     final string eval(string cmd)
@@ -722,7 +722,7 @@ package:
     static size_t _threadID;
 
     /** This widget's unique name. */
-    string _name;
+    public string _name;
 
     /** Counter to create a thread-global unique widget name (_threadID is used in mangling). */
     static int _lastWidgetID = 0;

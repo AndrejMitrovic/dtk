@@ -47,12 +47,12 @@ struct Padding
     int bottom = 0;
 }
 
-package string toString(Padding padding)
+string toString(Padding padding)
 {
     return format("%s %s %s %s", padding.left, padding.top, padding.right, padding.bottom);
 }
 
-package Padding toPadding(string input)
+Padding toPadding(string input)
 {
     Padding result;
     size_t idx;
@@ -112,7 +112,7 @@ enum Sticky
     nsew,
 }
 
-package Sticky toSticky(string sticky)
+Sticky toSticky(string sticky)
 {
     switch (sticky) with (Sticky)
     {
@@ -142,7 +142,7 @@ enum Anchor
     center,     ///
 }
 
-package Anchor toAnchor(string anchor)
+Anchor toAnchor(string anchor)
 {
     switch (anchor) with (Anchor)
     {
@@ -160,7 +160,7 @@ package Anchor toAnchor(string anchor)
     }
 }
 
-package string toString(Anchor anchor)
+string toString(Anchor anchor)
 {
     final switch (anchor) with (Anchor)
     {
@@ -202,7 +202,7 @@ enum Justification
     right,  ///
 }
 
-package Justification toJustification(string justification)
+Justification toJustification(string justification)
 {
     switch (justification) with (Justification)
     {
@@ -214,7 +214,7 @@ package Justification toJustification(string justification)
     }
 }
 
-package string toString(Justification justification)
+string toString(Justification justification)
 {
     final switch (justification) with (Justification)
     {

@@ -12,7 +12,7 @@ import std.string;
 /** Convenience. */
 alias DtkOptions = string[string];
 
-package string options2string(DtkOptions opts)
+string options2string(DtkOptions opts)
 {
     Appender!(string[]) result;
 

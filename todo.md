@@ -131,3 +131,8 @@ Replace all boolean parameters and fields with enums.
 
 Read in detail about Tcl's string escaping and quoting rules because they seem complicated.
 Apparently we should only escape inner curly braces: http://stackoverflow.com/a/5302213/279684
+
+See if we can replace fake widgets from inheriting the Widget class and instead use App.evalFmt directly,
+but only if _name isn't used.
+
+Implement exceptions for all eval calls. E.g. image loading should throw an ImageLoad exception, etc.

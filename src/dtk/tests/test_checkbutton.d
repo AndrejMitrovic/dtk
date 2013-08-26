@@ -9,7 +9,11 @@ import std.range;
 import std.stdio;
 import std.string;
 
-import dtk;
+static if (__VERSION__ < 2064)
+    import dtk.all;
+else
+    import dtk;
+
 import dtk.tests.globals;
 
 unittest

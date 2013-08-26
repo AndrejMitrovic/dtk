@@ -20,13 +20,13 @@ struct RGB
     ubyte g;
     ubyte b;
 
-    package string toString()
+    string toString()
     {
         return format("#%02X%02X%02X", this.r, this.g, this.b);
     }
 }
 
-package RGB toRGB(string input)
+RGB toRGB(string input)
 {
     if (input.empty)
         return RGB.init;

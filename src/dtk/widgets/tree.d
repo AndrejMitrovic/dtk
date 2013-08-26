@@ -14,6 +14,7 @@ import std.range;
 import std.string;
 
 import dtk.geometry;
+import dtk.image;
 import dtk.utils;
 import dtk.options;
 
@@ -21,11 +22,6 @@ import dtk.widgets.widget;
 
 ///
 enum Image NoImage = null;
-
-// todo: move to Image module and implement
-class Image
-{
-}
 
 ///
 enum IsOpened
@@ -545,8 +541,10 @@ class Tree : Widget
     {
         RowOptions options;
 
-        // todo: image
         options.text = this.evalFmt("%s item %s -text", _name, _treeID);
+
+        string imagePath = this.evalFmt("%s item %s -image", _name, _treeID);
+        options.image = cast(Image)Widget.lookupWidgetPath(imagePath);
 
         options.values = this.evalFmt("%s item %s -values", _name, _treeID).split;
 
@@ -677,9 +675,12 @@ class Tree : Widget
     {
         HeadingOptions options;
 
-        // todo: image and command
+        // todo: command
         options.text   = this.evalFmt("%s heading %s -text", _name, index);
         options.anchor = this.evalFmt("%s heading %s -anchor", _name, index).toAnchor();
+
+        string imagePath = this.evalFmt("%s heading %s -image", _name, index);
+        options.image = cast(Image)Widget.lookupWidgetPath(imagePath);
 
         return options;
     }
@@ -692,9 +693,10 @@ class Tree : Widget
     */
     void setHeadingOptions(int index, HeadingOptions options)
     {
-        // todo: image and command
+        // todo: command
         this.evalFmt("%s heading %s -text %s", _name, index, options.text._tclEscape);
         this.evalFmt("%s heading %s -anchor %s", _name, index, options.anchor.toString());
+        this.evalFmt("%s heading %s -image %s", _name, index, options.image ? options.image._name : "{}");
     }
 
     /** Get the tree column heading options. */
@@ -702,9 +704,12 @@ class Tree : Widget
     {
         HeadingOptions options;
 
-        // todo: image and command
+        // todo: command
         options.text   = this.evalFmt("%s heading #0 -text", _name);
         options.anchor = this.evalFmt("%s heading #0 -anchor", _name).toAnchor();
+
+        string imagePath = this.evalFmt("%s heading #0 -image", _name);
+        options.image = cast(Image)Widget.lookupWidgetPath(imagePath);
 
         return options;
     }
@@ -712,9 +717,10 @@ class Tree : Widget
     /** Set the tree column heading options. */
     @property void treeHeadingOptions(HeadingOptions options)
     {
-        // todo: image and command
+        // todo: command
         this.evalFmt("%s heading #0 -text %s", _name, options.text._tclEscape);
         this.evalFmt("%s heading #0 -anchor %s", _name, options.anchor.toString());
+        this.evalFmt("%s heading #0 -image %s", _name, options.image ? options.image._name : "{}");
     }
 
     ///

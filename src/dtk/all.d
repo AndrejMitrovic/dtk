@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk;
+module dtk.all;
 
 public
 {
@@ -13,17 +13,16 @@ public
     import dtk.event;
     import dtk.font;
     import dtk.geometry;
-    import dtk.image;
     import dtk.loader;
     import dtk.options;
     import dtk.types;
     import dtk.utils;
 
-    import dtk.widgets;
+    import dtk.widgets.all;
 }
 
 version(unittest)
 version(DTK_UNITTEST)
 {
-    import dtk.tests;
+    import dtk.tests.all;
 }

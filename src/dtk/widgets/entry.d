@@ -25,9 +25,12 @@ import dtk.widgets.button;
 import dtk.widgets.widget;
 
 /** Check whether type $(D T) is a validator function. */
-public enum isValidator(T) = isSomeFunction!T &&
-                             is(ReturnType!T == IsValidated) &&
-                             is(ParameterTypeTuple!T == TypeTuple!(Widget, ValidateEvent));
+template isValidator(T)
+{
+    enum isValidator = isSomeFunction!T &&
+                       is(ReturnType!T == IsValidated) &&
+                       is(ParameterTypeTuple!T == TypeTuple!(Widget, ValidateEvent));
+}
 
 ///
 enum ValidationMode

@@ -23,14 +23,17 @@ rem     - Logs all log/logf calls, for use with unittesting.
 rem
 
 set includes=-I%cd%
-set debug_versions=-version=DTK_LOG_EVAL
+set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_EVAL
 set flags=%includes% -g %debug_versions%
 
 rem set compiler=dmd.exe
 set compiler=dmd_msc.exe
 rem set compiler=ldmd2.exe
 
-set dtest=rdmd --build-only -w -of%binPath%\dtk_test.exe --main -version=DTK_UNITTEST -L/SUBSYSTEM:WINDOWS:5.01 -unittest -g --force --compiler=%compiler% %flags% dtk\package.d
+rem set main_file=dtk\package.d
+set main_file=dtk\all.d
+
+set dtest=rdmd --build-only -w -of%binPath%\dtk_test.exe --main -L/SUBSYSTEM:WINDOWS:5.01 -unittest -g --force --compiler=%compiler% %flags% %main_file%
 
 set stdout_log=%buildPath%\dtktest_stdout.log
 set stderr_log=%buildPath%\dtktest_stderr.log
@@ -38,11 +41,11 @@ set stderr_log=%buildPath%\dtktest_stderr.log
 echo. > %stdout_log%
 echo. > %stderr_log%
 
-%dtest%
-if errorlevel 1 GOTO ERROR
+timeit %dtest%
+if errorlevel 1 GOTO :ERROR
 
 %binPath%\dtk_test.exe
-if errorlevel 1 GOTO ERROR
+if errorlevel 1 GOTO :ERROR
 
 type %stdout_log%
 echo Success: dtk tested.

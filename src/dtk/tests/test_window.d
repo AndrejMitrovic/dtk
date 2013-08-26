@@ -7,7 +7,11 @@ import std.algorithm;
 import std.range;
 import std.traits;
 
-import dtk;
+static if (__VERSION__ < 2064)
+    import dtk.all;
+else
+    import dtk;
+
 import dtk.tests.globals;
 
 /**

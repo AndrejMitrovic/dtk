@@ -7,7 +7,7 @@
 module dtk.font;
 
 ///
-enum GenericFont
+enum GenericFont : string
 {
     default_     = "TkDefaultFont",      /// The default for all GUI items not otherwise specified.
     text         = "TkTextFont",         /// Used for entry widgets, listboxes, etc.
