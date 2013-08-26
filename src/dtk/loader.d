@@ -29,12 +29,14 @@ version (Windows)
 
     shared static this()
     {
-        HMODULE hTcl = enforce(LoadLibraryA("tcl86.dll"));
+        enum tclDll = "tcl86.dll";
+        HMODULE hTcl = enforce(LoadLibraryA(tclDll), format("'%s' not found in PATH.", tclDll));
 
         foreach (string member; __traits(allMembers, TclProcs))
             hTcl.loadSymbol!(__traits(getMember, TclProcs, member));
 
-        HMODULE hTk = enforce(LoadLibraryA("tk86.dll"));
+        enum tkDll = "tk86.dll";
+        HMODULE hTk = enforce(LoadLibraryA(tkDll), format("'%s' not found in PATH.", tkDll));
 
         foreach (string member; __traits(allMembers, TkProcs))
             hTk.loadSymbol!(__traits(getMember, TkProcs, member));
