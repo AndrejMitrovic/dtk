@@ -78,6 +78,10 @@ void testButton(CheckButton button)
     button.style = ButtonStyle.toolButton;
     assert(button.style == ButtonStyle.toolButton);
     button.style = ButtonStyle.none;
+
+    assert(button.text == "Flash");
+    button.text = "this is some long text";
+    assert(button.text == "this is some long text", button.text);
 }
 
 // test standard widget states
@@ -92,10 +96,6 @@ void testStandard(Widget button)
 
     button.width = 50;   // set maximum 50 units
     assert(button.width == 50);
-
-    assert(button.text == "Flash");
-    button.text = "this is some long text";
-    assert(button.text == "this is some long text", button.text);
 
     assert(button.isEnabled);
     assert(!button.isDisabled);

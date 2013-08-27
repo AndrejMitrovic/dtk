@@ -226,32 +226,22 @@ abstract class Widget
         evalFmt("pack %s", _name);
     }
 
+    /// Note: The text property is implemented only in some subclasses
+    @disable public string text;
+
     /** Options: */
 
-    // todo: labels and buttons have this
-    /** Get the 0-based index of the underlined character, or -1 if no character is underlined. */
-    //~ @property int underline()
-    //~ {
-        //~ return this.getOption!int("underline");
-    //~ }
-
-    //~ /** Set the underlined character at the 0-based index. */
-    //~ @property void underline(int charIndex)
-    //~ {
-        //~ this.setOption("underline", charIndex);
-    //~ }
-
     /** Get the text string displayed in the widget. */
-    @property string text()
-    {
-        return this.getOption!string("text");
-    }
+    //~ @property string text()
+    //~ {
+        //~ return this.getOption!string("text");
+    //~ }
 
-    /** Set the text string displayed in the widget. */
-    @property void text(string newText)
-    {
-        this.setOption("text", newText);
-    }
+    //~ /** Set the text string displayed in the widget. */
+    //~ @property void text(string newText)
+    //~ {
+        //~ this.setOption("text", newText);
+    //~ }
 
     /**
         Get the text label space width currently set.

@@ -22,7 +22,7 @@ unittest
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
-    auto frame = new LabelFrame(testWindow);
+    LabelFrame frame = new LabelFrame(testWindow);
 
     assert(frame.underline == -1);
     frame.underline = 2;

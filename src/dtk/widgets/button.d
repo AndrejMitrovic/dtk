@@ -133,6 +133,18 @@ class Button : Widget
     {
         this.setOption("underline", charIndex);
     }
+
+    /** Get the text string displayed in the widget. */
+    @property string text()
+    {
+        return this.getOption!string("text");
+    }
+
+    /** Set the text string displayed in the widget. */
+    @property void text(string newText)
+    {
+        this.setOption("text", newText);
+    }
 }
 
 package ButtonStyle toButtonStyle(string style)
