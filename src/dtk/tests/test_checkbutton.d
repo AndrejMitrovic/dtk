@@ -70,6 +70,10 @@ unittest
 // test button-specific options
 void testButton(CheckButton button)
 {
+    assert(button.underline == -1);
+    button.underline = 2;
+    assert(button.underline == 2);
+
     assert(button.style == ButtonStyle.none);
     button.style = ButtonStyle.toolButton;
     assert(button.style == ButtonStyle.toolButton);
@@ -79,10 +83,6 @@ void testButton(CheckButton button)
 // test standard widget states
 void testStandard(Widget button)
 {
-    assert(button.underline == -1);
-    button.underline = 2;
-    assert(button.underline == 2);
-
     assert(button.width == 0);  // natural width
     button.width = -50;  // set minimum 50 units
     assert(button.width == -50);

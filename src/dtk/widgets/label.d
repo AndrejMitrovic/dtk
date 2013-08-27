@@ -236,4 +236,16 @@ class Label : Widget
     {
         this.setOption("compound", newCompound);
     }
+
+    /** Get the 0-based index of the underlined character, or -1 if no character is underlined. */
+    @property int underline()
+    {
+        return this.getOption!int("underline");
+    }
+
+    /** Set the underlined character using a 0-based index. */
+    @property void underline(int charIndex)
+    {
+        this.setOption("underline", charIndex);
+    }
 }

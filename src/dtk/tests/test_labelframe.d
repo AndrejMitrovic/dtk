@@ -24,6 +24,10 @@ unittest
 
     auto frame = new LabelFrame(testWindow);
 
+    assert(frame.underline == -1);
+    frame.underline = 2;
+    assert(frame.underline == 2);
+
     auto button1 = new Button(frame, "Flash");
     assert(button1.parentWidget is frame);
 

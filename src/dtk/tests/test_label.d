@@ -25,6 +25,10 @@ unittest
     auto label = new Label(testWindow);
     label.pack();
 
+    assert(label.underline == -1);
+    label.underline = 2;
+    assert(label.underline == 2);
+
     label.text = "some note\nsome larger note 2\nsmall note";
     assert(label.text == "some note\nsome larger note 2\nsmall note");
 

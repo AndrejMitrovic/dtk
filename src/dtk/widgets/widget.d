@@ -118,9 +118,7 @@ abstract class Widget
 
         Once the parent is set they should call the initialize method.
     */
-    this(InitLater)
-    {
-    }
+    this(InitLater) { }
 
     /**
         Fake widgets which have event handlers but no actual Tk path name.
@@ -230,17 +228,18 @@ abstract class Widget
 
     /** Options: */
 
+    // todo: labels and buttons have this
     /** Get the 0-based index of the underlined character, or -1 if no character is underlined. */
-    @property int underline()
-    {
-        return this.getOption!int("underline");
-    }
+    //~ @property int underline()
+    //~ {
+        //~ return this.getOption!int("underline");
+    //~ }
 
-    /** Set the underlined character at the 0-based index. */
-    @property void underline(int charIndex)
-    {
-        this.setOption("underline", charIndex);
-    }
+    //~ /** Set the underlined character at the 0-based index. */
+    //~ @property void underline(int charIndex)
+    //~ {
+        //~ this.setOption("underline", charIndex);
+    //~ }
 
     /** Get the text string displayed in the widget. */
     @property string text()
