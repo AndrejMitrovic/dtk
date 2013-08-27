@@ -563,6 +563,7 @@ class Tree : Widget
         this.evalFmt("%s item %s -values [list %s]", _name, _treeID, options.values.join(" "));
         this.evalFmt("%s item %s -open %s", _name, _treeID, cast(int)options.isOpened);
         this.evalFmt("%s item %s -tags [list %s]", _name, _treeID, options.tags.join(" "));
+        this.evalFmt("%s item %s -image %s", _name, _treeID, options.image ? options.image._name : "{}");
     }
 
     /** Set the value for the column at the specified index. */

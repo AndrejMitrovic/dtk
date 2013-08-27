@@ -30,8 +30,8 @@ set compiler=dmd.exe
 rem set compiler=dmd_msc.exe
 rem set compiler=ldmd2.exe
 
-rem set main_file=dtk\package.d
-set main_file=dtk\all.d
+set main_file=dtk\package.d
+rem set main_file=dtk\all.d
 
 set dtest=rdmd --build-only -w -of%binPath%\dtk_test.exe --main -L/SUBSYSTEM:WINDOWS:5.01 -unittest -g --force --compiler=%compiler% %flags% %main_file%
 

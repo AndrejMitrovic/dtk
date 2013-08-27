@@ -13,6 +13,7 @@ import std.range;
 import std.string;
 
 import dtk.geometry;
+import dtk.image;
 import dtk.options;
 import dtk.utils;
 
@@ -32,19 +33,19 @@ enum TabState
 struct TabOptions
 {
     string text;
-    string image;  // todo: figure out the proper type later
-    int compound;  // ditto
+    Image image;
+    Compound compound;
     int underline = -1;
     TabState tabState;
     Sticky sticky = Sticky.nsew;  // default is nsew
     Padding padding;
 
-    string toString()
+    string toTclString()
     {
-        return format("-text %s %s %s %s -state %s -sticky %s -padding %s",
+        return format("-text %s -image %s -compound %s %s -state %s -sticky %s -padding %s",
             text._tclEscape,
-            "", // todo: image
-            "", // todo: compound
+            image ? image._name : "{}",
+            compound,
             (underline == -1) ? "" : format("-underline %s", underline),
             tabState,
             sticky,
@@ -86,7 +87,7 @@ class Notebook : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to add must be this notebook."));
 
-        this.evalFmt("%s add %s %s", _name, widget._name, tabOptions.toString());
+        this.evalFmt("%s add %s %s", _name, widget._name, tabOptions.toTclString());
     }
 
     /** Insert a widget to this notebook at a specific position. */
@@ -114,7 +115,7 @@ class Notebook : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to insert must be this notebook."));
 
-        this.evalFmt("%s insert %s %s %s", _name, index, widget._name, tabOptions.toString());
+        this.evalFmt("%s insert %s %s %s", _name, index, widget._name, tabOptions.toTclString());
     }
 
     /** Remove a widget from this notebook. */
@@ -207,13 +208,17 @@ class Notebook : Widget
         TabOptions options;
 
         options.text = this.evalFmt("%s tab %s -text", _name, ident);
-        // todo: image
-        // todo: compound
+
         string underlineRes = this.evalFmt("%s tab %s -underline", _name, ident);
         options.underline = underlineRes.empty ? -1 : to!int(underlineRes);
+
         options.tabState = to!TabState(this.evalFmt("%s tab %s -state", _name, ident));
         options.sticky = toSticky(this.evalFmt("%s tab %s -sticky", _name, ident));
         options.padding = toPadding(this.evalFmt("%s tab %s -padding", _name, ident));
+        options.compound = to!Compound(this.evalFmt("%s tab %s -compound", _name, ident));
+
+        string imagePath = this.evalFmt("%s tab %s -image", _name, ident);
+        options.image = cast(Image)Widget.lookupWidgetPath(imagePath);
 
         return options;
     }
@@ -224,16 +229,13 @@ class Notebook : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to set the options for must be this notebook."));
 
-        //~ import std.stdio;
-        //~ stderr.writefln("calling with: %s", options);
-        //~ stderr.writefln("--result: %s", this.evalFmt("%s tab %s %s", _name, widget._name, options));
-        this.evalFmt("%s tab %s %s", _name, widget._name, options);
+        this.evalFmt("%s tab %s %s", _name, widget._name, options.toTclString());
     }
 
     /** ditto. */
     void setOptions(int index, TabOptions options)
     {
-        this.evalFmt("%s tab %s %s", _name, index, options);
+        this.evalFmt("%s tab %s %s", _name, index, options.toTclString());
     }
 
     /** Get all widgets that are part of this notebook. */

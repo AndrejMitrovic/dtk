@@ -2,7 +2,7 @@
 setlocal EnableDelayedExpansion
 
 set thisPath=%~dp0
-set dtkRoot=%thisPath%\..
+set dtkRoot=%thisPath%\..\..
 set binPath=%dtkRoot%\bin
 cd %thisPath%\..
 
@@ -19,4 +19,4 @@ goto :eof
 set FileName=%1
 set SourceFile=%2
 
-rdmd -w -g -L/SUBSYSTEM:WINDOWS:5.01 -version=DTK_LOG_EVAL -unittest -I..\src -of%binPath%\%FileName%.exe %SourceFile%
+rdmd -w -g -L/SUBSYSTEM:WINDOWS:5.01 -version=DTK_LOG_EVAL -unittest -I%dtkRoot%\src -of%binPath%\%FileName%.exe %SourceFile%

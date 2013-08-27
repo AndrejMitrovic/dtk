@@ -136,3 +136,12 @@ See if we can replace fake widgets from inheriting the Widget class and instead 
 but only if _name isn't used.
 
 Implement exceptions for all eval calls. E.g. image loading should throw an ImageLoad exception, etc.
+
+Once the toolkit is in place we should port the widget demo from Tcl:
+C:\Program Files (x86)\Tcl\demos\Tk8.6
+
+ttk::menubutton is not ported yet. See also which other ttk widgets we have to port that are not listed
+on tkdocs.com.
+
+Text, canvas, and tree widgets (and maybe more) have a tagging ability, which enables to e.g.
+set the same image to multiple objects, and to generate events.

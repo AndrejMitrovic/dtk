@@ -1,22 +1,29 @@
-module test_image;
+module dtk.tests.test_image;
+
+version(unittest):
+version(DTK_UNITTEST):
 
 import core.thread;
 
-import std.conv;
+import std.ascii;
+import std.algorithm;
 import std.range;
 import std.stdio;
 import std.string;
 
-import dtk;
+static if (__VERSION__ < 2064)
+    import dtk.all;
+else
+    import dtk;
+
 import dtk.tests.globals;
 
 unittest
 {
-    auto app = new App;
-    auto testWindow = new Window(app.mainWindow, 300, 300);
+    auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
-    auto image = new Image("small_button.png");
+    auto image = new Image("../tests/small_button.png");
 
     // button
     auto button = new Button(testWindow, "Flash");
@@ -47,8 +54,8 @@ unittest
     auto radio1 = new RadioButton(testWindow, radioGroup, "Set On", "on");
     auto radio2 = new RadioButton(testWindow, radioGroup, "Set Off", "off");
 
-    auto diskRed = new Image("disk_red.png");
-    auto diskBlue = new Image("disk_blue.png");
+    auto diskRed = new Image("../tests/disk_red.png");
+    auto diskBlue = new Image("../tests/disk_blue.png");
 
     radio1.image = diskRed;
     radio2.image = diskBlue;
@@ -122,9 +129,5 @@ unittest
     tree.setHeadingOptions(1, headOpts2);
     assert(tree.headingOptions(1) == headOpts2);
 
-    app.run();
-}
-
-void main()
-{
+    app.testRun();
 }

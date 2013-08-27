@@ -21,6 +21,7 @@ private
     import dtk.tests.test_dialog;
     import dtk.tests.test_entry;
     import dtk.tests.test_frame;
+    import dtk.tests.test_image;
     import dtk.tests.test_label;
     import dtk.tests.test_labelframe;
     import dtk.tests.test_listbox;
