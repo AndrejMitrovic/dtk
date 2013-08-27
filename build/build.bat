@@ -41,7 +41,7 @@ set stderr_log=%buildPath%\dtktest_stderr.log
 echo. > %stdout_log%
 echo. > %stderr_log%
 
-timeit %dtest%
+%dtest%
 if errorlevel 1 GOTO :ERROR
 
 %binPath%\dtk_test.exe

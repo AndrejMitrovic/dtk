@@ -145,7 +145,11 @@ unittest
     assert(children.front is button2);
 
     testWindow.setTopWindow();
+
+    // todo: this can sometimes fail, probably due to delayed
+    // geometry changes in Tk
     assert(testWindow.isAbove(childWin));
+
     assert(childWin.isBelow(testWindow));
 
     childWin.setTopWindow();

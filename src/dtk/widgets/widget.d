@@ -392,7 +392,7 @@ abstract class Widget
         _isDestroyed = true;
     }
 
-    /** Get the underlying Tcl widget name. Use with debugging and eval calls. */
+    /** Get the underlying Tcl widget name. Used for debugging and eval calls. */
     public string getTclName()
     {
         return _name;
@@ -503,7 +503,7 @@ package:
 
         The function returns the variable name.
     */
-    string createTracedTaggedVariable(EventType eventType)
+    final string createTracedTaggedVariable(EventType eventType)
     {
         assert(!_eventCallbackIdent.empty);
 
@@ -533,7 +533,7 @@ package:
     }
 
     /** Create a Tcl callback. */
-    string createCallback(Signal!(Widget, Event)* signal)
+    final string createCallback(Signal!(Widget, Event)* signal)
     {
         int newSlotID = _lastCallbackID++;
 
@@ -759,7 +759,7 @@ package template EnumBaseType(E) if (is(E == enum))
 }
 
 /// required due to Issue 10814 - Formatting string-based enum prints its name instead of its value
-package T toBaseType(E, T = EnumBaseType!E)(E val)
+package EnumBaseType!E toBaseType(E)(E val)
 {
-    return cast(T)val;
+    return cast(typeof(return))val;
 }
