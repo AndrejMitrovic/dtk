@@ -31,6 +31,22 @@ import dtk.utils;
 import dtk.widgets.entry;
 import dtk.widgets.scrollbar;
 
+/**
+    Specifies how to display the image relative to the text,
+    in the case both text and an image are present in a widget.
+*/
+enum Compound
+{
+    none,   /// Display the image if present, otherwise the text.
+    text,   /// Display text only.
+    image,  /// Display the image only.
+    center, /// Display the text centered on top of the image.
+    top,    /// Display the text above of the text.
+    bottom, /// Display the text below of the text.
+    left,   /// Display the text to the left of the text.
+    right,  /// Display the text to the right of the text.
+}
+
 ///
 enum SelectMode
 {

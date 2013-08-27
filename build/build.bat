@@ -26,8 +26,8 @@ set includes=-I%cd%
 set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_EVAL
 set flags=%includes% -g %debug_versions%
 
-rem set compiler=dmd.exe
-set compiler=dmd_msc.exe
+set compiler=dmd.exe
+rem set compiler=dmd_msc.exe
 rem set compiler=ldmd2.exe
 
 rem set main_file=dtk\package.d

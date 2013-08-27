@@ -61,6 +61,11 @@ unittest
     label.padding = Padding(10, 10, 10, 10);
     assert(label.padding == Padding(10, 10, 10, 10));
 
+    assert(label.compound == Compound.none);
+
+    label.compound = Compound.center;
+    assert(label.compound == Compound.center);
+
     app.testRun();
 }
 

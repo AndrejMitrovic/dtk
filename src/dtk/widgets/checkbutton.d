@@ -11,6 +11,7 @@ import std.string;
 
 import dtk.app;
 import dtk.event;
+import dtk.image;
 import dtk.signals;
 import dtk.utils;
 import dtk.options;
@@ -106,6 +107,25 @@ class CheckButton : Widget
     @property void style(ButtonStyle newStyle)
     {
         this.setOption("style", newStyle.toString);
+    }
+
+    /**
+        Get the image associated with this check button,
+        or null if no image was set.
+    */
+    @property Image image()
+    {
+        string imagePath = this.getOption!string("image");
+        return cast(Image)Widget.lookupWidgetPath(imagePath);
+    }
+
+    /**
+        Set an image for this check button. If image is null,
+        the button is reset to display text only.
+    */
+    @property void image(Image newImage)
+    {
+        this.setOption("image", newImage ? newImage._name : "{}");
     }
 
 private:

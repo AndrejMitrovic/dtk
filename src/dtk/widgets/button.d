@@ -119,7 +119,7 @@ class Button : Widget
     */
     @property void image(Image newImage)
     {
-        this.setOption("image", newImage._name);
+        this.setOption("image", newImage ? newImage._name : "{}");
     }
 }
 

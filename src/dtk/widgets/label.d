@@ -11,6 +11,7 @@ import std.range;
 import std.string;
 
 import dtk.color;
+import dtk.image;
 import dtk.geometry;
 import dtk.options;
 import dtk.utils;
@@ -190,5 +191,49 @@ class Label : Widget
     @property void font(string newFont)
     {
         this.setOption("font", newFont);
+    }
+
+    /**
+        Get the image associated with this label,
+        or null if no image was set.
+    */
+    @property Image image()
+    {
+        string imagePath = this.getOption!string("image");
+        return cast(Image)Widget.lookupWidgetPath(imagePath);
+    }
+
+    /**
+        Set an image for this label. If image is null,
+        the label is reset to display text only.
+
+        Note: Use the $(D compound) option to set whether
+        both an image and text should be displayed.
+    */
+    @property void image(Image newImage)
+    {
+        this.setOption("image", newImage ? newImage._name : "{}");
+    }
+
+    /**
+        Get the compound.
+
+        Compound specifies how to display the image relative to the text,
+        in the case both text and an image are present.
+    */
+    @property Compound compound()
+    {
+        return this.getOption!Compound("compound");
+    }
+
+    /**
+        Set the compound.
+
+        Compound specifies how to display the image relative to the text,
+        in the case both text and an image are present.
+    */
+    @property void compound(Compound newCompound)
+    {
+        this.setOption("compound", newCompound);
     }
 }
