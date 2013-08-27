@@ -70,6 +70,16 @@ unittest
     label.compound = Compound.center;
     assert(label.compound == Compound.center);
 
+    assert(label.textWidth == 100, label.textWidth.text);  // seems to be 100 initially
+    label.textWidth = -50;  // set minimum 50 units
+    assert(label.textWidth == -50);
+
+    label.textWidth = 0;
+    assert(label.textWidth == 0);
+
+    label.textWidth = 50;   // set maximum 50 units
+    assert(label.textWidth == 50);
+
     app.testRun();
 }
 

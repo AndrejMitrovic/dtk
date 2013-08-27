@@ -226,47 +226,11 @@ abstract class Widget
         evalFmt("pack %s", _name);
     }
 
-    /// Note: The text property is implemented only in some subclasses
+    /// Note: The text property is implemented only in specific subclasses.
     @disable public string text;
 
-    /** Options: */
-
-    /** Get the text string displayed in the widget. */
-    //~ @property string text()
-    //~ {
-        //~ return this.getOption!string("text");
-    //~ }
-
-    //~ /** Set the text string displayed in the widget. */
-    //~ @property void text(string newText)
-    //~ {
-        //~ this.setOption("text", newText);
-    //~ }
-
-    /**
-        Get the text label space width currently set.
-        If no specific text width is set, 0 is returned,
-        which implies a natural text space width is used.
-    */
-    @property int width()
-    {
-        string input = this.getOption!string("width");
-        if (input.empty)
-            return 0;
-
-        return to!int(input);
-    }
-
-    /**
-        Set the text label space width. If greater than zero, specifies how much space
-        in character widths to allocate for the text label. If less than zero,
-        specifies a minimum width. If zero or unspecified, the natural width of
-        the text label is used.
-    */
-    @property void width(int newWidth)
-    {
-        this.setOption("width", newWidth);
-    }
+    /// Note: The textWidth property is implemented only in specific subclasses.
+    @disable public string textWidth;
 
     /** State modifiers: */
 

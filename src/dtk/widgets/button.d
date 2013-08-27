@@ -7,6 +7,7 @@
 module dtk.widgets.button;
 
 import std.conv;
+import std.range;
 import std.string;
 
 import dtk.event;
@@ -144,6 +145,30 @@ class Button : Widget
     @property void text(string newText)
     {
         this.setOption("text", newText);
+    }
+
+    /**
+        Get the text width currently set.
+        If no specific text width is set, 0 is returned,
+        which implies a natural text width is used.
+    */
+    @property int textWidth()
+    {
+        string input = this.getOption!string("width");
+        if (input.empty)
+            return 0;
+
+        return to!int(input);
+    }
+
+    /**
+        Set the text space width. If greater than zero, specifies how much space
+        in character widths to allocate for the text label. If less than zero,
+        specifies a minimum width. If zero, the natural width of the text label is used.
+    */
+    @property void textWidth(int newWidth)
+    {
+        this.setOption("width", newWidth);
     }
 }
 

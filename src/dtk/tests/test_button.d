@@ -78,21 +78,21 @@ void testButton(Button button)
     assert(button.text == "Flash");
     button.text = "this is some long text";
     assert(button.text == "this is some long text", button.text);
+
+    assert(button.textWidth == 0);  // natural width
+    button.textWidth = -50;  // set minimum 50 units
+    assert(button.textWidth == -50);
+
+    button.textWidth = 0;
+    assert(button.textWidth == 0);
+
+    button.textWidth = 50;   // set maximum 50 units
+    assert(button.textWidth == 50);
 }
 
 // test standard widget states
 void testStandard(Widget button)
 {
-    assert(button.width == 0);  // natural width
-    button.width = -50;  // set minimum 50 units
-    assert(button.width == -50);
-
-    button.width = 0;
-    assert(button.width == 0);
-
-    button.width = 50;   // set maximum 50 units
-    assert(button.width == 50);
-
     assert(button.isEnabled);
     assert(!button.isDisabled);
 

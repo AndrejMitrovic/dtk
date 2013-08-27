@@ -68,5 +68,15 @@ unittest
     radio2.pack();
     radio3.pack();
 
+    assert(radio1.textWidth == 0);  // natural width
+    radio1.textWidth = -50;  // set minimum 50 units
+    assert(radio1.textWidth == -50);
+
+    radio1.textWidth = 0;
+    assert(radio1.textWidth == 0);
+
+    radio1.textWidth = 50;   // set maximum 50 units
+    assert(radio1.textWidth == 50);
+
     app.testRun();
 }

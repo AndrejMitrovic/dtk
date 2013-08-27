@@ -59,6 +59,16 @@ unittest
 
     frame.padding = Padding(10, 10, 10, 10);
 
+    assert(frame.textWidth == 100);  // seems to be 100 initially, just like label
+    frame.textWidth = -50;  // set minimum 50 units
+    assert(frame.textWidth == -50);
+
+    frame.textWidth = 0;
+    assert(frame.textWidth == 0);
+
+    frame.textWidth = 50;   // set maximum 50 units
+    assert(frame.textWidth == 50);
+
     frame.pack();
     button1.pack();
 
