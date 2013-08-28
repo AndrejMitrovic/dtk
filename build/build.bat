@@ -26,6 +26,9 @@ set includes=-I%cd%
 set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_EVAL
 set flags=%includes% -g %debug_versions%
 
+rem Uncomment this to run dtk tests
+rem set run_tests=1
+
 set compiler=dmd.exe
 rem set compiler=dmd_msc.exe
 rem set compiler=ldmd2.exe
@@ -41,6 +44,10 @@ set stderr_log=%buildPath%\dtktest_stderr.log
 echo. > %stdout_log%
 echo. > %stderr_log%
 
+if [%run_tests%]==[] goto :BUILD
+
+:RUN_TESTS
+
 %dtest%
 if errorlevel 1 GOTO :ERROR
 
@@ -49,6 +56,8 @@ if errorlevel 1 GOTO :ERROR
 
 type %stdout_log%
 echo Success: dtk tested.
+
+:BUILD
 
 %compiler% -g -of%binPath%\dtk.lib -lib %flags% %files%
 if errorlevel 1 GOTO :eof
