@@ -113,9 +113,4 @@ void testStandard(Widget button)
     assert(!button.isAlternate);
     assert(!button.isInvalid);
     assert(!button.isHovered);
-
-    assert(button.genericStyle.empty);
-    button.genericStyle = "Toolbutton";
-    assert(button.genericStyle == "Toolbutton");
-    button.genericStyle = "";
 }

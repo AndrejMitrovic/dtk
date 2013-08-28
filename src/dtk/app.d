@@ -27,6 +27,9 @@ final class App
     /** Create the app and a main window. */
     this()
     {
+        enforce(!_isAppInited, "Cannot have more than one App instance.");
+        _isAppInited = true;
+
         _interp = enforce(Tcl_CreateInterp());
 
         enforce(Tcl_Init(_interp) == TCL_OK, to!string(_interp.result));
@@ -180,6 +183,7 @@ final class App
 
 private:
     Window _window;
+    __gshared bool _isAppInited;
 }
 
 version(unittest)

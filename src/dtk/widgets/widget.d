@@ -122,8 +122,8 @@ abstract class Widget
 
     /**
         Fake widgets which have event handlers but no actual Tk path name.
-        Since each event handler uses a name mapping, this widget must end
-        up having a valid name.
+        Since each event handler uses a name mapping, this object must
+        have a valid _name field.
 
         E.g. a widget such as a check menu is implicitly created through a
         parent menu object and doesn't have a widget path.
@@ -134,7 +134,7 @@ abstract class Widget
     }
 
     // ditto
-    void initialize(CreateFakeWidget)
+    package void initialize(CreateFakeWidget)
     {
         string name = format("%s%s%s", _fakeWidgetPrefix, _threadID, _lastWidgetID++);
         this.initialize(name, EmitGenericSignals.no);
@@ -155,10 +155,15 @@ abstract class Widget
         enforce(!name.empty);
         _name = name;
         _widgetPathMap[_name] = this;
+
+        // todo: it's unnecessary to make so many callbacks, we only need one per class, and
+        // we can use %W to get the widget path, which is valid for all Tk event types.
         _eventCallbackIdent = this.createCallback(&onEvent);
 
         if (emitGenericSignals == EmitGenericSignals.yes)
         {
+            // todo now: instead of binding each widget with this same code, we should bind the class type,
+            // maybe in the app class or in a shared this ctor.
             this.evalFmt("bind %s <Enter> { %s %s %s }", _name, _eventCallbackIdent, EventType.Enter, eventArgs);
             this.evalFmt("bind %s <Leave> { %s %s %s }", _name, _eventCallbackIdent, EventType.Leave, eventArgs);
         }
@@ -212,12 +217,6 @@ abstract class Widget
     */
     public Signal!(Widget, Event) onEvent;
 
-    /// implemented in derived classes
-    public void exit() { }
-
-    /// implemented in derived classes
-    public void clean() { }
-
     /** Commands: */
 
     // todo: this should be moved to a layout module
@@ -232,43 +231,7 @@ abstract class Widget
     /// Note: The textWidth property is implemented only in specific subclasses.
     @disable public string textWidth;
 
-    /** State modifiers: */
-
-    /** Enable this widget. */
-    public final void enable()
-    {
-        this.setState("!disabled");
-    }
-
-    /** Disable this widget. */
-    public final void disable()
-    {
-        this.setState("disabled");
-    }
-
-    /**
-        Get the current widget style.
-
-        Use the derived-class $(D style)
-        properties to get a specific style.
-    */
-    @property string genericStyle()
-    {
-        return this.getOption!string("style");
-    }
-
-    /**
-        Set the widget style.
-
-        Use the derived-class $(D style)
-        properties to set a specific style.
-    */
-    @property void genericStyle(string newStyle)
-    {
-        this.setOption("style", newStyle);
-    }
-
-    /** State checks: */
+    /** Widget states: */
 
     /**
         Check whether this widget is active.
@@ -287,10 +250,22 @@ abstract class Widget
         return !this.isDisabled();
     }
 
+    /** Enable this widget. */
+    public final void enable()
+    {
+        this.setState("!disabled");
+    }
+
     /** Check whether this widget is disabled. */
     public final @property bool isDisabled()
     {
         return this.checkState("disabled");
+    }
+
+    /** Disable this widget. */
+    public final void disable()
+    {
+        this.setState("disabled");
     }
 
     /** Check whether this widget has keyboard focus. */
@@ -307,7 +282,7 @@ abstract class Widget
         e.g. on key Release we set focus to another
         widget.
     */
-    void focus()
+    public final void focus()
     {
         evalFmt("focus %s", _name);
     }
@@ -384,6 +359,8 @@ abstract class Widget
     {
         return this.checkState("hover");
     }
+
+    /** End widget styles. */
 
     /** Destroy this widget. */
     public void destroy()

@@ -1,10 +1,16 @@
-- Remove 'text' from Widget class because it's confusing, e.g. some widgets
-use text via 'configure -text', but other widgets don't -- the text widget
-uses 'get' and 'set' methods, and 'configure -text' doesn't work for it
-because it's not a ttk widget.
+- Standard Widget options to port:
+    - class
+    - cursor
+    - style
+    - takefocus (can take a command)
 
-- Also try removing other generic methods in the Widget class that might have
-a different behavior in each subclass.
+Todo now:
+
+- We can use 'generate window event' to simulate mouse clicks. We should use
+this for the unittests.
+
+- Could use 'bind Button <event>' to bind all tk class types to static
+C functions in the D classes.
 
 - Put place, pack, and grid commands into a separate layout file.
 
@@ -12,6 +18,8 @@ a different behavior in each subclass.
 this via opDispatch, to ensure that calling these functions in D doesn't break
 cross-compilation. Instead of breaking compilation, we could issue a pragma(msg)
 for the unsupported OS calls, and tell the user to use version(Windows) statements.
+
+- Event propagation, should events propagate upwards and downwards? Harmonia has sinking and bubbling.
 
 - Include the new signals implementation, and make buttons emit signals instead of
 invoke a specific function or delegate. Update: We should avoid using signals
@@ -132,3 +140,8 @@ on tkdocs.com.
 
 - Text, canvas, and tree widgets (and maybe more) have a tagging ability, which enables to e.g.
 set the same image to multiple objects, and to generate events.
+
+- Port Cursors.
+
+- Info about what the event loop does, and what idle commands do:
+http://wiki.tcl.tk/1527
