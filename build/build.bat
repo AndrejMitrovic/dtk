@@ -27,6 +27,7 @@ set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_EVAL
 set flags=%includes% -g %debug_versions%
 
 rem Uncomment this to run dtk tests
+rem
 rem set run_tests=1
 
 set compiler=dmd.exe

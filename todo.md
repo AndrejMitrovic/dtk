@@ -145,3 +145,11 @@ set the same image to multiple objects, and to generate events.
 
 - Info about what the event loop does, and what idle commands do:
 http://wiki.tcl.tk/1527
+
+- Can generate mouse moves, see "moving the mouse pointer" at the bottom of this page:
+http://www.tcl.tk/man/tcl8.6/TkCmd/event.htm
+
+- Disability features:
+PS: for the double-click timings: most people won't ever
+  touch them, but people with certain disabilities might
+  very strongly depend on being able to enlarge this time.

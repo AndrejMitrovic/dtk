@@ -47,11 +47,13 @@ enum Compound
     right,  /// Display the text to the right of the text.
 }
 
-///
+/**
+    Specifies the type of selection mode a widget has.
+*/
 enum SelectMode
 {
-    single,        ///
-    multiple,      ///
+    single,        /// Allow only a single selection.
+    multiple,      /// Allow multiple selections.
     old_single,    /// deprecated
     old_multiple,  /// deprecated
 }
@@ -82,27 +84,53 @@ package string toString(SelectMode selectMode)
 /// Tk and Ttk widget types
 package enum TkType : string
 {
-    button = "ttk::button",
+    button      = "ttk::button",
     checkbutton = "ttk::checkbutton",
-    combobox = "ttk::combobox",
-    entry = "ttk::entry",
-    frame = "ttk::frame",
-    label = "ttk::label",
-    labelframe = "ttk::labelframe",
-    listbox = "tk::listbox",     // note: no ttk::listbox yet in v8.6
-    menu = "menu",           // note: no ttk::menu
-    notebook = "ttk::notebook",
+    combobox    = "ttk::combobox",
+    entry       = "ttk::entry",
+    frame       = "ttk::frame",
+    label       = "ttk::label",
+    labelframe  = "ttk::labelframe",
+    listbox     = "tk::listbox",     // note: no ttk::listbox yet in v8.6
+    menu        = "menu",            // note: no ttk::menu
+    notebook    = "ttk::notebook",
     panedwindow = "ttk::panedwindow",
     progressbar = "ttk::progressbar",
     radiobutton = "ttk::radiobutton",
-    scale = "ttk::scale",
-    separator = "ttk::separator",
-    sizegrip = "ttk::sizegrip",
-    scrollbar = "ttk::scrollbar",
-    spinbox = "ttk::spinbox",
-    text = "tk::text",           // note: no ttk::text
-    toplevel = "tk::toplevel",   // note: no ttk::toplevel
-    tree = "ttk::treeview",
+    scale       = "ttk::scale",
+    separator   = "ttk::separator",
+    sizegrip    = "ttk::sizegrip",
+    scrollbar   = "ttk::scrollbar",
+    spinbox     = "ttk::spinbox",
+    text        = "tk::text",        // note: no ttk::text
+    toplevel    = "tk::toplevel",    // note: no ttk::toplevel
+    tree        = "ttk::treeview",
+}
+
+/// Tk class types for each widget type
+package enum TkClass : string
+{
+    button      = "TButton",
+    checkbutton = "TCheckbutton",
+    combobox    = "TCombobox",
+    entry       = "TEntry",
+    frame       = "TFrame",
+    label       = "TLabel",
+    labelframe  = "TLabelframe",
+    listbox     = "Listbox",
+    menu        = "Menu",
+    notebook    = "TNotebook",
+    panedwindow = "TPanedwindow",
+    progressbar = "TProgressbar",
+    radiobutton = "TRadiobutton",
+    scale       = "TScale",
+    separator   = "TSeparator",
+    sizegrip    = "TSizegrip",
+    scrollbar   = "TScrollbar",
+    spinbox     = "TSpinbox",
+    text        = "Text",
+    toplevel    = "Toplevel",
+    tree        = "Treeview",
 }
 
 package struct InitLater { }
