@@ -26,7 +26,7 @@ class Listbox : Widget
     {
         super(master, TkType.listbox);
 
-        _varName = this.createTracedTaggedVariable(EventType.TkListboxChange);
+        _varName = this.createTracedTaggedVariable(TkEventType.TkListboxChange);
         this.setOption("listvariable", _varName);
     }
 

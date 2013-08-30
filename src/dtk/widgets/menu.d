@@ -56,14 +56,14 @@ abstract class MenuClass : Widget
     final void addItem(MenuItem menuItem)
     {
         assert(!_name.empty);
-        this.evalFmt("%s add command -label %s -command { %s %s }", _name, menuItem._label, menuItem._eventCallbackIdent, EventType.TkMenuItemSelect);
+        this.evalFmt("%s add command -label %s -command { %s %s }", _name, menuItem._label, menuItem._dtkCallbackIdent, TkEventType.TkMenuItemSelect);
     }
 
     /** Insert an item at a specific position. */
     final void insertItem(MenuItem menuItem, int index)
     {
         assert(!_name.empty);
-        this.evalFmt("%s insert %s command -label %s -command { %s %s }", _name, index, menuItem._label._tclEscape, menuItem._eventCallbackIdent, EventType.TkMenuItemSelect);
+        this.evalFmt("%s insert %s command -label %s -command { %s %s }", _name, index, menuItem._label._tclEscape, menuItem._dtkCallbackIdent, TkEventType.TkMenuItemSelect);
     }
 
     /** Add a check menu item to this menu. */
@@ -176,7 +176,7 @@ class CheckMenuItem : Widget
         _onValue = onValue;
         _offValue = offValue;
         super(CreateFakeWidget.init);
-        _toggleVarName = this.createTracedTaggedVariable(EventType.TkCheckMenuItemToggle);
+        _toggleVarName = this.createTracedTaggedVariable(TkEventType.TkCheckMenuItemToggle);
     }
 
     /** Get the menu item label. */
@@ -205,7 +205,7 @@ class RadioGroupMenu : Widget
     this()
     {
         super(CreateFakeWidget.init);
-        _varName = this.createTracedTaggedVariable(EventType.TkRadioMenuSelect);
+        _varName = this.createTracedTaggedVariable(TkEventType.TkRadioMenuSelect);
     }
 
     /**

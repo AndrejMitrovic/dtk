@@ -229,14 +229,13 @@ abstract class Widget
 
         // todo: it's unnecessary to make so many callbacks, we only need one per class, and
         // we can use %W to get the widget path, which is valid for all Tk event types.
-        _eventCallbackIdent = this.createCallback(&onEvent);
 
         if (emitGenericSignals == EmitGenericSignals.yes)
         {
             // todo now: instead of binding each widget with this same code, we should bind the class type,
             // maybe in the app class or in a shared this ctor.
-            this.evalFmt("bind %s <Enter> { %s %s %s }", _name, _eventCallbackIdent, EventType.Enter, eventArgs);
-            this.evalFmt("bind %s <Leave> { %s %s %s }", _name, _eventCallbackIdent, EventType.Leave, eventArgs);
+            this.evalFmt("bind %s <Enter> { %s %s %s }", _name, _dtkCallbackIdent, TkEventType.Enter, eventArgs);
+            this.evalFmt("bind %s <Leave> { %s %s %s }", _name, _dtkCallbackIdent, TkEventType.Leave, eventArgs);
         }
 
         _isInitialized = true;
@@ -496,6 +495,7 @@ package:
         return evalFmt(`%s configure -%s %s`, _name, option, value._tclEscape);
     }
 
+    /** Get the value of the variable $(D varName) of type $(D T). */
     final T getVar(T)(string varName)
     {
         // todo: use TCL_LEAVE_ERR_MSG
@@ -528,6 +528,7 @@ package:
         }
     }
 
+    /** Set a new value to the variable $(D varName) of type $(D T). */
     final void setVar(T)(string varName, T value)
     {
         static if (isArray!T && !isSomeString!T)
@@ -551,9 +552,9 @@ package:
 
         The function returns the variable name.
     */
-    final string createTracedTaggedVariable(EventType eventType)
+    final string createTracedTaggedVariable(TkEventType eventType)
     {
-        assert(!_eventCallbackIdent.empty);
+        assert(_isInitialized);  // todo: was: assert(!_dtkCallbackIdent.empty);
 
         string varName = this.createVariableName();
         string tracerFunc = format("tracer_%s", this.createCallbackName());
@@ -565,7 +566,7 @@ package:
                 upvar #0 $varname var
                 %s %s $var
             }
-            `, tracerFunc, _eventCallbackIdent, eventType);
+            `, tracerFunc, _dtkCallbackIdent, eventType);
 
         // hook up the tracer for this unique variable
         this.evalFmt(`trace add variable %s write "%s %s"`, varName, tracerFunc, varName);
@@ -580,35 +581,24 @@ package:
         return format("%s%s_%s", _callbackPrefix, _threadID, newSlotID).replace(":", "_");
     }
 
-    /** Create a Tcl callback. */
-    final string createCallback(Signal!(Widget, Event)* signal)
+    /* API: Initialize the global dtk callback. */
+    public static void _initCallback()
     {
-        int newSlotID = _lastCallbackID++;
-
-        ClientData clientData = cast(ClientData)newSlotID;
-        string callbackName = format("%s%s_%s", _callbackPrefix, _threadID, newSlotID);
+        enforce(!_dtkCallbackInitialized, "dtk callback already initialized.");
 
         Tcl_CreateObjCommand(App._interp,
-                             cast(char*)callbackName.toStringz,
-                             &callbackHandler,
-                             clientData,
-                             &callbackDeleter);
+                             cast(char*)_dtkCallbackIdent.toStringz,
+                             &dtkCallbackHandler,
+                             null,  // no extra client data
+                             &dtkCallbackDeleter);
 
-        _callbackMap[newSlotID] = Callback(this, signal);
-        return callbackName;
+        _dtkCallbackInitialized = true;
     }
 
     static extern(C)
-    void callbackDeleter(ClientData clientData)
+    int dtkCallbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
     {
-        int slotID = cast(int)clientData;
-        _callbackMap.remove(slotID);
-    }
-
-    static extern(C)
-    int callbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
-    {
-        int slotID = cast(int)clientData;
+       /+  int slotID = cast(int)clientData;
 
         if (auto callback = slotID in _callbackMap)
         {
@@ -618,7 +608,7 @@ package:
             {
                 try
                 {
-                    event.type = tclConv!EventType(Tcl_GetString(objv[1]));
+                    event.type = tclConv!TkEventType(Tcl_GetString(objv[1]));
                 }
                 catch (ConvException ce)
                 {
@@ -626,7 +616,7 @@ package:
                     throw ce;
                 }
 
-                switch (event.type) with (EventType)
+                switch (event.type) with (TkEventType)
                 {
                     case TkCheckButtonToggle:
                     case TkRadioButtonSelect:
@@ -696,7 +686,15 @@ package:
         {
             Tcl_SetResult(interp, cast(char*)"Trying to invoke non-existent callback", TCL_STATIC);
             return TCL_ERROR;
-        }
+        } +/
+
+        return TCL_OK;
+    }
+
+    // no-op
+    static extern(C)
+    void dtkCallbackDeleter(ClientData clientData)
+    {
     }
 
     /** Create a Tcl variable name. */
@@ -726,8 +724,14 @@ package:
 
 package:
 
-    /** The Tcl identifier for the onEvent signal callback. */
-    string _eventCallbackIdent;
+    /** The Tcl identifier for the D event callback. */
+    enum _dtkCallbackIdent = "dtk::callback_handler";
+
+    /** Is the Tcl callback registered. */
+    __gshared bool _dtkCallbackInitialized;
+
+    //~ /** The Tcl identifier for the onEvent signal callback. */
+    //~ string _eventCallbackIdent;
 
     // invoked per-thread: store a unique integral identifier
     static this()
@@ -758,14 +762,14 @@ package:
     /** Prefix for variables to avoid name clashes. */
     enum _variablePrefix = "::dtk_var";
 
-    static struct Callback
-    {
-        Widget widget;
-        Signal!(Widget, Event)* signal;
-    }
+    //~ static struct Callback
+    //~ {
+        //~ Widget widget;
+        //~ Signal!(Widget, Event)* signal;
+    //~ }
 
-    /** All thread-local active callbacks. */
-    static Callback[int] _callbackMap;
+    //~ /** All thread-local active callbacks. */
+    //~ static Callback[int] _callbackMap;
 
     /** All widget paths -> widget maps */
     static Widget[string] _widgetPathMap;

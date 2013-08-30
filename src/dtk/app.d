@@ -35,6 +35,7 @@ final class App
         enforce(Tcl_Init(_interp) == TCL_OK, to!string(_interp.result));
         enforce(Tk_Init(_interp) == TCL_OK, to!string(_interp.result));
 
+        Widget._initCallback();
         _window = new Window(enforce(Tk_MainWindow(_interp)));
     }
 

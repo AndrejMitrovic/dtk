@@ -29,7 +29,7 @@ class RadioGroup : Widget
     this()
     {
         super(CreateFakeWidget.init);
-        _varName = this.createTracedTaggedVariable(EventType.TkRadioButtonSelect);
+        _varName = this.createTracedTaggedVariable(TkEventType.TkRadioButtonSelect);
     }
 
     /**

@@ -72,14 +72,14 @@ class Entry : Widget
     {
         super(master, TkType.entry);
 
-        string varName = this.createTracedTaggedVariable(EventType.TkTextChange);
+        string varName = this.createTracedTaggedVariable(TkEventType.TkTextChange);
         this.setOption("textvariable", varName);
 
         /* Validation */
         _validateVar = this.createVariableName();
         createTclVariable(_validateVar);
 
-        string callValidator = format("%s %s", _eventCallbackIdent, validationArgs);
+        string callValidator = format("%s %s", _dtkCallbackIdent, validationArgs);
         string validateFunc = format("validate_%s", this.createCallbackName());
 
         /**
@@ -99,11 +99,11 @@ class Entry : Widget
                 return $%s
             }
             `, validateFunc,
-               _eventCallbackIdent,
+               _dtkCallbackIdent,
                _validateVar);
 
-        this.evalFmt("%s configure -validatecommand { %s %s %s }", _name, validateFunc, EventType.TkValidate, validationArgs);
-        this.evalFmt("%s configure -invalidcommand { %s %s %s }", _name, validateFunc, EventType.TkFailedValidation, validationArgs);
+        this.evalFmt("%s configure -validatecommand { %s %s %s }", _name, validateFunc, TkEventType.TkValidate, validationArgs);
+        this.evalFmt("%s configure -invalidcommand { %s %s %s }", _name, validateFunc, TkEventType.TkFailedValidation, validationArgs);
     }
 
     /** Return the text in this entry. */
@@ -171,7 +171,7 @@ class Entry : Widget
         this.onEvent.connect(
             (Widget widget, Event event)
             {
-                if (event.type == EventType.TkValidate)
+                if (event.type == TkEventType.TkValidate)
                     this.setValidState(validator(widget, event.validateEvent));
             });
     }
@@ -183,7 +183,7 @@ class Entry : Widget
         this.onEvent.connect(
             (Widget widget, Event event)
             {
-                if (event.type == EventType.TkFailedValidation)
+                if (event.type == TkEventType.TkFailedValidation)
                     func(widget, event.validateEvent);
             });
     }

@@ -40,7 +40,7 @@ package class GenericDialog : Widget
     this()
     {
         super(CreateFakeWidget.init);
-        _defaultFileTypeVar = this.createTracedTaggedVariable(EventType.TkComboboxChange);
+        _defaultFileTypeVar = this.createTracedTaggedVariable(TkEventType.TkComboboxChange);
     }
 
     /**

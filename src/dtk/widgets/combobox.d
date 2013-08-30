@@ -29,7 +29,7 @@ class Combobox : Widget
     {
         super(master, TkType.combobox);
 
-        _varName = this.createTracedTaggedVariable(EventType.TkComboboxChange);
+        _varName = this.createTracedTaggedVariable(TkEventType.TkComboboxChange);
         this.setOption("textvariable", _varName);
     }
 

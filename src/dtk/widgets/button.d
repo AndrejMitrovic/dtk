@@ -61,7 +61,7 @@ class Button : Widget
         this.evalFmt("bind %s <Return> { %s invoke }", _name, _name);
 
         // 'command' calls onEvent
-        this.setOption("command", format("%s %s", _eventCallbackIdent, EventType.TkButtonPush));
+        this.setOption("command", format("%s %s", _dtkCallbackIdent, TkEventType.TkButtonPush));
     }
 
     /**
