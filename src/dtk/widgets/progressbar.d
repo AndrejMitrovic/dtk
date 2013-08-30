@@ -41,7 +41,7 @@ class Progressbar : Widget
         _maxValue = maxValue;
         super(master, TkType.progressbar, options);
 
-        _varName = this.createTracedTaggedVariable(TkEventType.TkProgressbarChange);
+        _varName = makeTracedVar(TkEventType.TkProgressbarChange);
         this.setOption("variable", _varName);
     }
 

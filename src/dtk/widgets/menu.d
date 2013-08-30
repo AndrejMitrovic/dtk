@@ -177,7 +177,7 @@ class CheckMenuItem : Widget
         _onValue = onValue;
         _offValue = offValue;
         super(CreateFakeWidget.init);
-        _toggleVarName = this.createTracedTaggedVariable(TkEventType.TkCheckMenuItemToggle);
+        _toggleVarName = makeTracedVar(TkEventType.TkCheckMenuItemToggle);
     }
 
     /** Get the menu item label. */
@@ -206,7 +206,7 @@ class RadioGroupMenu : Widget
     this()
     {
         super(CreateFakeWidget.init);
-        _varName = this.createTracedTaggedVariable(TkEventType.TkRadioMenuSelect);
+        _varName = makeTracedVar(TkEventType.TkRadioMenuSelect);
     }
 
     /**

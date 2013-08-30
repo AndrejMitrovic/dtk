@@ -35,7 +35,7 @@ class Scale : Widget
         _maxValue = maxValue;
         super(master, TkType.scale, options);
 
-        _varName = this.createTracedTaggedVariable(TkEventType.TkScaleChange);
+        _varName = makeTracedVar(TkEventType.TkScaleChange);
         this.setOption("variable", _varName);
     }
 

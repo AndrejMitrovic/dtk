@@ -476,16 +476,10 @@ package:
 
         The function returns the variable name.
     */
-    static string createTracedTaggedVariable(TkEventType eventType)
+    static string makeTracedVar(TkEventType eventType)
     {
         string varName = createVariableName();
-
-        // first we need to initialize the variable
-        tclEvalFmt(`set %s ""`, varName);
-
-        // then hook the dtk callback directly
-        tclEvalFmt(`trace add variable %s write %s "%s $%s"`, varName, eventType, _dtkCallbackIdent, varName);
-
+        tclMakeTracedVar(varName, eventType.text, _dtkCallbackIdent);
         return varName;
     }
 

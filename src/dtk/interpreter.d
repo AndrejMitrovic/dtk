@@ -66,6 +66,16 @@ string tclEvalFmt(T...)(string fmt, T args)
     return Interpreter._interp;
 }
 
+/** Create a traced Tcl variable. */
+package void tclMakeTracedVar(string varName, string varTag, string callbackName)
+{
+    // first we need to initialize the variable
+    tclEvalFmt("set %s %s", varName, `""`);
+
+    // then hook the callback
+    tclEvalFmt(`trace add variable %s write %s "%s $%s"`, varName, varTag, callbackName, varName);
+}
+
 /** Get the value of the variable $(D varName) of type $(D T). */
 T tclGetVar(T)(string varName)
 {

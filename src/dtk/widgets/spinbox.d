@@ -27,7 +27,7 @@ abstract class SpinboxBase : Widget
     {
         super(master, TkType.spinbox, options);
 
-        _varName = this.createTracedTaggedVariable(TkEventType.TkSpinboxChange);
+        _varName = makeTracedVar(TkEventType.TkSpinboxChange);
         this.setOption("textvariable", _varName);
     }
 
