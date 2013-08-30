@@ -469,56 +469,6 @@ package:
         return tclEvalFmt(`%s configure -%s %s`, _name, option, value._tclEscape);
     }
 
-    /** Get the value of the variable $(D varName) of type $(D T). */
-    static T getVar(T)(string varName)
-    {
-        // todo: use TCL_LEAVE_ERR_MSG
-        // todo: check _interp error
-        // tood: check all interpreter error codes
-
-        enum getFlags = 0;
-        static if (isArray!T && !isSomeString!T)
-        {
-            Appender!T result;
-
-            auto tclObj = Tcl_GetVar2Ex(tclInterp, cast(char*)varName.toStringz, null, getFlags);
-            enforce(tclObj !is null);
-
-            int arrCount;
-            Tcl_Obj **array;
-            enforce(Tcl_ListObjGetElements(tclInterp, tclObj, &arrCount, &array) != TCL_ERROR);
-
-            foreach (index; 0 .. arrCount)
-                result ~= to!string(Tcl_GetString(array[index]));
-
-            return result.data;
-        }
-        else
-        {
-            version (DTK_LOG_EVAL)
-                stderr.writefln("Tcl_GetVar(%s)", varName);
-
-            return to!T(Tcl_GetVar(tclInterp, cast(char*)varName.toStringz, getFlags));
-        }
-    }
-
-    /** Set a new value to the variable $(D varName) of type $(D T). */
-    static void setVar(T)(string varName, T value)
-    {
-        static if (isArray!T && !isSomeString!T)
-        {
-            tclEvalFmt("set %s [list %s]", varName, value.join(" "));
-        }
-        else
-        {
-            version (DTK_LOG_EVAL)
-                stderr.writefln("Tcl_SetVar(%s, %s)", varName, to!string(value));
-
-            enum setFlags = 0;
-            Tcl_SetVar(tclInterp, cast(char*)varName.toStringz, cast(char*)(to!string(value).toStringz), setFlags);
-        }
-    }
-
     /**
         Create a traced Tcl variable, which will invoke the
         dtk callback and pass event type and the variable value

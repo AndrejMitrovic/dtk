@@ -35,13 +35,13 @@ class Listbox : Widget
     /** Get the current list in the listbox. */
     @property string[] values()
     {
-        return this.getVar!(string[])(_varName);
+        return tclGetVar!(string[])(_varName);
     }
 
     /** Set the list in the listbox. */
     @property void values(string[] newValues)
     {
-        this.setVar(_varName, newValues);
+        tclSetVar(_varName, newValues);
     }
 
     /** Add an item to the end of the list. */

@@ -57,7 +57,7 @@ class Progressbar : Widget
     */
     @property float value()
     {
-        string res = this.getVar!string(_varName);
+        string res = tclGetVar!string(_varName);
 
         if (res.empty)
             return 0.0;
@@ -72,7 +72,7 @@ class Progressbar : Widget
     */
     @property void value(float newValue)
     {
-        this.setVar(_varName, newValue);
+        tclSetVar(_varName, newValue);
     }
 
     /** Get the maximum value that was set in the constructor. */

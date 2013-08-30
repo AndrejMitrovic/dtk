@@ -3,6 +3,8 @@ module dtk.tests.globals;
 version(unittest):
 version(DTK_UNITTEST):
 
+package:  // should only be used in the test-suite
+
 import std.stdio;
 
 /** One app and one main window for testing. */

@@ -12,6 +12,7 @@ import std.range;
 
 import dtk.app;
 import dtk.event;
+import dtk.interpreter;
 import dtk.geometry;
 import dtk.options;
 import dtk.utils;
@@ -41,7 +42,7 @@ class Scale : Widget
     /** Get the current value of the scale. */
     @property float value()
     {
-        string res = this.getVar!string(_varName);
+        string res = tclGetVar!string(_varName);
 
         if (res.empty)
             return 0.0;
@@ -56,7 +57,7 @@ class Scale : Widget
     */
     @property void value(float newValue)
     {
-        this.setVar(_varName, newValue);
+        tclSetVar(_varName, newValue);
     }
 
     /** Get the minimum value that was set in the constructor. */

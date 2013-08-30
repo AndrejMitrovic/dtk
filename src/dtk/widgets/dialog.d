@@ -87,14 +87,14 @@ package class GenericDialog : Widget
         if (!found)
             fileTypes ~= defFileType;
 
-        this.setVar(_defaultFileTypeVar, defFileType.typeName);
+        tclSetVar(_defaultFileTypeVar, defFileType.typeName);
     }
 
     package void updateDefaultFileType()
     {
-        this.setVar(_defaultFileTypeVar, _defaultFileType.typeName);
+        tclSetVar(_defaultFileTypeVar, _defaultFileType.typeName);
 
-        string newDefFileTypeName = this.getVar!string(_defaultFileTypeVar);
+        string newDefFileTypeName = tclGetVar!string(_defaultFileTypeVar);
         foreach (fileType; fileTypes)
         {
             if (fileType.typeName == newDefFileTypeName)

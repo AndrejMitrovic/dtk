@@ -216,7 +216,7 @@ class RadioGroupMenu : Widget
     */
     @property string value()
     {
-        return this.getVar!string(_varName);
+        return tclGetVar!string(_varName);
     }
 
     /**
@@ -226,7 +226,7 @@ class RadioGroupMenu : Widget
     */
     @property void value(string newValue)
     {
-        this.setVar(_varName, newValue);
+        tclSetVar(_varName, newValue);
     }
 
     private void add(RadioMenuItem item)
