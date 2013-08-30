@@ -106,3 +106,18 @@ Two options:
 
 - Note: we should maybe name our event types with a leading Event, which could make it easier to
 autocomplete:
+
+We should only allow signals for specific events, and not the onEvent generic handler, e.g.:
+
+Toplevel .toplevel
+    Frame .frame
+        Button .button
+
+.button clicked:
+
+.toplevel.onPreEvent();
+    .frame.onPreEvent();
+        .button.onEvent();
+        .button.onClickEvent.emit(...);  // signal
+    .frame.onPostEvent();
+.toplevel.onPostEvent();

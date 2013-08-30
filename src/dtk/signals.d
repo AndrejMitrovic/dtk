@@ -679,6 +679,8 @@ unittest
     onTest.emit();
 }
 
+
+
 /** Callbacks can only have these return types. */
 private alias CallbackReturnTypes = TypeTuple!(void, bool);
 

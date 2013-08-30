@@ -140,6 +140,49 @@ package struct CreateFakeWidget { }
 abstract class Widget
 {
     /**
+        Intercept an event that is sinking towards a child widget.
+        You can assign $(D true) to $(D event.handled) in the
+        event handler if you want to stop the event from propagating
+        further down to the target child.
+    */
+    public EventHandler!Event onPreEvent;
+
+    /**
+        Intercept an event that is bubbling toward the root parent.
+        At this point the target child widget has already handled
+        the event.
+
+        You can assign $(D true) to $(D event.handled) in the
+        event handler if you want to stop the event from propagating
+        futher up the parent tree.
+    */
+    public EventHandler!Event onPostEvent;
+
+    /**
+        Handle an event meant for this widget. This generic event
+        handler is invoked before an event-specific handler
+        such as onMouseEvent is called.
+
+        Note that at this point click/push events may have already
+        caused the widget to physically change appearance.
+
+        You can assign $(D true) to $(D event.handled) in the
+        event handler if you want to stop the event from propagating
+        to event-specific event handlers;
+    */
+    public EventHandler!Event onEvent;
+
+    /**
+        Handle mouse-specific events.
+    */
+    public EventHandler!MouseEvent onMouseEvent;
+
+    /**
+        Handle keyboard-specific events.
+    */
+    public EventHandler!KeyboardEvent onKeyboardEvent;
+
+    /**
         Delayed initialization. Some widgets in Tk must be parented (e.g. menus),
         but only receive their parent information once they're assigned to another
         widget (e.g. when a menubar is assigned to a window, or submenu to a menu).
@@ -243,7 +286,7 @@ abstract class Widget
         button.onEvent.connect((Widget w, Event e) {  }
         ----
     */
-    public Signal!(Widget, Event) onEvent;
+    //~ public Signal!(Widget, Event) onEvent;
 
     /** Commands: */
 
