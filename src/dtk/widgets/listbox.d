@@ -11,6 +11,7 @@ import std.range;
 import std.string;
 
 import dtk.event;
+import dtk.interpreter;
 import dtk.options;
 import dtk.utils;
 
@@ -46,7 +47,7 @@ class Listbox : Widget
     /** Add an item to the end of the list. */
     void add(string value)
     {
-        this.evalFmt("%s insert end %s", _name, value._tclEscape);
+        tclEvalFmt("%s insert end %s", _name, value._tclEscape);
     }
 
     /** Clear out all items in the listbox. */
@@ -74,7 +75,7 @@ class Listbox : Widget
     @property void height(int newHeight)
     {
         this.setOption("height", newHeight);
-        this.eval("update idletasks");
+        tclEval("update idletasks");
     }
 
     /** Get the current selection mode. */
@@ -92,7 +93,7 @@ class Listbox : Widget
     /** Get the indices of the selected items. */
     @property size_t[] selection()
     {
-        string res = this.evalFmt("%s curselection", _name);
+        string res = tclEvalFmt("%s curselection", _name);
         if (res.empty)
             return [];
 
@@ -118,19 +119,19 @@ class Listbox : Widget
     void selectRange(size_t lowIdx, size_t highIdx)
     {
         this.clearSelection();
-        this.evalFmt("%s selection set %s %s", _name, lowIdx, highIdx);
+        tclEvalFmt("%s selection set %s %s", _name, lowIdx, highIdx);
     }
 
     // select an item without clearing previous items.
     private void select(size_t index)
     {
-        this.evalFmt("%s selection set %s", _name, index);
+        tclEvalFmt("%s selection set %s", _name, index);
     }
 
     /** Clear any selections in the listbox. */
     void clearSelection()
     {
-        this.evalFmt("%s selection clear 0 end", _name);
+        tclEvalFmt("%s selection clear 0 end", _name);
     }
 
 private:

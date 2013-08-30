@@ -54,18 +54,18 @@ class MyButton : Button
 
 unittest
 {
-    auto testWindow = new Window(app.mainWindow, 200, 200);
-    testWindow.position = Point(500, 500);
+    //~ auto testWindow = new Window(app.mainWindow, 200, 200);
+    //~ testWindow.position = Point(500, 500);
 
-    auto button1 = new MyButton(testWindow, "Flash");
+    //~ auto button1 = new MyButton(testWindow, "Flash");
 
-    button1.focus();
-    button1.pack();
+    //~ button1.focus();
+    //~ button1.pack();
 
-    testStandard(button1);
-    testButton(button1);
+    //~ testStandard(button1);
+    //~ testButton(button1);
 
-    app.testRun();
+    //~ app.testRun();
 }
 
 // test button-specific options

@@ -18,6 +18,7 @@ import std.string;
 alias splitter = std.algorithm.splitter;
 
 import dtk.event;
+import dtk.interpreter;
 import dtk.options;
 import dtk.types;
 import dtk.utils;
@@ -52,26 +53,26 @@ class Window : Widget
         super(parent, TkType.toplevel, options);
 
         // wait for the window to show up before we issue any commands
-        evalFmt("tkwait visibility %s", _name);
+        tclEvalFmt("tkwait visibility %s", _name);
     }
 
     /** Used for the initial implicitly-created Tk root window. */
     this(Tk_Window window)
     {
         super(".", EmitGenericSignals.yes);
-        evalFmt("tkwait visibility %s", _name);
+        tclEvalFmt("tkwait visibility %s", _name);
     }
 
     /** Return the current window title. */
     @property string title()
     {
-        return evalFmt("wm title %s", _name);
+        return tclEvalFmt("wm title %s", _name);
     }
 
     /** Set a new window title. */
     @property void title(string newTitle)
     {
-        evalFmt("wm title %s %s", _name, newTitle._tclEscape);
+        tclEvalFmt("wm title %s %s", _name, newTitle._tclEscape);
     }
 
     /**
@@ -80,8 +81,8 @@ class Window : Widget
     */
     @property Point position()
     {
-        string x = evalFmt("winfo x %s", _name);
-        string y = evalFmt("winfo y %s", _name);
+        string x = tclEvalFmt("winfo x %s", _name);
+        string y = tclEvalFmt("winfo y %s", _name);
         return Point(to!int(x), to!int(y));
     }
 
@@ -100,8 +101,8 @@ class Window : Widget
     /** Get the current window size. */
     @property Size size()
     {
-        string width = evalFmt("winfo width %s", _name);
-        string height = evalFmt("winfo height %s", _name);
+        string width = tclEvalFmt("winfo width %s", _name);
+        string height = tclEvalFmt("winfo height %s", _name);
         return Size(to!int(width), to!int(height));
     }
 
@@ -128,7 +129,7 @@ class Window : Widget
     */
     void setResizable(CanResizeWidth canResizeWidth, CanResizeHeight canResizeHeight)
     {
-        this.evalFmt("wm resizable %s %s %s", _name, canResizeWidth, canResizeHeight);
+        tclEvalFmt("wm resizable %s %s %s", _name, canResizeWidth, canResizeHeight);
     }
 
     /** Set a sizegrip for the window. */
@@ -150,15 +151,15 @@ class Window : Widget
     /** Return the size of the screen on which this window is currently displayed on. */
     @property Size screenSize()
     {
-        string width = evalFmt("winfo screenwidth %s", _name);
-        string height = evalFmt("winfo screenheight %s", _name);
+        string width = tclEvalFmt("winfo screenwidth %s", _name);
+        string height = tclEvalFmt("winfo screenheight %s", _name);
         return Size(to!int(width), to!int(height));
     }
 
     /** Get the current window geometry. */
     @property Rect geometry()
     {
-        return evalFmt("wm geometry %s", _name).toGeometry();
+        return tclEvalFmt("wm geometry %s", _name).toGeometry();
     }
 
     /**
@@ -167,8 +168,8 @@ class Window : Widget
     */
     @property void geometry(Rect newGeometry)
     {
-        this.evalFmt("wm geometry %s %s", _name, newGeometry.toEvalString);
-        this.eval("update idletasks");
+        tclEvalFmt("wm geometry %s %s", _name, newGeometry.toEvalString);
+        tclEval("update idletasks");
     }
 
     /**
@@ -178,7 +179,7 @@ class Window : Widget
     */
     float getAlpha()
     {
-        return to!float(evalFmt("wm attributes %s -alpha", _name));
+        return to!float(tclEvalFmt("wm attributes %s -alpha", _name));
     }
 
     /**
@@ -188,37 +189,37 @@ class Window : Widget
     */
     void setAlpha(float alpha = 1.0)
     {
-        evalFmt("wm attributes %s -alpha %s", _name, alpha);
+        tclEvalFmt("wm attributes %s -alpha %s", _name, alpha);
     }
 
     /** Place the window in a mode that takes up the entire screen. */
     void maximizeWindow()
     {
-        evalFmt("wm attributes %s -fullscreen 1", _name);
+        tclEvalFmt("wm attributes %s -fullscreen 1", _name);
     }
 
     /** Restore the maximized window back to its original size. */
     void unmaximizeWindow()
     {
-        evalFmt("wm attributes %s -fullscreen 0", _name);
+        tclEvalFmt("wm attributes %s -fullscreen 0", _name);
     }
 
     /** Minimize the window. */
     void minimizeWindow()
     {
-        evalFmt("wm iconify %s", _name);
+        tclEvalFmt("wm iconify %s", _name);
     }
 
     /** Restore the minimized window. */
     void unminimizeWindow()
     {
-        evalFmt("wm deiconify %s", _name);
+        tclEvalFmt("wm deiconify %s", _name);
     }
 
     /** Return true if this window is minimized. */
     bool isMinimized()
     {
-        return this.evalFmt("wm state %s", _name) == "iconic";
+        return tclEvalFmt("wm state %s", _name) == "iconic";
     }
 
     /** Note: Minimized windows don't behave nicely with respect to setting their stacking order. */
@@ -226,37 +227,37 @@ class Window : Widget
     /** Make this the top-most window which will be displayed above all other windows. */
     void setTopWindow()
     {
-        this.evalFmt("raise %s", _name);
+        tclEvalFmt("raise %s", _name);
     }
 
     /** Make this the bottom-most window which will be displayed below all other windows. */
     void setBottomWindow()
     {
-        this.evalFmt("lower %s", _name);
+        tclEvalFmt("lower %s", _name);
     }
 
     /** Set this window above another window. */
     void setAbove(Window otherWindow)
     {
-        this.evalFmt("raise %s %s", _name, otherWindow._name);
+        tclEvalFmt("raise %s %s", _name, otherWindow._name);
     }
 
     /** Set this window below another window. */
     void setBelow(Window otherWindow)
     {
-        this.evalFmt("lower %s %s", _name, otherWindow._name);
+        tclEvalFmt("lower %s %s", _name, otherWindow._name);
     }
 
     /** Return true if this window is above another window. */
     bool isAbove(Window otherWindow)
     {
-        return this.evalFmt("wm stackorder %s isabove %s", _name, otherWindow._name) == "1";
+        return tclEvalFmt("wm stackorder %s isabove %s", _name, otherWindow._name) == "1";
     }
 
     /** Return true if this window is below another window. */
     bool isBelow(Window otherWindow)
     {
-        return this.evalFmt("wm stackorder %s isbelow %s", _name, otherWindow._name) == "1";
+        return tclEvalFmt("wm stackorder %s isbelow %s", _name, otherWindow._name) == "1";
     }
 
     /**
@@ -266,14 +267,14 @@ class Window : Widget
     */
     @property auto childWidgets()
     {
-        string paths = evalFmt("winfo children %s", _name);
+        string paths = tclEvalFmt("winfo children %s", _name);
         return map!(a => Widget.lookupWidgetPath(a))(paths.splitter);
     }
 
     /** Return the parent window of this window, or $(D null) if this window is the main window. */
     @property Window parentWindow()
     {
-        string windowPath = evalFmt("winfo parent %s", _name);
+        string windowPath = tclEvalFmt("winfo parent %s", _name);
         return cast(Window)Widget.lookupWidgetPath(windowPath);
     }
 
@@ -315,14 +316,14 @@ class Window : Widget
         version (OSX)
         {
             // right click on osx => second mouse button => context menu
-            this.evalFmt(`bind %s <2> "tk_popup %s %s"`, _name, newContextMenu._name, "%X %Y");
+            tclEvalFmt(`bind %s <2> "tk_popup %s %s"`, _name, newContextMenu._name, "%X %Y");
 
             // ctrl+left click on osx => context menu
-            this.evalFmt(`bind %s <Control-1> "tk_popup %s %s"`, _name, newContextMenu._name, "%X %Y");
+            tclEvalFmt(`bind %s <Control-1> "tk_popup %s %s"`, _name, newContextMenu._name, "%X %Y");
         }
         else
         {
-            this.evalFmt(`bind %s <3> "tk_popup %s %s"`, _name, newContextMenu._name, "%X %Y");
+            tclEvalFmt(`bind %s <3> "tk_popup %s %s"`, _name, newContextMenu._name, "%X %Y");
         }
 
         _contextMenu = newContextMenu;

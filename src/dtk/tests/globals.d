@@ -58,10 +58,4 @@ shared static this()
     assert(app.mainWindow !is null);
     app.mainWindow.position = Point(500, 500);
     unitTester.setTester();
-
-}
-
-shared static ~this()
-{
-    app.exit();
 }

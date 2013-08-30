@@ -12,6 +12,7 @@ import std.string;
 
 import dtk.event;
 import dtk.image;
+import dtk.interpreter;
 import dtk.signals;
 import dtk.options;
 import dtk.utils;
@@ -58,7 +59,7 @@ class Button : Widget
         super(master, TkType.button, options);
 
         // invoke calls 'command'
-        this.evalFmt("bind %s <Return> { %s invoke }", _name, _name);
+        tclEvalFmt("bind %s <Return> { %s invoke }", _name, _name);
 
         // 'command' calls onEvent
         this.setOption("command", format("%s %s", _dtkCallbackIdent, TkEventType.TkButtonPush));
@@ -71,13 +72,13 @@ class Button : Widget
     void push()
     {
         // push the button
-        this.evalFmt("%s state pressed", _name);
+        tclEvalFmt("%s state pressed", _name);
 
         // queue unpush for later
-        this.evalFmt("after 200 { %s state !pressed }", _name);
+        tclEvalFmt("after 200 { %s state !pressed }", _name);
 
         // meanwhile emit the TkButtonPush event
-        this.evalFmt("%s invoke", _name);
+        tclEvalFmt("%s invoke", _name);
     }
 
     /** Get the current button style. */

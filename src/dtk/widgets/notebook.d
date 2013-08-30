@@ -14,6 +14,7 @@ import std.string;
 
 import dtk.geometry;
 import dtk.image;
+import dtk.interpreter;
 import dtk.options;
 import dtk.utils;
 
@@ -69,7 +70,7 @@ class Notebook : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to add must be this notebook."));
 
-        this.evalFmt("%s add %s", _name, widget._name);
+        tclEvalFmt("%s add %s", _name, widget._name);
     }
 
     /** ditto. */
@@ -79,7 +80,7 @@ class Notebook : Widget
             format("The parent widget of the widget to add must be this notebook."));
 
         string opts = format("-text %s", text._tclEscape);
-        this.evalFmt("%s add %s %s", _name, widget._name, opts);
+        tclEvalFmt("%s add %s %s", _name, widget._name, opts);
     }
 
     /** ditto. */
@@ -88,7 +89,7 @@ class Notebook : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to add must be this notebook."));
 
-        this.evalFmt("%s add %s %s", _name, widget._name, tabOptions.toTclString());
+        tclEvalFmt("%s add %s %s", _name, widget._name, tabOptions.toTclString());
     }
 
     /** Insert a widget to this notebook at a specific position. */
@@ -97,7 +98,7 @@ class Notebook : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to insert must be this notebook."));
 
-        this.evalFmt("%s insert %s %s", _name, index, widget._name);
+        tclEvalFmt("%s insert %s %s", _name, index, widget._name);
     }
 
     /** ditto. */
@@ -107,7 +108,7 @@ class Notebook : Widget
             format("The parent widget of the widget to insert must be this notebook."));
 
         string opts = format("-text %s", text._tclEscape);
-        this.evalFmt("%s insert %s %s %s", _name, index, widget._name, opts);
+        tclEvalFmt("%s insert %s %s %s", _name, index, widget._name, opts);
     }
 
     /** ditto. */
@@ -116,7 +117,7 @@ class Notebook : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to insert must be this notebook."));
 
-        this.evalFmt("%s insert %s %s %s", _name, index, widget._name, tabOptions.toTclString());
+        tclEvalFmt("%s insert %s %s %s", _name, index, widget._name, tabOptions.toTclString());
     }
 
     /** Remove a widget from this notebook. */
@@ -125,13 +126,13 @@ class Notebook : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to remove must be this notebook."));
 
-        this.evalFmt("%s forget %s", _name, widget._name);
+        tclEvalFmt("%s forget %s", _name, widget._name);
     }
 
     /** ditto. */
     void remove(int index)
     {
-        this.evalFmt("%s forget %s", _name, index);
+        tclEvalFmt("%s forget %s", _name, index);
     }
 
     /**
@@ -142,7 +143,7 @@ class Notebook : Widget
     */
     @property Widget selected()
     {
-        string widgetPath = this.evalFmt("%s select", _name);
+        string widgetPath = tclEvalFmt("%s select", _name);
         return cast(Widget)Widget.lookupWidgetPath(widgetPath);
     }
 
@@ -152,13 +153,13 @@ class Notebook : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to select must be this notebook."));
 
-        this.evalFmt("%s select %s", _name, widget._name);
+        tclEvalFmt("%s select %s", _name, widget._name);
     }
 
     /** ditto. */
     @property void selected(int index)
     {
-        this.evalFmt("%s select %s", _name, index);
+        tclEvalFmt("%s select %s", _name, index);
     }
 
     /** Hide a tab. */
@@ -167,7 +168,7 @@ class Notebook : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to hide must be this notebook."));
 
-        this.evalFmt("%s hide %s", _name, widget._name);
+        tclEvalFmt("%s hide %s", _name, widget._name);
     }
 
     /** Un-hide a tab. */
@@ -185,7 +186,7 @@ class Notebook : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to get the index of must be this notebook."));
 
-        return to!int(this.evalFmt("%s index %s", _name, widget._name));
+        return to!int(tclEvalFmt("%s index %s", _name, widget._name));
     }
 
     /** Get the tab options for a widget. */
@@ -208,17 +209,17 @@ class Notebook : Widget
     {
         TabOptions options;
 
-        options.text = this.evalFmt("%s tab %s -text", _name, ident);
+        options.text = tclEvalFmt("%s tab %s -text", _name, ident);
 
-        string underlineRes = this.evalFmt("%s tab %s -underline", _name, ident);
+        string underlineRes = tclEvalFmt("%s tab %s -underline", _name, ident);
         options.underline = underlineRes.empty ? -1 : to!int(underlineRes);
 
-        options.tabState = to!TabState(this.evalFmt("%s tab %s -state", _name, ident));
-        options.sticky = toSticky(this.evalFmt("%s tab %s -sticky", _name, ident));
-        options.padding = toPadding(this.evalFmt("%s tab %s -padding", _name, ident));
-        options.compound = to!Compound(this.evalFmt("%s tab %s -compound", _name, ident));
+        options.tabState = to!TabState(tclEvalFmt("%s tab %s -state", _name, ident));
+        options.sticky = toSticky(tclEvalFmt("%s tab %s -sticky", _name, ident));
+        options.padding = toPadding(tclEvalFmt("%s tab %s -padding", _name, ident));
+        options.compound = to!Compound(tclEvalFmt("%s tab %s -compound", _name, ident));
 
-        string imagePath = this.evalFmt("%s tab %s -image", _name, ident);
+        string imagePath = tclEvalFmt("%s tab %s -image", _name, ident);
         options.image = cast(Image)Widget.lookupWidgetPath(imagePath);
 
         return options;
@@ -230,19 +231,19 @@ class Notebook : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to set the options for must be this notebook."));
 
-        this.evalFmt("%s tab %s %s", _name, widget._name, options.toTclString());
+        tclEvalFmt("%s tab %s %s", _name, widget._name, options.toTclString());
     }
 
     /** ditto. */
     void setOptions(int index, TabOptions options)
     {
-        this.evalFmt("%s tab %s %s", _name, index, options.toTclString());
+        tclEvalFmt("%s tab %s %s", _name, index, options.toTclString());
     }
 
     /** Get all widgets that are part of this notebook. */
     @property Widget[] tabs()
     {
-        string result = this.evalFmt("%s tabs", _name);
+        string result = tclEvalFmt("%s tabs", _name);
         if (result.empty)
             return null;
 

@@ -23,6 +23,7 @@ alias splitter = std.algorithm.splitter;
 import dtk.app;
 import dtk.event;
 import dtk.geometry;
+import dtk.interpreter;
 import dtk.options;
 import dtk.signals;
 import dtk.types;
@@ -38,12 +39,42 @@ import dtk.widgets.scrollbar;
 abstract class Widget
 {
     /**
-        Intercept an event that is sinking towards a child widget.
+        Intercept an event that is sinking towards a child widget,
+        which has $(D this) widget as its direct or indirect parent.
+
         You can assign $(D true) to $(D event.handled) in the
         event handler if you want to stop the event from propagating
         further down to the target child.
+
+        Only widgets which are direct or indirect parents of the target
+        widget will have their $(D onSinkEvent) handler called.
+
+        This event handler is typically used in two cases:
+
+        $(LI
+            When an indirect parent of a widget may not hold a
+            direct reference to the child widget, but would
+            still want to intercept the event.
+        )
+
+        $(LI
+            When a direct parent of a widget (or several widgets)
+            wants to intercept the events that target the child widget.
+        )
+
+        E.g. observe this widget tree: Frame -> Notebook -> Button.
+
+        The Frame might want to intercept the Button from being
+        pressed, but it may not be aware of the Button's existence.
+        The sinking phase of the event allows the parent widget (the Frame)
+        to intercept the event and either modify it or block it from
+        reaching any other children (Notebook) and the target widget
+        itself (Button).
+
+        Note: To intercept an event of an arbitrary widget, add your
+        event handler to the target widget's $(D onEventFilter) list.
     */
-    public EventHandler!Event onPreEvent;
+    public EventHandler!Event onSinkEvent;
 
     /**
         Intercept an event that is bubbling toward the root parent.
@@ -53,24 +84,74 @@ abstract class Widget
         You can assign $(D true) to $(D event.handled) in the
         event handler if you want to stop the event from propagating
         futher up the parent tree.
+
+        Only widgets which are direct or indirect parents of the target
+        widget will have their $(D onBubbleEvent) handler called.
+
+        This event handler is typically used in two cases:
+
+        $(LI
+            When an indirect parent of a widget may not hold a
+            direct reference to the child widget, but would
+            still want to be notified when the child widget
+            has received and handled an event.
+        )
+
+        $(LI
+            When a direct parent of a widget (or several widgets)
+            wants to be notified when a child widget has
+            received and handled an event.
+        )
+
+        Note: To receive notification that an event was received and
+        handled in an arbitrary widget, add your event handler to the
+        target widget's $(D onEventNotify) list.
     */
-    public EventHandler!Event onPostEvent;
+    public EventHandler!Event onBubbleEvent;
 
     /**
-        Handle an event meant for this widget. This generic event
-        handler is invoked before an event-specific handler
-        such as onMouseEvent is called.
+        Handle an event for which the target is this widget.
+        This generic event handler is invoked before an
+        event-specific handler such as $(D onMouseEvent) is called.
 
         Note that at this point click/push events may have already
         caused the widget to physically change appearance.
 
         You can assign $(D true) to $(D event.handled) in the
         event handler if you want to stop the event from propagating
-        to event-specific event handlers;
+        to event-specific event handlers.
     */
     public EventHandler!Event onEvent;
 
-    // todo: add an EventHandlerList
+    /**
+        A list of event handlers which will be called in sequence
+        just before this widget's onEvent handler.
+
+        You can assign $(D true) to $(D event.handled) in the
+        event handler if you want to stop the event from reaching
+        the target widget's $(D onEvent) handler.
+
+        This will also stop other event filters in thist list
+        from being called.
+
+        This event handler list is used for intercepting an event
+        from reaching $(D this) widget.
+    */
+    public EventHandlerList!Event onEventFilter;
+
+    /**
+        A list of event handlers which will be called in sequence
+        just after this widget's onEvent handler.
+
+        You can assign $(D true) to $(D event.handled) in the
+        event handler if you want to stop the event from reaching
+        other event handlers in this list.
+
+        This event handler list is used for notifying event
+        handlers when an event has been received and handled
+        by $(D this) widget.
+    */
+    public EventHandlerList!Event onEventNotify;
 
     /**
         Handle mouse-specific events.
@@ -81,6 +162,9 @@ abstract class Widget
         Handle keyboard-specific events.
     */
     public EventHandler!KeyboardEvent onKeyboardEvent;
+
+
+    //~ bindtags .button [list $buttonClass InterceptEvent .button all ]
 
     /**
         Delayed initialization. Some widgets in Tk must be parented (e.g. menus),
@@ -134,8 +218,8 @@ abstract class Widget
         {
             // todo now: instead of binding each widget with this same code, we should bind the class type,
             // maybe in the app class or in a shared this ctor.
-            this.evalFmt("bind %s <Enter> { %s %s %s }", _name, _dtkCallbackIdent, TkEventType.Enter, eventArgs);
-            this.evalFmt("bind %s <Leave> { %s %s %s }", _name, _dtkCallbackIdent, TkEventType.Leave, eventArgs);
+            tclEvalFmt("bind %s <Enter> { %s %s %s }", _name, _dtkCallbackIdent, TkEventType.Enter, eventArgs);
+            tclEvalFmt("bind %s <Leave> { %s %s %s }", _name, _dtkCallbackIdent, TkEventType.Leave, eventArgs);
         }
 
         _isInitialized = true;
@@ -163,7 +247,7 @@ abstract class Widget
             prefix = parent._name;
 
         string name = format("%s.%s%s%s", prefix, tkType.toString(), _threadID, _lastWidgetID++);
-        this.evalFmt("%s %s %s", tkType.toBaseType(), name, opts);
+        tclEvalFmt("%s %s %s", tkType.toBaseType(), name, opts);
 
         this.initialize(name, emitGenericSignals);
     }
@@ -192,7 +276,7 @@ abstract class Widget
     // todo: this should be moved to a layout module
     public final void pack()
     {
-        evalFmt("pack %s", _name);
+        tclEvalFmt("pack %s", _name);
     }
 
     /// Note: The text property is implemented only in specific subclasses.
@@ -254,7 +338,7 @@ abstract class Widget
     */
     public final void focus()
     {
-        evalFmt("focus %s", _name);
+        tclEvalFmt("focus %s", _name);
     }
 
     /** Check whether this widget is being pressed. */
@@ -335,7 +419,7 @@ abstract class Widget
     /** Destroy this widget. */
     public void destroy()
     {
-        this.evalFmt("destroy %s", _name);
+        tclEvalFmt("destroy %s", _name);
         _isDestroyed = true;
     }
 
@@ -348,7 +432,7 @@ abstract class Widget
     /** Return the parent widget of this widget, or $(D null) if this widget is the main window. */
     @property Widget parentWidget()
     {
-        string widgetPath = evalFmt("winfo parent %s", _name);
+        string widgetPath = tclEvalFmt("winfo parent %s", _name);
         return cast(Widget)Widget.lookupWidgetPath(widgetPath);
     }
 
@@ -365,34 +449,24 @@ package:
         scrollbar.setOption("command", format("%s %s", this._name, viewTarget));
     }
 
-    final string evalFmt(T...)(string fmt, T args)
-    {
-        return App.evalFmt(fmt, args);
-    }
-
-    final string eval(string cmd)
-    {
-        return App.eval(cmd);
-    }
-
     final bool checkState(string state)
     {
-        return cast(bool)to!int(evalFmt("%s instate %s", _name, state));
+        return cast(bool)to!int(tclEvalFmt("%s instate %s", _name, state));
     }
 
     final void setState(string state)
     {
-        evalFmt("%s state %s", _name, state);
+        tclEvalFmt("%s state %s", _name, state);
     }
 
     final T getOption(T)(string option)
     {
-        return to!T(evalFmt("%s cget -%s", _name, option));
+        return to!T(tclEvalFmt("%s cget -%s", _name, option));
     }
 
     final string setOption(T)(string option, T value)
     {
-        return evalFmt(`%s configure -%s %s`, _name, option, value._tclEscape);
+        return tclEvalFmt(`%s configure -%s %s`, _name, option, value._tclEscape);
     }
 
     /** Get the value of the variable $(D varName) of type $(D T). */
@@ -407,12 +481,12 @@ package:
         {
             Appender!T result;
 
-            auto tclObj = Tcl_GetVar2Ex(App._interp, cast(char*)varName.toStringz, null, getFlags);
+            auto tclObj = Tcl_GetVar2Ex(tclInterp, cast(char*)varName.toStringz, null, getFlags);
             enforce(tclObj !is null);
 
             int arrCount;
             Tcl_Obj **array;
-            enforce(Tcl_ListObjGetElements(App._interp, tclObj, &arrCount, &array) != TCL_ERROR);
+            enforce(Tcl_ListObjGetElements(tclInterp, tclObj, &arrCount, &array) != TCL_ERROR);
 
             foreach (index; 0 .. arrCount)
                 result ~= to!string(Tcl_GetString(array[index]));
@@ -424,7 +498,7 @@ package:
             version (DTK_LOG_EVAL)
                 stderr.writefln("Tcl_GetVar(%s)", varName);
 
-            return to!T(Tcl_GetVar(App._interp, cast(char*)varName.toStringz, getFlags));
+            return to!T(Tcl_GetVar(tclInterp, cast(char*)varName.toStringz, getFlags));
         }
     }
 
@@ -433,7 +507,7 @@ package:
     {
         static if (isArray!T && !isSomeString!T)
         {
-            App.evalFmt("set %s [list %s]", varName, value.join(" "));
+            tclEvalFmt("set %s [list %s]", varName, value.join(" "));
         }
         else
         {
@@ -441,7 +515,7 @@ package:
                 stderr.writefln("Tcl_SetVar(%s, %s)", varName, to!string(value));
 
             enum setFlags = 0;
-            Tcl_SetVar(App._interp, cast(char*)varName.toStringz, cast(char*)(to!string(value).toStringz), setFlags);
+            Tcl_SetVar(tclInterp, cast(char*)varName.toStringz, cast(char*)(to!string(value).toStringz), setFlags);
         }
     }
 
@@ -457,10 +531,10 @@ package:
         string varName = createVariableName();
 
         // first we need to initialize the variable
-        App.evalFmt(`set %s ""`, varName);
+        tclEvalFmt(`set %s ""`, varName);
 
         // then hook the dtk callback directly
-        App.evalFmt(`trace add variable %s write %s "%s $%s"`, varName, eventType, _dtkCallbackIdent, varName);
+        tclEvalFmt(`trace add variable %s write %s "%s $%s"`, varName, eventType, _dtkCallbackIdent, varName);
 
         return varName;
     }
@@ -477,7 +551,7 @@ package:
     {
         enforce(!_dtkCallbackInitialized, "dtk callback already initialized.");
 
-        Tcl_CreateObjCommand(App._interp,
+        Tcl_CreateObjCommand(tclInterp,
                              cast(char*)_dtkCallbackIdent.toStringz,
                              &dtkCallbackHandler,
                              null,  // no extra client data
@@ -601,7 +675,7 @@ package:
     /** Create a Tcl variable. */
     static void createTclVariable(string varName)
     {
-        App.evalFmt("set %s true", varName);
+        tclEvalFmt("set %s true", varName);
     }
 
     /**

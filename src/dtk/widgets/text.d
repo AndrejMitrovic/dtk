@@ -11,6 +11,7 @@ import std.string;
 import dtk.app;
 import dtk.event;
 import dtk.geometry;
+import dtk.interpreter;
 import dtk.utils;
 
 import dtk.widgets.widget;
@@ -68,14 +69,14 @@ class Text : Widget
     @property string value()
     {
         // tk text automatically adds a newline at the end
-        return this.evalFmt("%s get 1.0 end-1c", _name);
+        return tclEvalFmt("%s get 1.0 end-1c", _name);
     }
 
     /** Set the contents of the text widget. */
     @property void value(string newText)
     {
-        this.evalFmt("%s delete 1.0 end", _name);
-        this.evalFmt("%s insert 1.0 %s", _name, newText._tclEscape);
+        tclEvalFmt("%s delete 1.0 end", _name);
+        tclEvalFmt("%s insert 1.0 %s", _name, newText._tclEscape);
     }
 }
 

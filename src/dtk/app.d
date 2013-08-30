@@ -15,6 +15,7 @@ import std.conv;
 import std.path;
 
 import dtk.event;
+import dtk.interpreter;
 import dtk.loader;
 import dtk.types;
 
@@ -29,14 +30,7 @@ final class App
     {
         enforce(!_isAppInited, "Cannot have more than one App instance.");
         _isAppInited = true;
-
-        _interp = enforce(Tcl_CreateInterp());
-
-        enforce(Tcl_Init(_interp) == TCL_OK, to!string(_interp.result));
-        enforce(Tk_Init(_interp) == TCL_OK, to!string(_interp.result));
-
-        Widget._initCallback();
-        _window = new Window(enforce(Tk_MainWindow(_interp)));
+        _window = new Window(enforce(Tk_MainWindow(tclInterp), "Couldn't retrieve the main Tk toplevel window."));
     }
 
     version(unittest)
@@ -61,7 +55,7 @@ final class App
             this.setupExitHandler();
 
             // if the user explicitly closes the window while testing, we break out of the whole test-suite.
-            eval("
+            tclEval("
             wm protocol . WM_DELETE_WINDOW {
                 ::dtk_early_exit
             }");
@@ -118,7 +112,7 @@ final class App
 
         private void setupExitHandler()
         {
-            Tcl_CreateObjCommand(App._interp,
+            Tcl_CreateObjCommand(tclInterp,
                                  cast(char*)"::dtk_early_exit",
                                  &callbackHandler,
                                  null,
@@ -139,9 +133,6 @@ final class App
     /** Start the App event loop. */
     void run()
     {
-        scope(exit)
-            this.exit();
-
         Tk_MainLoop();
     }
 
@@ -150,29 +141,6 @@ final class App
     {
         return _window;
     }
-
-    public static string evalFmt(T...)(string fmt, T args)
-    {
-        return eval(format(fmt, args));
-    }
-
-    /** Evaluate any Tcl command and return its result. */
-    public static string eval(string cmd)
-    {
-        version (DTK_LOG_EVAL)
-            stderr.writefln("tcl_eval %s", cmd);
-
-        Tcl_Eval(_interp, cast(char*)toStringz(cmd));
-        return to!string(_interp.result);
-    }
-
-    void exit()
-    {
-        Tcl_DeleteInterp(_interp);
-    }
-
-    /* Only one interpreter is allowed. */
-    /*package*/ __gshared Tcl_Interp* _interp;
 
 private:
     Window _window;

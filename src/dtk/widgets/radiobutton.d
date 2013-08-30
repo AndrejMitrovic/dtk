@@ -14,6 +14,7 @@ import std.string;
 import dtk.app;
 import dtk.event;
 import dtk.image;
+import dtk.interpreter;
 import dtk.options;
 import dtk.signals;
 import dtk.types;
@@ -82,7 +83,7 @@ class RadioButton : Widget
         super(master, TkType.radiobutton, options);
 
         // keyboard binding
-        this.evalFmt("bind %s <Return> { %s invoke }", _name, _name);
+        tclEvalFmt("bind %s <Return> { %s invoke }", _name, _name);
 
         radioGroup.add(this);
         _radioGroup = radioGroup;

@@ -13,6 +13,7 @@ import std.string;
 
 import dtk.app;
 import dtk.event;
+import dtk.interpreter;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
@@ -36,13 +37,13 @@ class Combobox : Widget
     /** Get the currently selected combobox value. */
     @property string value()
     {
-        return this.evalFmt("%s get", _name);
+        return tclEvalFmt("%s get", _name);
     }
 
     /** Set the combobox value. */
     @property void value(string newValue)
     {
-        this.evalFmt("%s set %s", _name, newValue);
+        tclEvalFmt("%s set %s", _name, newValue);
     }
 
     /** Get the values in this combobox. */

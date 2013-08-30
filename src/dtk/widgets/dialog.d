@@ -16,6 +16,7 @@ import std.string;
 import dtk.app;
 import dtk.color;
 import dtk.event;
+import dtk.interpreter;
 import dtk.signals;
 import dtk.options;
 import dtk.types;
@@ -138,7 +139,7 @@ class OpenFileDialog : GenericDialog
 
         this.updateDefaultFileType();
 
-        return this.evalFmt("tk_getOpenFile -filetypes %s -initialdir %s -initialfile %s %s -multiple %s %s -title %s -typevariable %s",
+        return tclEvalFmt("tk_getOpenFile -filetypes %s -initialdir %s -initialfile %s %s -multiple %s %s -title %s -typevariable %s",
             fileTypes.toString(),
             initialDir._tclEscape,
             initialFile._tclEscape,
@@ -170,7 +171,7 @@ class SaveFileDialog : GenericDialog
 
         this.updateDefaultFileType();
 
-        return this.evalFmt("tk_getSaveFile -filetypes %s -confirmoverwrite %s -defaultextension %s  -initialdir %s -initialfile %s %s %s -title %s -typevariable %s",
+        return tclEvalFmt("tk_getSaveFile -filetypes %s -confirmoverwrite %s -defaultextension %s  -initialdir %s -initialfile %s %s %s -title %s -typevariable %s",
             fileTypes.toString(),
             confirmOverwrite,
             defaultExtension,
@@ -212,7 +213,7 @@ class SelectDirDialog : Widget
     */
     string show()
     {
-        return this.evalFmt("tk_chooseDirectory -initialdir %s -mustexist %s %s -title %s",
+        return tclEvalFmt("tk_chooseDirectory -initialdir %s -mustexist %s %s -title %s",
             initialDir._tclEscape,
             mustExist,
             (parent is null) ? "" : format("-parent %s", parent._name._tclEscape),
@@ -245,7 +246,7 @@ class SelectColorDialog : Widget
     {
         Result result;
 
-        string output = this.evalFmt("tk_chooseColor %s %s -title %s",
+        string output = tclEvalFmt("tk_chooseColor %s %s -title %s",
             !_useInitColor ? "" : format("-initialcolor %s", _initColor.toString()),
             (parent is null) ? "" : format("-parent %s", parent._name._tclEscape),
             title._tclEscape,
@@ -341,7 +342,7 @@ class MessageBox : Widget
         else
             string titleStr = format("-title %s", title._tclEscape);
 
-        string result = this.evalFmt("tk_messageBox %s -detail %s -icon %s -message %s %s %s -type %s",
+        string result = tclEvalFmt("tk_messageBox %s -detail %s -icon %s -message %s %s %s -type %s",
             strDefault,
             extraMessage._tclEscape,
             messageBoxIcon,

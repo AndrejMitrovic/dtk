@@ -29,7 +29,7 @@ set flags=%includes% -g %debug_versions%
 rem Set this to enforce building with unittests even for the static library.
 rem Only use this during DTK development.
 rem
-rem set build_flags=-unittest
+set build_flags=-unittest
 
 rem Uncomment these to run the test-suite and build the static library
 rem

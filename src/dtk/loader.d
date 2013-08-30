@@ -8,8 +8,11 @@ module dtk.loader;
 
 import std.exception;
 
+import dtk.interpreter;
 import dtk.types;
 import dtk.utils;
+
+import dtk.widgets.widget;
 
 /** Used for Tcl string literal escape rules. */
 string[dchar] _tclTransTable;
@@ -45,8 +48,7 @@ version (Windows)
         // the user to pass it via main(string[] args).
         string appName = Runtime.args[0];
 
-        // This call is apparently required before all other Tcl/Tk calls on some systems,
-        // but we'll call it on all systems to be sure.
+        // This call is apparently required before all other Tcl/Tk calls on some systems.
         Tcl_FindExecutable(appName.toStringz);
 
         _tclTransTable['"'] = `\"`;
@@ -56,6 +58,16 @@ version (Windows)
         _tclTransTable['\\'] = r"\\";
         _tclTransTable['{'] = r"\{";
         _tclTransTable['}'] = r"\}";
+
+        /** Initialize DTK classes. */
+        Interpreter.initialize();
+        Widget._initCallback();
+    }
+
+    shared static ~this()
+    {
+        /** Release DTK classes. */
+        Interpreter.release();
     }
 }
 else

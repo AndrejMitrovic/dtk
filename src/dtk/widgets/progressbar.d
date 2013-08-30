@@ -13,6 +13,7 @@ import std.range;
 import dtk.app;
 import dtk.event;
 import dtk.geometry;
+import dtk.interpreter;
 import dtk.options;
 import dtk.utils;
 
@@ -89,7 +90,7 @@ class Progressbar : Widget
     */
     void start(int msecs = 50)
     {
-        this.evalFmt("%s start %s", _name, msecs);
+        tclEvalFmt("%s start %s", _name, msecs);
         _started = true;
     }
 
@@ -112,8 +113,8 @@ class Progressbar : Widget
     */
     void stop()
     {
-        this.evalFmt("%s stop", _name);
-        this.eval("update idletasks");
+        tclEvalFmt("%s stop", _name);
+        tclEval("update idletasks");
         _started = false;
     }
 

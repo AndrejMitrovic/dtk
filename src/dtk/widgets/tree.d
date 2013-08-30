@@ -15,6 +15,7 @@ import std.string;
 
 import dtk.geometry;
 import dtk.image;
+import dtk.interpreter;
 import dtk.utils;
 import dtk.options;
 
@@ -124,14 +125,14 @@ class Tree : Widget
         super(master, TkType.tree);
 
         // create the columns
-        this.evalFmt("%s configure -columns %s", _name, columns.join(" ")._tclEscape);
+        tclEvalFmt("%s configure -columns %s", _name, columns.join(" ")._tclEscape);
 
         // set the tree column label
-        this.evalFmt(`%s heading #0 -text %s`, _name, label._tclEscape);
+        tclEvalFmt(`%s heading #0 -text %s`, _name, label._tclEscape);
 
         // set the column names
         foreach (idx, col; columns)
-            this.evalFmt(`%s heading %s -text %s`, _name, idx, col._tclEscape);
+            tclEvalFmt(`%s heading %s -text %s`, _name, idx, col._tclEscape);
 
         _rootTree = this;
         _treeIDMap[_rootTreeID] = this;
@@ -162,7 +163,7 @@ class Tree : Widget
     // todo: handle all arguments
     Tree add(string text, Image image = null, IsOpened isOpened = IsOpened.no, string[] values = null, string[] tags = null)
     {
-        return new Tree(_rootTree, _name, this.evalFmt("%s insert %s end -text %s", _name, _treeID, text._tclEscape));
+        return new Tree(_rootTree, _name, tclEvalFmt("%s insert %s end -text %s", _name, _treeID, text._tclEscape));
     }
 
     /**
@@ -175,25 +176,25 @@ class Tree : Widget
     // todo: handle all arguments
     Tree insert(int index, string text, Image image = null, IsOpened isOpened = IsOpened.no, string[] values = null, string[] tags = null)
     {
-        return new Tree(_rootTree, _name, this.evalFmt("%s insert %s %s -text %s", _name, _treeID, index, text._tclEscape));
+        return new Tree(_rootTree, _name, tclEvalFmt("%s insert %s %s -text %s", _name, _treeID, index, text._tclEscape));
     }
 
     /** Return the index of this tree. */
     int index()
     {
-        return this.evalFmt("%s index %s", _name, _treeID).to!int;
+        return tclEvalFmt("%s index %s", _name, _treeID).to!int;
     }
 
     /** Attach a tree to this tree at the last position. */
     void attach(Tree tree)
     {
-        this.evalFmt("%s move %s %s end", _name, tree._treeID, _treeID);
+        tclEvalFmt("%s move %s %s end", _name, tree._treeID, _treeID);
     }
 
     /** Attach a tree to this tree at a specific position. */
     void attach(Tree tree, int index)
     {
-        this.evalFmt("%s move %s %s %s", _name, tree._treeID, _treeID, index);
+        tclEvalFmt("%s move %s %s %s", _name, tree._treeID, _treeID, index);
     }
 
     /**
@@ -206,7 +207,7 @@ class Tree : Widget
     {
         // note: this call must come before calling detach or .parent will return the root identifier
         _detachInfo = DetachInfo(parent, index, IsDetached.yes);
-        this.evalFmt("%s detach %s", _name, _treeID);
+        tclEvalFmt("%s detach %s", _name, _treeID);
     }
 
     /**
@@ -227,7 +228,7 @@ class Tree : Widget
             "Cannot reattach tree because its parent was destroyed.");
 
         // todo: provide a better implementation
-        auto treeCount = this.evalFmt("%s children %s", _name, _detachInfo.parent._treeID).splitter(" ").walkLength;
+        auto treeCount = tclEvalFmt("%s children %s", _name, _detachInfo.parent._treeID).splitter(" ").walkLength;
 
         // readjust index if it's out of bounds
         if (_detachInfo.index >= treeCount)
@@ -250,7 +251,7 @@ class Tree : Widget
 
         _rootTree._treeIDMap.remove(tree._treeID);
 
-        this.evalFmt("%s delete %s", _name, tree._treeID);
+        tclEvalFmt("%s delete %s", _name, tree._treeID);
     }
 
     /** Return the parent of this tree, or null if this is the root tree. */
@@ -259,7 +260,7 @@ class Tree : Widget
         if (this.isRootTree)
             return null;
 
-        string parentID = this.evalFmt("%s parent %s", _name, _treeID);
+        string parentID = tclEvalFmt("%s parent %s", _name, _treeID);
 
         if (parentID.empty)  // nested right in the root tree
             return _rootTree;
@@ -278,7 +279,7 @@ class Tree : Widget
     /** Return the previous sibling tree, or null if this is the first child of its parent. */
     Tree prevTree()
     {
-        string prevID = this.evalFmt("%s prev %s", _name, _treeID);
+        string prevID = tclEvalFmt("%s prev %s", _name, _treeID);
 
         if (prevID.empty)
             return null;
@@ -292,7 +293,7 @@ class Tree : Widget
     /** Return the next sibling tree, or null if this is the last child of its parent. */
     Tree nextTree()
     {
-        string nextID = this.evalFmt("%s next %s", _name, _treeID);
+        string nextID = tclEvalFmt("%s next %s", _name, _treeID);
 
         if (nextID.empty)
             return null;
@@ -306,7 +307,7 @@ class Tree : Widget
     /** Get the selected trees. */
     @property Tree[] selection()
     {
-        string treeIDs = this.evalFmt("%s selection", _name);
+        string treeIDs = tclEvalFmt("%s selection", _name);
 
         Appender!(Tree[]) result;
 
@@ -332,7 +333,7 @@ class Tree : Widget
         enforce(tree._treeID in _rootTree._treeIDMap,
             format("Cannot select tree because it is not part of this root tree."));
 
-        this.evalFmt("%s selection set %s", _name, tree._treeID);
+        tclEvalFmt("%s selection set %s", _name, tree._treeID);
     }
 
     /** Select the trees provided. */
@@ -344,7 +345,7 @@ class Tree : Widget
                 format("Cannot select tree because it is not part of this root tree."));
         }
 
-        this.evalFmt("%s selection set [list %s]", _name, trees.map!(a => a._treeID).join(" "));
+        tclEvalFmt("%s selection set [list %s]", _name, trees.map!(a => a._treeID).join(" "));
     }
 
     /** Add one or more trees to the selection. */
@@ -356,7 +357,7 @@ class Tree : Widget
                 format("Cannot add tree to selection because it is not part of this root tree."));
         }
 
-        this.evalFmt("%s selection add [list %s]", _name, trees.map!(a => a._treeID).join(" "));
+        tclEvalFmt("%s selection add [list %s]", _name, trees.map!(a => a._treeID).join(" "));
     }
 
     /** Toggle the select state of one or more trees. */
@@ -368,15 +369,15 @@ class Tree : Widget
                 format("Cannot toggle selection of tree because it is not part of this root tree."));
         }
 
-        this.evalFmt("%s selection toggle [list %s]", _name, trees.map!(a => a._treeID).join(" "));
+        tclEvalFmt("%s selection toggle [list %s]", _name, trees.map!(a => a._treeID).join(" "));
     }
 
     /** Remove all selections from this tree. */
     void deselectAll()
     {
-        string treeIDs = this.evalFmt("%s selection", _name);
+        string treeIDs = tclEvalFmt("%s selection", _name);
         foreach (treeID; treeIDs.splitter(" "))
-            this.evalFmt("%s selection remove %s", _name, treeID);
+            tclEvalFmt("%s selection remove %s", _name, treeID);
     }
 
     /**
@@ -385,7 +386,7 @@ class Tree : Widget
     */
     void setVisible()
     {
-        this.evalFmt("%s see %s", _name, _treeID);
+        tclEvalFmt("%s see %s", _name, _treeID);
     }
 
     /** Check if this tree is the root tree. */
@@ -404,7 +405,7 @@ class Tree : Widget
     */
     @property bool contains(Tree tree)
     {
-        return this.evalFmt("%s exists %s", _name, tree._treeID) == "1";
+        return tclEvalFmt("%s exists %s", _name, tree._treeID) == "1";
     }
 
     /** Return the children of this tree. */
@@ -412,7 +413,7 @@ class Tree : Widget
     {
         Appender!(Tree[]) result;
 
-        string treePaths = this.evalFmt("%s children %s", _name, _treeID);
+        string treePaths = tclEvalFmt("%s children %s", _name, _treeID);
 
         foreach (treePath; treePaths.splitter(" "))
         {
@@ -432,7 +433,7 @@ class Tree : Widget
     */
     Tree getFocus()
     {
-        string treePath = this.evalFmt("%s focus", _name);
+        string treePath = tclEvalFmt("%s focus", _name);
 
         if (treePath.empty)
             return null;
@@ -446,7 +447,7 @@ class Tree : Widget
     /** Set this tree to be the focused tree. */
     void setFocus()
     {
-        this.evalFmt("%s focus %s", _name, _treeID);
+        tclEvalFmt("%s focus %s", _name, _treeID);
     }
 
     /** Get the tree column visibility. */
@@ -542,17 +543,17 @@ class Tree : Widget
     {
         RowOptions options;
 
-        options.text = this.evalFmt("%s item %s -text", _name, _treeID);
+        options.text = tclEvalFmt("%s item %s -text", _name, _treeID);
 
-        string imagePath = this.evalFmt("%s item %s -image", _name, _treeID);
+        string imagePath = tclEvalFmt("%s item %s -image", _name, _treeID);
         options.image = cast(Image)Widget.lookupWidgetPath(imagePath);
 
-        options.values = this.evalFmt("%s item %s -values", _name, _treeID).split;
+        options.values = tclEvalFmt("%s item %s -values", _name, _treeID).split;
 
-        string isOpenStr = this.evalFmt("%s item %s -open", _name, _treeID);
+        string isOpenStr = tclEvalFmt("%s item %s -open", _name, _treeID);
         options.isOpened = (isOpenStr == "1" || isOpenStr == "true") ? IsOpened.yes : IsOpened.no;
 
-        options.tags = this.evalFmt("%s item %s -tags", _name, _treeID).split;
+        options.tags = tclEvalFmt("%s item %s -tags", _name, _treeID).split;
 
         return options;
     }
@@ -560,17 +561,17 @@ class Tree : Widget
     /** Set the options for the row this tree belongs to. */
     @property void rowOptions(RowOptions options)
     {
-        this.evalFmt("%s item %s -text %s", _name, _treeID, options.text._tclEscape);
-        this.evalFmt("%s item %s -values [list %s]", _name, _treeID, options.values.join(" "));
-        this.evalFmt("%s item %s -open %s", _name, _treeID, cast(int)options.isOpened);
-        this.evalFmt("%s item %s -tags [list %s]", _name, _treeID, options.tags.join(" "));
-        this.evalFmt("%s item %s -image %s", _name, _treeID, options.image ? options.image._name : "{}");
+        tclEvalFmt("%s item %s -text %s", _name, _treeID, options.text._tclEscape);
+        tclEvalFmt("%s item %s -values [list %s]", _name, _treeID, options.values.join(" "));
+        tclEvalFmt("%s item %s -open %s", _name, _treeID, cast(int)options.isOpened);
+        tclEvalFmt("%s item %s -tags [list %s]", _name, _treeID, options.tags.join(" "));
+        tclEvalFmt("%s item %s -image %s", _name, _treeID, options.image ? options.image._name : "{}");
     }
 
     /** Set the value for the column at the specified index. */
     void setColumn(int index, string value)
     {
-        this.evalFmt("%s set %s %s %s", _name, _treeID, index, value._tclEscape);
+        tclEvalFmt("%s set %s %s %s", _name, _treeID, index, value._tclEscape);
     }
 
     /**
@@ -583,11 +584,11 @@ class Tree : Widget
     {
         ColumnOptions options;
 
-        options._name = this.evalFmt("%s column %s -id", _name, index);
-        options._anchor = this.evalFmt("%s column %s -anchor", _name, index).toAnchor();
-        options._minWidth = this.evalFmt("%s column %s -minwidth", _name, index).to!int;
-        options._doStretch = cast(DoStretch)this.evalFmt("%s column %s -stretch", _name, index).to!int;
-        options._width = this.evalFmt("%s column %s -width", _name, index).to!int;
+        options._name = tclEvalFmt("%s column %s -id", _name, index);
+        options._anchor = tclEvalFmt("%s column %s -anchor", _name, index).toAnchor();
+        options._minWidth = tclEvalFmt("%s column %s -minwidth", _name, index).to!int;
+        options._doStretch = cast(DoStretch)tclEvalFmt("%s column %s -stretch", _name, index).to!int;
+        options._width = tclEvalFmt("%s column %s -width", _name, index).to!int;
 
         return options;
     }
@@ -600,10 +601,10 @@ class Tree : Widget
     */
     void setColumnOptions(int index, ColumnOptions options)
     {
-        this.evalFmt("%s column %s -anchor %s", _name, index, options._anchor.toString());
-        this.evalFmt("%s column %s -minwidth %s", _name, index, options._minWidth);
-        this.evalFmt("%s column %s -stretch %s", _name, index, cast(int)options._doStretch);
-        this.evalFmt("%s column %s -width %s", _name, index, options._width);
+        tclEvalFmt("%s column %s -anchor %s", _name, index, options._anchor.toString());
+        tclEvalFmt("%s column %s -minwidth %s", _name, index, options._minWidth);
+        tclEvalFmt("%s column %s -stretch %s", _name, index, cast(int)options._doStretch);
+        tclEvalFmt("%s column %s -width %s", _name, index, options._width);
     }
 
     /** Get the tree column options. */
@@ -611,11 +612,11 @@ class Tree : Widget
     {
         ColumnOptions options;
 
-        options._name = this.evalFmt("%s column #0 -id", _name);
-        options._anchor = this.evalFmt("%s column #0 -anchor", _name).toAnchor();
-        options._minWidth = this.evalFmt("%s column #0 -minwidth", _name).to!int;
-        options._doStretch = cast(DoStretch)this.evalFmt("%s column #0 -stretch", _name).to!int;
-        options._width = this.evalFmt("%s column #0 -width", _name).to!int;
+        options._name = tclEvalFmt("%s column #0 -id", _name);
+        options._anchor = tclEvalFmt("%s column #0 -anchor", _name).toAnchor();
+        options._minWidth = tclEvalFmt("%s column #0 -minwidth", _name).to!int;
+        options._doStretch = cast(DoStretch)tclEvalFmt("%s column #0 -stretch", _name).to!int;
+        options._width = tclEvalFmt("%s column #0 -width", _name).to!int;
 
         return options;
     }
@@ -623,10 +624,10 @@ class Tree : Widget
     /** Set the tree column options. */
     @property void treeColumnOptions(ColumnOptions options)
     {
-        this.evalFmt("%s column #0 -anchor %s", _name, options._anchor.toString());
-        this.evalFmt("%s column #0 -minwidth %s", _name, options._minWidth);
-        this.evalFmt("%s column #0 -stretch %s", _name, cast(int)options._doStretch);
-        this.evalFmt("%s column #0 -width %s", _name, options._width);
+        tclEvalFmt("%s column #0 -anchor %s", _name, options._anchor.toString());
+        tclEvalFmt("%s column #0 -minwidth %s", _name, options._minWidth);
+        tclEvalFmt("%s column #0 -stretch %s", _name, cast(int)options._doStretch);
+        tclEvalFmt("%s column #0 -width %s", _name, options._width);
     }
 
     /** Return the set of columns which are displayed. */
@@ -678,10 +679,10 @@ class Tree : Widget
         HeadingOptions options;
 
         // todo: command
-        options.text   = this.evalFmt("%s heading %s -text", _name, index);
-        options.anchor = this.evalFmt("%s heading %s -anchor", _name, index).toAnchor();
+        options.text   = tclEvalFmt("%s heading %s -text", _name, index);
+        options.anchor = tclEvalFmt("%s heading %s -anchor", _name, index).toAnchor();
 
-        string imagePath = this.evalFmt("%s heading %s -image", _name, index);
+        string imagePath = tclEvalFmt("%s heading %s -image", _name, index);
         options.image = cast(Image)Widget.lookupWidgetPath(imagePath);
 
         return options;
@@ -696,9 +697,9 @@ class Tree : Widget
     void setHeadingOptions(int index, HeadingOptions options)
     {
         // todo: command
-        this.evalFmt("%s heading %s -text %s", _name, index, options.text._tclEscape);
-        this.evalFmt("%s heading %s -anchor %s", _name, index, options.anchor.toString());
-        this.evalFmt("%s heading %s -image %s", _name, index, options.image ? options.image._name : "{}");
+        tclEvalFmt("%s heading %s -text %s", _name, index, options.text._tclEscape);
+        tclEvalFmt("%s heading %s -anchor %s", _name, index, options.anchor.toString());
+        tclEvalFmt("%s heading %s -image %s", _name, index, options.image ? options.image._name : "{}");
     }
 
     /** Get the tree column heading options. */
@@ -707,10 +708,10 @@ class Tree : Widget
         HeadingOptions options;
 
         // todo: command
-        options.text   = this.evalFmt("%s heading #0 -text", _name);
-        options.anchor = this.evalFmt("%s heading #0 -anchor", _name).toAnchor();
+        options.text   = tclEvalFmt("%s heading #0 -text", _name);
+        options.anchor = tclEvalFmt("%s heading #0 -anchor", _name).toAnchor();
 
-        string imagePath = this.evalFmt("%s heading #0 -image", _name);
+        string imagePath = tclEvalFmt("%s heading #0 -image", _name);
         options.image = cast(Image)Widget.lookupWidgetPath(imagePath);
 
         return options;
@@ -720,15 +721,15 @@ class Tree : Widget
     @property void treeHeadingOptions(HeadingOptions options)
     {
         // todo: command
-        this.evalFmt("%s heading #0 -text %s", _name, options.text._tclEscape);
-        this.evalFmt("%s heading #0 -anchor %s", _name, options.anchor.toString());
-        this.evalFmt("%s heading #0 -image %s", _name, options.image ? options.image._name : "{}");
+        tclEvalFmt("%s heading #0 -text %s", _name, options.text._tclEscape);
+        tclEvalFmt("%s heading #0 -anchor %s", _name, options.anchor.toString());
+        tclEvalFmt("%s heading #0 -image %s", _name, options.image ? options.image._name : "{}");
     }
 
     ///
     override string toString()
     {
-        string text = this.evalFmt("%s item %s -text", _name, _treeID);
+        string text = tclEvalFmt("%s item %s -text", _name, _treeID);
         return format("%s(%s)", typeof(this).stringof, text);
     }
 

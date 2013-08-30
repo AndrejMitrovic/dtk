@@ -13,6 +13,7 @@ import std.range;
 import std.string;
 
 import dtk.geometry;
+import dtk.interpreter;
 import dtk.options;
 import dtk.utils;
 
@@ -48,7 +49,7 @@ class PanedWindow : Widget
             format("The parent widget of the widget to add must be this paned window."));
 
         string weightStr = (weight == 0) ? "" : format("-weight %s", weight);
-        this.evalFmt("%s add %s %s", _name, widget._name, weightStr);
+        tclEvalFmt("%s add %s %s", _name, widget._name, weightStr);
     }
 
     /** Insert a widget to this paned window at a specific position. */
@@ -58,7 +59,7 @@ class PanedWindow : Widget
             format("The parent widget of the widget to insert must be this paned window."));
 
         string weightStr = (weight == 0) ? "" : format("-weight %s", weight);
-        this.evalFmt("%s insert %s %s %s", _name, index, widget._name, weightStr);
+        tclEvalFmt("%s insert %s %s %s", _name, index, widget._name, weightStr);
     }
 
     /** Remove a widget from this paned window. */
@@ -67,20 +68,19 @@ class PanedWindow : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to remove must be this paned window."));
 
-        this.evalFmt("%s forget %s", _name, widget._name);
+        tclEvalFmt("%s forget %s", _name, widget._name);
     }
 
     /** ditto. */
     void remove(int index)
     {
-        this.evalFmt("%s forget %s", _name, index);
+        tclEvalFmt("%s forget %s", _name, index);
     }
 
     /** Note: disabled due to bugs */
     @disable void setPosition(int index, int newIndex)
     {
-        import std.stdio;
-        stderr.writeln("res: ", this.evalFmt("%s sashpos %s %s", _name, index, newIndex));
+        tclEvalFmt("%s sashpos %s %s", _name, index, newIndex);
     }
 
     /** Set the width of a pane in this paned window. */
@@ -89,19 +89,19 @@ class PanedWindow : Widget
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget to configure must be this paned window."));
 
-        this.evalFmt("%s pane %s -width %s", _name, widget._name, width);
+        tclEvalFmt("%s pane %s -width %s", _name, widget._name, width);
     }
 
     /** ditto. */
     void setWidth(int index, int width)
     {
-        this.evalFmt("%s pane %s -width %s", _name, index, width);
+        tclEvalFmt("%s pane %s -width %s", _name, index, width);
     }
 
     /** Get all widgets that are part of this paned window. */
     @property Widget[] panes()
     {
-        string result = this.evalFmt("%s panes", _name);
+        string result = tclEvalFmt("%s panes", _name);
         if (result.empty)
             return null;
 

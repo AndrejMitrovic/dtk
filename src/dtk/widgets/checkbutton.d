@@ -13,6 +13,7 @@ import std.string;
 import dtk.app;
 import dtk.event;
 import dtk.image;
+import dtk.interpreter;
 import dtk.signals;
 import dtk.utils;
 import dtk.options;
@@ -37,7 +38,7 @@ class CheckButton : Widget
         this.toggleOff();
 
         // keyboard binding
-        this.evalFmt("bind %s <Return> { %s invoke }", _name, _name);
+        tclEvalFmt("bind %s <Return> { %s invoke }", _name, _name);
     }
 
     /**
@@ -47,7 +48,7 @@ class CheckButton : Widget
     */
     void toggleOn()
     {
-        this.evalFmt("set %s %s", _toggleVarName, onValue());
+        tclEvalFmt("set %s %s", _toggleVarName, onValue());
     }
 
     /**
@@ -57,7 +58,7 @@ class CheckButton : Widget
     */
     void toggleOff()
     {
-        this.evalFmt("set %s %s", _toggleVarName, offValue());
+        tclEvalFmt("set %s %s", _toggleVarName, offValue());
     }
 
     /**
@@ -65,13 +66,13 @@ class CheckButton : Widget
     */
     void toggle()
     {
-        this.evalFmt("%s invoke", _name);
+        tclEvalFmt("%s invoke", _name);
     }
 
     /** Get the current state of the checkbutton. It should equal to either onValue or offValue. */
     @property string value()
     {
-        return to!string(Tcl_GetVar(App._interp, cast(char*)_toggleVarName.toStringz, 0));
+        return to!string(Tcl_GetVar(tclInterp, cast(char*)_toggleVarName.toStringz, 0));
     }
 
     /** Return the value that's emitted when the check button is toggled on. */

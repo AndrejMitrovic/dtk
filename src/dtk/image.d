@@ -11,6 +11,7 @@ import std.file;
 import std.path;
 import std.string;
 
+import dtk.interpreter;
 import dtk.utils;
 
 import dtk.widgets.widget;
@@ -26,6 +27,6 @@ class Image : Widget
         super(CreateFakeWidget.init);
 
         // todo: throw on invalid image format, invalid file name, etc.
-        this.evalFmt("image create photo %s -file %s", _name, fileName._tclEscape);
+        tclEvalFmt("image create photo %s -file %s", _name, fileName._tclEscape);
     }
 }

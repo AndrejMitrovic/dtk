@@ -14,6 +14,7 @@ public
     import dtk.font;
     import dtk.geometry;
     import dtk.image;
+    import dtk.interpreter;
     import dtk.loader;
     import dtk.options;
     import dtk.types;

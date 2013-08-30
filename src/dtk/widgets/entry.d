@@ -16,6 +16,7 @@ import std.typetuple;
 import dtk.app;
 import dtk.event;
 import dtk.geometry;
+import dtk.interpreter;
 import dtk.options;
 import dtk.signals;
 import dtk.types;
@@ -92,7 +93,7 @@ class Entry : Widget
             }
         */
 
-        this.evalFmt(
+        tclEvalFmt(
             `
             proc %s {type args} {
                 %s $type $args
@@ -102,21 +103,21 @@ class Entry : Widget
                _dtkCallbackIdent,
                _validateVar);
 
-        this.evalFmt("%s configure -validatecommand { %s %s %s }", _name, validateFunc, TkEventType.TkValidate, validationArgs);
-        this.evalFmt("%s configure -invalidcommand { %s %s %s }", _name, validateFunc, TkEventType.TkFailedValidation, validationArgs);
+        tclEvalFmt("%s configure -validatecommand { %s %s %s }", _name, validateFunc, TkEventType.TkValidate, validationArgs);
+        tclEvalFmt("%s configure -invalidcommand { %s %s %s }", _name, validateFunc, TkEventType.TkFailedValidation, validationArgs);
     }
 
     /** Return the text in this entry. */
     @property string value()
     {
-        return evalFmt("%s get", _name);
+        return tclEvalFmt("%s get", _name);
     }
 
     /** Set the text in this entry. */
     @property void value(string newText)
     {
-        evalFmt("%s delete 0 end", _name);
-        evalFmt(`%s insert 0 "%s"`, _name, newText);
+        tclEvalFmt("%s delete 0 end", _name);
+        tclEvalFmt(`%s insert 0 "%s"`, _name, newText);
     }
 
     /**
@@ -190,7 +191,7 @@ class Entry : Widget
 
     private void setValidState(IsValidated isValidated)
     {
-        this.evalFmt("set %s %s", _validateVar, cast(bool)isValidated);
+        tclEvalFmt("set %s %s", _validateVar, cast(bool)isValidated);
     }
 
     /** Get the current justification. */

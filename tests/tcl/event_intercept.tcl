@@ -5,6 +5,8 @@ pack .button
 
 # By default, the bindtags for a widget are:
 # { widgetPath, widetClass, widgetToplevel, all }
+
+# We bind some commands
 bind .button <Button-1> { puts ".button clicked" }
 bind . <Button-1> { puts ". clicked" }
 
