@@ -29,112 +29,8 @@ import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.entry;
+import dtk.widgets.options;
 import dtk.widgets.scrollbar;
-
-/**
-    Specifies how to display the image relative to the text,
-    in the case both text and an image are present in a widget.
-*/
-enum Compound
-{
-    none,   /// Display the image if present, otherwise the text.
-    text,   /// Display text only.
-    image,  /// Display the image only.
-    center, /// Display the text centered on top of the image.
-    top,    /// Display the text above of the text.
-    bottom, /// Display the text below of the text.
-    left,   /// Display the text to the left of the text.
-    right,  /// Display the text to the right of the text.
-}
-
-/**
-    Specifies the type of selection mode a widget has.
-*/
-enum SelectMode
-{
-    single,        /// Allow only a single selection.
-    multiple,      /// Allow multiple selections.
-    old_single,    /// deprecated
-    old_multiple,  /// deprecated
-}
-
-package SelectMode toSelectMode(string input)
-{
-    switch (input) with (SelectMode)
-    {
-        case "browse":     return single;
-        case "extended":   return multiple;
-        case "single":     return old_single;
-        case "multiple":   return old_multiple;
-        default:           assert(0, format("Unhandled select input: '%s'", input));
-    }
-}
-
-package string toString(SelectMode selectMode)
-{
-    final switch (selectMode) with (SelectMode)
-    {
-        case single:        return "browse";
-        case multiple:      return "extended";
-        case old_single:    return "single";
-        case old_multiple:  return "multiple";
-    }
-}
-
-/// Tk and Ttk widget types
-package enum TkType : string
-{
-    button      = "ttk::button",
-    checkbutton = "ttk::checkbutton",
-    combobox    = "ttk::combobox",
-    entry       = "ttk::entry",
-    frame       = "ttk::frame",
-    label       = "ttk::label",
-    labelframe  = "ttk::labelframe",
-    listbox     = "tk::listbox",     // note: no ttk::listbox yet in v8.6
-    menu        = "menu",            // note: no ttk::menu
-    notebook    = "ttk::notebook",
-    panedwindow = "ttk::panedwindow",
-    progressbar = "ttk::progressbar",
-    radiobutton = "ttk::radiobutton",
-    scale       = "ttk::scale",
-    separator   = "ttk::separator",
-    sizegrip    = "ttk::sizegrip",
-    scrollbar   = "ttk::scrollbar",
-    spinbox     = "ttk::spinbox",
-    text        = "tk::text",        // note: no ttk::text
-    toplevel    = "tk::toplevel",    // note: no ttk::toplevel
-    tree        = "ttk::treeview",
-}
-
-/// Tk class types for each widget type
-package enum TkClass : string
-{
-    button      = "TButton",
-    checkbutton = "TCheckbutton",
-    combobox    = "TCombobox",
-    entry       = "TEntry",
-    frame       = "TFrame",
-    label       = "TLabel",
-    labelframe  = "TLabelframe",
-    listbox     = "Listbox",
-    menu        = "Menu",
-    notebook    = "TNotebook",
-    panedwindow = "TPanedwindow",
-    progressbar = "TProgressbar",
-    radiobutton = "TRadiobutton",
-    scale       = "TScale",
-    separator   = "TSeparator",
-    sizegrip    = "TSizegrip",
-    scrollbar   = "TScrollbar",
-    spinbox     = "TSpinbox",
-    text        = "Text",
-    toplevel    = "Toplevel",
-    tree        = "Treeview",
-}
-
-package struct InitLater { }
-package struct CreateFakeWidget { }
 
 /** The main class of all Dtk widgets. */
 abstract class Widget
@@ -598,6 +494,9 @@ package:
     static extern(C)
     int dtkCallbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
     {
+        // todo: use try/catch on a Throwable, we don't want to escape exceptions to the C side.
+        // todo: extract the types, and the event type, and the direct it to a D function that can
+
        /+  int slotID = cast(int)clientData;
 
         if (auto callback = slotID in _callbackMap)
@@ -787,6 +686,84 @@ package:
     */
     bool _isDestroyed;
 }
+
+package SelectMode toSelectMode(string input)
+{
+    switch (input) with (SelectMode)
+    {
+        case "browse":     return single;
+        case "extended":   return multiple;
+        case "single":     return old_single;
+        case "multiple":   return old_multiple;
+        default:           assert(0, format("Unhandled select input: '%s'", input));
+    }
+}
+
+package string toString(SelectMode selectMode)
+{
+    final switch (selectMode) with (SelectMode)
+    {
+        case single:        return "browse";
+        case multiple:      return "extended";
+        case old_single:    return "single";
+        case old_multiple:  return "multiple";
+    }
+}
+
+/// Tk and Ttk widget types
+package enum TkType : string
+{
+    button      = "ttk::button",
+    checkbutton = "ttk::checkbutton",
+    combobox    = "ttk::combobox",
+    entry       = "ttk::entry",
+    frame       = "ttk::frame",
+    label       = "ttk::label",
+    labelframe  = "ttk::labelframe",
+    listbox     = "tk::listbox",     // note: no ttk::listbox yet in v8.6
+    menu        = "menu",            // note: no ttk::menu
+    notebook    = "ttk::notebook",
+    panedwindow = "ttk::panedwindow",
+    progressbar = "ttk::progressbar",
+    radiobutton = "ttk::radiobutton",
+    scale       = "ttk::scale",
+    separator   = "ttk::separator",
+    sizegrip    = "ttk::sizegrip",
+    scrollbar   = "ttk::scrollbar",
+    spinbox     = "ttk::spinbox",
+    text        = "tk::text",        // note: no ttk::text
+    toplevel    = "tk::toplevel",    // note: no ttk::toplevel
+    tree        = "ttk::treeview",
+}
+
+/// Tk class types for each widget type
+package enum TkClass : string
+{
+    button      = "TButton",
+    checkbutton = "TCheckbutton",
+    combobox    = "TCombobox",
+    entry       = "TEntry",
+    frame       = "TFrame",
+    label       = "TLabel",
+    labelframe  = "TLabelframe",
+    listbox     = "Listbox",
+    menu        = "Menu",
+    notebook    = "TNotebook",
+    panedwindow = "TPanedwindow",
+    progressbar = "TProgressbar",
+    radiobutton = "TRadiobutton",
+    scale       = "TScale",
+    separator   = "TSeparator",
+    sizegrip    = "TSizegrip",
+    scrollbar   = "TScrollbar",
+    spinbox     = "TSpinbox",
+    text        = "Text",
+    toplevel    = "Toplevel",
+    tree        = "Treeview",
+}
+
+package struct InitLater { }
+package struct CreateFakeWidget { }
 
 // all the event arguments captures by the bind command
 package immutable string eventArgs = "%x %y %k %K %w %h %X %Y";

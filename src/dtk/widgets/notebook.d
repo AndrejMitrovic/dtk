@@ -17,6 +17,7 @@ import dtk.image;
 import dtk.options;
 import dtk.utils;
 
+import dtk.widgets.options;
 import dtk.widgets.widget;
 
 ///

@@ -19,6 +19,7 @@ public
     import dtk.widgets.listbox;
     import dtk.widgets.menu;
     import dtk.widgets.notebook;
+    import dtk.widgets.options;
     import dtk.widgets.panedwindow;
     import dtk.widgets.progressbar;
     import dtk.widgets.radiobutton;
