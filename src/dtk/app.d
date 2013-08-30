@@ -171,16 +171,8 @@ final class App
         Tcl_DeleteInterp(_interp);
     }
 
-    static if (__VERSION__ < 2064)
-    {
-        /* Only one interpreter is allowed. */
-        public __gshared Tcl_Interp* _interp;
-    }
-    else
-    {
-        /* Only one interpreter is allowed. */
-        package __gshared Tcl_Interp* _interp;
-    }
+    /* Only one interpreter is allowed. */
+    /*package*/ __gshared Tcl_Interp* _interp;
 
 private:
     Window _window;

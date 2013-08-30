@@ -20,7 +20,7 @@ void log(Args...)(Args args)
 {
     version (DTK_LOG_TESTS)
     {
-        stderr.writeln(args);
+        writeln(args);
     }
 }
 
@@ -29,7 +29,7 @@ void logf(Args...)(Args args)
 {
     version (DTK_LOG_TESTS)
     {
-        stderr.writefln(args[0], args[1 .. $]);
+        writefln(args[0], args[1 .. $]);
     }
 }
 

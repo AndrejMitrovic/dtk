@@ -23,12 +23,18 @@ rem     - Logs all log/logf calls, for use with unittesting.
 rem
 
 set includes=-I%cd%
-set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_EVAL
+set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_EVAL -version=DTK_LOG_TESTS
 set flags=%includes% -g %debug_versions%
 
-rem Uncomment this to run dtk tests
+rem Set this to enforce building with unittests even for the static library.
+rem Only use this during DTK development.
 rem
-rem set run_tests=1
+rem set build_flags=-unittest
+
+rem Uncomment these to run the test-suite and build the static library
+rem
+set run_tests=1
+rem set run_build=1
 
 set compiler=dmd.exe
 rem set compiler=dmd_msc.exe
@@ -60,7 +66,9 @@ echo Success: dtk tested.
 
 :BUILD
 
-%compiler% -g -of%binPath%\dtk.lib -lib %flags% %files%
+if [%run_build%]==[] goto :eof
+
+%compiler% %build_flags% -g -of%binPath%\dtk.lib -lib %flags% %files%
 if errorlevel 1 GOTO :eof
 
 echo Success: dtk built.

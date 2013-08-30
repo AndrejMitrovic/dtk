@@ -32,6 +32,8 @@ import dtk.widgets.entry;
 import dtk.widgets.options;
 import dtk.widgets.scrollbar;
 
+// todo: add tagging for Widget types as well.
+
 /** The main class of all Dtk widgets. */
 abstract class Widget
 {
@@ -67,6 +69,8 @@ abstract class Widget
         to event-specific event handlers;
     */
     public EventHandler!Event onEvent;
+
+    // todo: add an EventHandlerList
 
     /**
         Handle mouse-specific events.
@@ -392,7 +396,7 @@ package:
     }
 
     /** Get the value of the variable $(D varName) of type $(D T). */
-    final T getVar(T)(string varName)
+    static T getVar(T)(string varName)
     {
         // todo: use TCL_LEAVE_ERR_MSG
         // todo: check _interp error
@@ -425,11 +429,11 @@ package:
     }
 
     /** Set a new value to the variable $(D varName) of type $(D T). */
-    final void setVar(T)(string varName, T value)
+    static void setVar(T)(string varName, T value)
     {
         static if (isArray!T && !isSomeString!T)
         {
-            this.evalFmt("set %s [list %s]", varName, value.join(" "));
+            App.evalFmt("set %s [list %s]", varName, value.join(" "));
         }
         else
         {
@@ -442,30 +446,21 @@ package:
     }
 
     /**
-        Create a tracec Tcl variable, which will invoke the
-        generic onEvent signal handler and pass the variable
-        value and a special tag.
+        Create a traced Tcl variable, which will invoke the
+        dtk callback and pass event type and the variable value
+        whenever the variable is changed.
 
         The function returns the variable name.
     */
-    final string createTracedTaggedVariable(TkEventType eventType)
+    static string createTracedTaggedVariable(TkEventType eventType)
     {
-        assert(_isInitialized);  // todo: was: assert(!_dtkCallbackIdent.empty);
+        string varName = createVariableName();
 
-        string varName = this.createVariableName();
-        string tracerFunc = format("tracer_%s", this.createCallbackName());
+        // first we need to initialize the variable
+        App.evalFmt(`set %s ""`, varName);
 
-        // tracer used instead of -command
-        this.evalFmt(
-            `
-            proc %s {varname args} {
-                upvar #0 $varname var
-                %s %s $var
-            }
-            `, tracerFunc, _dtkCallbackIdent, eventType);
-
-        // hook up the tracer for this unique variable
-        this.evalFmt(`trace add variable %s write "%s %s"`, varName, tracerFunc, varName);
+        // then hook the dtk callback directly
+        App.evalFmt(`trace add variable %s write %s "%s $%s"`, varName, eventType, _dtkCallbackIdent, varName);
 
         return varName;
     }
@@ -660,15 +655,6 @@ package:
 
     /** Prefix for variables to avoid name clashes. */
     enum _variablePrefix = "::dtk_var";
-
-    //~ static struct Callback
-    //~ {
-        //~ Widget widget;
-        //~ Signal!(Widget, Event)* signal;
-    //~ }
-
-    //~ /** All thread-local active callbacks. */
-    //~ static Callback[int] _callbackMap;
 
     /** All widget paths -> widget maps */
     static Widget[string] _widgetPathMap;
