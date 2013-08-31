@@ -6,6 +6,8 @@
 
 Todo now:
 
+- Find all valid substitutions for each event types.
+
 - Remove as many fake widgets as possible, and simplify super ctor in Widget.
 - Call bindtags for all real widgets
 

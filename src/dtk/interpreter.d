@@ -25,7 +25,7 @@ import dtk.widgets.window;
 package abstract final class Interpreter
 {
     /** Initialize the Interpreter and the Tcl and Tk libraries. */
-    package static void initialize()
+    package static void initClass()
     {
         _interp = enforce(Tcl_CreateInterp(), "Couldn't create the Tcl interpreter.");
 
@@ -34,7 +34,7 @@ package abstract final class Interpreter
     }
 
     /** Release the interpreter resources. */
-    package static void release()
+    package static void releaseClass()
     {
         Tcl_DeleteInterp(_interp);
         _interp = null;

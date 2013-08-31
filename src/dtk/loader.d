@@ -60,14 +60,14 @@ version (Windows)
         _tclTransTable['}'] = r"\}";
 
         /** Initialize DTK classes. */
-        Interpreter.initialize();
-        Widget._initCallback();
+        Interpreter.initClass();
+        Widget.initClass();
     }
 
     shared static ~this()
     {
         /** Release DTK classes. */
-        Interpreter.release();
+        Interpreter.releaseClass();
     }
 }
 else

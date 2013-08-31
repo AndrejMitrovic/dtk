@@ -162,8 +162,11 @@ abstract class Widget
     */
     public EventHandler!KeyboardEvent onKeyboardEvent;
 
-
-    //~ bindtags .button [list $buttonClass InterceptEvent .button all ]
+    /** Ctor for widgets which know their parent during construction. */
+    this(Widget parent, TkType tkType)
+    {
+        this.initialize(parent, tkType);
+    }
 
     /**
         Delayed initialization. Some widgets in Tk must be parented (e.g. menus),
@@ -197,35 +200,24 @@ abstract class Widget
     this(CreateToplevel)
     {
         this.initialize(".");
+        this.bindTags(TkClass.toplevel);
     }
 
-    /** Factored out for the toplevel window widget and fake widgets. */
-    package void initialize(string name)
+    /**
+        Bind the DTK interceptor as the first event handler for this widget.
+
+        By default a Tk widget has the tag bindings in this order:
+        { widgetPath, widetClass, widgetToplevel, all }
+
+        For our event mechanism we need to intercept the event before it reaches
+        any other tag binding, and we have to remove the widgetToplevel from the
+        tags list since our event dispatch mechanism will already notify the
+        toplevel window of a widget when an event occurs.
+    */
+    private void bindTags(TkClass tkClass)
     {
-        enforce(!name.empty);
-        _name = name;
-        _widgetPathMap[_name] = this;
-
-        // todo: we can use %W to get the widget path, which is valid for all Tk event types.
-        // todo: only bind the Interceptor, and maybe avoid setting up bindtags for some widgets
-        // (mostly fake widgets, but maybe menus as well)
-        // List of widgets which had no emitted generic signals:
-        // Menu, Separator, Sizegrip.
-        //~ if (emitGenericSignals == EmitGenericSignals.yes)
-        //~ {
-            //~ // todo now: instead of binding each widget with this same code, we should bind the class type,
-            //~ // maybe in the app class or in a shared this ctor.
-            //~ tclEvalFmt("bind %s <Enter> { %s %s %s }", _name, _dtkCallbackIdent, TkEventType.Enter, eventArgs);
-            //~ tclEvalFmt("bind %s <Leave> { %s %s %s }", _name, _dtkCallbackIdent, TkEventType.Leave, eventArgs);
-        //~ }
-
-        _isInitialized = true;
-    }
-
-    /** Ctor for widgets which know their parent during construction. */
-    this(Widget parent, TkType tkType)
-    {
-        this.initialize(parent, tkType);
+        enforce(!_name.empty);
+        tclEvalFmt("bindtags %s [list %s %s %s all ]", _name, _dtkInterceptTag, cast(string)tkClass, _name);
     }
 
     /** Factored out for delayed initialization. */
@@ -245,6 +237,19 @@ abstract class Widget
         tclEvalFmt("%s %s", tkType.toBaseType(), name);
 
         this.initialize(name);
+
+        this.bindTags(tkType.toTkClass());
+
+        //~ bindtags .button [list $buttonClass InterceptEvent .button all ]
+    }
+
+    /** Init the name. */
+    private void initialize(string name)
+    {
+        enforce(!name.empty);
+        _name = name;
+        _widgetPathMap[_name] = this;
+        _isInitialized = true;
     }
 
     /**
@@ -497,8 +502,15 @@ package:
         return format("%s%s_%s", _callbackPrefix, _threadID, newSlotID).replace(":", "_");
     }
 
-    /* API: Initialize the global dtk callback. */
-    public static void _initCallback()
+    /* API: Initialize the global dtk callback and the dtk interceptor tag bindings. */
+    public static void initClass()
+    {
+        _initDtkCallback();
+        _initDtkInterceptor();
+    }
+
+    /// ditto
+    private static void _initDtkCallback()
     {
         enforce(!_dtkCallbackInitialized, "dtk callback already initialized.");
 
@@ -511,9 +523,62 @@ package:
         _dtkCallbackInitialized = true;
     }
 
+    // all the event arguments captures by the bind command (todo: %W should be caught)
+    immutable string eventArgs = "%x %y %k %K %w %h %X %Y";
+    //~ tclEvalFmt("bind %s <Enter> { %s %s %s }", _dtkInterceptTag, _dtkCallbackIdent, EventType.Enter, eventArgs);
+
+
+    // validation arguments captured by validatecommand
+    immutable string validationArgs = "%d %i %P %s %S %v %V %W";
+
+    /// ditto
+    private static void _initDtkInterceptor()
+    {
+        // todo: we should call the D callback, and then run either continue or break.
+        // we should probably have some kind of variable which the callback sets.
+        // Actually: it would be better if we had a return value
+        //~ "%s $%s"
+
+        //~ enum string tcl_flags = "%W";
+        //~ tclEvalFmt(
+        //~ "bind %s <Button-1> {
+            //~ set dtk_intercept_status [%s %s]
+            //~ if ($dtk_intercept_status eq 1)
+                //~ break
+            //~ else
+                //~ continue
+        //~ }
+        //~ ", _dtkInterceptTag, _dtkCallbackIdent, tcl_flags);
+
+
+
+
+        //~ string keyboardSubs = "";
+
+
+
+        tclEvalFmt("bind %s <KeyPress> { %s %s %s }", _dtkInterceptTag, _dtkCallbackIdent, EventType.keyboard, eventArgs);
+
+        //~ enum string tcl_flags = "%W";
+        //~ tclEvalFmt(`bind %s <Button-1> "%s %s"`, _dtkInterceptTag, _dtkCallbackIdent, tcl_flags);
+
+    }
+
     static extern(C)
     int dtkCallbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
     {
+        // todo:
+        //~ TCL_BREAK;
+        //~ TCL_CONTINUE;
+
+        import std.stdio;
+
+        stderr.writefln("-- received 1: %s", to!string(Tcl_GetString(objv[1])));
+        stderr.writefln("-- received 2: %s", to!string(Tcl_GetString(objv[2])));
+        stderr.writeln();
+
+        return TCL_BREAK;
+
         // todo: use try/catch on a Throwable, we don't want to escape exceptions to the C side.
         // todo: extract the types, and the event type, and the direct it to a D function that can
 
@@ -607,7 +672,7 @@ package:
             return TCL_ERROR;
         } +/
 
-        return TCL_OK;
+        //~ return TCL_OK;
     }
 
     // no-op
@@ -640,6 +705,9 @@ package:
 
     /** Is the Tcl callback registered. */
     __gshared bool _dtkCallbackInitialized;
+
+    /** Used for Tcl bindtags. */
+    enum _dtkInterceptTag = "dtk::intercept_tag";
 
     // invoked per-thread: store a unique thread identifier
     static this()
@@ -748,12 +816,51 @@ package enum TkClass : string
     tree        = "Treeview",
 }
 
+///
+package TkClass toTkClass(TkType tkType)
+{
+    // note: safe since to!string will return the member name, not the string value
+    return to!TkClass(to!string(tkType));
+}
+
+///
+package enum TkSubs : string
+{
+    client_request = "%#",
+    win_below_target = "%a",
+    mouse_button = "%b",
+    count = "%c",
+    user_data = "%d",
+    focus = "%f",
+    height = "%h",
+    win_hex_id = "%i",
+    keycode = "%k",
+    mode = "%m",
+    override_redirect = "%o",
+    place = "%p",
+    state = "%s",
+    timestamp = "%t",
+    width = "%w",
+    x_pos = "%x",
+    y_pos = "%y",
+    uni_char = "%A",
+    border_width = "%B",
+    mouse_wheel_delta = "%D",
+    send_event_type = "%E",
+    keysym_text = "%K",
+    keysym_decimal = "%N",
+    property_name = "%P",
+    root_window_id = "%R",
+    subwindow_id = "%S",
+    type = "%T",
+    window_id = "%W",
+    x_root = "%X",
+    y_root = "%Y",
+}
+
+// mapping of DTK event types to the subs we need for the bindings
+//~ package TkSubs[][EventType] eventTypeSubs;
+
 package struct InitLater { }
 package struct CreateFakeWidget { }
 package struct CreateToplevel { }
-
-// all the event arguments captures by the bind command
-package immutable string eventArgs = "%x %y %k %K %w %h %X %Y";
-
-// validation arguments captured by validatecommand
-package immutable string validationArgs = "%d %i %P %s %S %v %V %W";

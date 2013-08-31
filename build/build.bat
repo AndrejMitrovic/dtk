@@ -31,11 +31,6 @@ rem Only use this during DTK development.
 rem
 set build_flags=-unittest
 
-rem Uncomment these to run the test-suite and build the static library
-rem
-set run_tests=1
-rem set run_build=1
-
 set compiler=dmd.exe
 rem set compiler=dmd_msc.exe
 rem set compiler=ldmd2.exe
@@ -43,7 +38,7 @@ rem set compiler=ldmd2.exe
 set main_file=dtk\package.d
 rem set main_file=dtk\all.d
 
-set dtest=rdmd --build-only -w -of%binPath%\dtk_test.exe --main -L/SUBSYSTEM:WINDOWS:5.01 -unittest -g --force --compiler=%compiler% %flags% %main_file%
+set cmd_build_tests=rdmd --build-only -w -of%binPath%\dtk_test.exe --main -L/SUBSYSTEM:WINDOWS:5.01 -unittest -g --force --compiler=%compiler% %flags% %main_file%
 
 set stdout_log=%buildPath%\dtktest_stdout.log
 set stderr_log=%buildPath%\dtktest_stderr.log
@@ -51,22 +46,31 @@ set stderr_log=%buildPath%\dtktest_stderr.log
 echo. > %stdout_log%
 echo. > %stderr_log%
 
-if [%run_tests%]==[] goto :BUILD
+rem Uncomment these as necessary
+rem
+set build_tests=1
+rem set run_tests=1
+rem set build_lib=1
 
-:RUN_TESTS
+if [%build_tests%]==[] goto :BUILD
 
-%dtest%
+:TEST
+
+%cmd_build_tests%
 if errorlevel 1 GOTO :ERROR
+if [%run_tests%]==[] echo Success: dtk tests built.
+
+if [%run_tests%]==[] goto :BUILD
 
 %binPath%\dtk_test.exe
 if errorlevel 1 GOTO :ERROR
 
 type %stdout_log%
-echo Success: dtk tested.
+echo Success: dtk tests passed.
 
 :BUILD
 
-if [%run_build%]==[] goto :eof
+if [%build_lib%]==[] goto :eof
 
 %compiler% %build_flags% -g -of%binPath%\dtk.lib -lib %flags% %files%
 if errorlevel 1 GOTO :eof

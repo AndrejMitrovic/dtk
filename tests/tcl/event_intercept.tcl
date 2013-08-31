@@ -41,7 +41,21 @@ bind $buttonClass <Button-1> "+puts {Some TButton was clicked}"
 # we call either break or continue. Here is where we will call the D
 # callback to ask whether it's ok to propagate this event, which will
 # determine if e.g. a button widget is pushed.
-bind InterceptEvent <Button-1> { break }
+#~ bind InterceptEvent <Button-1> { break }
+
+# Testing - We could also call the d callback directly which returns TCL_BREAK or TCL_CONTINUE
+bind InterceptEvent <Button-1> {
+    set dtk_intercept_status [d_callback %W]
+    if {$dtk_intercept_status eq 1} {
+        break
+    } else {
+        continue
+    }
+}
+
+proc d_callback {varname args} {
+    return 1
+}
 
 # -- Now let's try with another widget --
 ttk::checkbutton .checkbutton -text "Checkbutton" -variable checkbuttonVar -command { puts "command: .checkbutton clicked" }

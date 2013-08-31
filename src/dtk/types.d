@@ -16,6 +16,9 @@ import dtk.utils;
 
 enum uint TCL_OK = 0;
 enum uint TCL_ERROR = 1;
+enum uint TCL_RETURN = 2;
+enum uint TCL_BREAK = 3;
+enum uint TCL_CONTINUE = 4;
 
 struct CData
 {
