@@ -19,7 +19,6 @@ alias splitter = std.algorithm.splitter;
 
 import dtk.event;
 import dtk.interpreter;
-import dtk.options;
 import dtk.types;
 import dtk.utils;
 
@@ -47,10 +46,10 @@ class Window : Widget
     /** Instantiate a new Window. */
     this(Window parent, int width, int height)
     {
-        DtkOptions options;
-        options["width"] = to!string(width);
-        options["height"] = to!string(height);
-        super(parent, TkType.toplevel, options);
+        super(parent, TkType.toplevel);
+
+        this.setOption("width", width);
+        this.setOption("height", height);
 
         // wait for the window to show up before we issue any commands
         tclEvalFmt("tkwait visibility %s", _name);
@@ -59,7 +58,7 @@ class Window : Widget
     /** Used for the initial implicitly-created Tk root window. */
     this(Tk_Window window)
     {
-        super(".", EmitGenericSignals.yes);
+        super(CreateToplevel.init);
         tclEvalFmt("tkwait visibility %s", _name);
     }
 

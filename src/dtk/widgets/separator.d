@@ -13,7 +13,6 @@ import std.range;
 import dtk.app;
 import dtk.event;
 import dtk.geometry;
-import dtk.options;
 import dtk.utils;
 
 import dtk.widgets.widget;
@@ -24,9 +23,8 @@ class Separator : Widget
     ///
     this(Widget master, Orientation orientation)
     {
-        DtkOptions options;
-        options["orient"] = to!string(orientation);
-        super(master, TkType.separator, options, EmitGenericSignals.no);
+        super(master, TkType.separator, EmitGenericSignals.no);
+        this.setOption("orient", to!string(orientation));
     }
 
     /** Get the orientation of this scrollbar. */

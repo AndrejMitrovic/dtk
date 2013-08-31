@@ -17,7 +17,6 @@ import dtk.interpreter;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
-import dtk.options;
 
 import dtk.widgets.button;
 import dtk.widgets.widget;

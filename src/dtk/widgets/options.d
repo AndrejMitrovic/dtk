@@ -6,6 +6,8 @@
  */
 module dtk.widgets.options;
 
+import std.string;
+
 /**
     Holds various options that are used in multiple widget types.
 */
@@ -35,4 +37,27 @@ enum SelectMode
     multiple,      /// Allow multiple selections.
     old_single,    /// deprecated
     old_multiple,  /// deprecated
+}
+
+package SelectMode toSelectMode(string input)
+{
+    switch (input) with (SelectMode)
+    {
+        case "browse":     return single;
+        case "extended":   return multiple;
+        case "single":     return old_single;
+        case "multiple":   return old_multiple;
+        default:           assert(0, format("Unhandled select input: '%s'", input));
+    }
+}
+
+package string toString(SelectMode selectMode)
+{
+    final switch (selectMode) with (SelectMode)
+    {
+        case single:        return "browse";
+        case multiple:      return "extended";
+        case old_single:    return "single";
+        case old_multiple:  return "multiple";
+    }
 }

@@ -17,7 +17,6 @@ import dtk.app;
 import dtk.event;
 import dtk.geometry;
 import dtk.interpreter;
-import dtk.options;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
@@ -77,8 +76,7 @@ class Entry : Widget
         this.setOption("textvariable", varName);
 
         /* Validation */
-        _validateVar = this.createVariableName();
-        createTclVariable(_validateVar);
+        _validateVar = makeVar();
 
         string callValidator = format("%s %s", _dtkCallbackIdent, validationArgs);
         string validateFunc = format("validate_%s", this.createCallbackName());

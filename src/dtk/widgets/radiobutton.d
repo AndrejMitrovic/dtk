@@ -15,7 +15,6 @@ import dtk.app;
 import dtk.event;
 import dtk.image;
 import dtk.interpreter;
-import dtk.options;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
@@ -75,12 +74,11 @@ class RadioButton : Widget
     {
         enforce(radioGroup !is null, "radioGroup argument must not be null.");
 
-        DtkOptions options;
-        options["text"] = text;
-        options["variable"] = radioGroup._varName;
-        options["value"] = value;
+        super(master, TkType.radiobutton);
 
-        super(master, TkType.radiobutton, options);
+        this.setOption("text", text);
+        this.setOption("variable", radioGroup._varName);
+        this.setOption("value", value);
 
         // keyboard binding
         tclEvalFmt("bind %s <Return> { %s invoke }", _name, _name);

@@ -18,7 +18,6 @@ import dtk.color;
 import dtk.event;
 import dtk.interpreter;
 import dtk.signals;
-import dtk.options;
 import dtk.types;
 import dtk.utils;
 

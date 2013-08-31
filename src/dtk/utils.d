@@ -60,3 +60,16 @@ string _tclEscape(T)(T input)
     // enum -> int
     return format(`"%s"`, to!string(input).translate(_tclTransTable));
 }
+
+///
+package template EnumBaseType(E) if (is(E == enum))
+{
+    static if (is(E B == enum))
+        alias EnumBaseType = B;
+}
+
+/// required due to Issue 10814 - Formatting string-based enum prints its name instead of its value
+package EnumBaseType!E toBaseType(E)(E val)
+{
+    return cast(typeof(return))val;
+}

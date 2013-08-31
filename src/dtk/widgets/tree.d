@@ -17,7 +17,6 @@ import dtk.geometry;
 import dtk.image;
 import dtk.interpreter;
 import dtk.utils;
-import dtk.options;
 
 import dtk.widgets.options;
 import dtk.widgets.widget;

@@ -14,7 +14,6 @@ import std.string;
 
 import dtk.geometry;
 import dtk.interpreter;
-import dtk.options;
 import dtk.utils;
 
 import dtk.widgets.widget;
@@ -25,9 +24,8 @@ class PanedWindow : Widget
     ///
     this(Widget master, Orientation orientation)
     {
-        DtkOptions options;
-        options["orient"] = to!string(orientation);
-        super(master, TkType.panedwindow, options);
+        super(master, TkType.panedwindow);
+        this.setOption("orient", to!string(orientation));
     }
 
     /** Get the orientation of this scrollbar. */

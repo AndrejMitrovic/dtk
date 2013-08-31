@@ -8,7 +8,6 @@ Todo now:
 
 - Remove as many fake widgets as possible, and simplify super ctor in Widget.
 - Call bindtags for all real widgets
-- this.getVar and this.setVar should be tclGetVar and tclSetVar
 
 - We can use 'generate window event' to simulate mouse clicks. We should use
 this for the unittests.

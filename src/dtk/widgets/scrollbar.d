@@ -12,7 +12,6 @@ import std.string;
 
 import dtk.event;
 import dtk.geometry;
-import dtk.options;
 
 import dtk.widgets.widget;
 
@@ -22,9 +21,9 @@ class Scrollbar : Widget
     ///
     this(Widget master, Widget target, Orientation orientation)
     {
-        DtkOptions options;
-        options["orient"] = to!string(orientation);
-        super(master, TkType.scrollbar, options);
+        super(master, TkType.scrollbar);
+
+        this.setOption("orient", to!string(orientation));
 
         // note: super ctor must be called first to get the _name field
         target.setScrollbar(this);

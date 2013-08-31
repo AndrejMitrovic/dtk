@@ -16,7 +16,6 @@ public
     import dtk.image;
     import dtk.interpreter;
     import dtk.loader;
-    import dtk.options;
     import dtk.types;
     import dtk.utils;
 

@@ -11,7 +11,6 @@ import std.range;
 import std.string;
 
 import dtk.geometry;
-import dtk.options;
 import dtk.utils;
 
 import dtk.widgets.widget;

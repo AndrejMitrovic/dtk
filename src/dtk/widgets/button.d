@@ -14,7 +14,6 @@ import dtk.event;
 import dtk.image;
 import dtk.interpreter;
 import dtk.signals;
-import dtk.options;
 import dtk.utils;
 
 import dtk.widgets.widget;
@@ -54,15 +53,14 @@ class Button : Widget
     ///
     this(Widget master, string text)
     {
-        DtkOptions options;
-        options["text"] = text;
-        super(master, TkType.button, options);
+        super(master, TkType.button);
 
         // invoke calls 'command'
         tclEvalFmt("bind %s <Return> { %s invoke }", _name, _name);
 
         // 'command' calls onEvent
         this.setOption("command", format("%s %s", _dtkCallbackIdent, TkEventType.TkButtonPush));
+        this.setOption("text", text);
     }
 
     /**

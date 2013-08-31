@@ -16,7 +16,6 @@ import dtk.image;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.utils;
-import dtk.options;
 import dtk.types;
 
 import dtk.widgets.button;
@@ -28,9 +27,9 @@ class CheckButton : Widget
     ///
     this(Widget master, string text)
     {
-        DtkOptions options;
-        options["text"] = text;
-        super(master, TkType.checkbutton, options);
+        super(master, TkType.checkbutton);
+
+        this.setOption("text", text);
 
         _toggleVarName = makeTracedVar(TkEventType.TkCheckButtonToggle);
         this.setOption("variable", _toggleVarName);

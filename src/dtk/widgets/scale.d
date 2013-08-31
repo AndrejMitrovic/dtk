@@ -14,7 +14,6 @@ import dtk.app;
 import dtk.event;
 import dtk.interpreter;
 import dtk.geometry;
-import dtk.options;
 import dtk.utils;
 
 import dtk.widgets.widget;
@@ -25,15 +24,14 @@ class Scale : Widget
     ///
     this(Widget master, Orientation orientation, int length, float minValue = 0.0, float maxValue = 100.0)
     {
-        DtkOptions options;
-        options["orient"] = to!string(orientation);
-        options["length"] = to!string(length);
-        options["from"] = to!string(minValue);
-        options["to"] = to!string(maxValue);
-
         _minValue = minValue;
         _maxValue = maxValue;
-        super(master, TkType.scale, options);
+        super(master, TkType.scale);
+
+        this.setOption("orient", to!string(orientation));
+        this.setOption("length", to!string(length));
+        this.setOption("from", to!string(minValue));
+        this.setOption("to", to!string(maxValue));
 
         _varName = makeTracedVar(TkEventType.TkScaleChange);
         this.setOption("variable", _varName);

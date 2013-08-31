@@ -24,7 +24,6 @@ import dtk.app;
 import dtk.event;
 import dtk.geometry;
 import dtk.interpreter;
-import dtk.options;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
@@ -171,9 +170,11 @@ abstract class Widget
         but only receive their parent information once they're assigned to another
         widget (e.g. when a menubar is assigned to a window, or submenu to a menu).
 
-        Once the parent is set they should call the initialize method.
+        Once the parent is set the child should call the initialize method.
     */
-    this(InitLater) { }
+    this(InitLater)
+    {
+    }
 
     /**
         Fake widgets which have event handlers but no actual Tk path name.
@@ -183,13 +184,7 @@ abstract class Widget
         E.g. a widget such as a check menu is implicitly created through a
         parent menu object and doesn't have a widget path.
     */
-    this(CreateFakeWidget createFakeWidget)
-    {
-        this.initialize(createFakeWidget);
-    }
-
-    // ditto
-    package void initialize(CreateFakeWidget)
+    this(CreateFakeWidget)
     {
         string name = format("%s%s%s", _fakeWidgetPrefix, _threadID, _lastWidgetID++);
         this.initialize(name, EmitGenericSignals.no);
@@ -199,19 +194,18 @@ abstract class Widget
         Ctor for widgets which are implicitly created by Tk,
         such as the toplevel "." window.
     */
-    package this(string name, EmitGenericSignals emitGenericSignals)
+    this(CreateToplevel)
     {
-        this.initialize(name, emitGenericSignals);
+        this.initialize(".", EmitGenericSignals.yes);
     }
 
-    /** Required to be a method instead of a ctor to allow delayed initialization. */
+    /** Factored out for delayed initialization. */
     package void initialize(string name, EmitGenericSignals emitGenericSignals)
     {
         enforce(!name.empty);
         _name = name;
         _widgetPathMap[_name] = this;
 
-        // todo: it's unnecessary to make so many callbacks, we only need one per class, and
         // we can use %W to get the widget path, which is valid for all Tk event types.
 
         if (emitGenericSignals == EmitGenericSignals.yes)
@@ -225,29 +219,27 @@ abstract class Widget
         _isInitialized = true;
     }
 
-    this(Widget parent, TkType tkType, DtkOptions opt, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes)
+    /** Ctor for widgets which know their parent during construction. */
+    this(Widget parent, TkType tkType, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes)
     {
-        this.initialize(parent, tkType, emitGenericSignals, opt.options2string);
+        this.initialize(parent, tkType, emitGenericSignals);
     }
 
-    this(Widget parent, TkType tkType, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes, string opts = "")
+    /** Factored out for delayed initialization. */
+    package void initialize(Widget parent, TkType tkType, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes)
     {
-        this.initialize(parent, tkType, emitGenericSignals, opts);
-    }
+        enforce(parent !is null, "Parent cannot be null");
 
-    package void initialize(Widget parent, TkType tkType, DtkOptions opt, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes)
-    {
-        this.initialize(parent, tkType, emitGenericSignals, opt.options2string);
-    }
-
-    package void initialize(Widget parent, TkType tkType, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes, string opts = "")
-    {
-        string prefix;  // '.' is the root window
-        if (parent !is null && parent._name != ".")
+        /**
+            If parent is the root window '.', '.widget' is the widget path.
+            If parent is '.frame', '.frame.widget' is the widget path (dot added before widget).
+        */
+        string prefix;
+        if (parent._name != ".")
             prefix = parent._name;
 
         string name = format("%s.%s%s%s", prefix, tkType.toString(), _threadID, _lastWidgetID++);
-        tclEvalFmt("%s %s %s", tkType.toBaseType(), name, opts);
+        tclEvalFmt("%s %s", tkType.toBaseType(), name);
 
         this.initialize(name, emitGenericSignals);
     }
@@ -439,7 +431,7 @@ abstract class Widget
 package:
 
     /* Set a scrollbar for this widget. */
-    package void setScrollbar(Scrollbar scrollbar)
+    final void setScrollbar(Scrollbar scrollbar)
     {
         assert(!scrollbar._name.empty);
         string scrollCommand = format("%sscrollcommand", (scrollbar.orientation == Orientation.horizontal) ? "h" : "y");
@@ -470,6 +462,18 @@ package:
     }
 
     /**
+        Create a Tcl variable.
+
+        The function returns the variable name.
+    */
+    static string makeVar()
+    {
+        string varName = getUniqueVarName();
+        tclMakeVar(varName);
+        return varName;
+    }
+
+    /**
         Create a traced Tcl variable, which will invoke the
         dtk callback and pass event type and the variable value
         whenever the variable is changed.
@@ -478,7 +482,7 @@ package:
     */
     static string makeTracedVar(TkEventType eventType)
     {
-        string varName = createVariableName();
+        string varName = getUniqueVarName();
         tclMakeTracedVar(varName, eventType.text, _dtkCallbackIdent);
         return varName;
     }
@@ -605,26 +609,18 @@ package:
 
     // no-op
     static extern(C)
-    void dtkCallbackDeleter(ClientData clientData)
-    {
-    }
+    void dtkCallbackDeleter(ClientData clientData) { }
 
-    /** Create a Tcl variable name. */
-    static string createVariableName()
+    /** Create a unique Tcl variable name. */
+    static string getUniqueVarName()
     {
         int newSlotID = _lastVariableID++;
         return format("%s%s_%s", _variablePrefix, _threadID, newSlotID);
     }
 
-    /** Create a Tcl variable. */
-    static void createTclVariable(string varName)
-    {
-        tclEvalFmt("set %s true", varName);
-    }
-
     /**
-        Find the binding of a Tcl widget path and return the mapped widget,
-        or return null if there is no such path mapping.
+        Find the binding of a Tcl widget path and return the
+        mapped widget or null if there is no such path mapping.
     */
     static Widget lookupWidgetPath(string path)
     {
@@ -642,10 +638,7 @@ package:
     /** Is the Tcl callback registered. */
     __gshared bool _dtkCallbackInitialized;
 
-    //~ /** The Tcl identifier for the onEvent signal callback. */
-    //~ string _eventCallbackIdent;
-
-    // invoked per-thread: store a unique integral identifier
+    // invoked per-thread: store a unique thread identifier
     static this()
     {
         _threadID = cast(size_t)cast(void*)Thread.getThis;
@@ -674,44 +667,21 @@ package:
     /** Prefix for variables to avoid name clashes. */
     enum _variablePrefix = "::dtk_var";
 
-    /** All widget paths -> widget maps */
+    /** Mapping of Tcl widget paths to Widget objects. */
     static Widget[string] _widgetPathMap;
 
     /**
         Set when the widget has been initialized. Some delayed-initialized widgets
-        can be initialized after construction until initialize is called.
+        can be initialized after construction when initialize is called.
     */
     bool _isInitialized;
 
     /**
         Set when the widget is destroyed. This either happens when the destroy()
-        method is called, or when a parent widget which manages the lifetime of
-        the object destroys the widget (e.g. $(D Tree.destroy(Tree tree))).
+        method is called or when a parent widget which manages the lifetime of
+        the child destroys the child (e.g. $(D tree.destroy(subTree))).
     */
     bool _isDestroyed;
-}
-
-package SelectMode toSelectMode(string input)
-{
-    switch (input) with (SelectMode)
-    {
-        case "browse":     return single;
-        case "extended":   return multiple;
-        case "single":     return old_single;
-        case "multiple":   return old_multiple;
-        default:           assert(0, format("Unhandled select input: '%s'", input));
-    }
-}
-
-package string toString(SelectMode selectMode)
-{
-    final switch (selectMode) with (SelectMode)
-    {
-        case single:        return "browse";
-        case multiple:      return "extended";
-        case old_single:    return "single";
-        case old_multiple:  return "multiple";
-    }
 }
 
 /// Tk and Ttk widget types
@@ -738,6 +708,15 @@ package enum TkType : string
     text        = "tk::text",        // note: no ttk::text
     toplevel    = "tk::toplevel",    // note: no ttk::toplevel
     tree        = "ttk::treeview",
+}
+
+///
+package string toString(TkType tkType)
+{
+    // note: cannot use :: in name because it can sometimes be
+    // interpreted in a special way, e.g. tk hardcodes some
+    // methods to ttk::type.func.name
+    return tkType.replace(":", "_");
 }
 
 /// Tk class types for each widget type
@@ -768,31 +747,10 @@ package enum TkClass : string
 
 package struct InitLater { }
 package struct CreateFakeWidget { }
+package struct CreateToplevel { }
 
 // all the event arguments captures by the bind command
 package immutable string eventArgs = "%x %y %k %K %w %h %X %Y";
 
 // validation arguments captured by validatecommand
 package immutable string validationArgs = "%d %i %P %s %S %v %V %W";
-
-///
-package string toString(TkType tkType)
-{
-    // note: cannot use :: in name because it can sometimes be
-    // interpreted in a special way, e.g. tk hardcodes some
-    // methods to ttk::type.func.name
-    return tkType.replace(":", "_");
-}
-
-///
-package template EnumBaseType(E) if (is(E == enum))
-{
-    static if (is(E B == enum))
-        alias EnumBaseType = B;
-}
-
-/// required due to Issue 10814 - Formatting string-based enum prints its name instead of its value
-package EnumBaseType!E toBaseType(E)(E val)
-{
-    return cast(typeof(return))val;
-}

@@ -14,7 +14,6 @@ import dtk.app;
 import dtk.event;
 import dtk.geometry;
 import dtk.interpreter;
-import dtk.options;
 import dtk.utils;
 
 import dtk.widgets.widget;
@@ -32,14 +31,13 @@ class Progressbar : Widget
     ///
     this(Widget master, Orientation orientation, int length, ProgressMode progressMode, float maxValue = 100)
     {
-        DtkOptions options;
-        options["orient"] = to!string(orientation);
-        options["mode"] = to!string(progressMode);
-        options["length"] = to!string(length);
-        options["maximum"] = to!string(maxValue);
-
         _maxValue = maxValue;
-        super(master, TkType.progressbar, options);
+        super(master, TkType.progressbar);
+
+        this.setOption("orient", to!string(orientation));
+        this.setOption("mode", to!string(progressMode));
+        this.setOption("length", to!string(length));
+        this.setOption("maximum", to!string(maxValue));
 
         _varName = makeTracedVar(TkEventType.TkProgressbarChange);
         this.setOption("variable", _varName);

@@ -14,7 +14,6 @@ import dtk.app;
 import dtk.event;
 import dtk.geometry;
 import dtk.interpreter;
-import dtk.options;
 import dtk.utils;
 
 import dtk.widgets.widget;
@@ -23,9 +22,9 @@ import dtk.widgets.widget;
 abstract class SpinboxBase : Widget
 {
     ///
-    package this(Widget master, DtkOptions options)
+    package this(Widget master)
     {
-        super(master, TkType.spinbox, options);
+        super(master, TkType.spinbox);
 
         _varName = makeTracedVar(TkEventType.TkSpinboxChange);
         this.setOption("textvariable", _varName);
@@ -57,12 +56,12 @@ class ScalarSpinbox : SpinboxBase
     ///
     this(Widget master, float minValue = 0.0, float maxValue = 100.0)
     {
-        DtkOptions options;
-        options["from"] = to!string(minValue);
-        options["to"] = to!string(maxValue);
         _minValue = minValue;
         _maxValue = maxValue;
-        super(master, options);
+        super(master);
+
+        this.setOption("from", minValue);
+        this.setOption("to", maxValue);
     }
 
     /** Get the current value of the spinbox. */
@@ -109,9 +108,8 @@ class ListSpinbox : SpinboxBase
     ///
     this(Widget master, string[] values)
     {
-        DtkOptions options;
-        options["values"] = values.join(" ");
-        super(master, options);
+        super(master);
+        this.setOption("values", values.join(" "));
     }
 
     /** Get the values in this spinbox. */

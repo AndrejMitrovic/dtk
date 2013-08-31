@@ -14,7 +14,6 @@ import std.string;
 import dtk.app;
 import dtk.event;
 import dtk.interpreter;
-import dtk.options;
 import dtk.types;
 import dtk.utils;
 
@@ -32,9 +31,8 @@ abstract class MenuClass : Widget
     /** A menu must always have a parent, so proper initialization is required. */
     package void initParent(Widget master)
     {
-        DtkOptions options;
-        options["tearoff"] = "0";  // disable tearoff by default
-        this.initialize(master, TkType.menu, options, EmitGenericSignals.no);
+        this.initialize(master, TkType.menu, EmitGenericSignals.no);
+        this.setOption("tearoff", 0);  // disable tearoff by default
     }
 
     /** Add a menu to this menu. */
