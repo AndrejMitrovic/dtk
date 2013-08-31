@@ -524,44 +524,40 @@ package:
     }
 
     // all the event arguments captures by the bind command (todo: %W should be caught)
-    immutable string eventArgs = "%x %y %k %K %w %h %X %Y";
+    enum string eventArgs = "%W %w %x %y %k %K %h %X %Y";
     //~ tclEvalFmt("bind %s <Enter> { %s %s %s }", _dtkInterceptTag, _dtkCallbackIdent, EventType.Enter, eventArgs);
 
 
     // validation arguments captured by validatecommand
-    immutable string validationArgs = "%d %i %P %s %S %v %V %W";
+    enum string validationArgs = "%d %i %P %s %S %v %V %W";
+
+    static immutable mouseEventArgs = [TkSubs.detail, tkSubs.window_id].join(" ");
 
     /// ditto
     private static void _initDtkInterceptor()
     {
-        // todo: we should call the D callback, and then run either continue or break.
-        // we should probably have some kind of variable which the callback sets.
-        // Actually: it would be better if we had a return value
-        //~ "%s $%s"
+        //~ tclEvalFmt("bind %s <KeyPress> { %s %s %s }", _dtkInterceptTag, _dtkCallbackIdent, EventType.keyboard, eventArgs);
 
-        //~ enum string tcl_flags = "%W";
-        //~ tclEvalFmt(
-        //~ "bind %s <Button-1> {
-            //~ set dtk_intercept_status [%s %s]
-            //~ if ($dtk_intercept_status eq 1)
-                //~ break
-            //~ else
-                //~ continue
-        //~ }
-        //~ ", _dtkInterceptTag, _dtkCallbackIdent, tcl_flags);
+        // #1 == _dtkCallbackIdent
+        // #2 == EventType.mouse
+        // #3+ == eventArgs
 
 
 
-
-        //~ string keyboardSubs = "";
-
-
-
-        tclEvalFmt("bind %s <KeyPress> { %s %s %s }", _dtkInterceptTag, _dtkCallbackIdent, EventType.keyboard, eventArgs);
+        tclEvalFmt("bind %s <Button-1> { %s %s %s }", _dtkInterceptTag, _dtkCallbackIdent, EventType.mouse, mouseEventArgs);
 
         //~ enum string tcl_flags = "%W";
         //~ tclEvalFmt(`bind %s <Button-1> "%s %s"`, _dtkInterceptTag, _dtkCallbackIdent, tcl_flags);
 
+    }
+
+    static auto safeToInt(T)(T* val)
+    {
+        auto res = to!string(val);
+        if (res == "??")  // note: edge-case, but there might be more of them
+            return 0;    // note2: "0" is just a guess, not sure what else to set it to.
+
+        return to!int(res);
     }
 
     static extern(C)
@@ -571,11 +567,38 @@ package:
         //~ TCL_BREAK;
         //~ TCL_CONTINUE;
 
+        if (objc < 2)  // DTK event signals need at least 2 arguments
+            return TCL_OK;
+
+        EventType type = to!EventType(Tcl_GetString(objv[1]).
+        switch (
+
+
+        //~ event.x       = safeToInt(Tcl_GetString(objv[1]));
+        //~ event.y       = safeToInt(Tcl_GetString(objv[2]));
+        //~ event.keycode = safeToInt(Tcl_GetString(objv[3]));
+        //~ event.width   = safeToInt(Tcl_GetString(objv[4]));
+        //~ event.height  = safeToInt(Tcl_GetString(objv[5]));
+        //~ event.width   = safeToInt(Tcl_GetString(objv[6]));
+        //~ event.height  = safeToInt(Tcl_GetString(objv[7]));
+
+
         import std.stdio;
 
-        stderr.writefln("-- received 1: %s", to!string(Tcl_GetString(objv[1])));
-        stderr.writefln("-- received 2: %s", to!string(Tcl_GetString(objv[2])));
-        stderr.writeln();
+        string getString(size_t index)
+        {
+            return to!string(Tcl_GetString(objv[index]));
+        }
+
+        void printString(size_t index)
+        {
+            stderr.writefln("-- received #%s: %s", index + 1, getString(index));
+        }
+
+        foreach (i; 0 .. objc)
+        {
+            printString(i);
+        }
 
         return TCL_BREAK;
 
@@ -830,7 +853,7 @@ package enum TkSubs : string
     win_below_target = "%a",
     mouse_button = "%b",
     count = "%c",
-    user_data = "%d",
+    detail = "%d",
     focus = "%f",
     height = "%h",
     win_hex_id = "%i",
