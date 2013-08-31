@@ -31,7 +31,7 @@ abstract class MenuClass : Widget
     /** A menu must always have a parent, so proper initialization is required. */
     package void initParent(Widget master)
     {
-        this.initialize(master, TkType.menu, EmitGenericSignals.no);
+        this.initialize(master, TkType.menu);
         this.setOption("tearoff", 0);  // disable tearoff by default
     }
 

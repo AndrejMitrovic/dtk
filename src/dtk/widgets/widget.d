@@ -187,7 +187,7 @@ abstract class Widget
     this(CreateFakeWidget)
     {
         string name = format("%s%s%s", _fakeWidgetPrefix, _threadID, _lastWidgetID++);
-        this.initialize(name, EmitGenericSignals.no);
+        this.initialize(name);
     }
 
     /**
@@ -196,37 +196,40 @@ abstract class Widget
     */
     this(CreateToplevel)
     {
-        this.initialize(".", EmitGenericSignals.yes);
+        this.initialize(".");
     }
 
-    /** Factored out for delayed initialization. */
-    package void initialize(string name, EmitGenericSignals emitGenericSignals)
+    /** Factored out for the toplevel window widget and fake widgets. */
+    package void initialize(string name)
     {
         enforce(!name.empty);
         _name = name;
         _widgetPathMap[_name] = this;
 
-        // we can use %W to get the widget path, which is valid for all Tk event types.
-
-        if (emitGenericSignals == EmitGenericSignals.yes)
-        {
-            // todo now: instead of binding each widget with this same code, we should bind the class type,
-            // maybe in the app class or in a shared this ctor.
-            tclEvalFmt("bind %s <Enter> { %s %s %s }", _name, _dtkCallbackIdent, TkEventType.Enter, eventArgs);
-            tclEvalFmt("bind %s <Leave> { %s %s %s }", _name, _dtkCallbackIdent, TkEventType.Leave, eventArgs);
-        }
+        // todo: we can use %W to get the widget path, which is valid for all Tk event types.
+        // todo: only bind the Interceptor, and maybe avoid setting up bindtags for some widgets
+        // (mostly fake widgets, but maybe menus as well)
+        // List of widgets which had no emitted generic signals:
+        // Menu, Separator, Sizegrip.
+        //~ if (emitGenericSignals == EmitGenericSignals.yes)
+        //~ {
+            //~ // todo now: instead of binding each widget with this same code, we should bind the class type,
+            //~ // maybe in the app class or in a shared this ctor.
+            //~ tclEvalFmt("bind %s <Enter> { %s %s %s }", _name, _dtkCallbackIdent, TkEventType.Enter, eventArgs);
+            //~ tclEvalFmt("bind %s <Leave> { %s %s %s }", _name, _dtkCallbackIdent, TkEventType.Leave, eventArgs);
+        //~ }
 
         _isInitialized = true;
     }
 
     /** Ctor for widgets which know their parent during construction. */
-    this(Widget parent, TkType tkType, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes)
+    this(Widget parent, TkType tkType)
     {
-        this.initialize(parent, tkType, emitGenericSignals);
+        this.initialize(parent, tkType);
     }
 
     /** Factored out for delayed initialization. */
-    package void initialize(Widget parent, TkType tkType, EmitGenericSignals emitGenericSignals = EmitGenericSignals.yes)
+    package void initialize(Widget parent, TkType tkType)
     {
         enforce(parent !is null, "Parent cannot be null");
 
@@ -241,7 +244,7 @@ abstract class Widget
         string name = format("%s.%s%s%s", prefix, tkType.toString(), _threadID, _lastWidgetID++);
         tclEvalFmt("%s %s", tkType.toBaseType(), name);
 
-        this.initialize(name, emitGenericSignals);
+        this.initialize(name);
     }
 
     /**

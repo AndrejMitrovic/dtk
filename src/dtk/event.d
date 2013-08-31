@@ -263,10 +263,3 @@ ValidationType toValidationType(int input)
     //~ string state;  // e.g. toggle state
     //~ ValidateEvent validateEvent;
 //~ }
-
-// todo: remove this
-enum EmitGenericSignals
-{
-    no,
-    yes,
-}

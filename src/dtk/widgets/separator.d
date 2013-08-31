@@ -23,7 +23,7 @@ class Separator : Widget
     ///
     this(Widget master, Orientation orientation)
     {
-        super(master, TkType.separator, EmitGenericSignals.no);
+        super(master, TkType.separator);
         this.setOption("orient", to!string(orientation));
     }
 
