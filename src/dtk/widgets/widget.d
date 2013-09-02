@@ -73,7 +73,7 @@ abstract class Widget
         itself (Button).
 
         Note: To intercept an event of an arbitrary widget, add your
-        event handler to the target widget's $(D onEventFilter) list.
+        event handler to the target widget's $(D onFilterEvent) list.
     */
     public EventHandler!Event onSinkEvent;
 
@@ -106,7 +106,7 @@ abstract class Widget
 
         Note: To receive notification that an event was received and
         handled in an arbitrary widget, add your event handler to the
-        target widget's $(D onEventNotify) list.
+        target widget's $(D onNotifyEvent) list.
     */
     public EventHandler!Event onBubbleEvent;
 
@@ -138,7 +138,7 @@ abstract class Widget
         This event handler list is used for intercepting an event
         from reaching $(D this) widget.
     */
-    public EventHandlerList!Event onEventFilter;
+    public EventHandlerList!Event onFilterEvent;
 
     /**
         A list of event handlers which will be called in sequence
@@ -152,7 +152,7 @@ abstract class Widget
         handlers when an event has been received and handled
         by $(D this) widget.
     */
-    public EventHandlerList!Event onEventNotify;
+    public EventHandlerList!Event onNotifyEvent;
 
     /**
         Handle mouse-specific events.
@@ -574,7 +574,6 @@ package:
     /// create and populate a keyboard event, and dispatch it.
     private static EventStopped _handleKeyboardEvent(const Tcl_Obj*[] tclArr)
     {
-        //~ import std.stdio;
         //~ stderr.writefln("Key code: %s", cast(KeySym)to!long(tclArr[0].tclPeekString()));
 
         /**
@@ -611,6 +610,8 @@ package:
     /// main dispatch function, should take care of filters and whatnot.
     private static EventStopped _dispatchEvent(Widget widget, scope Event event)
     {
+        //~ stderr.writefln("Dispatching %s %s", widget, event);
+
         /** Handle the filter list, return if filtered. */
         _filterEvent(widget, event);
         if (event.handled)
@@ -635,6 +636,9 @@ package:
             default:       assert(0, format("Unhandled event type: '%s'", event.type));
         }
 
+        /** Notify any listeners. */
+        _notifyEvent(widget, event);
+
         /** Handle event bubbling, this is the final travel stage. */
         _bubbleEvent(widget, event);
 
@@ -653,7 +657,7 @@ package:
     */
     private static void _filterEvent(Widget widget, scope Event event)
     {
-        auto handlers = widget.onEventFilter.handlers;
+        auto handlers = widget.onFilterEvent.handlers;
 
         if (handlers.empty)
             return;
@@ -668,14 +672,34 @@ package:
         }
     }
 
+    /**
+        Call all the installed notify listeners for the $(D widget).
+    */
+    private static void _notifyEvent(Widget widget, scope Event event)
+    {
+        auto handlers = widget.onNotifyEvent.handlers;
+
+        if (handlers.empty)
+            return;
+
+        event._eventTravel = EventTravel.notifying;
+
+        foreach (notifyWidget; handlers)
+        {
+            notifyWidget.call(event);
+            if (event.handled)
+                return;
+        }
+    }
+
     /** Begin the sink event routine if this widget has any parents. */
     private static void _sinkEvent(Widget widget, scope Event event)
     {
-        if (widget.parentWidget is null)
-            return;
-
-        event._eventTravel = EventTravel.sinking;
-        _sinkEventImpl(widget, event);
+        if (auto parent = widget.parentWidget)
+        {
+            event._eventTravel = EventTravel.sinking;
+            _sinkEventImpl(parent, event);
+        }
     }
 
     /**
@@ -703,11 +727,11 @@ package:
     /** Begin the bubble event routine if this widget has any parents. */
     private static void _bubbleEvent(Widget widget, scope Event event)
     {
-        if (widget.parentWidget is null)
-            return;
-
-        event._eventTravel = EventTravel.bubbling;
-        _bubbleEventImpl(widget, event);
+        if (auto parent = widget.parentWidget)
+        {
+            event._eventTravel = EventTravel.bubbling;
+            _bubbleEventImpl(parent, event);
+        }
     }
 
     /**

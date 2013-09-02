@@ -73,6 +73,9 @@ enum EventTravel
     /// onEvent and/or one of its specific event handlers, such as onKeyboardEvent.
     target,
 
+    /// The event was dispatched to the widget, and now explicit listeners are notified.
+    notifying,
+
     /// The event is bubbling upwards towards the toplevel parent of this widget.
     bubbling,
 

@@ -122,26 +122,26 @@ mixin template gen_toString()
     }
 }
 
-//~ ///
-//~ unittest
-//~ {
-    //~ static class C
-    //~ {
-        //~ this(int x, int y)
-        //~ {
-            //~ this.x = x;
-            //~ this.y = y;
-        //~ }
+/+ ///
+unittest
+{
+    static class C
+    {
+        this(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
 
-        //~ mixin gen_toString;
+        mixin gen_toString;
 
-        //~ int x;
-        //~ int y;
-    //~ }
+        int x;
+        int y;
+    }
 
-    //~ auto c = new C(1, 2);
-    //~ assert(text(c) == "C(1, 2)");
-//~ }
+    auto c = new C(1, 2);
+    assert(text(c) == "C(1, 2)");
+} +/
 
 /** Static cast. */
 T StaticCast(T, S)(S source)

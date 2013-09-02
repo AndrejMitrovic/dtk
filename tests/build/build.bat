@@ -6,6 +6,8 @@ set dtkRoot=%thisPath%\..\..
 set binPath=%dtkRoot%\bin
 cd %thisPath%\..
 
+rem set versions=-version=DTK_LOG_EVAL
+
 if [%1]==[] goto :error
 if [%2]==[] goto :error
 goto :next
@@ -19,4 +21,4 @@ goto :eof
 set FileName=%1
 set SourceFile=%2
 
-rdmd -w -g -L/SUBSYSTEM:WINDOWS:5.01 -version=DTK_LOG_EVAL -unittest -I%dtkRoot%\src -of%binPath%\%FileName%.exe %SourceFile%
+rdmd -w -g -L/SUBSYSTEM:WINDOWS:5.01 %versions% -unittest -I%dtkRoot%\src -of%binPath%\%FileName%.exe %SourceFile%

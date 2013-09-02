@@ -6,7 +6,7 @@
  */
 module dtk.signals;
 
-//~ import std.algorithm;
+import std.algorithm;
 import std.container;
 //~ import std.functional;
 //~ import std.range;
