@@ -565,14 +565,14 @@ package:
         //~ return to!int(res);
     //~ }
 
-    private enum EventHandled : uint
+    private enum EventStopped : uint
     {
         no = TCL_CONTINUE,
         yes = TCL_BREAK,
     }
 
     /// create and populate a keyboard event, and dispatch it.
-    private static EventHandled _handleKeyboardEvent(const Tcl_Obj*[] tclArr)
+    private static EventStopped _handleKeyboardEvent(const Tcl_Obj*[] tclArr)
     {
         //~ import std.stdio;
         //~ stderr.writefln("Key code: %s", cast(KeySym)to!long(tclArr[0].tclPeekString()));
@@ -585,7 +585,7 @@ package:
                 3  => Timestamp
         */
 
-        // note: Use this after Issue 10942 is fixed for KeySym.
+        // note: change this to EnumBaseType after Issue 10942 is fixed for KeySym.
         alias keyBaseType = long;
 
         KeySym keySym = to!KeySym(to!keyBaseType(tclArr[0].tclPeekString()));
@@ -598,40 +598,143 @@ package:
         TimeMsec timeMsec = to!TimeMsec(tclArr[3].tclPeekString());
 
         auto event = scoped!KeyboardEvent(widget, keySym, keyMod, timeMsec);
-        _dispatchEvent(event);
-        return event.handled ? EventHandled.yes : EventHandled.no;
+        return _dispatchEvent(widget, event);
     }
 
     /// create and populate a mouse event, and dispatch it.
-    private static EventHandled _handleMouseEvent(const Tcl_Obj*[] tclArr)
-    {
-        auto event = scoped!MouseEvent();
-        _dispatchEvent(event);
-        return event.handled ? EventHandled.yes : EventHandled.no;
-    }
+    //~ private static EventStopped _handleMouseEvent(const Tcl_Obj*[] tclArr)
+    //~ {
+        //~ auto event = scoped!MouseEvent();
+        //~ return _dispatchEvent(event);
+    //~ }
 
     /// main dispatch function, should take care of filters and whatnot.
-    private static void _dispatchEvent(scope Event event)
+    private static EventStopped _dispatchEvent(Widget widget, scope Event event)
     {
-        //~ import std.stdio;
-        stderr.writefln("Dispatching: -- %s", event);
+        /** Handle the filter list, return if filtered. */
+        _filterEvent(widget, event);
+        if (event.handled)
+            return EventStopped.yes;
 
-        Widget target = event._targetWidget;
+        /** Handle event sinking, return if filtered. */
+        _sinkEvent(widget, event);
+        if (event.handled)
+            return EventStopped.yes;
 
-        // todo: see how HM does it
+        /** Handle event by the target widget itself. */
+        event._eventTravel = EventTravel.target;
+        widget.onEvent.call(event);
 
-        // todo: this dispatcher should take the Widget from the event, and find the toplevel,
-        // and start dispatching.
+        /** If the generic handler didn't handle it, try a specific handler. */
+        if (!event.handled)
+        switch (event.type) with (EventType)
+        {
+            case user:     break;  // user events can be handled with onEvent
+            case mouse:    widget.onMouseEvent.call(StaticCast!MouseEvent(event)); break;
+            case keyboard: widget.onKeyboardEvent.call(StaticCast!KeyboardEvent(event)); break;
+            default:       assert(0, format("Unhandled event type: '%s'", event.type));
+        }
+
+        /** Handle event bubbling, this is the final travel stage. */
+        _bubbleEvent(widget, event);
+
+        /**
+            The filter and sinking stage did not stop the event,
+            at this point the event is determined to call other Tk bindtags
+            which will e.g. allow a mouse button press event to trigger a
+            widget button push event.
+        */
+        return EventStopped.no;
+    }
+
+    /**
+        Call all the installed filters for the $(D widget), so they
+        get a chance at intercepting the event.
+    */
+    private static void _filterEvent(Widget widget, scope Event event)
+    {
+        auto handlers = widget.onEventFilter.handlers;
+
+        if (handlers.empty)
+            return;
+
+        event._eventTravel = EventTravel.filtering;
+
+        foreach (filterWidget; handlers)
+        {
+            filterWidget.call(event);
+            if (event.handled)
+                return;
+        }
+    }
+
+    /** Begin the sink event routine if this widget has any parents. */
+    private static void _sinkEvent(Widget widget, scope Event event)
+    {
+        if (widget.parentWidget is null)
+            return;
+
+        event._eventTravel = EventTravel.sinking;
+        _sinkEventImpl(widget, event);
+    }
+
+    /**
+        Find the toplevel widget of $(D widget), and then start
+        calling $(D onSinkEvent) on each of these widgets, from the
+        toplevel to $(D widget), including $(widget) itself.
+
+        The $(D widget) should already be a parent of the initial
+        target widget, since $(D onSinkEvent) will be called on it.
+    */
+    private static void _sinkEventImpl(Widget widget, scope Event event)
+    {
+        // climb to the toplevel before sending
+        if (auto parent = widget.parentWidget)
+            _sinkEventImpl(parent, event);
+
+        // start sending events from the toplevel downwards
+        if (event.handled)
+            return;
+
+        // handle the sinking event
+        widget.onSinkEvent.call(event);
+    }
+
+    /** Begin the bubble event routine if this widget has any parents. */
+    private static void _bubbleEvent(Widget widget, scope Event event)
+    {
+        if (widget.parentWidget is null)
+            return;
+
+        event._eventTravel = EventTravel.bubbling;
+        _bubbleEventImpl(widget, event);
+    }
+
+    /**
+        Walk from $(D widget) to the toplevel widget by following
+        its parent link, while simultaneously calling
+        $(D onBubbleEvent) on each widget in the hierarchy.
+
+        The $(D widget) should already be a parent of the initial
+        target widget, since $(D onBubbleEvent) will be called on it.
+    */
+    private static void _bubbleEventImpl(Widget widget, scope Event event)
+    {
+        // handle the bubbling event
+        widget.onBubbleEvent.call(event);
+
+        // if handled, return
+        if (event.handled)
+            return;
+
+        // else, climb upwards and keep sending
+        if (auto parent = widget.parentWidget)
+            _bubbleEventImpl(parent, event);
     }
 
     static extern(C)
     int dtkCallbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** argArr)
     {
-        // todo:
-        //~ TCL_BREAK;
-        //~ TCL_CONTINUE;
-        //~ TCL_OK;
-
         if (objc < 2)  // DTK event signals need at least 2 arguments
             return TCL_OK;
 
@@ -658,23 +761,28 @@ package:
             into separate functions.
         */
 
-        // debugging
-        //~ import std.stdio;
-        //~ foreach (idx; 0 .. objc)
-        //~ {
-            //~ printf("%s\n", Tcl_GetString(argArr[idx]));
-            //~ stderr.writefln("-- received #%s: %s", idx + 1, argArr[idx].tclPeekString());
-        //~ }
+        version (DTK_LOG_EVENTS)
+        {
+            import std.stdio;
+            foreach (idx; 0 .. objc)
+            {
+                stderr.writefln("-- received #%s: %s", idx + 1, argArr[idx].tclPeekString());
+            }
+        }
 
         EventType type = to!EventType(argArr[1].tclPeekString());
         auto args = argArr[2 .. objc + 1];
+
         switch (type) with (EventType)
         {
-            case mouse:    return _handleMouseEvent(args);
+            case mouse:    return TCL_OK;  // todo: _handleMouseEvent(args);
             case keyboard: return _handleKeyboardEvent(args);
             default:       assert(0, format("Unhandled event type '%s'", type));
         }
+    }
 
+    private void _oldValidation()
+    {
         //~ return TCL_OK;
 
         // todo: use try/catch on a Throwable, we don't want to escape exceptions to the C side.

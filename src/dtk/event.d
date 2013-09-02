@@ -53,6 +53,33 @@ enum EventType
     keyboard,
 }
 
+/**
+    Each event is traveling in a direction, either from the root window of
+    the target child towards the target child widget (sinking), or in the
+    opposite direction (bubbling).
+*/
+enum EventTravel
+{
+    ///
+    invalid,  // sentinel
+
+    /// The event is going through the target widget's filter list.
+    filtering,
+
+    /// The event is sinking from the toplevel parent of this widget, towards the widget.
+    sinking,
+
+    /// The event has reached its target widget, and is now being handled by either
+    /// onEvent and/or one of its specific event handlers, such as onKeyboardEvent.
+    target,
+
+    /// The event is bubbling upwards towards the toplevel parent of this widget.
+    bubbling,
+
+
+    // direct,  // todo
+}
+
 // All standard event types are listed here, in the same order as EventType.
 private alias EventClassMap = TypeTuple!(Event, Event, MouseEvent, KeyboardEvent);
 
@@ -145,10 +172,14 @@ class Event
         return _targetWidget;
     }
 
-    /** Output the string representation of this event. */
-    void toString(scope void delegate(const(char)[]) sink)
+    /** Return the current travel direction of this event. */
+    public @property EventTravel eventTravel()
     {
+        return _eventTravel;
     }
+
+    /** Output the string representation of this event. */
+    public void toString(scope void delegate(const(char)[]) sink) { }
 
     /**
         Used for reusability in derived classes, where we want the fields
@@ -169,6 +200,9 @@ package:
         event object itself. Hence the property getter above.
     */
     Widget _targetWidget;
+
+    /** The current travel direction of the event. */
+    EventTravel _eventTravel;
 }
 
 /**

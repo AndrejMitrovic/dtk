@@ -269,8 +269,8 @@ struct EventHandlerList(EventClass)
         if (isEventHandler!(T, EventClass))
     {
         auto call = HandlerType(handler);
-        assert(find(handlers[], call).empty, "Handler is already registered!");
-        handlers.stableInsertAfter(handlers[], call);
+        assert(find(_handlers[], call).empty, "Handler is already registered!");
+        _handlers.stableInsertAfter(_handlers[], call);
         ++handlersCount;
         return handler;
     }
@@ -280,8 +280,8 @@ struct EventHandlerList(EventClass)
         if (isEventHandler!(T, EventClass))
     {
         auto call = HandlerType(handler);
-        assert(find(handlers[], call).empty, "Handler is already registered!");
-        handlers.stableInsertFront(call);
+        assert(find(_handlers[], call).empty, "Handler is already registered!");
+        _handlers.stableInsertFront(call);
         ++handlersCount;
         return handler;
     }
@@ -298,22 +298,22 @@ struct EventHandlerList(EventClass)
         auto before = HandlerType(beforeThis);
         auto call = HandlerType(handler);
 
-        auto location = find(handlers[], before);
+        auto location = find(_handlers[], before);
         if (location.empty)
              throw new Exception("Handler 'beforeThis' is not registered!");
 
-        assert(find(handlers[], call).empty, "Handler is already registered!");
+        assert(find(_handlers[], call).empty, "Handler is already registered!");
 
         // not exactly fast
-        size_t length = walkLength(handlers[]);
+        size_t length = walkLength(_handlers[]);
         size_t pos = walkLength(location);
         size_t new_location = length - pos;
-        location = handlers[];
+        location = _handlers[];
 
         if (new_location == 0)
-            handlers.stableInsertFront(call);
+            _handlers.stableInsertFront(call);
         else
-            handlers.stableInsertAfter(take(location, new_location), call);
+            _handlers.stableInsertAfter(take(location, new_location), call);
 
         ++handlersCount;
         return handler;
@@ -330,7 +330,7 @@ struct EventHandlerList(EventClass)
     {
         auto after = HandlerType(afterThis);
         auto call = HandlerType(handler);
-        auto location = find(handlers[], after);
+        auto location = find(_handlers[], after);
 
         if (location.empty)  // afterThis not found
         {
@@ -339,8 +339,8 @@ struct EventHandlerList(EventClass)
         }
         else
         {
-            assert(find(handlers[], call).empty, "Handler is already registered!");
-            handlers.stableInsertAfter(location.take(1), call);
+            assert(find(_handlers[], call).empty, "Handler is already registered!");
+            _handlers.stableInsertAfter(location.take(1), call);
             ++handlersCount;
             return handler;
         }
@@ -351,12 +351,12 @@ struct EventHandlerList(EventClass)
         if (isEventHandler!(T, EventClass))
     {
         auto call = HandlerType(handler);
-        auto pos = find(handlers[], call);
+        auto pos = find(_handlers[], call);
         if (pos.empty)
         {
             throw new Exception("Handler is not connected");
         }
-        handlers.stableLinearRemove(pos.take(1));
+        _handlers.stableLinearRemove(pos.take(1));
         --handlersCount;
         return handler;
     }
@@ -366,13 +366,13 @@ struct EventHandlerList(EventClass)
         if (isEventHandler!(T, EventClass))
     {
         auto call = HandlerType(handler);
-        return !find(handlers[], call).empty;
+        return !find(_handlers[], call).empty;
     }
 
     /** Remove all handlers from the list. */
     void clear()
     {
-        handlers.clear();
+        _handlers.clear();
         handlersCount = 0;
     }
 
@@ -383,16 +383,16 @@ struct EventHandlerList(EventClass)
     }
 
     /** Get a forward range of all the handlers. */
-    auto getHandlers()
+    @property auto handlers()
     {
-        return handlers[];
+        return _handlers[];
     }
 
 private:
     alias HandlerType = EventHandler!EventClass;
 
 private:
-    SList!HandlerType handlers;
+    SList!HandlerType _handlers;
     size_t handlersCount;
 }
 

@@ -142,3 +142,27 @@ mixin template gen_toString()
     //~ auto c = new C(1, 2);
     //~ assert(text(c) == "C(1, 2)");
 //~ }
+
+/** Static cast. */
+T StaticCast(T, S)(S source)
+{
+    return cast(T)(*cast(void**)&source);
+}
+
+///
+unittest
+{
+    class A { int x; }
+    class B : A { int y; this(int y) { this.y = y; } }
+
+    A a = new B(1);
+    B b = StaticCast!B(a);
+    assert(b.y == 1);
+
+    import std.typecons;
+
+    auto sb = scoped!B(2);
+    A as = sb;
+    B bs = StaticCast!B(as);
+    assert(bs.y == 2);
+}
