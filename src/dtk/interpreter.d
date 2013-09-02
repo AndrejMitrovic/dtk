@@ -17,6 +17,7 @@ import std.path;
 import dtk.event;
 import dtk.loader;
 import dtk.types;
+import dtk.utils;
 
 import dtk.widgets.widget;
 import dtk.widgets.window;
@@ -135,4 +136,20 @@ void tclSetVar(T)(string varName, T value)
         enum setFlags = 0;
         Tcl_SetVar(tclInterp, cast(char*)varName.toStringz, cast(char*)(to!string(value).toStringz), setFlags);
     }
+}
+
+/** Return the string of the Tcl object $(D tclObj). */
+package string tclGetString(const Tcl_Obj* tclObj)
+{
+    return tclObj.Tcl_GetString.to!string;
+}
+
+/**
+    Peek at the string of the Tcl object $(D tclObj).
+    The returned string is not allocated, it is only a slice.
+    $(D .dup) should be called when assigning to ensure memory safety.
+*/
+package const(char)[] tclPeekString(const Tcl_Obj* tclObj)
+{
+    return tclObj.Tcl_GetString().peekCString();
 }

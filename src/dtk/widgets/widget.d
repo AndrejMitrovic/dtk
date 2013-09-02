@@ -14,6 +14,7 @@ import std.range;
 import std.stdio;
 import std.string;
 import std.traits;
+import std.typecons;
 import std.conv;
 
 import std.c.stdlib;
@@ -23,6 +24,7 @@ alias splitter = std.algorithm.splitter;
 import dtk.app;
 import dtk.event;
 import dtk.geometry;
+import dtk.keymap;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.types;
@@ -436,6 +438,11 @@ abstract class Widget
         return cast(Widget)Widget.lookupWidgetPath(widgetPath);
     }
 
+    override string toString() const
+    {
+        return format("%s(%s)", typeid(this).name, _name);
+    }
+
 package:
 
     /* Set a scrollbar for this widget. */
@@ -531,76 +538,144 @@ package:
     // validation arguments captured by validatecommand
     enum string validationArgs = "%d %i %P %s %S %v %V %W";
 
-    static immutable mouseEventArgs = [TkSubs.detail, tkSubs.window_id].join(" ");
+    //~ static immutable mouseEventArgs = [TkSubs.mouse_button, TkSubs.state, TkSubs.window_id].join(" ");
+    //~ static immutable keyboardEventArgs = [TkSubs.keycode, TkSubs.state, TkSubs.window_id].join(" ");
+
+    // Note: We're retrieving keysym, not keycode
+    static immutable string keyboardEventArgs = [TkSubs.keysym_decimal, TkSubs.state, TkSubs.window_id, TkSubs.timestamp].join(" ");
 
     /// ditto
     private static void _initDtkInterceptor()
     {
-        //~ tclEvalFmt("bind %s <KeyPress> { %s %s %s }", _dtkInterceptTag, _dtkCallbackIdent, EventType.keyboard, eventArgs);
+        // todo: add all bindings here
 
-        // #1 == _dtkCallbackIdent
-        // #2 == EventType.mouse
-        // #3+ == eventArgs
-
-
-
-        tclEvalFmt("bind %s <Button-1> { %s %s %s }", _dtkInterceptTag, _dtkCallbackIdent, EventType.mouse, mouseEventArgs);
+        tclEvalFmt("bind %s <KeyPress> { %s %s %s }", _dtkInterceptTag, _dtkCallbackIdent, EventType.keyboard, keyboardEventArgs);
 
         //~ enum string tcl_flags = "%W";
         //~ tclEvalFmt(`bind %s <Button-1> "%s %s"`, _dtkInterceptTag, _dtkCallbackIdent, tcl_flags);
 
     }
 
-    static auto safeToInt(T)(T* val)
-    {
-        auto res = to!string(val);
-        if (res == "??")  // note: edge-case, but there might be more of them
-            return 0;    // note2: "0" is just a guess, not sure what else to set it to.
+    //~ static auto safeToInt(T)(T* val)
+    //~ {
+        //~ auto res = to!string(val);
+        //~ if (res == "??")  // note: edge-case, but there might be more of them
+            //~ return 0;    // note2: "0" is just a guess, not sure what else to set it to.
 
-        return to!int(res);
+        //~ return to!int(res);
+    //~ }
+
+    private enum EventHandled : uint
+    {
+        no = TCL_CONTINUE,
+        yes = TCL_BREAK,
+    }
+
+    /// create and populate a keyboard event, and dispatch it.
+    private static EventHandled _handleKeyboardEvent(const Tcl_Obj*[] tclArr)
+    {
+        //~ import std.stdio;
+        //~ stderr.writefln("Key code: %s", cast(KeySym)to!long(tclArr[0].tclPeekString()));
+
+        /**
+            Indices:
+                0  => KeySym
+                1  => Modifier
+                2  => Widget path
+                3  => Timestamp
+        */
+
+        // note: Use this after Issue 10942 is fixed for KeySym.
+        alias keyBaseType = long;
+
+        KeySym keySym = to!KeySym(to!keyBaseType(tclArr[0].tclPeekString()));
+
+        KeyMod keyMod = cast(KeyMod)to!long(tclArr[1].tclPeekString());
+
+        Widget widget = lookupWidgetPath(tclArr[2].tclPeekString());
+        assert(widget !is null);
+
+        TimeMsec timeMsec = to!TimeMsec(tclArr[3].tclPeekString());
+
+        auto event = scoped!KeyboardEvent(widget, keySym, keyMod, timeMsec);
+        _dispatchEvent(event);
+        return event.handled ? EventHandled.yes : EventHandled.no;
+    }
+
+    /// create and populate a mouse event, and dispatch it.
+    private static EventHandled _handleMouseEvent(const Tcl_Obj*[] tclArr)
+    {
+        auto event = scoped!MouseEvent();
+        _dispatchEvent(event);
+        return event.handled ? EventHandled.yes : EventHandled.no;
+    }
+
+    /// main dispatch function, should take care of filters and whatnot.
+    private static void _dispatchEvent(scope Event event)
+    {
+        //~ import std.stdio;
+        stderr.writefln("Dispatching: -- %s", event);
+
+        Widget target = event._targetWidget;
+
+        // todo: see how HM does it
+
+        // todo: this dispatcher should take the Widget from the event, and find the toplevel,
+        // and start dispatching.
     }
 
     static extern(C)
-    int dtkCallbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
+    int dtkCallbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** argArr)
     {
         // todo:
         //~ TCL_BREAK;
         //~ TCL_CONTINUE;
+        //~ TCL_OK;
 
         if (objc < 2)  // DTK event signals need at least 2 arguments
             return TCL_OK;
 
-        EventType type = to!EventType(Tcl_GetString(objv[1]).
-        switch (
+        // note: simulating button push:
+        /*
+        .b state pressed
+        after 1000 {.b state !pressed}
+        */
 
+        // todo: store %t in the first run as _timeBegin, and then use %t - _timeBegin to calculate
+        // a Duration type (e.g. fromMsecs or similar).
 
-        //~ event.x       = safeToInt(Tcl_GetString(objv[1]));
-        //~ event.y       = safeToInt(Tcl_GetString(objv[2]));
-        //~ event.keycode = safeToInt(Tcl_GetString(objv[3]));
-        //~ event.width   = safeToInt(Tcl_GetString(objv[4]));
-        //~ event.height  = safeToInt(Tcl_GetString(objv[5]));
-        //~ event.width   = safeToInt(Tcl_GetString(objv[6]));
-        //~ event.height  = safeToInt(Tcl_GetString(objv[7]));
+        // todo: store a Point() struct for the mouse point.
+        // todo:
 
+        /**
+            Indices:
+                0  => Name of this callback.
+                1  => The EventType.
+                2  => Detailed subtype of EventType, MouseAction for specific buttons.
+                2+ => The data, based on the Tcl substitutions that we provided for the EventType.
 
-        import std.stdio;
+            The 1 + 2 event type tags are implemented this way to allow separating out event handlers
+            into separate functions.
+        */
 
-        string getString(size_t index)
+        // debugging
+        //~ import std.stdio;
+        //~ foreach (idx; 0 .. objc)
+        //~ {
+            //~ printf("%s\n", Tcl_GetString(argArr[idx]));
+            //~ stderr.writefln("-- received #%s: %s", idx + 1, argArr[idx].tclPeekString());
+        //~ }
+
+        EventType type = to!EventType(argArr[1].tclPeekString());
+        auto args = argArr[2 .. objc + 1];
+        switch (type) with (EventType)
         {
-            return to!string(Tcl_GetString(objv[index]));
+            case mouse:    return _handleMouseEvent(args);
+            case keyboard: return _handleKeyboardEvent(args);
+            default:       assert(0, format("Unhandled event type '%s'", type));
         }
 
-        void printString(size_t index)
-        {
-            stderr.writefln("-- received #%s: %s", index + 1, getString(index));
-        }
-
-        foreach (i; 0 .. objc)
-        {
-            printString(i);
-        }
-
-        return TCL_BREAK;
+        //~ return TCL_OK;
 
         // todo: use try/catch on a Throwable, we don't want to escape exceptions to the C side.
         // todo: extract the types, and the event type, and the direct it to a D function that can
@@ -611,15 +686,15 @@ package:
         {
             Event event;  // todo: update
 
-            if (objc > 1)  // todo: objc is the objv count, not sure if we should always assign all fields
+            if (objc > 1)  // todo: objc is the argArr count, not sure if we should always assign all fields
             {
                 try
                 {
-                    event.type = tclConv!TkEventType(Tcl_GetString(objv[1]));
+                    event.type = tclConv!TkEventType(Tcl_GetString(argArr[1]));
                 }
                 catch (ConvException ce)
                 {
-                    stderr.writefln("Couldn't convert: `%s`", to!string(Tcl_GetString(objv[1])));
+                    stderr.writefln("Couldn't convert: `%s`", to!string(Tcl_GetString(argArr[1])));
                     throw ce;
                 }
 
@@ -636,14 +711,14 @@ package:
                     case TkCheckMenuItemToggle:
                     case TkRadioMenuSelect:
                     {
-                        event.state = to!string(Tcl_GetString(objv[2]));
+                        event.state = to!string(Tcl_GetString(argArr[2]));
                         break;
                     }
 
                     case TkValidate:
                     case TkFailedValidation:
                     {
-                        string validEventArgs = to!string(Tcl_GetString(objv[2]));
+                        string validEventArgs = to!string(Tcl_GetString(argArr[2]));
 
                         auto args = validEventArgs.splitter(" ");
 
@@ -677,8 +752,8 @@ package:
                         {
                             if (objc > idx)
                             {
-                                //~ stderr.writefln("arg %s: %s", idx, to!string(Tcl_GetString(objv[idx])));
-                                event.tupleof[idx - 1] = tclConv!(typeof(event.tupleof[idx - 1]))(Tcl_GetString(objv[idx]));
+                                //~ stderr.writefln("arg %s: %s", idx, to!string(Tcl_GetString(argArr[idx])));
+                                event.tupleof[idx - 1] = tclConv!(typeof(event.tupleof[idx - 1]))(Tcl_GetString(argArr[idx]));
                             }
                         }
                     }
@@ -713,7 +788,7 @@ package:
         Find the binding of a Tcl widget path and return the
         mapped widget or null if there is no such path mapping.
     */
-    static Widget lookupWidgetPath(string path)
+    static Widget lookupWidgetPath(in char[] path)
     {
         if (auto widget = path in _widgetPathMap)
             return *widget;

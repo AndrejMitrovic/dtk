@@ -15,6 +15,7 @@ public
     import dtk.geometry;
     import dtk.image;
     import dtk.interpreter;
+    import dtk.keymap;
     import dtk.loader;
     import dtk.types;
     import dtk.utils;

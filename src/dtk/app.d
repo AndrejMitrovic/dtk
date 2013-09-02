@@ -143,6 +143,8 @@ final class App
     }
 
 private:
+    long timestamp;
+
     Window _window;
     __gshared bool _isAppInited;
 }

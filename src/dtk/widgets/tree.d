@@ -75,7 +75,7 @@ struct ColumnOptions
     }
 
     ///
-    string toString()
+    string toString() const
     {
         return format("%s(%s, %s, %s, %s, %s)",
             typeof(this).stringof, _name, _anchor, _minWidth, _doStretch, _width);
@@ -726,7 +726,7 @@ class Tree : Widget
     }
 
     ///
-    override string toString()
+    override string toString() const
     {
         string text = tclEvalFmt("%s item %s -text", _name, _treeID);
         return format("%s(%s)", typeof(this).stringof, text);

@@ -6,6 +6,17 @@
 
 Todo now:
 
+- We could use a template getter for the timestamp, which returns a Duration. This avoids
+  huge build times for importing std.datetime until the timestamp is used.
+
+- Use toString with a sink, to avoid allocating memory.
+
+- Use better typeid extraction (see what it consists of, so we can get rid of the full path name)
+
+- Key codes are in keysymdef.h
+
+- Percent substitution is made in ExpandPercents in tk/generic/tkBind.c
+
 - Find all valid substitutions for each event types.
 
 - Remove as many fake widgets as possible, and simplify super ctor in Widget.

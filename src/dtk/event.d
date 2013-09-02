@@ -6,16 +6,24 @@
  */
 module dtk.event;
 
+import core.stdc.config : c_ulong;
+
+import std.array;
+import std.conv;
 import std.string;
 import std.traits;
 import std.typecons;
 import std.typetuple;
 
 import dtk.geometry;
+import dtk.keymap;
 import dtk.signals;
 import dtk.utils;
 
 import dtk.widgets.widget;
+
+/// The type of the $(D timeMsec) field in an event.
+public alias TimeMsec = c_ulong;
 
 /**
     All the possible event types. If the event is a custom user event type,
@@ -72,23 +80,42 @@ unittest
 class Event
 {
     /**
-        The default base class constructor is only called for user-derived events.
+        This base class constructor is only called for user-derived events.
         It ensures the event type is initialized as a user event.
 
         It can optionally take a user event type tag.
     */
-    this(long userType = 0)
+    this(Widget targetWidget, long userType = 0, TimeMsec timeMsec = 0)
     {
-        this.type = EventType.user;
         this.userType = userType;
+        this(targetWidget, EventType.user, timeMsec);
     }
 
-    // Only library event classes can call this ctor.
-    package this(EventType type)
+    package this(Widget targetWidget, EventType type, TimeMsec timeMsec)
     {
         this.type = type;
         this.userType = 0;
+        this.timeMsec = timeMsec;
+        _targetWidget = targetWidget;
     }
+
+    /**
+        Get the timestamp when the event occured.
+        The returned type is a $(D core.time.Duration) type.
+        The time is relative to when the system started.
+    */
+    @property auto time()()
+    {
+        import core.time;
+        return timeMsec.dur!"msecs";
+    }
+
+    /**
+        The timestamp in milliseconds when the event occurred.
+        The time is relative to when the system started.
+        Use $(D time) to get a $(D Duration) type.
+    */
+    public const(TimeMsec) timeMsec;
 
     /**
         The type of this event. Use this to quickly determine the dynamic type of the event.
@@ -118,26 +145,206 @@ class Event
         return _targetWidget;
     }
 
-private:
+    /** Output the string representation of this event. */
+    void toString(scope void delegate(const(char)[]) sink)
+    {
+    }
 
-    /* The target widget for the event. */
+    /**
+        Used for reusability in derived classes, where we want the fields
+        but not the class name in the output.
+    */
+    final protected void toStringMembers(scope void delegate(const(char)[]) sink)
+    {
+        sink(to!string(widget));
+        sink(", ");
+        sink(to!string(timeMsec));
+    }
+
+package:
+
+    /**
+        The target widget for the event. Note that this isn't a const public field, since
+        we want to allow modification to the widget, but disallow modification to the
+        event object itself. Hence the property getter above.
+    */
     Widget _targetWidget;
+}
+
+/**
+    A set of possible mouse actions.
+    Press and release actions include any mouse
+    button, such as the middle or wheel button.
+*/
+enum MouseAction
+{
+    /** One of the mouse buttons was pressed. */
+    press,
+
+    /** One of the mouse buttons was released. */
+    release,
+
+    /** Convenience - equal to $(D press). */
+    click = press,
+
+    /** One of the mouse buttons was clicked twice in rapid succession. */
+    double_click,
+
+    /** One of the mouse buttons was clicked three times in rapid succession. */
+    tripple_click,
+
+    /** One of the mouse buttons was clicked four times in rapid succession. */
+    quadruple_click,
+
+    /**
+        The mouse wheel was moved. See the $(D wheelStep) field to determine
+        the direction the mouse wheel was moved in.
+
+        $(BLUE Note): When the wheel is pressed as a mouse button,
+        the action will equal $(D press), not $(D wheel).
+    */
+    wheel,
+
+    /** The mouse was moved. */
+    move,
+}
+
+/**
+    A set of possible mouse buttons.
+*/
+enum MouseButton
+{
+    /** The left mouse button. */
+    button1,
+
+    /** Convenience - equal to $(D button1). */
+    left = button1,
+
+    /** The middle mouse button. */
+    button2,
+
+    /** Convenience - equal to $(D button2). */
+    middle = button2,
+
+    /** The right mouse button. */
+    button3,
+
+    /** Convenience - equal to $(D button3). */
+    right = button3,
+}
+
+//~ enum ShiftMask   = (1<<0);
+//~ enum LockMask    = (1<<1);
+//~ enum ControlMask = (1<<2);
+//~ enum Mod1Mask    = (1<<3);
+//~ enum Mod2Mask    = (1<<4);
+//~ enum Mod3Mask    = (1<<5);
+//~ enum Mod4Mask    = (1<<6);
+//~ enum Mod5Mask    = (1<<7);
+
+//~ enum META_MASK = (AnyModifier<<1);
+//~ enum ALT_MASK = (AnyModifier<<2);
+//~ enum EXTENDED_MASK = (AnyModifier<<3);
+
+private enum AnyModifier = 1 << 15;
+//~ private enum EXTENDED_MASK = 1 << 15;
+
+/**
+    A set of possible key modifiers.
+    These are special keys such as the control
+    and alt keys.
+
+    todo: add bit checking for these, which means we have to init them
+    properly. See test in d_code somewhere
+*/
+// major todo: the keysym already defines alt_l and alt_r, this enum should just
+// be a subgroup of that enum.
+// major todo: remove these bit initializers, and instead use a helper function to
+// extract this info when we need it (only for mice during %S substitution, because
+// otherwise we already have the %K substitution).
+enum KeyMod
+{
+    none = 0,
+
+    /** Control key. */
+    control = 1 << 2,
+
+    /** Alt key. */
+    alt = AnyModifier << 2,
+
+    /** Convenience for OSX - equal to $(D alt). */
+    option = alt,
+
+    ///
+    shift = 1 << 0,
+
+    // todo: when caps lock is turned off, lock is set.
+    // we can probably tell then if it's on or off.
+
+    ///
+    lock = 1 << 1,
+
+    /**
+        The meta key is present on special keyboards,
+        such as the MIT keyboard.
+        See: http://en.wikipedia.org/wiki/Meta_key
+    */
+    meta = AnyModifier << 1,
 }
 
 class MouseEvent : Event
 {
+    MouseAction action;
+
     this()
     {
-        super(EventType.mouse);
+        // todo: we should pass a widget
+        super(null, EventType.mouse);
     }
 }
 
 class KeyboardEvent : Event
 {
-    this()
+    this(Widget widget, KeySym keySym, KeyMod keyMod, TimeMsec timeMsec)
     {
-        super(EventType.keyboard);
+        super(widget, EventType.keyboard, timeMsec);
+        this.keySym = keySym;
+        this.keyMod = keyMod;
     }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        sink(__traits(identifier, typeof(this)));
+        sink("(");
+
+        foreach (i, val; this.tupleof)
+        {
+            sink(to!string(val));
+            sink(", ");
+        }
+
+        Event.toStringMembers(sink);
+        sink(")");
+    }
+
+    /// The key symbol that was pressed or released
+    const(KeySym) keySym;
+
+    /**
+        A bit mask of all key modifiers that were
+        held while keySym was pressed or released.
+
+        Examples:
+        -----
+        // test if control was held
+        if (keyMod & KeyMod.control) { }
+
+        // test if both control and alt were held at the same time
+        if (keyMod & (KeyMod.control | KeyMod.alt)) { }
+        -----
+    */
+    const(KeyMod) keyMod;
 }
 
 /** Old code below */

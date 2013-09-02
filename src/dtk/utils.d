@@ -61,11 +61,23 @@ string _tclEscape(T)(T input)
     return format(`"%s"`, to!string(input).translate(_tclTransTable));
 }
 
-///
+/// similar to OriginalType, but without the modifier stripping
 package template EnumBaseType(E) if (is(E == enum))
 {
     static if (is(E B == enum))
         alias EnumBaseType = B;
+}
+
+/// frequent typo
+alias BaseEnumType = EnumBaseType;
+
+unittest
+{
+    enum EI : int { x = 0 }
+    enum EF : float { x = 1.5 }
+
+    static assert(is(BaseEnumType!EI == int));
+    static assert(is(BaseEnumType!EF == float));
 }
 
 /// required due to Issue 10814 - Formatting string-based enum prints its name instead of its value
@@ -73,3 +85,60 @@ package EnumBaseType!E toBaseType(E)(E val)
 {
     return cast(typeof(return))val;
 }
+
+/** Return the slice of a null-terminated C string, without allocating a new string. */
+inout(char)[] peekCString(inout(char)* s)
+{
+    if (s is null)
+        return null;
+
+    inout(char)* ptr;
+    for (ptr = s; *ptr; ++ptr) { }
+
+    return s[0 .. ptr - s];
+}
+
+///
+unittest
+{
+    const(char)[] input = "foo\0";
+    assert(peekCString(input.ptr).ptr == input.ptr);
+}
+
+/**
+    Generate a toString() method for an aggregate type.
+    Issue 9872: format should include class field values.
+*/
+mixin template gen_toString()
+{
+    override string toString()
+    {
+        Appender!(string[]) result;
+
+        foreach (val; this.tupleof)
+            result ~= to!string(val);
+
+        return format("%s(%s)", __traits(identifier, typeof(this)), join(result.data, ", "));
+    }
+}
+
+//~ ///
+//~ unittest
+//~ {
+    //~ static class C
+    //~ {
+        //~ this(int x, int y)
+        //~ {
+            //~ this.x = x;
+            //~ this.y = y;
+        //~ }
+
+        //~ mixin gen_toString;
+
+        //~ int x;
+        //~ int y;
+    //~ }
+
+    //~ auto c = new C(1, 2);
+    //~ assert(text(c) == "C(1, 2)");
+//~ }
