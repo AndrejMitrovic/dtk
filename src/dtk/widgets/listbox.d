@@ -11,6 +11,7 @@ import std.string;
 
 import dtk.event;
 import dtk.interpreter;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.options;

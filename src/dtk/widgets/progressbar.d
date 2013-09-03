@@ -13,6 +13,7 @@ import dtk.app;
 import dtk.event;
 import dtk.geometry;
 import dtk.interpreter;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.widget;

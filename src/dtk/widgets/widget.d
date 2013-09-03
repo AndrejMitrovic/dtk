@@ -186,9 +186,7 @@ abstract class Widget
 
         Once the parent is set the child should call the initialize method.
     */
-    this(InitLater)
-    {
-    }
+    this(InitLater) { }
 
     /**
         Fake widgets which have event handlers but no actual Tk path name.
@@ -212,53 +210,6 @@ abstract class Widget
     {
         this.initialize(".");
         this.bindTags(TkClass.toplevel);
-    }
-
-    /**
-        Bind the DTK interceptor as the first event handler for this widget.
-
-        By default a Tk widget has the tag bindings in this order:
-        { widgetPath, widetClass, widgetToplevel, all }
-
-        For our event mechanism we need to intercept the event before it reaches
-        any other tag binding, and we have to remove the widgetToplevel from the
-        tags list since our event dispatch mechanism will already notify the
-        toplevel window of a widget when an event occurs.
-    */
-    private void bindTags(TkClass tkClass)
-    {
-        enforce(!_name.empty);
-        tclEvalFmt("bindtags %s [list %s %s %s all ]", _name, _dtkInterceptTag, cast(string)tkClass, _name);
-    }
-
-    /** Factored out for delayed initialization. */
-    package void initialize(Widget parent, TkType tkType)
-    {
-        enforce(parent !is null, "Parent cannot be null");
-
-        /**
-            If parent is the root window '.', '.widget' is the widget path.
-            If parent is '.frame', '.frame.widget' is the widget path (dot added before widget).
-        */
-        string prefix;
-        if (parent._name != ".")
-            prefix = parent._name;
-
-        string name = format("%s.%s%s%s", prefix, tkType.toString(), _threadID, _lastWidgetID++);
-        tclEvalFmt("%s %s", tkType.toBaseType(), name);
-
-        this.initialize(name);
-
-        this.bindTags(tkType.toTkClass());
-    }
-
-    /** Init the name. */
-    private void initialize(string name)
-    {
-        enforce(!name.empty);
-        _name = name;
-        _widgetPathMap[_name] = this;
-        _isInitialized = true;
     }
 
     /**
@@ -288,10 +239,10 @@ abstract class Widget
         tclEvalFmt("pack %s", _name);
     }
 
-    /// Note: The text property is implemented only in specific subclasses.
+    /// Note: These properties are implemented in specific subclasses.
     @disable public string text;
 
-    /// Note: The textWidth property is implemented only in specific subclasses.
+    /// ditto
     @disable public string textWidth;
 
     /** Widget states: */
@@ -426,20 +377,20 @@ abstract class Widget
     /** End widget styles. */
 
     /** Destroy this widget. */
-    public void destroy()
+    public final void destroy()
     {
         tclEvalFmt("destroy %s", _name);
         _isDestroyed = true;
     }
 
     /** Get the underlying Tcl widget name. Used for debugging and eval calls. */
-    public string getTclName()
+    public final string getTclName()
     {
         return _name;
     }
 
     /** Return the parent widget of this widget, or $(D null) if this widget is the main window. */
-    @property Widget parentWidget()
+    public final @property Widget parentWidget()
     {
         string widgetPath = tclEvalFmt("winfo parent %s", _name);
         return cast(Widget)Widget.lookupWidgetPath(widgetPath);
@@ -453,7 +404,7 @@ abstract class Widget
 package:
 
     /* Set a scrollbar for this widget. */
-    final void setScrollbar(Scrollbar scrollbar)
+    package final void setScrollbar(Scrollbar scrollbar)
     {
         assert(!scrollbar._name.empty);
         string scrollCommand = format("%sscrollcommand", (scrollbar.orientation == Orientation.horizontal) ? "h" : "y");
@@ -463,22 +414,22 @@ package:
         scrollbar.setOption("command", format("%s %s", this._name, viewTarget));
     }
 
-    final bool checkState(string state)
+    package final bool checkState(string state)
     {
         return cast(bool)to!int(tclEvalFmt("%s instate %s", _name, state));
     }
 
-    final void setState(string state)
+    package final void setState(string state)
     {
         tclEvalFmt("%s state %s", _name, state);
     }
 
-    final T getOption(T)(string option)
+    package final T getOption(T)(string option)
     {
         return to!T(tclEvalFmt("%s cget -%s", _name, option));
     }
 
-    final string setOption(T)(string option, T value)
+    package final string setOption(T)(string option, T value)
     {
         return tclEvalFmt(`%s configure -%s %s`, _name, option, value._tclEscape);
     }
@@ -488,7 +439,7 @@ package:
 
         The function returns the variable name.
     */
-    static string makeVar()
+    package static string makeVar()
     {
         string varName = getUniqueVarName();
         tclMakeVar(varName);
@@ -502,7 +453,7 @@ package:
 
         The function returns the variable name.
     */
-    static string makeTracedVar(TkEventType eventType)
+    package static string makeTracedVar(TkEventType eventType)
     {
         string varName = getUniqueVarName();
         tclMakeTracedVar(varName, eventType.text, _dtkCallbackIdent);
@@ -510,121 +461,23 @@ package:
     }
 
     /** Create a unique new callback name. */
-    static string createCallbackName()
+    package static string createCallbackName()
     {
         int newSlotID = _lastCallbackID++;
         return format("%s%s_%s", _callbackPrefix, _threadID, newSlotID).replace(":", "_");
     }
 
-    private void _oldValidation()
-    {
-        //~ return TCL_OK;
-
-        // todo: use try/catch on a Throwable, we don't want to escape exceptions to the C side.
-        // todo: extract the types, and the event type, and the direct it to a D function that can
-
-       /+  int slotID = cast(int)clientData;
-
-        if (auto callback = slotID in _callbackMap)
-        {
-            Event event;  // todo: update
-
-            if (objc > 1)  // todo: objc is the argArr count, not sure if we should always assign all fields
-            {
-                try
-                {
-                    event.type = tclConv!TkEventType(Tcl_GetString(argArr[1]));
-                }
-                catch (ConvException ce)
-                {
-                    stderr.writefln("Couldn't convert: `%s`", to!string(Tcl_GetString(argArr[1])));
-                    throw ce;
-                }
-
-                switch (event.type) with (TkEventType)
-                {
-                    case TkCheckButtonToggle:
-                    case TkRadioButtonSelect:
-                    case TkComboboxChange:
-                    case TkTextChange:
-                    case TkListboxChange:
-                    case TkProgressbarChange:
-                    case TkScaleChange:
-                    case TkSpinboxChange:
-                    case TkCheckMenuItemToggle:
-                    case TkRadioMenuSelect:
-                    {
-                        event.state = to!string(Tcl_GetString(argArr[2]));
-                        break;
-                    }
-
-                    case TkValidate:
-                    case TkFailedValidation:
-                    {
-                        string validEventArgs = to!string(Tcl_GetString(argArr[2]));
-
-                        auto args = validEventArgs.splitter(" ");
-
-                        event.validateEvent.type = toValidationType(to!int(args.front));
-                        args.popFront();
-
-                        event.validateEvent.charIndex = to!sizediff_t(args.front);
-                        args.popFront();
-
-                        event.validateEvent.newValue = args.front == "{}" ? null : args.front;
-                        args.popFront();
-
-                        event.validateEvent.curValue = args.front == "{}" ? null : args.front;
-                        args.popFront();
-
-                        event.validateEvent.changeValue = args.front == "{}" ? null : args.front;
-                        args.popFront();
-
-                        event.validateEvent.validationMode = toValidationMode(args.front);
-                        args.popFront();
-
-                        event.validateEvent.validationCondition = toValidationMode(args.front);
-                        args.popFront();
-                        break;
-                    }
-
-                    default:
-                    {
-                        foreach (idx, field; event.tupleof)
-                        static if (idx != 0)  // first element is the callback name
-                        {
-                            if (objc > idx)
-                            {
-                                //~ stderr.writefln("arg %s: %s", idx, to!string(Tcl_GetString(argArr[idx])));
-                                event.tupleof[idx - 1] = tclConv!(typeof(event.tupleof[idx - 1]))(Tcl_GetString(argArr[idx]));
-                            }
-                        }
-                    }
-                }
-            }
-
-            //~ stderr.writefln("emitting: %s %s", callback.widget, event);
-            callback.signal.emit(callback.widget, event);
-            return TCL_OK;
-        }
-        else
-        {
-            Tcl_SetResult(interp, cast(char*)"Trying to invoke non-existent callback", TCL_STATIC);
-            return TCL_ERROR;
-        } +/
-
-        //~ return TCL_OK;
-    }
-
     /** Create a unique Tcl variable name. */
-    static string getUniqueVarName()
+    package static string getUniqueVarName()
     {
         int newSlotID = _lastVariableID++;
         return format("%s%s_%s", _variablePrefix, _threadID, newSlotID);
     }
 
-    /**
-        API:
+    /*
+        Note: API-only function, public due to package disallowing
+        access to super packages.
+
         Find the binding of a Tcl widget path and return the
         mapped widget or null if there is no such path mapping.
     */
@@ -636,159 +489,104 @@ package:
         return null;
     }
 
+    /**
+        Bind the DTK interceptor as the first event handler for this widget.
+
+        By default a Tk widget has the tag bindings in this order:
+        { widgetPath, widetClass, widgetToplevel, all }
+
+        For our event mechanism we need to intercept the event before it reaches
+        any other tag binding, and we have to remove the widgetToplevel from the
+        tags list since our event dispatch mechanism will already notify the
+        toplevel window of a widget when an event occurs.
+    */
+    private final void bindTags(TkClass tkClass)
+    {
+        enforce(!_name.empty);
+        tclEvalFmt("bindtags %s [list %s %s %s all ]", _name, _dtkInterceptTag, cast(string)tkClass, _name);
+    }
+
+    /** Factored out for delayed initialization. */
+    package final void initialize(Widget parent, TkType tkType)
+    {
+        enforce(parent !is null, "Parent cannot be null");
+
+        /**
+            If parent is the root window '.', '.widget' is the widget path.
+            If parent is '.frame', '.frame.widget' is the widget path (dot added before widget).
+        */
+        string prefix;
+        if (parent._name != ".")
+            prefix = parent._name;
+
+        string name = format("%s.%s%s%s", prefix, tkType.toString(), _threadID, _lastWidgetID++);
+        tclEvalFmt("%s %s", tkType.toBaseType(), name);
+
+        this.initialize(name);
+
+        this.bindTags(tkType.toTkClass());
+    }
+
+    /** Init the name. */
+    private final void initialize(string name)
+    {
+        enforce(!name.empty);
+        _name = name;
+        _widgetPathMap[_name] = this;
+        _isInitialized = true;
+    }
+
 package:
 
-    // invoked per-thread: store a unique thread identifier
+    // invoked per-thread: store a unique thread identifier.
     static this()
     {
         _threadID = cast(size_t)cast(void*)Thread.getThis;
     }
 
     /** Unique Thread ID. Needed to create thread-global unique identifiers for Tcl/Tk. */
-    static size_t _threadID;
+    package static size_t _threadID;
 
-    /** This widget's unique name. */
+    /**
+        API-only: public due to package disallowing access to super packages.
+
+        This widget's unique name.
+    */
     public string _name;
 
     /** Counter to create a thread-global unique widget name (_threadID is used in mangling). */
-    static int _lastWidgetID = 0;
+    package static int _lastWidgetID = 0;
 
     /** Counter to create a unique thread-local callback ID. */
-    static int _lastCallbackID;
+    package static int _lastCallbackID;
 
-    enum _fakeWidgetPrefix = "dtk_fake_widget";
+    package enum _fakeWidgetPrefix = "dtk_fake_widget";
 
     /** Prefix for callbacks to avoid name clashes. */
-    enum _callbackPrefix = "dtk::call";
+    package enum _callbackPrefix = "dtk::call";
 
     /** Counter to create a unique thread-local variable ID. */
-    static int _lastVariableID;
+    package static int _lastVariableID;
 
     /** Prefix for variables to avoid name clashes. */
-    enum _variablePrefix = "::dtk_var";
+    package enum _variablePrefix = "::dtk_var";
 
     /** Mapping of Tcl widget paths to Widget objects. */
-    static Widget[string] _widgetPathMap;
+    package static Widget[string] _widgetPathMap;
 
     /**
         Set when the widget has been initialized. Some delayed-initialized widgets
         can be initialized after construction when initialize is called.
     */
-    bool _isInitialized;
+    package bool _isInitialized;
 
     /**
         Set when the widget is destroyed. This either happens when the destroy()
         method is called or when a parent widget which manages the lifetime of
         the child destroys the child (e.g. $(D tree.destroy(subTree))).
     */
-    bool _isDestroyed;
+    package bool _isDestroyed;
 }
-
-/// Tk and Ttk widget types
-package enum TkType : string
-{
-    button      = "ttk::button",
-    checkbutton = "ttk::checkbutton",
-    combobox    = "ttk::combobox",
-    entry       = "ttk::entry",
-    frame       = "ttk::frame",
-    label       = "ttk::label",
-    labelframe  = "ttk::labelframe",
-    listbox     = "tk::listbox",     // note: no ttk::listbox yet in v8.6
-    menu        = "menu",            // note: no ttk::menu
-    notebook    = "ttk::notebook",
-    panedwindow = "ttk::panedwindow",
-    progressbar = "ttk::progressbar",
-    radiobutton = "ttk::radiobutton",
-    scale       = "ttk::scale",
-    separator   = "ttk::separator",
-    sizegrip    = "ttk::sizegrip",
-    scrollbar   = "ttk::scrollbar",
-    spinbox     = "ttk::spinbox",
-    text        = "tk::text",        // note: no ttk::text
-    toplevel    = "tk::toplevel",    // note: no ttk::toplevel
-    tree        = "ttk::treeview",
-}
-
-///
-package string toString(TkType tkType)
-{
-    // note: cannot use :: in name because it can sometimes be
-    // interpreted in a special way, e.g. tk hardcodes some
-    // methods to ttk::type.func.name
-    return tkType.replace(":", "_");
-}
-
-/// Tk class types for each widget type
-package enum TkClass : string
-{
-    button      = "TButton",
-    checkbutton = "TCheckbutton",
-    combobox    = "TCombobox",
-    entry       = "TEntry",
-    frame       = "TFrame",
-    label       = "TLabel",
-    labelframe  = "TLabelframe",
-    listbox     = "Listbox",
-    menu        = "Menu",
-    notebook    = "TNotebook",
-    panedwindow = "TPanedwindow",
-    progressbar = "TProgressbar",
-    radiobutton = "TRadiobutton",
-    scale       = "TScale",
-    separator   = "TSeparator",
-    sizegrip    = "TSizegrip",
-    scrollbar   = "TScrollbar",
-    spinbox     = "TSpinbox",
-    text        = "Text",
-    toplevel    = "Toplevel",
-    tree        = "Treeview",
-}
-
-///
-package TkClass toTkClass(TkType tkType)
-{
-    // note: safe since to!string will return the member name, not the string value
-    return to!TkClass(to!string(tkType));
-}
-
-///
-package enum TkSubs : string
-{
-    client_request = "%#",
-    win_below_target = "%a",
-    mouse_button = "%b",
-    count = "%c",
-    detail = "%d",
-    focus = "%f",
-    height = "%h",
-    win_hex_id = "%i",
-    keycode = "%k",
-    mode = "%m",
-    override_redirect = "%o",
-    place = "%p",
-    state = "%s",
-    timestamp = "%t",
-    width = "%w",
-    rel_x_pos = "%x",
-    rel_y_pos = "%y",
-    uni_char = "%A",
-    border_width = "%B",
-    mouse_wheel_delta = "%D",
-    send_event_type = "%E",
-    keysym_text = "%K",
-    keysym_decimal = "%N",
-    property_name = "%P",
-    root_window_path = "%R",
-    subwindow_path = "%S",
-    type = "%T",
-    widget_path = "%W",
-    abs_x_pos = "%X",
-    abs_y_pos = "%Y",
-}
-
-// mapping of DTK event types to the subs we need for the bindings
-//~ package TkSubs[][EventType] eventTypeSubs;
 
 package struct InitLater { }
 package struct CreateFakeWidget { }

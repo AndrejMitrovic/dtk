@@ -12,6 +12,7 @@ import std.string;
 import dtk.color;
 import dtk.image;
 import dtk.geometry;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.options;

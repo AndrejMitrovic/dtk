@@ -9,6 +9,7 @@ module dtk.widgets.frame;
 import std.string;
 
 import dtk.geometry;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.widget;

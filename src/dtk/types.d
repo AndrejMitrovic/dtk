@@ -12,6 +12,7 @@ module dtk.types;
 
 import core.stdc.config : c_long, c_ulong;
 
+import std.array;
 import std.exception;
 
 import dtk.utils;
@@ -222,4 +223,107 @@ struct Tcl_Obj
     }
 
     internalRep_ internalRep;
+}
+
+/// Tk and Ttk widget types
+package enum TkType : string
+{
+    button      = "ttk::button",
+    checkbutton = "ttk::checkbutton",
+    combobox    = "ttk::combobox",
+    entry       = "ttk::entry",
+    frame       = "ttk::frame",
+    label       = "ttk::label",
+    labelframe  = "ttk::labelframe",
+    listbox     = "tk::listbox",     // note: no ttk::listbox yet in v8.6
+    menu        = "menu",            // note: no ttk::menu
+    notebook    = "ttk::notebook",
+    panedwindow = "ttk::panedwindow",
+    progressbar = "ttk::progressbar",
+    radiobutton = "ttk::radiobutton",
+    scale       = "ttk::scale",
+    separator   = "ttk::separator",
+    sizegrip    = "ttk::sizegrip",
+    scrollbar   = "ttk::scrollbar",
+    spinbox     = "ttk::spinbox",
+    text        = "tk::text",        // note: no ttk::text
+    toplevel    = "tk::toplevel",    // note: no ttk::toplevel
+    tree        = "ttk::treeview",
+}
+
+///
+package string toString(TkType tkType)
+{
+    // note: cannot use :: in name because it can sometimes be
+    // interpreted in a special way, e.g. tk hardcodes some
+    // methods to ttk::type.func.name
+    return tkType.replace(":", "_");
+}
+
+/// Tk class types for each widget type
+package enum TkClass : string
+{
+    button      = "TButton",
+    checkbutton = "TCheckbutton",
+    combobox    = "TCombobox",
+    entry       = "TEntry",
+    frame       = "TFrame",
+    label       = "TLabel",
+    labelframe  = "TLabelframe",
+    listbox     = "Listbox",
+    menu        = "Menu",
+    notebook    = "TNotebook",
+    panedwindow = "TPanedwindow",
+    progressbar = "TProgressbar",
+    radiobutton = "TRadiobutton",
+    scale       = "TScale",
+    separator   = "TSeparator",
+    sizegrip    = "TSizegrip",
+    scrollbar   = "TScrollbar",
+    spinbox     = "TSpinbox",
+    text        = "Text",
+    toplevel    = "Toplevel",
+    tree        = "Treeview",
+}
+
+///
+package TkClass toTkClass(TkType tkType)
+{
+    // note: safe since to!string will return the member name, not the string value
+    return to!TkClass(to!string(tkType));
+}
+
+///
+package enum TkSubs : string
+{
+    client_request = "%#",
+    win_below_target = "%a",
+    mouse_button = "%b",
+    count = "%c",
+    detail = "%d",
+    focus = "%f",
+    height = "%h",
+    win_hex_id = "%i",
+    keycode = "%k",
+    mode = "%m",
+    override_redirect = "%o",
+    place = "%p",
+    state = "%s",
+    timestamp = "%t",
+    width = "%w",
+    rel_x_pos = "%x",
+    rel_y_pos = "%y",
+    uni_char = "%A",
+    border_width = "%B",
+    mouse_wheel_delta = "%D",
+    send_event_type = "%E",
+    keysym_text = "%K",
+    keysym_decimal = "%N",
+    property_name = "%P",
+    root_window_path = "%R",
+    subwindow_path = "%S",
+    type = "%T",
+    widget_path = "%W",
+    abs_x_pos = "%X",
+    abs_y_pos = "%Y",
 }

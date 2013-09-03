@@ -433,3 +433,103 @@ static:
     /** Is the Tcl callback registered. */
     __gshared bool _dtkCallbackInitialized;
 }
+
+private void _oldValidation()
+{
+    //~ return TCL_OK;
+
+    // todo: use try/catch on a Throwable, we don't want to escape exceptions to the C side.
+    // todo: extract the types, and the event type, and the direct it to a D function that can
+
+   /+  int slotID = cast(int)clientData;
+
+    if (auto callback = slotID in _callbackMap)
+    {
+        Event event;  // todo: update
+
+        if (objc > 1)  // todo: objc is the argArr count, not sure if we should always assign all fields
+        {
+            try
+            {
+                event.type = tclConv!TkEventType(Tcl_GetString(argArr[1]));
+            }
+            catch (ConvException ce)
+            {
+                stderr.writefln("Couldn't convert: `%s`", to!string(Tcl_GetString(argArr[1])));
+                throw ce;
+            }
+
+            switch (event.type) with (TkEventType)
+            {
+                case TkCheckButtonToggle:
+                case TkRadioButtonSelect:
+                case TkComboboxChange:
+                case TkTextChange:
+                case TkListboxChange:
+                case TkProgressbarChange:
+                case TkScaleChange:
+                case TkSpinboxChange:
+                case TkCheckMenuItemToggle:
+                case TkRadioMenuSelect:
+                {
+                    event.state = to!string(Tcl_GetString(argArr[2]));
+                    break;
+                }
+
+                case TkValidate:
+                case TkFailedValidation:
+                {
+                    string validEventArgs = to!string(Tcl_GetString(argArr[2]));
+
+                    auto args = validEventArgs.splitter(" ");
+
+                    event.validateEvent.type = toValidationType(to!int(args.front));
+                    args.popFront();
+
+                    event.validateEvent.charIndex = to!sizediff_t(args.front);
+                    args.popFront();
+
+                    event.validateEvent.newValue = args.front == "{}" ? null : args.front;
+                    args.popFront();
+
+                    event.validateEvent.curValue = args.front == "{}" ? null : args.front;
+                    args.popFront();
+
+                    event.validateEvent.changeValue = args.front == "{}" ? null : args.front;
+                    args.popFront();
+
+                    event.validateEvent.validationMode = toValidationMode(args.front);
+                    args.popFront();
+
+                    event.validateEvent.validationCondition = toValidationMode(args.front);
+                    args.popFront();
+                    break;
+                }
+
+                default:
+                {
+                    foreach (idx, field; event.tupleof)
+                    static if (idx != 0)  // first element is the callback name
+                    {
+                        if (objc > idx)
+                        {
+                            //~ stderr.writefln("arg %s: %s", idx, to!string(Tcl_GetString(argArr[idx])));
+                            event.tupleof[idx - 1] = tclConv!(typeof(event.tupleof[idx - 1]))(Tcl_GetString(argArr[idx]));
+                        }
+                    }
+                }
+            }
+        }
+
+        //~ stderr.writefln("emitting: %s %s", callback.widget, event);
+        callback.signal.emit(callback.widget, event);
+        return TCL_OK;
+    }
+    else
+    {
+        Tcl_SetResult(interp, cast(char*)"Trying to invoke non-existent callback", TCL_STATIC);
+        return TCL_ERROR;
+    } +/
+
+    //~ return TCL_OK;
+}

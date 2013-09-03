@@ -15,6 +15,7 @@ import std.string;
 import dtk.geometry;
 import dtk.image;
 import dtk.interpreter;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.options;
@@ -235,6 +236,9 @@ class Tree : Widget
         _detachInfo.parent.attach(this, _detachInfo.index);
         _detachInfo.isDetached = IsDetached.no;
     }
+
+    ///
+    alias super.destroy destroy;
 
     /** Remove and destroy a tree. */
     void destroy(Tree tree)

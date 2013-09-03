@@ -14,6 +14,7 @@ import dtk.event;
 import dtk.image;
 import dtk.interpreter;
 import dtk.signals;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.widget;

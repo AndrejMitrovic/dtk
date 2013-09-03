@@ -14,6 +14,7 @@ import std.string;
 import dtk.geometry;
 import dtk.image;
 import dtk.interpreter;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.options;

@@ -12,6 +12,7 @@ import std.range;
 import dtk.app;
 import dtk.event;
 import dtk.geometry;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.widget;
