@@ -1,4 +1,4 @@
-module test_events_keyboard;
+module test_events;
 
 import std.algorithm;
 import std.range;
@@ -28,9 +28,9 @@ void onEvent(scope Event event)
     //~ event.handled = true;
 }
 
-void onKeyboardEvent(scope KeyboardEvent event)
+void onButtonEvent(scope ButtonEvent event)
 {
-    stderr.writefln("Handle keyboard event: %s", event);
+    stderr.writefln("Handle button event: %s", event);
     assert(event.eventTravel == EventTravel.target);
     //~ event.handled = true;
 }
@@ -55,14 +55,18 @@ unittest
 
     auto testWindow = new Window(app.mainWindow, 200, 200);
 
-    testWindow.onFilterEvent ~= &onFilterEvent;
-    testWindow.onNotifyEvent ~= &onNotifyEvent;
+    auto button = new Button(testWindow, "button");
 
-    testWindow.parentWidget.onSinkEvent = &onSinkEvent;
-    testWindow.parentWidget.onBubbleEvent = &onBubbleEvent;
+    button.onFilterEvent ~= &onFilterEvent;
+    button.onNotifyEvent ~= &onNotifyEvent;
 
-    testWindow.onEvent = &onEvent;
-    testWindow.onKeyboardEvent = &onKeyboardEvent;
+    button.parentWidget.onSinkEvent = &onSinkEvent;
+    button.parentWidget.onBubbleEvent = &onBubbleEvent;
+
+    button.onEvent = &onEvent;
+    button.onButtonEvent = &onButtonEvent;
+
+    button.pack();
 
     app.run();
 }

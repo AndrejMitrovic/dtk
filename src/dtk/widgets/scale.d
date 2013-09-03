@@ -6,7 +6,6 @@
  */
 module dtk.widgets.scale;
 
-import std.conv;
 import std.string;
 import std.range;
 

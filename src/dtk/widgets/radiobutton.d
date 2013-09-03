@@ -6,7 +6,6 @@
  */
 module dtk.widgets.radiobutton;
 
-import std.conv;
 import std.exception;
 import std.range;
 import std.string;

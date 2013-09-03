@@ -6,6 +6,8 @@
  */
 module dtk.widgets.widget;
 
+debug = DTK_LOG_EVENTS;
+
 import core.thread;
 
 import std.algorithm;
@@ -15,7 +17,6 @@ import std.stdio;
 import std.string;
 import std.traits;
 import std.typecons;
-import std.conv;
 
 import std.c.stdlib;
 
@@ -30,6 +31,7 @@ import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
+import dtk.widgets.button;
 import dtk.widgets.entry;
 import dtk.widgets.options;
 import dtk.widgets.scrollbar;
@@ -42,6 +44,15 @@ abstract class Widget
     /**
         Intercept an event that is sinking towards a child widget,
         which has $(D this) widget as its direct or indirect parent.
+
+        When to use:
+        If a parent widget has many child widgets, either direct
+        children on sub-children of the parent, and it wants to
+        intercept events that target those children, you should use
+        $(D onSinkEvent).
+
+        This allows you to capture events without having to know
+        in advance which widgets to track the events for.
 
         You can assign $(D true) to $(D event.handled) in the
         event handler if you want to stop the event from propagating
@@ -126,27 +137,24 @@ abstract class Widget
 
     /**
         A list of event handlers which will be called in sequence
-        just before this widget's onEvent handler.
+        before any other event handlers.
 
         You can assign $(D true) to $(D event.handled) in the
-        event handler if you want to stop the event from reaching
-        the target widget's $(D onEvent) handler.
-
-        This will also stop other event filters in thist list
-        from being called.
-
-        This event handler list is used for intercepting an event
-        from reaching $(D this) widget.
+        event handler if you want to stop the event from going
+        into the sinking phase. This will also stop other event
+        filters in this list from being called.
     */
     public EventHandlerList!Event onFilterEvent;
 
     /**
         A list of event handlers which will be called in sequence
-        just after this widget's onEvent handler.
+        after this widget's generic (onEvent) or specific
+        (e.g. onKeyboardEvent)event handler.
 
         You can assign $(D true) to $(D event.handled) in the
         event handler if you want to stop the event from reaching
-        other event handlers in this list.
+        other event handlers in this list. However this will not
+        stop the event from reaching $(D onBubbleEvent) handlers.
 
         This event handler list is used for notifying event
         handlers when an event has been received and handled
@@ -241,8 +249,6 @@ abstract class Widget
         this.initialize(name);
 
         this.bindTags(tkType.toTkClass());
-
-        //~ bindtags .button [list $buttonClass InterceptEvent .button all ]
     }
 
     /** Init the name. */
@@ -538,11 +544,11 @@ package:
     // validation arguments captured by validatecommand
     enum string validationArgs = "%d %i %P %s %S %v %V %W";
 
-    //~ static immutable mouseEventArgs = [TkSubs.mouse_button, TkSubs.state, TkSubs.window_id].join(" ");
-    //~ static immutable keyboardEventArgs = [TkSubs.keycode, TkSubs.state, TkSubs.window_id].join(" ");
+    //~ static immutable mouseEventArgs = [TkSubs.mouse_button, TkSubs.state, TkSubs.window_path].join(" ");
+    //~ static immutable keyboardEventArgs = [TkSubs.keycode, TkSubs.state, TkSubs.window_path].join(" ");
 
     // Note: We're retrieving keysym, not keycode
-    static immutable string keyboardEventArgs = [TkSubs.keysym_decimal, TkSubs.state, TkSubs.window_id, TkSubs.timestamp].join(" ");
+    static immutable string keyboardEventArgs = [TkSubs.keysym_decimal, TkSubs.state, TkSubs.window_path, TkSubs.timestamp].join(" ");
 
     /// ditto
     private static void _initDtkInterceptor()
@@ -565,16 +571,20 @@ package:
         //~ return to!int(res);
     //~ }
 
-    private enum EventStopped : uint
+    private enum TkEventFlag : uint
     {
-        no = TCL_CONTINUE,
-        yes = TCL_BREAK,
+        // note: $(D resume) and $(D stop) can only be returned for bind events, not for -command.
+        resume = TCL_CONTINUE,
+        stop = TCL_BREAK,
+        ok = TCL_OK,
     }
 
     /// create and populate a keyboard event, and dispatch it.
-    private static EventStopped _handleKeyboardEvent(const Tcl_Obj*[] tclArr)
+    private static TkEventFlag _handleKeyboardEvent(const Tcl_Obj*[] tclArr)
     {
         //~ stderr.writefln("Key code: %s", cast(KeySym)to!long(tclArr[0].tclPeekString()));
+
+        assert(tclArr.length == 4, tclArr.length.text);
 
         /**
             Indices:
@@ -600,40 +610,89 @@ package:
         return _dispatchEvent(widget, event);
     }
 
+    /// create and populate a button event, and dispatch it.
+    private static TkEventFlag _handleButtonEvent(const Tcl_Obj*[] tclArr)
+    {
+        //~ stderr.writefln("Key code: %s", cast(KeySym)to!long(tclArr[0].tclPeekString()));
+
+        assert(tclArr.length == 2, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => ButtonAction
+                1  => Widget path
+        */
+
+        stderr.writefln("-- received #0: %s", tclArr[0].tclPeekString());
+        stderr.writefln("-- received #1: %s", tclArr[1].tclPeekString());
+
+        ButtonAction action = to!ButtonAction(tclArr[0].tclPeekString());
+
+        Widget widget = lookupWidgetPath(tclArr[1].tclPeekString());
+        assert(widget !is null);
+
+        // note: timestamp missing since -command doesn't have percent substitution
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!ButtonEvent(widget, action, timeMsec);
+        return _dispatchEvent(widget, event);
+    }
+
     /// create and populate a mouse event, and dispatch it.
-    //~ private static EventStopped _handleMouseEvent(const Tcl_Obj*[] tclArr)
+    //~ private static TkEventFlag _handleMouseEvent(const Tcl_Obj*[] tclArr)
     //~ {
         //~ auto event = scoped!MouseEvent();
         //~ return _dispatchEvent(event);
     //~ }
 
-    /// main dispatch function, should take care of filters and whatnot.
-    private static EventStopped _dispatchEvent(Widget widget, scope Event event)
+    /// main dispatch function
+    private static TkEventFlag _dispatchEvent(Widget widget, scope Event event)
     {
         //~ stderr.writefln("Dispatching %s %s", widget, event);
 
         /** Handle the filter list, return if filtered. */
         _filterEvent(widget, event);
         if (event.handled)
-            return EventStopped.yes;
+            return TkEventFlag.stop;
 
         /** Handle event sinking, return if filtered. */
         _sinkEvent(widget, event);
         if (event.handled)
-            return EventStopped.yes;
+            return TkEventFlag.stop;
 
         /** Handle event by the target widget itself. */
         event._eventTravel = EventTravel.target;
         widget.onEvent.call(event);
 
+        /**
+            Most events are set up by 'bind', which allows continue/resume based on
+            what the D callback returns. Some events however are set up via -command,
+            which doesn't have bindtags, and where returning TCL_CONTINUE/TCL_BREAK
+            is invalid, TCL_OK must be returned instead.
+        */
+        TkEventFlag result = TkEventFlag.resume;
+
         /** If the generic handler didn't handle it, try a specific handler. */
         if (!event.handled)
         switch (event.type) with (EventType)
         {
-            case user:     break;  // user events can be handled with onEvent
-            case mouse:    widget.onMouseEvent.call(StaticCast!MouseEvent(event)); break;
-            case keyboard: widget.onKeyboardEvent.call(StaticCast!KeyboardEvent(event)); break;
-            default:       assert(0, format("Unhandled event type: '%s'", event.type));
+            case user:
+                break;  // user events can be handled with onEvent
+
+            case mouse:
+                widget.onMouseEvent.call(StaticCast!MouseEvent(event));
+                break;
+
+            case keyboard:
+                widget.onKeyboardEvent.call(StaticCast!KeyboardEvent(event));
+                break;
+
+            case button:
+                StaticCast!Button(widget).onButtonEvent.call(StaticCast!ButtonEvent(event));
+                result = TkEventFlag.ok;  // -command events do not have continue/break
+                break;
+
+            default: assert(0, format("Unhandled event type: '%s'", event.type));
         }
 
         /** Notify any listeners. */
@@ -648,7 +707,7 @@ package:
             which will e.g. allow a mouse button press event to trigger a
             widget button push event.
         */
-        return EventStopped.no;
+        return result;
     }
 
     /**
@@ -662,7 +721,7 @@ package:
         if (handlers.empty)
             return;
 
-        event._eventTravel = EventTravel.filtering;
+        event._eventTravel = EventTravel.filter;
 
         foreach (filterWidget; handlers)
         {
@@ -682,7 +741,7 @@ package:
         if (handlers.empty)
             return;
 
-        event._eventTravel = EventTravel.notifying;
+        event._eventTravel = EventTravel.notify;
 
         foreach (notifyWidget; handlers)
         {
@@ -697,7 +756,7 @@ package:
     {
         if (auto parent = widget.parentWidget)
         {
-            event._eventTravel = EventTravel.sinking;
+            event._eventTravel = EventTravel.sink;
             _sinkEventImpl(parent, event);
         }
     }
@@ -729,7 +788,7 @@ package:
     {
         if (auto parent = widget.parentWidget)
         {
-            event._eventTravel = EventTravel.bubbling;
+            event._eventTravel = EventTravel.bubble;
             _bubbleEventImpl(parent, event);
         }
     }
@@ -762,12 +821,6 @@ package:
         if (objc < 2)  // DTK event signals need at least 2 arguments
             return TCL_OK;
 
-        // note: simulating button push:
-        /*
-        .b state pressed
-        after 1000 {.b state !pressed}
-        */
-
         // todo: store %t in the first run as _timeBegin, and then use %t - _timeBegin to calculate
         // a Duration type (e.g. fromMsecs or similar).
 
@@ -795,13 +848,14 @@ package:
         }
 
         EventType type = to!EventType(argArr[1].tclPeekString());
-        auto args = argArr[2 .. objc + 1];
+        auto args = argArr[2 .. objc];
 
         switch (type) with (EventType)
         {
             case mouse:    return TCL_OK;  // todo: _handleMouseEvent(args);
             case keyboard: return _handleKeyboardEvent(args);
-            default:       assert(0, format("Unhandled event type '%s'", type));
+            case button:   return _handleButtonEvent(args);
+            default:       assert(0, format("Unhandled event type '%s'.", type));
         }
     }
 
@@ -1080,10 +1134,10 @@ package enum TkSubs : string
     keysym_text = "%K",
     keysym_decimal = "%N",
     property_name = "%P",
-    root_window_id = "%R",
-    subwindow_id = "%S",
+    root_window_path = "%R",
+    subwindow_path = "%S",
     type = "%T",
-    window_id = "%W",
+    window_path = "%W",
     x_root = "%X",
     y_root = "%Y",
 }

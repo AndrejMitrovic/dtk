@@ -7,7 +7,6 @@
 module dtk.widgets.dialog;
 
 import std.array;
-import std.conv;
 import std.exception;
 import std.path;
 import std.range;

@@ -6,7 +6,6 @@
  */
 module dtk.widgets.labelframe;
 
-import std.conv;
 import std.range;
 import std.string;
 

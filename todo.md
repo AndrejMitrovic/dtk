@@ -6,6 +6,11 @@
 
 Todo now:
 
+- When we set up commands for dtk, we should use action enums instead of Tk enums, prefer
+ButtonAction.push over TkEvent.tkButtonPush, since the former is what we store anyway.
+
+- Add test-suite for event handlers.
+
 - We could use a template getter for the timestamp, which returns a Duration. This avoids
   huge build times for importing std.datetime until the timestamp is used.
 

@@ -6,7 +6,6 @@
  */
 module dtk.widgets.checkbutton;
 
-import std.conv;
 import std.range;
 import std.string;
 
@@ -42,8 +41,7 @@ class CheckButton : Widget
 
     /**
         Toggle the chekbutton to On. This will set its value to the
-        value retrieived from onValue, and will emit an event
-        with type TkButtonPush.
+        value retrieived from onValue, and will emit a ButtonEvent.
     */
     void toggleOn()
     {
@@ -52,8 +50,7 @@ class CheckButton : Widget
 
     /**
         Toggle the chekbutton to Off. This will set its value to the
-        value retrieived from offValue, and will emit an event
-        with type TkButtonPush.
+        value retrieived from offValue, and will emit a ButtonEvent.
     */
     void toggleOff()
     {

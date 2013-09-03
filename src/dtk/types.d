@@ -10,6 +10,8 @@ module dtk.types;
     This module contains just a small portion of the Tcl/Tk declarations.
 */
 
+import core.stdc.config : c_long, c_ulong;
+
 import std.exception;
 
 import dtk.utils;
@@ -68,6 +70,31 @@ enum TCL_TIMER_EVENTS   = (1<<4);
 enum TCL_IDLE_EVENTS    = (1<<5);  /* WAS 0x10 ???? */
 enum TCL_ALL_EVENTS     = (~TCL_DONT_WAIT);
 
+
+/// The type of the $(D timeMsec) field in an event.
+public alias TimeMsec = c_ulong;
+
+/**
+    Get the current Tcl time. Equivalent to the implementation of
+    $(B TkpGetMS) in the Tk library, which uses $(B Tcl_GetTime)
+*/
+TimeMsec getTclTime()
+{
+    Tcl_Time now;
+
+    Tcl_GetTime(&now);
+
+    // note: in Tk they cast this to long, might be a bug since Time is defined as:
+    // xlib\x11\X.h: 'typedef unsigned long Time;'
+    return cast(TimeMsec)now.sec * 1000 + now.usec / 1000;
+}
+
+struct Tcl_Time
+{
+    c_long sec;  /* Seconds. */
+    c_long usec; /* Microseconds. */
+}
+
 /*
  * Using structs so I can iterate the members via __traits(allMembers, TclProcs).
  * This simplifies loading the symbols dynamically.
@@ -97,6 +124,7 @@ __gshared extern(C):
     int function(Tcl_Interp* interp) Tcl_Init;
     void function(Tcl_Interp* interp) Tcl_DeleteInterp;
     int function(int flags) Tcl_DoOneEvent;
+    void function(Tcl_Time* timeBuf) Tcl_GetTime;
 }
 
 struct TkProcs

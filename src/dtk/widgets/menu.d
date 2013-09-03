@@ -6,7 +6,6 @@
  */
 module dtk.widgets.menu;
 
-import std.conv;
 import std.exception;
 import std.range;
 import std.string;

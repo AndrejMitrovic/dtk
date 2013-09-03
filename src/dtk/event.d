@@ -6,10 +6,7 @@
  */
 module dtk.event;
 
-import core.stdc.config : c_ulong;
-
 import std.array;
-import std.conv;
 import std.string;
 import std.traits;
 import std.typecons;
@@ -18,12 +15,10 @@ import std.typetuple;
 import dtk.geometry;
 import dtk.keymap;
 import dtk.signals;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.widget;
-
-/// The type of the $(D timeMsec) field in an event.
-public alias TimeMsec = c_ulong;
 
 /**
     All the possible event types. If the event is a custom user event type,
@@ -51,6 +46,12 @@ enum EventType
         or held long enough to trigger a key hold event.
     */
     keyboard,
+
+    /** A button widget event, e.g. a button widget could be pressed. */
+    button,
+
+    /** A check button widget event, e.g. a check button was toggled on or off. */
+    checkbutton,
 }
 
 /**
@@ -64,20 +65,20 @@ enum EventTravel
     invalid,  // sentinel
 
     /// The event is going through the target widget's filter list.
-    filtering,
+    filter,
 
     /// The event is sinking from the toplevel parent of this widget, towards the widget.
-    sinking,
+    sink,
 
     /// The event has reached its target widget, and is now being handled by either
     /// onEvent and/or one of its specific event handlers, such as onKeyboardEvent.
     target,
 
     /// The event was dispatched to the widget, and now explicit listeners are notified.
-    notifying,
+    notify,
 
     /// The event is bubbling upwards towards the toplevel parent of this widget.
-    bubbling,
+    bubble,
 
 
     // direct,  // todo
@@ -185,14 +186,26 @@ class Event
     public void toString(scope void delegate(const(char)[]) sink) { }
 
     /**
-        Used for reusability in derived classes, where we want the fields
-        but not the class name in the output.
+        Derived classes should call $(D toStringImpl(sink, this.tupleof) )
+        in their $(D toString) implementation.
     */
-    final protected void toStringMembers(scope void delegate(const(char)[]) sink)
+    protected final void toStringImpl(T...)(scope void delegate(const(char)[]) sink, T args)
     {
+        string qualClassName = typeid(this).name;
+        sink(qualClassName[qualClassName.lastIndexOf(".") + 1 .. $]);  // workaround
+
+        sink("(");
+
+        foreach (val; args)
+        {
+            sink(to!string(val));
+            sink(", ");
+        }
+
         sink(to!string(widget));
         sink(", ");
         sink(to!string(timeMsec));
+        sink(")");
     }
 
 package:
@@ -329,17 +342,74 @@ enum KeyMod
     meta = AnyModifier << 1,
 }
 
+/// Button widget event.
+enum ButtonAction
+{
+    /// sentinel
+    invalid,
+
+    /// A button was pushed.
+    push,
+}
+
+///
+class ButtonEvent : Event
+{
+    this(Widget widget, ButtonAction action, TimeMsec timeMsec)
+    {
+        // todo: we should pass a widget
+        super(widget, EventType.button, timeMsec);
+        this.action = action;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    const(ButtonAction) action;
+}
+
+/// Check button widget event.
+enum CheckButtonAction
+{
+    /// sentinel
+    invalid,
+
+    /// A checkbutton was toggled on.
+    toggleOn,
+
+    /// A checkbutton was toggled off.
+    toggleOff,
+}
+
+///
+class CheckButtonEvent : Event
+{
+    this(Widget widget, CheckButtonAction action, TimeMsec timeMsec)
+    {
+        // todo: we should pass a widget
+        super(widget, EventType.checkbutton, timeMsec);
+        this.action = action;
+    }
+
+    const(CheckButtonAction) action;
+}
+
+///
 class MouseEvent : Event
 {
-    MouseAction action;
-
     this()
     {
         // todo: we should pass a widget
         super(null, EventType.mouse);
     }
+
+    MouseAction action;
 }
 
+///
 class KeyboardEvent : Event
 {
     this(Widget widget, KeySym keySym, KeyMod keyMod, TimeMsec timeMsec)
@@ -352,17 +422,7 @@ class KeyboardEvent : Event
     ///
     override void toString(scope void delegate(const(char)[]) sink)
     {
-        sink(__traits(identifier, typeof(this)));
-        sink("(");
-
-        foreach (i, val; this.tupleof)
-        {
-            sink(to!string(val));
-            sink(", ");
-        }
-
-        Event.toStringMembers(sink);
-        sink(")");
+        toStringImpl(sink, this.tupleof);
     }
 
     /// The key symbol that was pressed or released
@@ -423,7 +483,6 @@ package enum TkEventType
     Visibility,
     Deactivate,
 
-    TkButtonPush,
     TkCheckButtonToggle,
     TkRadioButtonSelect,
     TkComboboxChange,

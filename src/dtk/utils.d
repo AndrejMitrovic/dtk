@@ -7,7 +7,7 @@
 module dtk.utils;
 
 import std.array;
-import std.conv;
+static import std.conv;
 import std.algorithm;
 import std.functional;
 import std.stdio;
@@ -17,6 +17,56 @@ import std.traits;
 import dtk.loader;
 
 alias spaceJoin = pipe!(map!(to!string), reduce!("a ~ ' ' ~ b"));
+
+ //~ to!int(value);
+
+private template isRawStaticArray(T, A...)
+{
+    enum isRawStaticArray =
+        A.length == 0 &&
+        isStaticArray!T &&
+        !is(T == class) &&
+        !is(T == interface) &&
+        !is(T == struct) &&
+        !is(T == union);
+}
+
+public alias text = std.conv.text;
+
+/** Workaround for bad exception file and line info. */
+template to(T)
+{
+    T to(string file = __FILE__, size_t line = __LINE__, A...)(A input)
+        if (!isRawStaticArray!A)
+    {
+        try
+        {
+            return std.conv.to!T(input);
+        }
+        catch (std.conv.ConvException ex)
+        {
+            ex.file = file;
+            ex.line = line;
+            throw ex;
+        }
+    }
+
+    // Fix issue 6175
+    T to(S)(ref S input, string file = __FILE__, size_t line = __LINE__)
+        if (isRawStaticArray!S)
+    {
+        try
+        {
+            return std.conv.to!T(input);
+        }
+        catch (std.conv.ConvException ex)
+        {
+            ex.file = file;
+            ex.line = line;
+            throw ex;
+        }
+    }
+}
 
 /** Convert a Tcl string value into a D type. */
 T tclConv(T)(const(char)* input)

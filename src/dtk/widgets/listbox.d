@@ -6,7 +6,6 @@
  */
 module dtk.widgets.listbox;
 
-import std.conv;
 import std.range;
 import std.string;
 

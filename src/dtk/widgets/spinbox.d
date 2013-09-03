@@ -6,7 +6,6 @@
  */
 module dtk.widgets.spinbox;
 
-import std.conv;
 import std.string;
 import std.range;
 

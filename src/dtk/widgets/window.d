@@ -11,7 +11,6 @@ import dtk.geometry;
 import std.range;
 import std.stdio;
 import std.algorithm;
-import std.conv;
 import std.range;
 import std.string;
 

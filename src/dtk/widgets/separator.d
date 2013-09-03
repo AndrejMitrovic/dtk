@@ -6,7 +6,6 @@
  */
 module dtk.widgets.separator;
 
-import std.conv;
 import std.string;
 import std.range;
 

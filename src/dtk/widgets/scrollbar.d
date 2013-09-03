@@ -6,12 +6,12 @@
  */
 module dtk.widgets.scrollbar;
 
-import std.conv;
 import std.range;
 import std.string;
 
 import dtk.event;
 import dtk.geometry;
+import dtk.utils;
 
 import dtk.widgets.widget;
 

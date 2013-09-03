@@ -11,7 +11,6 @@ import std.c.stdlib;
 
 import std.exception;
 import std.string;
-import std.conv;
 import std.path;
 
 import dtk.event;

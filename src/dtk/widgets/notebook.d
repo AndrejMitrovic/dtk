@@ -7,7 +7,6 @@
 module dtk.widgets.notebook;
 
 import std.array;
-import std.conv;
 import std.exception;
 import std.range;
 import std.string;

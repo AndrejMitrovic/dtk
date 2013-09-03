@@ -6,7 +6,6 @@
  */
 module dtk.widgets.button;
 
-import std.conv;
 import std.range;
 import std.string;
 
@@ -55,16 +54,29 @@ class Button : Widget
     {
         super(master, TkType.button);
 
-        // invoke calls 'command'
+        // return key issues invoke, which calls 'command'
         tclEvalFmt("bind %s <Return> { %s invoke }", _name, _name);
 
-        // 'command' calls onEvent
-        this.setOption("command", format("%s %s", _dtkCallbackIdent, TkEventType.TkButtonPush));
+        tclEvalFmt("%s configure -command %s", _name,
+            format(`"%s %s %s %s"`,
+                _dtkCallbackIdent,
+                EventType.button,
+                ButtonAction.push,
+                _name));
+
+        // 'command' sends an event
+        //~ this.setOption("command",
+
         this.setOption("text", text);
     }
 
     /**
-        Physically push the button and emit the TkButtonPush event.
+        Event handler used when the button is pushed.
+    */
+    public EventHandler!ButtonEvent onButtonEvent;
+
+    /**
+        Physically push the button and emit a ButtonEvent.
         The button is automatically released after ~200 milliseconds.
     */
     void push()
@@ -75,7 +87,7 @@ class Button : Widget
         // queue unpush for later
         tclEvalFmt("after 200 { %s state !pressed }", _name);
 
-        // meanwhile emit the TkButtonPush event
+        // meanwhile invoke the command
         tclEvalFmt("%s invoke", _name);
     }
 

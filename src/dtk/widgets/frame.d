@@ -6,7 +6,6 @@
  */
 module dtk.widgets.frame;
 
-import std.conv;
 import std.string;
 
 import dtk.geometry;
