@@ -9,6 +9,7 @@ module dtk.widgets.button;
 import std.range;
 import std.string;
 
+import dtk.dispatch;
 import dtk.event;
 import dtk.image;
 import dtk.interpreter;

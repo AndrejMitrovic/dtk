@@ -9,14 +9,14 @@ import dtk;
 
 void onFilterEvent(scope Event event)
 {
-    stderr.writefln("Handle filtered event: %s", event);
+    //~ stderr.writefln("Handle filtered event: %s", event);
     assert(event.eventTravel == EventTravel.filter);
     //~ event.handled = true;
 }
 
 void onSinkEvent(scope Event event)
 {
-    stderr.writefln("Handle sink event: %s", event);
+    //~ stderr.writefln("Handle sink event: %s", event);
     assert(event.eventTravel == EventTravel.sink);
     //~ event.handled = true;
 }
@@ -28,23 +28,39 @@ void onEvent(scope Event event)
     //~ event.handled = true;
 }
 
+//~ void onMouseEvent(scope MouseEvent event)
+//~ {
+    //~ stderr.writefln("Handle mouse event: %s", event);
+    //~ assert(event.eventTravel == EventTravel.target);
+
+    //~ // if set, button should not be pushed.
+    //~ event.handled = true;
+//~ }
+
+void onKeyboardEvent(scope KeyboardEvent event)
+{
+    //~ stderr.writefln("Handle keyboard  event: %s", event);
+    assert(event.eventTravel == EventTravel.target);
+    //~ event.handled = true;
+}
+
 void onButtonEvent(scope ButtonEvent event)
 {
-    stderr.writefln("Handle button event: %s", event);
+    //~ stderr.writefln("Handle button event: %s", event);
     assert(event.eventTravel == EventTravel.target);
     //~ event.handled = true;
 }
 
 void onNotifyEvent(scope Event event)
 {
-    stderr.writefln("Handle notify event: %s", event);
+    //~ stderr.writefln("Handle notify event: %s", event);
     assert(event.eventTravel == EventTravel.notify);
     //~ event.handled = true;
 }
 
 void onBubbleEvent(scope Event event)
 {
-    stderr.writefln("Handle bubble event: %s", event);
+    //~ stderr.writefln("Handle bubble event: %s", event);
     assert(event.eventTravel == EventTravel.bubble);
     //~ event.handled = true;
 }
@@ -65,6 +81,8 @@ unittest
 
     button.onEvent = &onEvent;
     button.onButtonEvent = &onButtonEvent;
+    button.onKeyboardEvent = &onKeyboardEvent;
+    //~ button.onMouseEvent = &onMouseEvent;
 
     button.pack();
 

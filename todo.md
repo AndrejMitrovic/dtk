@@ -6,6 +6,8 @@
 
 Todo now:
 
+- Embed the type of the widget as an enum, so people can downcast safely.
+
 - When we set up commands for dtk, we should use action enums instead of Tk enums, prefer
 ButtonAction.push over TkEvent.tkButtonPush, since the former is what we store anyway.
 

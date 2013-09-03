@@ -8,11 +8,10 @@ module dtk.loader;
 
 import std.exception;
 
+import dtk.dispatch;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;
-
-import dtk.widgets.widget;
 
 /** Used for Tcl string literal escape rules. */
 string[dchar] _tclTransTable;
@@ -61,7 +60,7 @@ version (Windows)
 
         /** Initialize DTK classes. */
         Interpreter.initClass();
-        Widget.initClass();
+        Dispatch.initClass();
     }
 
     shared static ~this()

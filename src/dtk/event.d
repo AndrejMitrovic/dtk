@@ -283,21 +283,23 @@ enum MouseButton
     right = button3,
 }
 
-//~ enum ShiftMask   = (1<<0);
-//~ enum LockMask    = (1<<1);
-//~ enum ControlMask = (1<<2);
-//~ enum Mod1Mask    = (1<<3);
-//~ enum Mod2Mask    = (1<<4);
-//~ enum Mod3Mask    = (1<<5);
-//~ enum Mod4Mask    = (1<<6);
-//~ enum Mod5Mask    = (1<<7);
+/+
+enum ShiftMask   = (1<<0);
+enum LockMask    = (1<<1);
+enum ControlMask = (1<<2);
+enum Mod1Mask    = (1<<3);
+enum Mod2Mask    = (1<<4);
+enum Mod3Mask    = (1<<5);
+enum Mod4Mask    = (1<<6);
+enum Mod5Mask    = (1<<7);
 
-//~ enum META_MASK = (AnyModifier<<1);
-//~ enum ALT_MASK = (AnyModifier<<2);
-//~ enum EXTENDED_MASK = (AnyModifier<<3);
+enum META_MASK = (AnyModifier<<1);
+enum ALT_MASK = (AnyModifier<<2);
+enum EXTENDED_MASK = (AnyModifier<<3);
+private enum EXTENDED_MASK = 1 << 15;
++/
 
 private enum AnyModifier = 1 << 15;
-//~ private enum EXTENDED_MASK = 1 << 15;
 
 /**
     A set of possible key modifiers.
@@ -384,12 +386,11 @@ enum CheckButtonAction
     toggleOff,
 }
 
-///
+/// todo: not handled yet
 class CheckButtonEvent : Event
 {
     this(Widget widget, CheckButtonAction action, TimeMsec timeMsec)
     {
-        // todo: we should pass a widget
         super(widget, EventType.checkbutton, timeMsec);
         this.action = action;
     }
@@ -400,10 +401,9 @@ class CheckButtonEvent : Event
 ///
 class MouseEvent : Event
 {
-    this()
+    this(Widget widget, MouseAction action, TimeMsec timeMsec)
     {
-        // todo: we should pass a widget
-        super(null, EventType.mouse);
+        super(widget, EventType.mouse, timeMsec);
     }
 
     MouseAction action;
@@ -412,11 +412,14 @@ class MouseEvent : Event
 ///
 class KeyboardEvent : Event
 {
-    this(Widget widget, KeySym keySym, KeyMod keyMod, TimeMsec timeMsec)
+    this(Widget widget, KeySym keySym, char uniChar, KeyMod keyMod, Point widgetMousePos, Point desktopMousePos, TimeMsec timeMsec)
     {
         super(widget, EventType.keyboard, timeMsec);
         this.keySym = keySym;
+        this.uniChar = uniChar;
         this.keyMod = keyMod;
+        this.widgetMousePos = widgetMousePos;
+        this.desktopMousePos = desktopMousePos;
     }
 
     ///
@@ -427,6 +430,22 @@ class KeyboardEvent : Event
 
     /// The key symbol that was pressed or released
     const(KeySym) keySym;
+
+    /**
+        The unicode character that was pressed or released.
+
+        Note: that this can equal $(D char.init) if only a
+        single key modifier was pressed (e.g. $(B control) key).
+
+        Note: when a modifier is pressed together with a key,
+        e.g. $(B control + a) - the combination will store a
+        "sub" control unicode character to $(D uniChar),
+        but $(D keySym) will equal the $(B 'a') key.
+
+        On the other hand, pressing $(B shift + a) will set
+        both of these fields to $(B 'A').
+    */
+    const(char) uniChar;
 
     /**
         A bit mask of all key modifiers that were
@@ -442,6 +461,18 @@ class KeyboardEvent : Event
         -----
     */
     const(KeyMod) keyMod;
+
+    /**
+        The mouse position relative to the target widget
+        when the keyboard event was generated.
+    */
+    const(Point) widgetMousePos;
+
+    /**
+        The mouse position relative to the desktop
+        when the keyboard event was generated.
+    */
+    const(Point) desktopMousePos;
 }
 
 /** Old code below */

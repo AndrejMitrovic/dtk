@@ -11,6 +11,7 @@ import std.range;
 import std.string;
 
 import dtk.app;
+import dtk.dispatch;
 import dtk.event;
 import dtk.interpreter;
 import dtk.types;
@@ -54,14 +55,14 @@ abstract class MenuClass : Widget
     final void addItem(MenuItem menuItem)
     {
         assert(!_name.empty);
-        tclEvalFmt("%s add command -label %s -command { %s %s }", _name, menuItem._label, menuItem._dtkCallbackIdent, TkEventType.TkMenuItemSelect);
+        tclEvalFmt("%s add command -label %s -command { %s %s }", _name, menuItem._label, _dtkCallbackIdent, TkEventType.TkMenuItemSelect);
     }
 
     /** Insert an item at a specific position. */
     final void insertItem(MenuItem menuItem, int index)
     {
         assert(!_name.empty);
-        tclEvalFmt("%s insert %s command -label %s -command { %s %s }", _name, index, menuItem._label._tclEscape, menuItem._dtkCallbackIdent, TkEventType.TkMenuItemSelect);
+        tclEvalFmt("%s insert %s command -label %s -command { %s %s }", _name, index, menuItem._label._tclEscape, _dtkCallbackIdent, TkEventType.TkMenuItemSelect);
     }
 
     /** Add a check menu item to this menu. */

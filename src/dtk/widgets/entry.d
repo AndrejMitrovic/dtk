@@ -13,6 +13,7 @@ import std.traits;
 import std.typetuple;
 
 import dtk.app;
+import dtk.dispatch;
 import dtk.event;
 import dtk.geometry;
 import dtk.interpreter;
@@ -62,6 +63,10 @@ enum IsValidated
     no,   ///
     yes,  ///
 }
+
+// todo: this should be handled in dispatch:
+// validation arguments captured by validatecommand
+private enum string validationArgs = "%d %i %P %s %S %v %V %W";
 
 ///
 class Entry : Widget

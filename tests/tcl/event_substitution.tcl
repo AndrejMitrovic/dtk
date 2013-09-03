@@ -6,7 +6,11 @@ package require Tk
     #~ puts "detail = %d"
 #~ }
 
-bind . <ButtonPress> {
+ttk::button .button
+pack .button
+
+#~ bind . <ButtonPress> {
+bind .button <KeyPress> {
     puts "client_request = %#"
     puts "win_below_target = %a"
     puts "mouse_button = %b"
