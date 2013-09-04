@@ -28,14 +28,14 @@ void onEvent(scope Event event)
     //~ event.handled = true;
 }
 
-//~ void onMouseEvent(scope MouseEvent event)
-//~ {
+void onMouseEvent(scope MouseEvent event)
+{
     //~ stderr.writefln("Handle mouse event: %s", event);
-    //~ assert(event.eventTravel == EventTravel.target);
+    assert(event.eventTravel == EventTravel.target);
 
-    //~ // if set, button should not be pushed.
+    // if set, button should not be pushed.
     //~ event.handled = true;
-//~ }
+}
 
 void onKeyboardEvent(scope KeyboardEvent event)
 {
@@ -71,20 +71,22 @@ unittest
 
     auto testWindow = new Window(app.mainWindow, 200, 200);
 
-    auto button = new Button(testWindow, "button");
+    testWindow.onEvent = &onEvent;
 
-    button.onFilterEvent ~= &onFilterEvent;
-    button.onNotifyEvent ~= &onNotifyEvent;
+    //~ auto button = new Button(testWindow, "button");
 
-    button.parentWidget.onSinkEvent = &onSinkEvent;
-    button.parentWidget.onBubbleEvent = &onBubbleEvent;
+    //~ button.onFilterEvent ~= &onFilterEvent;
+    //~ button.onNotifyEvent ~= &onNotifyEvent;
 
-    button.onEvent = &onEvent;
-    button.onButtonEvent = &onButtonEvent;
-    button.onKeyboardEvent = &onKeyboardEvent;
+    //~ button.parentWidget.onSinkEvent = &onSinkEvent;
+    //~ button.parentWidget.onBubbleEvent = &onBubbleEvent;
+
+    //~ button.onEvent = &onEvent;
+    //~ button.onButtonEvent = &onButtonEvent;
+    //~ button.onKeyboardEvent = &onKeyboardEvent;
     //~ button.onMouseEvent = &onMouseEvent;
 
-    button.pack();
+    //~ button.pack();
 
     app.run();
 }

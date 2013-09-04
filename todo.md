@@ -6,23 +6,14 @@
 
 Todo now:
 
+- KeyPress/KeyRelease need to be a part of the key action.
+
 - Embed the type of the widget as an enum, so people can downcast safely.
 
 - When we set up commands for dtk, we should use action enums instead of Tk enums, prefer
 ButtonAction.push over TkEvent.tkButtonPush, since the former is what we store anyway.
 
 - Add test-suite for event handlers.
-
-- We could use a template getter for the timestamp, which returns a Duration. This avoids
-  huge build times for importing std.datetime until the timestamp is used.
-
-- Use toString with a sink, to avoid allocating memory.
-
-- Use better typeid extraction (see what it consists of, so we can get rid of the full path name)
-
-- Key codes are in keysymdef.h
-
-- Percent substitution is made in ExpandPercents in tk/generic/tkBind.c
 
 - Find all valid substitutions for each event types.
 
@@ -176,3 +167,9 @@ http://www.tcl.tk/man/tcl8.6/TkCmd/event.htm
 PS: for the double-click timings: most people won't ever
   touch them, but people with certain disabilities might
   very strongly depend on being able to enlarge this time.
+
+Tk info (move this to an info.md file):
+
+- Key codes are in keysymdef.h
+
+- Percent substitution is made in ExpandPercents in tk/generic/tkBind.c

@@ -241,7 +241,7 @@ enum MouseAction
     double_click,
 
     /** One of the mouse buttons was clicked three times in rapid succession. */
-    tripple_click,
+    triple_click,
 
     /** One of the mouse buttons was clicked four times in rapid succession. */
     quadruple_click,
@@ -256,7 +256,7 @@ enum MouseAction
     wheel,
 
     /** The mouse was moved. */
-    move,
+    motion,
 }
 
 /**
@@ -264,6 +264,9 @@ enum MouseAction
 */
 enum MouseButton
 {
+    /** No button was pressed or released. */
+    none,
+
     /** The left mouse button. */
     button1,
 
@@ -281,6 +284,12 @@ enum MouseButton
 
     /** Convenience - equal to $(D button3). */
     right = button3,
+
+    /** First additional button - hardware-dependent. */
+    button4,
+
+    /** Second additional button - hardware-dependent. */
+    button5,
 }
 
 /+
@@ -333,7 +342,7 @@ enum KeyMod
     // todo: when caps lock is turned off, lock is set.
     // we can probably tell then if it's on or off.
 
-    ///
+    /// todo: this is maybe capslock
     lock = 1 << 1,
 
     /**
@@ -344,24 +353,19 @@ enum KeyMod
     meta = AnyModifier << 1,
 }
 
-/// Button widget event.
-enum ButtonAction
-{
-    /// sentinel
-    invalid,
-
-    /// A button was pushed.
-    push,
-}
-
 ///
-class ButtonEvent : Event
+class MouseEvent : Event
 {
-    this(Widget widget, ButtonAction action, TimeMsec timeMsec)
+    this(Widget widget, MouseAction action, MouseButton button, int wheelDelta, KeyMod keyMod, Point widgetMousePos, Point desktopMousePos, TimeMsec timeMsec)
     {
-        // todo: we should pass a widget
-        super(widget, EventType.button, timeMsec);
+        super(widget, EventType.mouse, timeMsec);
+
         this.action = action;
+        this.button = button;
+        this.wheelDelta = wheelDelta;
+        this.keyMod = keyMod;
+        this.widgetMousePos = widgetMousePos;
+        this.desktopMousePos = desktopMousePos;
     }
 
     ///
@@ -370,43 +374,62 @@ class ButtonEvent : Event
         toStringImpl(sink, this.tupleof);
     }
 
-    const(ButtonAction) action;
-}
+    /**
+        Specifies what action the mouse performed,
+        e.g. a button click, a mouse motion, etc.
+    */
+    const(MouseAction) action;
 
-/// Check button widget event.
-enum CheckButtonAction
-{
-    /// sentinel
-    invalid,
+    /**
+        Specifies which button, if any, was pressed,
+        held, or released. If no buttons were pushed
+        or released then it equals $(D MouseButton.none).
+    */
+    const(MouseButton) button;
 
-    /// A checkbutton was toggled on.
-    toggleOn,
+    /**
+        The delta when the mouse wheel has been scrolled.
+        It is a positive value when pushed forward, and
+        negative otherwise. It equals zero if the wheel
+        was not scrolled.
 
-    /// A checkbutton was toggled off.
-    toggleOff,
-}
+        Note: The delta is hardware-specific, based on the
+        hardware resolution of the mouse wheel. Typically
+        it equals 120/-120, however this number can be
+        arbitrary when the hardware supports finer-grained
+        scrolling resolution.
 
-/// todo: not handled yet
-class CheckButtonEvent : Event
-{
-    this(Widget widget, CheckButtonAction action, TimeMsec timeMsec)
-    {
-        super(widget, EventType.checkbutton, timeMsec);
-        this.action = action;
-    }
+        See also: todo: add MSDN note about wheel delta,
+        and a blog post.
+    */
+    const(int) wheelDelta;
 
-    const(CheckButtonAction) action;
-}
+    /**
+        A bit mask of all key modifiers that were
+        held when the mouse event was generated.
 
-///
-class MouseEvent : Event
-{
-    this(Widget widget, MouseAction action, TimeMsec timeMsec)
-    {
-        super(widget, EventType.mouse, timeMsec);
-    }
+        Examples:
+        -----
+        // test if control was held
+        if (keyMod & KeyMod.control) { }
 
-    MouseAction action;
+        // test if both control and alt were held at the same time
+        if (keyMod & (KeyMod.control | KeyMod.alt)) { }
+        -----
+    */
+    const(KeyMod) keyMod;
+
+    /**
+        The mouse position relative to the target widget
+        when the mouse event was generated.
+    */
+    const(Point) widgetMousePos;
+
+    /**
+        The mouse position relative to the desktop
+        when the mouse event was generated.
+    */
+    const(Point) desktopMousePos;
 }
 
 ///
@@ -474,6 +497,63 @@ class KeyboardEvent : Event
     */
     const(Point) desktopMousePos;
 }
+
+/** Widget-specific events. */
+
+/// Button widget event.
+enum ButtonAction
+{
+    /// sentinel
+    invalid,
+
+    /// A button was pushed.
+    push,
+}
+
+///
+class ButtonEvent : Event
+{
+    this(Widget widget, ButtonAction action, TimeMsec timeMsec)
+    {
+        // todo: we should pass a widget
+        super(widget, EventType.button, timeMsec);
+        this.action = action;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    const(ButtonAction) action;
+}
+
+/// Check button widget event.
+enum CheckButtonAction
+{
+    /// sentinel
+    invalid,
+
+    /// A checkbutton was toggled on.
+    toggleOn,
+
+    /// A checkbutton was toggled off.
+    toggleOff,
+}
+
+/// todo: not handled yet
+class CheckButtonEvent : Event
+{
+    this(Widget widget, CheckButtonAction action, TimeMsec timeMsec)
+    {
+        super(widget, EventType.checkbutton, timeMsec);
+        this.action = action;
+    }
+
+    const(CheckButtonAction) action;
+}
+
 
 /** Old code below */
 

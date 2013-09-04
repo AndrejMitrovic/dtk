@@ -47,11 +47,13 @@ package:
 /** Evaluate any Tcl command and return its result. */
 string tclEval(string cmd)
 {
-    version (DTK_LOG_EVAL)
-        stderr.writefln("tcl_eval %s", cmd);
-
     Tcl_Eval(tclInterp, cast(char*)toStringz(cmd));
-    return to!string(tclInterp.result);
+    auto result = to!string(tclInterp.result);
+
+    version (DTK_LOG_EVAL)
+        stderr.writefln("tcl_eval: %s -- result: %s", cmd, result);
+
+    return result;
 }
 
 /** Ditto, but use a format string as a convenience. */

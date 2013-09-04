@@ -327,3 +327,12 @@ package enum TkSubs : string
     abs_x_pos = "%X",
     abs_y_pos = "%Y",
 }
+
+// All possible mouse bind target options
+package enum TkMouseAction
+{
+    press,
+    release,
+    motion,
+    wheel,
+}

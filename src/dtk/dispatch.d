@@ -71,13 +71,54 @@ static:
 
         /** Hook mouse. */
 
-        //~ static immutable mouseArgs =
-            //~ [TkSubs.mouse_button, TkSubs.state, TkSubs.widget_path].join(" ");
+        /*
+            Note: We should try not to use Tk's double, triple, etc, modifiers for tracking multiple
+            clicks because they're unreliable. E.g. a double-left-click followed by a single right
+            click will generate two double-click events for this binding:
 
-        //~ tclEvalFmt("bind %s <KeyPress> { %s %s %s }",
-            //~ _dtkInterceptTag, _dtkCallbackIdent, EventType.keyboard, mouseArgs);
+            bind . <Double-ButtonPress> { }
 
-        //~ tclEvalFmt(`bind %s <Button-1> "%s %s"`, _dtkInterceptTag, _dtkCallbackIdent, tcl_flags);
+            THe current workaround is to explicitly map each mouse combination, e.g.:
+
+            bind . <Double-ButtonPress-1> { }
+            bind . <Double-ButtonPress-3> { }
+
+            But this won't let us provide configuration for any specific mouse delay a user
+            might want, e.g. for use with accessibility features or widgets with a specific
+            input behavior.
+        */
+
+        static immutable mouseArgs = [cast(string)TkSubs.mouse_wheel_delta, TkSubs.state, TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.abs_x_pos, TkSubs.abs_y_pos, TkSubs.timestamp].join(" ");
+
+        static mouseButtons = [MouseButton.button1, MouseButton.button2, MouseButton.button3, MouseButton.button4, MouseButton.button5];
+
+        static modifiers = ["", "Double-", "Triple-", "Quadruple-"];
+
+        static mouseActions = [MouseAction.click, MouseAction.double_click, MouseAction.triple_click, MouseAction.quadruple_click];
+
+        foreach (idx, mouseButton; mouseButtons)
+        {
+            foreach (modifier, mouseAction; zip(modifiers, mouseActions))
+            {
+                // note: button click can be double clicks, triple clicks, etc.
+                tclEvalFmt("bind %s <%sButtonPress-%s> { %s %s %s %s %s }",
+                    _dtkInterceptTag, modifier, idx + 1 /* buttons start with 1 */,
+                    _dtkCallbackIdent, EventType.mouse, mouseAction, mouseButton, mouseArgs);
+            }
+
+            // note: button release does not have a double, triple, equivalent like clicks do.
+            tclEvalFmt("bind %s <ButtonRelease-%s> { %s %s %s %s %s }",
+                    _dtkInterceptTag, idx + 1,
+                    _dtkCallbackIdent, EventType.mouse, MouseAction.release, mouseButton, mouseArgs);
+        }
+
+        tclEvalFmt("bind %s <Motion> { %s %s %s %s %s }",
+                    _dtkInterceptTag,
+                    _dtkCallbackIdent, EventType.mouse, MouseAction.motion, cast(string)TkSubs.mouse_button, mouseArgs);
+
+        tclEvalFmt("bind %s <MouseWheel> { %s %s %s %s %s }",
+                    _dtkInterceptTag,
+                    _dtkCallbackIdent, EventType.mouse, MouseAction.wheel, cast(string)TkSubs.mouse_button, mouseArgs);
     }
 
     //~ static auto safeToInt(T)(T* val)
@@ -97,42 +138,44 @@ static:
         ok = TCL_OK,
     }
 
-    /// create and populate a mouse event, and dispatch it.
-    //~ private static TkEventFlag _handleMouseEvent(const Tcl_Obj*[] tclArr)
-    //~ {
-        //~ stderr.writefln("Key code: %s", cast(KeySym)to!long(tclArr[0].tclPeekString()));
-
-        //~ assert(tclArr.length == 4, tclArr.length.text);
+    /// create and populate a mouse event and dispatch it.
+    private static TkEventFlag _handleMouseEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 10, tclArr.length.text);
 
         /**
             Indices:
-                0  => KeySym
-                1  => Modifier
-                2  => Widget path
-                3  => Timestamp
+                0 => MouseAction
+                1 => Mouse button currently held
+                2 => Wheel delta
+                3 => Keyboard modifier
+                4 => Widget path
+                5 => Widget mouse X position
+                6 => Widget mouse X position
+                7 => Desktop mouse X position
+                8 => Desktop mouse Y position
+                9 => Timestamp
         */
 
-        // note: change this to EnumBaseType after Issue 10942 is fixed for KeySym.
-        //~ alias keyBaseType = long;
+        MouseAction action = to!MouseAction(tclArr[0].tclPeekString());
+        MouseButton button = getTclMouseButton(tclArr[1]);
+        int wheelDelta = getTclWheelDelta(tclArr[2]);
+        KeyMod keyMod = getTclKeyMod(tclArr[3]);
 
-        //~ KeySym keySym = to!KeySym(to!keyBaseType(tclArr[0].tclPeekString()));
+        Widget widget = Widget.lookupWidgetPath(tclArr[4].tclPeekString());
+        assert(widget !is null);
 
-        //~ KeyMod keyMod = cast(KeyMod)to!long(tclArr[1].tclPeekString());
+        Point widgetMousePos = getTclPoint(tclArr[5 .. 7]);
+        Point desktopMousePos = getTclPoint(tclArr[7 .. 9]);
+        TimeMsec timeMsec = to!TimeMsec(tclArr[9].tclPeekString());
 
-        //~ Widget widget = lookupWidgetPath(tclArr[2].tclPeekString());
-        //~ assert(widget !is null);
+        auto event = scoped!MouseEvent(widget, action, button, wheelDelta, keyMod, widgetMousePos, desktopMousePos, timeMsec);
+        return _dispatchEvent(widget, event);
+    }
 
-        //~ TimeMsec timeMsec = to!TimeMsec(tclArr[3].tclPeekString());
-
-        //~ auto event = scoped!MouseEvent(widget, keySym, keyMod, timeMsec);
-        //~ return _dispatchEvent(widget, event);
-    //~ }
-
-    /// create and populate a keyboard event, and dispatch it.
+    /// create and populate a keyboard event and dispatch it.
     private static TkEventFlag _handleKeyboardEvent(const Tcl_Obj*[] tclArr)
     {
-        //~ stderr.writefln("Key code: %s", cast(KeySym)to!long(tclArr[0].tclPeekString()));
-
         assert(tclArr.length == 9, tclArr.length.text);
 
         /**
@@ -165,11 +208,8 @@ static:
         Widget widget = Widget.lookupWidgetPath(tclArr[3].tclPeekString());
         assert(widget !is null);
 
-        Point widgetMousePos = Point(to!int(tclArr[4].tclPeekString()),
-                                     to!int(tclArr[5].tclPeekString()));
-
-        Point desktopMousePos = Point(to!int(tclArr[6].tclPeekString()),
-                                      to!int(tclArr[7].tclPeekString()));
+        Point widgetMousePos = getTclPoint(tclArr[4 .. 6]);
+        Point desktopMousePos = getTclPoint(tclArr[6 .. 8]);
 
         TimeMsec timeMsec = to!TimeMsec(tclArr[8].tclPeekString());
 
@@ -177,7 +217,7 @@ static:
         return _dispatchEvent(widget, event);
     }
 
-    /// create and populate a button event, and dispatch it.
+    /// create and populate a button event and dispatch it.
     private static TkEventFlag _handleButtonEvent(const Tcl_Obj*[] tclArr)
     {
         //~ stderr.writefln("Key code: %s", cast(KeySym)to!long(tclArr[0].tclPeekString()));
@@ -205,7 +245,7 @@ static:
         return _dispatchEvent(widget, event);
     }
 
-    /// create and populate a mouse event, and dispatch it.
+    /// create and populate a mouse event and dispatch it.
     //~ private static TkEventFlag _handleMouseEvent(const Tcl_Obj*[] tclArr)
     //~ {
         //~ auto event = scoped!MouseEvent();
@@ -398,11 +438,7 @@ static:
             Indices:
                 0  => Name of this callback.
                 1  => The EventType.
-                2  => Detailed subtype of EventType, MouseAction for specific buttons.
                 2+ => The data, based on the Tcl substitutions that we provided for the EventType.
-
-            The 1 + 2 event type tags are implemented this way to allow separating out event handlers
-            into separate functions.
         */
 
         version (DTK_LOG_EVENTS)
@@ -419,7 +455,7 @@ static:
 
         switch (type) with (EventType)
         {
-            case mouse:    return TCL_OK;  // return _handleMouseEvent(args);
+            case mouse:    return _handleMouseEvent(args);
             case keyboard: return _handleKeyboardEvent(args);
             case button:   return _handleButtonEvent(args);
             default:       assert(0, format("Unhandled event type '%s'.", type));
@@ -533,3 +569,48 @@ private void _oldValidation()
 
     //~ return TCL_OK;
 }
+
+/** Extract the integral X and Y points from the 2-dimensional Tcl_Obj array. */
+private Point getTclPoint(ref const(Tcl_Obj*)[2] tclArr)
+{
+    return Point(to!int(tclArr[0].tclPeekString()),
+                 to!int(tclArr[1].tclPeekString()));
+}
+
+/** Extract the mouse button from the Tcl_Obj object. */
+private MouseButton getTclMouseButton(const(Tcl_Obj)* tclObj)
+{
+    auto buttonStr = tclObj.tclPeekString();
+    return (buttonStr == "??") ? MouseButton.none : to!MouseButton(buttonStr);
+}
+
+/** Ditto, but interpret the '%d' field which encodes the button that was pressed. */
+private MouseButton getTclEncodedMouseButton(const(Tcl_Obj)* tclObj)
+{
+    auto buttonStr = tclObj.tclPeekString();
+    switch (buttonStr)
+    {
+        case "0": return MouseButton.none;
+        case "1": return MouseButton.button1;
+        case "2": return MouseButton.button2;
+        case "3": return MouseButton.button3;
+        case "4": return MouseButton.button4;
+        case "5": return MouseButton.button5;
+        default:  assert(0, format("Unhandled button '%s'", buttonStr));
+    }
+}
+
+/** Extract the key modifier from the Tcl_Obj object. */
+private KeyMod getTclKeyMod(const(Tcl_Obj)* tclObj)
+{
+    return cast(KeyMod)to!long(tclObj.tclPeekString());
+}
+
+/** Extract the mouse wheel delta from the Tcl_Obj object. */
+private int getTclWheelDelta(const(Tcl_Obj)* tclObj)
+{
+    auto wheelStr = tclObj.tclPeekString();
+    return (wheelStr == "??") ? 0 : to!int(wheelStr);
+}
+
+
