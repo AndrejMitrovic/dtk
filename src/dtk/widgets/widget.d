@@ -37,8 +37,6 @@ import dtk.widgets.entry;
 import dtk.widgets.options;
 import dtk.widgets.scrollbar;
 
-// todo: add tagging for Widget types as well.
-
 /** The main class of all Dtk widgets. */
 abstract class Widget
 {

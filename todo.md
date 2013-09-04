@@ -6,23 +6,14 @@
 
 Todo now:
 
-- Embed the type of the widget as an enum, so people can downcast safely.
-
-- When we set up commands for dtk, we should use action enums instead of Tk enums, prefer
-ButtonAction.push over TkEvent.tkButtonPush, since the former is what we store anyway.
-
 - Add test-suite for event handlers.
 
 - Find all valid substitutions for each event types.
 
-- Remove as many fake widgets as possible, and simplify super ctor in Widget.
-- Call bindtags for all real widgets
+- Remove fake widgets if possible.
 
 - We can use 'generate window event' to simulate mouse clicks. We should use
 this for the unittests.
-
-- Could use 'bind Button <event>' to bind all tk class types to static
-C functions in the D classes.
 
 - Put place, pack, and grid commands into a separate layout file.
 
