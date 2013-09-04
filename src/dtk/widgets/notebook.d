@@ -60,7 +60,7 @@ class Notebook : Widget
     ///
     this(Widget master)
     {
-        super(master, TkType.notebook);
+        super(master, TkType.notebook, WidgetType.notebook);
     }
 
     /** Add a widget to this notebook. */

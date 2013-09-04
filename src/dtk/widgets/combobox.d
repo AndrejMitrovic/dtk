@@ -26,7 +26,7 @@ class Combobox : Widget
     ///
     this(Widget master)
     {
-        super(master, TkType.combobox);
+        super(master, TkType.combobox, WidgetType.combobox);
 
         _varName = makeTracedVar(TkEventType.TkComboboxChange);
         this.setOption("textvariable", _varName);

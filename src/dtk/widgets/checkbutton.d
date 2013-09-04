@@ -26,7 +26,7 @@ class CheckButton : Widget
     ///
     this(Widget master, string text)
     {
-        super(master, TkType.checkbutton);
+        super(master, TkType.checkbutton, WidgetType.checkbutton);
 
         this.setOption("text", text);
 

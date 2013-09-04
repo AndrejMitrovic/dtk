@@ -24,7 +24,7 @@ class PanedWindow : Widget
     ///
     this(Widget master, Orientation orientation)
     {
-        super(master, TkType.panedwindow);
+        super(master, TkType.panedwindow, WidgetType.panedwindow);
         this.setOption("orient", to!string(orientation));
     }
 

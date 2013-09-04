@@ -6,8 +6,6 @@
 
 Todo now:
 
-- KeyPress/KeyRelease need to be a part of the key action.
-
 - Embed the type of the widget as an enum, so people can downcast safely.
 
 - When we set up commands for dtk, we should use action enums instead of Tk enums, prefer

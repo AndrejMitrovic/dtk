@@ -288,8 +288,14 @@ enum MouseButton
     /** First additional button - hardware-dependent. */
     button4,
 
+    /** Convenience - equal to $(D button4) */
+    x1 = button4,
+
     /** Second additional button - hardware-dependent. */
     button5,
+
+    /** Convenience - equal to $(D button5) */
+    x2 = button5,
 }
 
 /+
@@ -432,12 +438,25 @@ class MouseEvent : Event
     const(Point) desktopMousePos;
 }
 
+/**
+    A set of possible keyboard actions.
+*/
+enum KeyboardAction
+{
+    /** One of the keys was pressed. */
+    press,
+
+    /** One of the keys was released. */
+    release,
+}
+
 ///
 class KeyboardEvent : Event
 {
-    this(Widget widget, KeySym keySym, char uniChar, KeyMod keyMod, Point widgetMousePos, Point desktopMousePos, TimeMsec timeMsec)
+    this(Widget widget, KeyboardAction action, KeySym keySym, char uniChar, KeyMod keyMod, Point widgetMousePos, Point desktopMousePos, TimeMsec timeMsec)
     {
         super(widget, EventType.keyboard, timeMsec);
+        this.action = action;
         this.keySym = keySym;
         this.uniChar = uniChar;
         this.keyMod = keyMod;
@@ -451,7 +470,15 @@ class KeyboardEvent : Event
         toStringImpl(sink, this.tupleof);
     }
 
-    /// The key symbol that was pressed or released
+    /**
+        Specifies what action the keyboard performed,
+        e.g. a key press, a key release, etc.
+    */
+    const(KeyboardAction) action;
+
+    /**
+        The key symbol that was pressed or released.
+    */
     const(KeySym) keySym;
 
     /**

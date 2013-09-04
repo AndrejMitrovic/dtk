@@ -74,7 +74,7 @@ class Entry : Widget
     ///
     this(Widget master)
     {
-        super(master, TkType.entry);
+        super(master, TkType.entry, WidgetType.entry);
 
         string varName = makeTracedVar(TkEventType.TkTextChange);
         this.setOption("textvariable", varName);

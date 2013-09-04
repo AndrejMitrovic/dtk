@@ -121,7 +121,7 @@ class Tree : Widget
     ///
     this(Widget master, string label, string[] columns)
     {
-        super(master, TkType.tree);
+        super(master, TkType.tree, WidgetType.tree);
 
         // create the columns
         tclEvalFmt("%s configure -columns %s", _name, columns.join(" ")._tclEscape);
@@ -145,7 +145,7 @@ class Tree : Widget
     */
     private this(Tree rootTree, string name, string treeIdent)
     {
-        super(CreateFakeWidget.init);
+        super(CreateFakeWidget.init, WidgetType.tree);
         _treeID = treeIdent;
         _name = name;
         _rootTree = rootTree;

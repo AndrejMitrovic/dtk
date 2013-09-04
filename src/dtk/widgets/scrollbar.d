@@ -22,7 +22,7 @@ class Scrollbar : Widget
     ///
     this(Widget master, Widget target, Orientation orientation)
     {
-        super(master, TkType.scrollbar);
+        super(master, TkType.scrollbar, WidgetType.scrollbar);
 
         this.setOption("orient", to!string(orientation));
 

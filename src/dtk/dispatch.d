@@ -63,8 +63,11 @@ static:
         static immutable keyboardArgs =
             [TkSubs.keysym_decimal, TkSubs.uni_char, TkSubs.state, TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.abs_x_pos, TkSubs.abs_y_pos, TkSubs.timestamp].join(" ");
 
-        tclEvalFmt("bind %s <KeyPress> { %s %s %s }",
-            _dtkInterceptTag, _dtkCallbackIdent, EventType.keyboard, keyboardArgs);
+        tclEvalFmt("bind %s <KeyPress> { %s %s %s %s }",
+            _dtkInterceptTag, _dtkCallbackIdent, EventType.keyboard, KeyboardAction.press, keyboardArgs);
+
+        tclEvalFmt("bind %s <KeyRelease> { %s %s %s %s }",
+            _dtkInterceptTag, _dtkCallbackIdent, EventType.keyboard, KeyboardAction.release, keyboardArgs);
 
         /** Hook mouse. */
 
@@ -185,33 +188,35 @@ static:
     /// create and populate a keyboard event and dispatch it.
     private static TkEventFlag _handleKeyboardEvent(const Tcl_Obj*[] tclArr)
     {
-        assert(tclArr.length == 9, tclArr.length.text);
+        assert(tclArr.length == 10, tclArr.length.text);
 
         /**
             Indices:
-                0  => KeySym
-                1  => Unicode character (can be empty and equal {})
-                2  => Modifier
-                3  => Widget path
-                4  => Widget mouse X position
+                0  => KeyAction
+                1  => KeySym
+                2  => Unicode character (can be empty and equal {})
+                3  => Modifier
+                4  => Widget path
                 5  => Widget mouse X position
-                6  => Desktop mouse X position
-                7  => Desktop mouse Y position
-                8  => Timestamp
+                6  => Widget mouse X position
+                7  => Desktop mouse X position
+                8  => Desktop mouse Y position
+                9  => Timestamp
         */
 
-        KeySym keySym = getTclKeySym(tclArr[0]);
-        char uniChar = getTclUniChar(tclArr[1]);
-        KeyMod keyMod = getTclKeyMod(tclArr[2]);
+        KeyboardAction action = getTclKeyboardAction(tclArr[0]);
+        KeySym keySym = getTclKeySym(tclArr[1]);
+        char uniChar = getTclUniChar(tclArr[2]);
+        KeyMod keyMod = getTclKeyMod(tclArr[3]);
 
-        Widget widget = getTclWidget(tclArr[3]);
+        Widget widget = getTclWidget(tclArr[4]);
         assert(widget !is null);
 
-        Point widgetMousePos = getTclPoint(tclArr[4 .. 6]);
-        Point desktopMousePos = getTclPoint(tclArr[6 .. 8]);
-        TimeMsec timeMsec = getTclTimestamp(tclArr[8]);
+        Point widgetMousePos = getTclPoint(tclArr[5 .. 7]);
+        Point desktopMousePos = getTclPoint(tclArr[7 .. 9]);
+        TimeMsec timeMsec = getTclTimestamp(tclArr[9]);
 
-        auto event = scoped!KeyboardEvent(widget, keySym, uniChar, keyMod, widgetMousePos, desktopMousePos, timeMsec);
+        auto event = scoped!KeyboardEvent(widget, action, keySym, uniChar, keyMod, widgetMousePos, desktopMousePos, timeMsec);
         return _dispatchEvent(widget, event);
     }
 
@@ -485,4 +490,10 @@ private Widget getTclWidget(const(Tcl_Obj)* tclObj)
 private TimeMsec getTclTimestamp(const(Tcl_Obj)* tclObj)
 {
     return to!TimeMsec(tclObj.tclPeekString());
+}
+
+/** Extract the keyboard action from the Tcl_Obj object. */
+private KeyboardAction getTclKeyboardAction(const(Tcl_Obj)* tclObj)
+{
+    return to!KeyboardAction(tclObj.tclPeekString());
 }

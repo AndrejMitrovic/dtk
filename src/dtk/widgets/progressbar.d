@@ -32,7 +32,7 @@ class Progressbar : Widget
     this(Widget master, Orientation orientation, int length, ProgressMode progressMode, float maxValue = 100)
     {
         _maxValue = maxValue;
-        super(master, TkType.progressbar);
+        super(master, TkType.progressbar, WidgetType.progressbar);
 
         this.setOption("orient", to!string(orientation));
         this.setOption("mode", to!string(progressMode));

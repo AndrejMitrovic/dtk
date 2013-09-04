@@ -24,7 +24,7 @@ class Image : Widget
         enforce(fileName.exists, format("File name '%s' does not exist.", fileName.absolutePath));
         enforce(fileName.isFile, format("File name '%s' is not a file.", fileName.absolutePath));
 
-        super(CreateFakeWidget.init);
+        super(CreateFakeWidget.init, WidgetType.image);
 
         // todo: throw on invalid image format, invalid file name, etc.
         tclEvalFmt("image create photo %s -file %s", _name, fileName._tclEscape);

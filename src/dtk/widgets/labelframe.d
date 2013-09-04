@@ -21,7 +21,7 @@ class LabelFrame : Widget
     ///
     this(Widget master)
     {
-        super(master, TkType.labelframe);
+        super(master, TkType.labelframe, WidgetType.labelframe);
     }
 
     /** Get the current width of the border. */

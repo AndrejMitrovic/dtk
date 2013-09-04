@@ -165,6 +165,13 @@ abstract class Widget
 
     /**
         Handle mouse-specific events.
+
+        $(BLUE Behavior note:) If the mouse cursor leaves the button area
+        too quickly, and at the same time leaves the window area, the
+        signal may be emitted with a delay of several ~100 milliseconds.
+        To make sure the signal is emmitted as soon as the cursor leaves
+        the button area, ensure that the button does not lay directly on
+        an edge of a window (e.g. add some padding space next to the button).
     */
     public EventHandler!MouseEvent onMouseEvent;
 
@@ -174,8 +181,9 @@ abstract class Widget
     public EventHandler!KeyboardEvent onKeyboardEvent;
 
     /** Ctor for widgets which know their parent during construction. */
-    this(Widget parent, TkType tkType)
+    this(Widget parent, TkType tkType, WidgetType widgetType)
     {
+        this.widgetType = widgetType;
         this.initialize(parent, tkType);
     }
 
@@ -186,7 +194,10 @@ abstract class Widget
 
         Once the parent is set the child should call the initialize method.
     */
-    this(InitLater) { }
+    this(InitLater, WidgetType widgetType)
+    {
+        this.widgetType = widgetType;
+    }
 
     /**
         Fake widgets which have event handlers but no actual Tk path name.
@@ -196,8 +207,9 @@ abstract class Widget
         E.g. a widget such as a check menu is implicitly created through a
         parent menu object and doesn't have a widget path.
     */
-    this(CreateFakeWidget)
+    this(CreateFakeWidget, WidgetType widgetType)
     {
+        this.widgetType = widgetType;
         string name = format("%s%s%s", _fakeWidgetPrefix, _threadID, _lastWidgetID++);
         this.initialize(name);
     }
@@ -206,11 +218,49 @@ abstract class Widget
         Ctor for widgets which are implicitly created by Tk,
         such as the toplevel "." window.
     */
-    this(CreateToplevel)
+    this(CreateToplevel, WidgetType widgetType)
     {
+        this.widgetType = widgetType;
         this.initialize(".");
         this.bindTags(TkClass.toplevel);
     }
+
+    /**
+        The built-in dynamic type of this object.
+        Use this to when you want to avoid doing
+        an expensive derived cast.
+
+        Instead you can do a static cast based on
+        this widgetType field.
+
+        Example:
+        -----
+        // convenience template for static casting
+        T StaticCast(T, S)(S source)
+        {
+            return cast(T)(*cast(void**)&source);
+        }
+
+        Widget widget = new Button(...);
+        if (widget.widgetType == WidgetType.button)
+        {
+            // at this point it's safe to use a static cast
+            Button button = StaticCast!Button(widget);
+        }
+        -----
+
+        Tip: You can use the $(D toWidgetType) template
+        to retrieve the mapping of a widget class
+        to a widget type.
+
+        -----
+        if (widget.widgetType == toWidgetType!Button)
+        {
+            auto button = StaticCast!Button(widget);
+        }
+        -----
+    */
+    public const(WidgetType) widgetType;
 
     /**
         Signal emitted for various widget events.
@@ -586,6 +636,86 @@ package:
         the child destroys the child (e.g. $(D tree.destroy(subTree))).
     */
     package bool _isDestroyed;
+}
+
+/** The dynamic type of a built-in Widget object. */
+enum WidgetType
+{
+    invalid,             /// sentinel
+    button,              ///
+    checkmenu_item,      ///
+    checkbutton,         ///
+    combobox,            ///
+    entry,               ///
+    frame,               ///
+    generic_dialog,      ///
+    select_dir_dialog,   ///
+    select_color_dialog, ///
+    image,               ///
+    label,               ///
+    labelframe,          ///
+    listbox,             ///
+    list_spinbox,        ///
+    messagebox,          ///
+    menu,                ///
+    menubar,             ///
+    menuitem,            ///
+    notebook,            ///
+    panedwindow,         ///
+    progressbar,         ///
+    radiogroup_menu,     ///
+    radiogroup,          ///
+    radiobutton,         ///
+    radiomenu_item,      ///
+    scale,               ///
+    scrollbar,           ///
+    separator,           ///
+    sizegrip,            ///
+    scalar_spinbox,      ///
+    text,                ///
+    tree,                ///
+    window,              ///
+    user,                /// User-derived dynamic type
+}
+
+/** Return the widget type based on the class type. */
+template toWidgetType(Class : Widget)
+{
+    import std.traits;
+    import std.typetuple;
+
+    import dtk.image;
+    import dtk.widgets;
+
+    alias WidgetTypeList = TypeTuple!(
+        Button, CheckMenuItem, CheckButton, Combobox,
+        Entry, Frame, GenericDialog, SelectDirDialog,
+        SelectColorDialog, Image, Label, LabelFrame,
+        Listbox, ListSpinbox, MessageBox, Menu,
+        MenuBar, MenuItem, Notebook, PanedWindow,
+        Progressbar, RadioGroupMenu, RadioGroup,
+        RadioButton, RadioMenuItem, Scale, Scrollbar,
+        Separator, Sizegrip, ScalarSpinbox, Text, Tree,
+        Window
+    );
+
+    alias widgetTypes = EnumMembers!WidgetType;
+    static assert(WidgetTypeList.length == widgetTypes.length - 2);  // user and invalid
+
+    enum index = staticIndexOf!(Class, WidgetTypeList);
+
+    static if (index == -1)
+        enum toWidgetType = WidgetType.user;
+    else
+        enum toWidgetType = widgetTypes[index + 1];  // skip 'invalid'
+}
+
+///
+unittest
+{
+    static assert(toWidgetType!Button == WidgetType.button);
+    static class A : Widget { this() { super(CreateFakeWidget.init, WidgetType.generic_dialog); } }
+    static assert(toWidgetType!A == WidgetType.user);
 }
 
 package struct InitLater { }

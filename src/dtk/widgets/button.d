@@ -54,7 +54,7 @@ class Button : Widget
     ///
     this(Widget master, string text)
     {
-        super(master, TkType.button);
+        super(master, TkType.button, WidgetType.button);
 
         // return key issues invoke, which calls 'command'
         tclEvalFmt("bind %s <Return> { %s invoke }", _name, _name);

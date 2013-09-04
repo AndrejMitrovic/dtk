@@ -23,9 +23,9 @@ import dtk.widgets.window;
 /// Common code for menu bars and menus
 abstract class MenuClass : Widget
 {
-    this(InitLater initLater)
+    this(InitLater initLater, WidgetType widgetType)
     {
-        super(initLater);
+        super(initLater, widgetType);
     }
 
     /** A menu must always have a parent, so proper initialization is required. */
@@ -109,7 +109,7 @@ class MenuBar : MenuClass
 {
     this()
     {
-        super(InitLater.init);
+        super(InitLater.init, WidgetType.menubar);
     }
 }
 
@@ -120,7 +120,7 @@ class Menu : MenuClass
     this(string label)
     {
         _label = label;
-        super(InitLater.init);
+        super(InitLater.init, WidgetType.menu);
     }
 
     /** Add a dividing line. */
@@ -152,7 +152,7 @@ class MenuItem : Widget
     this(string label)
     {
         _label = label;
-        super(CreateFakeWidget.init);
+        super(CreateFakeWidget.init, WidgetType.menuitem);
     }
 
     /** Get the menu item label. */
@@ -174,7 +174,7 @@ class CheckMenuItem : Widget
         _label = label;
         _onValue = onValue;
         _offValue = offValue;
-        super(CreateFakeWidget.init);
+        super(CreateFakeWidget.init, WidgetType.checkmenu_item);
         _toggleVarName = makeTracedVar(TkEventType.TkCheckMenuItemToggle);
     }
 
@@ -203,7 +203,7 @@ class RadioGroupMenu : Widget
     // todo: this is not really a Widget, but it needs to have a callback mechanism
     this()
     {
-        super(CreateFakeWidget.init);
+        super(CreateFakeWidget.init, WidgetType.radiogroup_menu);
         _varName = makeTracedVar(TkEventType.TkRadioMenuSelect);
     }
 
@@ -251,7 +251,7 @@ class RadioMenuItem : Widget
         _label = label;
         _value = value;
         radioGroup.add(this);
-        super(CreateFakeWidget.init);
+        super(CreateFakeWidget.init, WidgetType.radiomenu_item);
     }
 
     /** Return the value that's emitted when this radio menu is selected. */

@@ -31,7 +31,7 @@ class Text : Widget
     ///
     this(Widget master)
     {
-        super(master, TkType.text);
+        super(master, TkType.text, WidgetType.text);
     }
 
     /**

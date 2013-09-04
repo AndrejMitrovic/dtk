@@ -26,7 +26,7 @@ class Scale : Widget
     {
         _minValue = minValue;
         _maxValue = maxValue;
-        super(master, TkType.scale);
+        super(master, TkType.scale, WidgetType.scale);
 
         this.setOption("orient", to!string(orientation));
         this.setOption("length", to!string(length));

@@ -216,3 +216,30 @@ unittest
     B bs = StaticCast!B(as);
     assert(bs.y == 2);
 }
+
+/**
+    Checks whether $(D Target) matches any $(D Types).
+*/
+template isOneOf(Target, Types...)
+{
+    static if (Types.length > 1)
+    {
+        enum bool isOneOf = isOneOf!(Target, Types[0]) || isOneOf!(Target, Types[1 .. $]);
+    }
+    else static if (Types.length == 1)
+    {
+        enum bool isOneOf = is(Unqual!Target == Unqual!(Types[0]));
+    }
+    else
+    {
+        enum bool isOneOf = false;
+    }
+}
+
+///
+unittest
+{
+    static assert(isOneOf!(int, float, string, const(int)));
+    static assert(isOneOf!(const(int), float, string, int));
+    static assert(!isOneOf!(int, float, string));
+}

@@ -24,7 +24,7 @@ class Label : Widget
     ///
     this(Widget master)
     {
-        super(master, TkType.label);
+        super(master, TkType.label, WidgetType.label);
     }
 
     /**

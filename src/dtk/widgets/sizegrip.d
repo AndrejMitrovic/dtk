@@ -20,7 +20,7 @@ class Sizegrip : Widget
     ///
     package this(Window master)
     {
-        super(master, TkType.sizegrip);
+        super(master, TkType.sizegrip, WidgetType.sizegrip);
         tclEvalFmt("pack %s -side right -anchor se", _name);
     }
 }
