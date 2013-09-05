@@ -14,7 +14,7 @@ private
     //~ import dtk.tests.test_app;  // todo: implement
     //~ import dtk.tests.test_widget;  // todo: implement
 
-    import dtk.tests.test_events_keyboard;
+    import dtk.tests.test_events_mouse;
 
     //~ import dtk.tests.test_button;
     //~ import dtk.tests.test_checkbutton;

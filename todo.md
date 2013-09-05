@@ -6,6 +6,33 @@
 
 Todo now:
 
+- Use the 'when' option for sendEvent/postEvent:
+    -when when
+        When determines when the event will be processed; it must have one of the following values:
+        now
+            Process the event immediately, before the command returns. This also happens if the -when option is omitted.
+        tail
+            Place the event on Tcl's event queue behind any events already queued for this application.
+        head
+            Place the event at the front of Tcl's event queue, so that it will be handled before any other events already queued.
+        mark
+            Place the event at the front of Tcl's event queue but behind any other events already queued with -when mark. This option is useful when generating a series of events that should be processed in order but at the front of the queue.
+
+- When can use virtual events, added with 'event add' to hook directly to key sequences, we should provide
+an API for this. E.g.:
+
+    auto seq = KeySeq(KeyMod.control | KeyMod.alt, KeySym.a);
+    widget.onKeySequence[seq] = (scope KeySequence event) { ... }
+
+    Perhaps we could make KeySeq a subclass of an Event, so a user can dynamically cast an event
+    to a key sequence event.
+
+    - Although maybe a better idea is to simply make this a helper function which does:
+
+    auto handler = makeKeySeqHandler(KeySeq(KeyMod.control | KeyMod.alt, KeySym.a),
+                                    (scope KeySequence event) { ... } ));
+    widget.onEvent.connect(handler);
+
 - The geometry module needs to have more methods and operators, e.g. +, +=, etc.
 
 - Rename parent to parentTree.
