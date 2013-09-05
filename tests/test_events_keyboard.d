@@ -4,50 +4,9 @@ import std.algorithm;
 import std.range;
 import std.stdio;
 import std.traits;
+import std.typetuple;
 
 import dtk;
-
-void onFilterEvent(scope Event event)
-{
-    stderr.writefln("Handle filtered event: %s", event);
-    assert(event.eventTravel == EventTravel.filter);
-    //~ event.handled = true;
-}
-
-void onSinkEvent(scope Event event)
-{
-    stderr.writefln("Handle sink event: %s", event);
-    assert(event.eventTravel == EventTravel.sink);
-    //~ event.handled = true;
-}
-
-void onEvent(scope Event event)
-{
-    stderr.writefln("Handle generic event: %s", event);
-    assert(event.eventTravel == EventTravel.target);
-    //~ event.handled = true;
-}
-
-void onKeyboardEvent(scope KeyboardEvent event)
-{
-    stderr.writefln("Handle keyboard event: %s", event);
-    assert(event.eventTravel == EventTravel.target);
-    //~ event.handled = true;
-}
-
-void onNotifyEvent(scope Event event)
-{
-    stderr.writefln("Handle notify event: %s", event);
-    assert(event.eventTravel == EventTravel.notify);
-    //~ event.handled = true;
-}
-
-void onBubbleEvent(scope Event event)
-{
-    stderr.writefln("Handle bubble event: %s", event);
-    assert(event.eventTravel == EventTravel.bubble);
-    //~ event.handled = true;
-}
 
 unittest
 {
@@ -55,14 +14,48 @@ unittest
 
     auto testWindow = new Window(app.mainWindow, 200, 200);
 
-    testWindow.onFilterEvent ~= &onFilterEvent;
-    testWindow.onNotifyEvent ~= &onNotifyEvent;
+    bool ignoreEvents;  // Tk double-click behavior workaround
 
-    testWindow.parentWidget.onSinkEvent = &onSinkEvent;
-    testWindow.parentWidget.onBubbleEvent = &onBubbleEvent;
+    //~ int wheel;
+    //~ MouseAction action;
+    //~ MouseButton button;
+    //~ KeyMod keyMod;
+    //~ Point widgetMousePos;
 
-    testWindow.onEvent = &onEvent;
-    testWindow.onKeyboardEvent = &onKeyboardEvent;
+    //~ // we only want to test this when we explicitly generate move events,
+    //~ // since the mouse can be at an arbitrary point when generating non-move events.
+    //~ enum MotionTest { none, widget, desktop }
+    //~ MotionTest motionTest;
+    //~ Point desktopMousePos;
+
+    auto handler = (scope KeyboardEvent e)
+    {
+        //~ if (ignoreEvents)
+            //~ return;
+
+        //~ assert(e.action == action, text(action, " ", e.action));
+        //~ assert(e.button == button, text(button, " ", e.button));
+        //~ assert(e.wheel  == wheel,  text(wheel,  " ", e.wheel));
+        //~ assert(e.keyMod == keyMod, text(keyMod, " ", e.keyMod));
+
+        //~ switch (motionTest)
+        //~ {
+            //~ case MotionTest.widget:
+                //~ assert(e.widgetMousePos == widgetMousePos, text(widgetMousePos, " ", e.widgetMousePos));
+                //~ break;
+
+            //~ case MotionTest.desktop:
+                //~ assert(e.desktopMousePos == desktopMousePos, text(desktopMousePos, " ", e.desktopMousePos));
+                //~ break;
+
+            //~ default:
+        //~ }
+    };
+
+    testWindow.onKeyboardEvent = handler;
+
+    tclEvalFmt("event generate %s <ButtonPress> -button %s", testWindow.getTclName(), ((buttonIdx - 2) % mouseButtons.length));
+
 
     app.run();
 }

@@ -1,6 +1,6 @@
 # See double-click issue: https://groups.google.com/forum/#!topic/comp.lang.tcl/wbL6ZLrH4gU
 
-bind . <ButtonPress> { puts "press %b %s " }
+bind . <Motion> { puts "press %b %s " }
 
 # Test button 1 press+release
 #~ event generate . <ButtonPress> -button 1
@@ -8,4 +8,4 @@ bind . <ButtonPress> { puts "press %b %s " }
 
 tkwait visibility .
 
-event generate . <ButtonPress> -button 1 -state 65536
+#~ event generate . <ButtonPress> -button 1 -state 65536

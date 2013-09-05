@@ -317,18 +317,14 @@ private enum EXTENDED_MASK = 1 << 15;
 private enum AnyModifier = 1 << 15;
 
 /**
-    A set of possible key modifiers.
-    These are special keys such as the control
-    and alt keys.
+    A set of keyboard modifiers or active mouse buttons
+    while another event was generated.
 
-    todo: add bit checking for these, which means we have to init them
-    properly. See test in d_code somewhere
+    Examples:
+        - When the 'a' key is pressed, the shift keyboard modifier might be present.
+        - When the left mouse button is pressed, the right mouse button might already
+          be held down, in that case the right mouse button is the button modifier.
 */
-// major todo: the keysym already defines alt_l and alt_r, this enum should just
-// be a subgroup of that enum.
-// major todo: remove these bit initializers, and instead use a helper function to
-// extract this info when we need it (only for mice during %S substitution, because
-// otherwise we already have the %K substitution).
 enum KeyMod
 {
     none = 0,
@@ -348,8 +344,8 @@ enum KeyMod
     // todo: when caps lock is turned off, lock is set.
     // we can probably tell then if it's on or off.
 
-    /// todo: this is maybe capslock
-    lock = 1 << 1,
+    /** Capslock key. */
+    capslock = 1 << 1,
 
     /**
         The meta key is present on special keyboards,
@@ -357,6 +353,45 @@ enum KeyMod
         See: http://en.wikipedia.org/wiki/Meta_key
     */
     meta = AnyModifier << 1,
+
+    /**
+        The following are similarly named as the members of the
+        $(D MouseButton) enum, but have a "mouse_" prefix.
+
+        $(BLUE Note): The integral values of the following members
+        are not the same as the ones in $(D MouseButton), do not
+        attempt to cast between the two.
+    */
+
+    /** The left mouse button. */
+    mouse_button1 = 1 << 8,
+
+    /** Convenience - equal to $(D mouse_button1). */
+    mouse_left = mouse_button1,
+
+    /** The middle mouse button. */
+    mouse_button2 = 1 << 9,
+
+    /** Convenience - equal to $(D mouse_button2). */
+    mouse_middle = mouse_button2,
+
+    /** The right mouse button. */
+    mouse_button3 = 1 << 10,
+
+    /** Convenience - equal to $(D mouse_button3). */
+    mouse_right = mouse_button3,
+
+    /** First additional button - hardware-dependent. */
+    mouse_button4 = 1 << 11,
+
+    /** Convenience - equal to $(D mouse_button4) */
+    mouse_x1 = mouse_button4,
+
+    /** Second additional button - hardware-dependent. */
+    mouse_button5 = 1 << 12,
+
+    /** Convenience - equal to $(D mouse_button5) */
+    mouse_x2 = mouse_button5,
 }
 
 ///
