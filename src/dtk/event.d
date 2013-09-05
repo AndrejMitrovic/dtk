@@ -229,22 +229,22 @@ package:
 enum MouseAction
 {
     /** One of the mouse buttons was pressed. */
-    press,
+    press = 0,
 
     /** One of the mouse buttons was released. */
-    release,
+    release = 1,
 
     /** Convenience - equal to $(D press). */
     click = press,
 
     /** One of the mouse buttons was clicked twice in rapid succession. */
-    double_click,
+    double_click = 2,
 
     /** One of the mouse buttons was clicked three times in rapid succession. */
-    triple_click,
+    triple_click = 3,
 
     /** One of the mouse buttons was clicked four times in rapid succession. */
-    quadruple_click,
+    quadruple_click = 4,
 
     /**
         The mouse wheel was moved. See the $(D wheelStep) field to determine
@@ -253,10 +253,10 @@ enum MouseAction
         $(BLUE Note): When the wheel is pressed as a mouse button,
         the action will equal $(D press), not $(D wheel).
     */
-    wheel,
+    wheel = 5,
 
     /** The mouse was moved. */
-    motion,
+    motion = 6,
 }
 
 /**
@@ -265,34 +265,34 @@ enum MouseAction
 enum MouseButton
 {
     /** No button was pressed or released. */
-    none,
+    none = 0,
 
     /** The left mouse button. */
-    button1,
+    button1 = 1,
 
     /** Convenience - equal to $(D button1). */
     left = button1,
 
     /** The middle mouse button. */
-    button2,
+    button2 = 2,
 
     /** Convenience - equal to $(D button2). */
     middle = button2,
 
     /** The right mouse button. */
-    button3,
+    button3 = 3,
 
     /** Convenience - equal to $(D button3). */
     right = button3,
 
     /** First additional button - hardware-dependent. */
-    button4,
+    button4 = 4,
 
     /** Convenience - equal to $(D button4) */
     x1 = button4,
 
     /** Second additional button - hardware-dependent. */
-    button5,
+    button5 = 5,
 
     /** Convenience - equal to $(D button5) */
     x2 = button5,
@@ -362,13 +362,13 @@ enum KeyMod
 ///
 class MouseEvent : Event
 {
-    this(Widget widget, MouseAction action, MouseButton button, int wheelDelta, KeyMod keyMod, Point widgetMousePos, Point desktopMousePos, TimeMsec timeMsec)
+    this(Widget widget, MouseAction action, MouseButton button, int wheel, KeyMod keyMod, Point widgetMousePos, Point desktopMousePos, TimeMsec timeMsec)
     {
         super(widget, EventType.mouse, timeMsec);
 
         this.action = action;
         this.button = button;
-        this.wheelDelta = wheelDelta;
+        this.wheel = wheel;
         this.keyMod = keyMod;
         this.widgetMousePos = widgetMousePos;
         this.desktopMousePos = desktopMousePos;
@@ -408,7 +408,7 @@ class MouseEvent : Event
         See also: todo: add MSDN note about wheel delta,
         and a blog post.
     */
-    const(int) wheelDelta;
+    const(int) wheel;
 
     /**
         A bit mask of all key modifiers that were

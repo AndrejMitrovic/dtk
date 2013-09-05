@@ -120,10 +120,12 @@ static:
         version (DTK_LOG_EVENTS)
         {
             import std.stdio;
+            stderr.writeln("--                --");
             foreach (idx; 0 .. objc)
             {
-                stderr.writefln("-- received #%s: %s", idx + 1, argArr[idx].tclPeekString());
+                stderr.writefln("-- received #%s: %s", idx + 1, argArr[idx].tclGetString());
             }
+            stderr.writeln("--                --");
         }
 
         EventType type = to!EventType(argArr[1].tclPeekString());
@@ -171,7 +173,7 @@ static:
 
         MouseAction action = getTclMouseAction(tclArr[0]);
         MouseButton button = getTclMouseButton(tclArr[1]);
-        int wheelDelta = getTclWheelDelta(tclArr[2]);
+        int wheel = getTclMouseWheel(tclArr[2]);
         KeyMod keyMod = getTclKeyMod(tclArr[3]);
 
         Widget widget = getTclWidget(tclArr[4]);
@@ -181,7 +183,7 @@ static:
         Point desktopMousePos = getTclPoint(tclArr[7 .. 9]);
         TimeMsec timeMsec = getTclTimestamp(tclArr[9]);
 
-        auto event = scoped!MouseEvent(widget, action, button, wheelDelta, keyMod, widgetMousePos, desktopMousePos, timeMsec);
+        auto event = scoped!MouseEvent(widget, action, button, wheel, keyMod, widgetMousePos, desktopMousePos, timeMsec);
         return _dispatchEvent(widget, event);
     }
 
@@ -459,7 +461,7 @@ private KeyMod getTclKeyMod(const(Tcl_Obj)* tclObj)
 }
 
 /** Extract the mouse wheel delta from the Tcl_Obj object. */
-private int getTclWheelDelta(const(Tcl_Obj)* tclObj)
+private int getTclMouseWheel(const(Tcl_Obj)* tclObj)
 {
     auto wheelStr = tclObj.tclPeekString();
     return (wheelStr == "??") ? 0 : to!int(wheelStr);

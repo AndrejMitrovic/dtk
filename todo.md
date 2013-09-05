@@ -6,6 +6,9 @@
 
 Todo now:
 
+- Wait for answer on double-click issue:
+https://groups.google.com/forum/#!topic/comp.lang.tcl/wbL6ZLrH4gU
+
 - Add test-suite for event handlers.
 
 - Find all valid substitutions for each event types.

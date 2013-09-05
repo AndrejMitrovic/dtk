@@ -47,11 +47,16 @@ package:
 /** Evaluate any Tcl command and return its result. */
 string tclEval(string cmd)
 {
-    Tcl_Eval(tclInterp, cast(char*)toStringz(cmd));
-    auto result = to!string(tclInterp.result);
-
     version (DTK_LOG_EVAL)
-        stderr.writefln("tcl_eval: %s -- result: %s", cmd, result);
+    {
+        stderr.writefln("tcl_eval: %s", cmd);
+        //~ stderr.flush();
+    }
+
+    Tcl_Eval(tclInterp, cast(char*)toStringz(cmd));
+
+    auto result = to!string(tclInterp.result);
+    //~ stderr.writefln(" -- result: %s", result);
 
     return result;
 }
