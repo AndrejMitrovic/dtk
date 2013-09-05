@@ -6,8 +6,30 @@
 
 Todo now:
 
+- The geometry module needs to have more methods and operators, e.g. +, +=, etc.
+
+- Rename parent to parentTree.
+
+- KeyMod seems to also be active when mouse buttons are held down:
+
+    mouse1 + mouse3:
+    press 3 256
+
+    mouse3 + mouse1:
+    press 1 1024
+
 - Wait for answer on double-click issue:
 https://groups.google.com/forum/#!topic/comp.lang.tcl/wbL6ZLrH4gU
+
+    Answer: Either use a delay script:
+    http://wiki.tcl.tk/1284
+
+    Or generate another button event in-between:
+
+    event generate . <ButtonPress> -button 1
+    event generate . <ButtonRelease> -button 1
+    event generate . <ButtonPress> -button 5 ; # make sure to ignore this event
+    event generate . <ButtonPress> -button 1
 
 - Add test-suite for event handlers.
 

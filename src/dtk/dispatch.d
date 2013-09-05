@@ -135,7 +135,7 @@ static:
         {
             case mouse:    return _handleMouseEvent(args);
             case keyboard: return _handleKeyboardEvent(args);
-            case button:   return _handleButtonEvent(args);
+            case button:   return _handleButtonEvent(args);  // todo: maybe we should return TCL_OK here
             default:       assert(0, format("Unhandled event type '%s'.", type));
         }
     }
@@ -258,40 +258,8 @@ static:
         if (event.handled)
             return TkEventFlag.stop;
 
-        /** Handle event by the target widget itself. */
-        event._eventTravel = EventTravel.target;
-        widget.onEvent.call(event);
-
-        /**
-            Most events are set up by 'bind', which allows continue/resume based on
-            what the D callback returns. Some events however are set up via -command,
-            which doesn't have bindtags, and where returning TCL_CONTINUE/TCL_BREAK
-            is invalid, TCL_OK must be returned instead.
-        */
-        TkEventFlag result = TkEventFlag.resume;
-
-        /** If the generic handler didn't handle it, try a specific handler. */
-        if (!event.handled)
-        switch (event.type) with (EventType)
-        {
-            case user:
-                break;  // user events can be handled with onEvent
-
-            case mouse:
-                widget.onMouseEvent.call(StaticCast!MouseEvent(event));
-                break;
-
-            case keyboard:
-                widget.onKeyboardEvent.call(StaticCast!KeyboardEvent(event));
-                break;
-
-            case button:
-                StaticCast!Button(widget).onButtonEvent.call(StaticCast!ButtonEvent(event));
-                result = TkEventFlag.ok;  // -command events can only return TCL_OK
-                break;
-
-            default: assert(0, format("Unhandled event type: '%s'", event.type));
-        }
+        /** Handle event by the target widget. */
+        TkEventFlag result = _targetEvent(widget, event);
 
         /** Notify any listeners. */
         _notifyEvent(widget, event);
@@ -329,26 +297,6 @@ static:
         }
     }
 
-    /**
-        Call all the installed notify listeners for the $(D widget).
-    */
-    private static void _notifyEvent(Widget widget, scope Event event)
-    {
-        auto handlers = widget.onNotifyEvent.handlers;
-
-        if (handlers.empty)
-            return;
-
-        event._eventTravel = EventTravel.notify;
-
-        foreach (notifyWidget; handlers)
-        {
-            notifyWidget.call(event);
-            if (event.handled)
-                return;
-        }
-    }
-
     /** Begin the sink event routine if this widget has any parents. */
     private static void _sinkEvent(Widget widget, scope Event event)
     {
@@ -379,6 +327,72 @@ static:
 
         // handle the sinking event
         widget.onSinkEvent.call(event);
+    }
+
+    /**
+        Call the generic onEvent on the target widget, or an event-specific handler if
+        onEvent doesn't handle the event.
+    */
+    private static TkEventFlag _targetEvent(Widget widget, scope Event event)
+    {
+        event._eventTravel = EventTravel.target;
+        widget.onEvent.call(event);
+
+        /**
+            Most events are set up by 'bind', which allows continue/resume based on
+            what the D callback returns. Some events however are set up via -command,
+            which doesn't have bindtags, and where returning TCL_CONTINUE/TCL_BREAK
+            is invalid, TCL_OK must be returned instead.
+        */
+        TkEventFlag result = TkEventFlag.resume;
+
+        /** If the generic handler didn't handle it, try a specific handler. */
+
+        // todo: @bug: TkEventFlag.resume will be returned on a command that was handled
+        // in the generic onEvent, we should fix this.
+        if (!event.handled)
+        switch (event.type) with (EventType)
+        {
+            case user:
+                break;  // user events can be handled with onEvent
+
+            case mouse:
+                widget.onMouseEvent.call(StaticCast!MouseEvent(event));
+                break;
+
+            case keyboard:
+                widget.onKeyboardEvent.call(StaticCast!KeyboardEvent(event));
+                break;
+
+            case button:
+                StaticCast!Button(widget).onButtonEvent.call(StaticCast!ButtonEvent(event));
+                result = TkEventFlag.ok;  // -command events can only return TCL_OK
+                break;
+
+            default: assert(0, format("Unhandled event type: '%s'", event.type));
+        }
+
+        return result;
+    }
+
+    /**
+        Call all the installed notify listeners for the $(D widget).
+    */
+    private static void _notifyEvent(Widget widget, scope Event event)
+    {
+        auto handlers = widget.onNotifyEvent.handlers;
+
+        if (handlers.empty)
+            return;
+
+        event._eventTravel = EventTravel.notify;
+
+        foreach (notifyWidget; handlers)
+        {
+            notifyWidget.call(event);
+            if (event.handled)
+                return;
+        }
     }
 
     /** Begin the bubble event routine if this widget has any parents. */

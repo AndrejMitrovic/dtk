@@ -74,93 +74,141 @@ unittest
 
     /** Test mouse */
 
+    bool ignoreEvents;  // Tk double-click behavior workaround
+
     int wheel;
     MouseAction action;
     MouseButton button;
     KeyMod keyMod;
+    Point widgetMousePos;
 
-    testWindow.onMouseEvent = (scope MouseEvent e)
+    // we only want to test this when we explicitly generate move events,
+    // since the mouse can be at an arbitrary point when generating non-move events.
+    enum MotionTest { none, widget, desktop }
+    MotionTest motionTest;
+    Point desktopMousePos;
+
+    auto handler = (scope MouseEvent e)
     {
+        if (ignoreEvents)
+            return;
+
         assert(e.action == action, text(action, " ", e.action));
         assert(e.button == button, text(button, " ", e.button));
         assert(e.wheel  == wheel,  text(wheel,  " ", e.wheel));
         assert(e.keyMod == keyMod, text(keyMod, " ", e.keyMod));
+
+        switch (motionTest)
+        {
+            case MotionTest.widget:
+                assert(e.widgetMousePos == widgetMousePos, text(widgetMousePos, " ", e.widgetMousePos));
+                break;
+
+            case MotionTest.desktop:
+                assert(e.desktopMousePos == desktopMousePos, text(desktopMousePos, " ", e.desktopMousePos));
+                break;
+
+            default:
+        }
     };
+
+    testWindow.onMouseEvent = handler;
 
     static mouseButtons = [MouseButton.button1, MouseButton.button2, MouseButton.button3, MouseButton.button4, MouseButton.button5];
 
     alias keyMods = NoDuplicates!(EnumMembers!KeyMod);
 
+    enum buttonCount = 5;
+
+    // Note: Two same-button press events will generate a double-click event, even if there was a
+    // button release event in-between. To work around this, we can inject another button-press
+    // after the release one, but with a different button.
+    // When button 1 is tested, we generate a button 5 event (not a button 2 event), since generating a
+    // button 2 event would link to the next loop when button 2 is tested.
+    // Note that the release event has to be generated as well, otherwise the state flag will have the
+    // key as a modifier.
+    void genIgnoredEvent(size_t buttonIdx)
+    {
+        ignoreEvents = true;
+        tclEvalFmt("event generate %s <ButtonPress> -button %s", testWindow.getTclName(), ((buttonIdx - 2) % mouseButtons.length));
+        tclEvalFmt("event generate %s <ButtonRelease> -button %s", testWindow.getTclName(), ((buttonIdx - 2) % mouseButtons.length));
+        ignoreEvents = false;
+    }
+
+    // test press and release
     foreach (idx, newButton; mouseButtons)
     {
         button = newButton;
+        keyMod = KeyMod.none;
 
-        action = MouseAction.press;
-        tclEvalFmt("event generate %s <ButtonPress> -button %s", testWindow.getTclName(), idx + 1);
+        static immutable modifiers = ["", "Double-", "Triple-", "Quadruple-"];
+        static immutable mouseActions = [MouseAction.click, MouseAction.double_click, MouseAction.triple_click, MouseAction.quadruple_click];
 
-        action = MouseAction.release;
-        tclEvalFmt("event generate %s <ButtonRelease> -button %s", testWindow.getTclName(), idx + 1);
+        // test single, double click, etc.
+        foreach (modifier, mouseAction; zip(modifiers, mouseActions))
+        {
+            action = mouseAction;
+            tclEvalFmt("event generate %s <%sButtonPress> -button %s", testWindow.getTclName(), modifier, idx + 1);
 
-        // note: if we issue two press events too quickly it will generate a double-click event
-        //~ tclEval("after 50");
+            action = MouseAction.release;
+            tclEvalFmt("event generate %s <ButtonRelease> -button %s", testWindow.getTclName(), idx + 1);
 
-        //~ foreach (newKeyMod; keyMods)
-        //~ {
-            //~ keyMod = newKeyMod;
+            genIgnoredEvent(idx);
+        }
 
-            //~ action = MouseAction.press;
-            //~ tclEvalFmt("event generate %s <ButtonPress> -button %s -state %s",
-                       //~ testWindow.getTclName(), idx + 1, cast(int)newKeyMod);
+        // test with key modifiers
+        foreach (newKeyMod; keyMods)
+        {
+            keyMod = newKeyMod;
 
-            //~ action = MouseAction.release;
-            //~ tclEvalFmt("event generate %s <ButtonRelease> -button %s -state %s",
-                       //~ testWindow.getTclName(), idx + 1, cast(int)newKeyMod);
-        //~ }
+            action = MouseAction.press;
+            tclEvalFmt("event generate %s <ButtonPress> -button %s -state %s",
+                       testWindow.getTclName(), idx + 1, cast(int)newKeyMod);
+
+            action = MouseAction.release;
+            tclEvalFmt("event generate %s <ButtonRelease> -button %s -state %s",
+                       testWindow.getTclName(), idx + 1, cast(int)newKeyMod);
+
+            genIgnoredEvent(idx);
+        }
     }
 
-    //~ foreach (sign; -1 .. 2)
-    //~ {
-        //~ // only MouseWheel supports delta, but doesn't support button option
-        //~ action = MouseAction.wheel;
-        //~ foreach (newKeyMod; keyMods)
-        //~ {
-            //~ keyMod = newKeyMod;
-            //~ wheel = sign * 120;
-            //~ tclEvalFmt("event generate %s <MouseWheel> -delta %s -state %s",
-                       //~ testWindow.getTclName(), wheel, cast(int)newKeyMod);
-        //~ }
-    //~ }
+    // test mouse wheel
+    foreach (sign; -1 .. 2)
+    {
+        // only MouseWheel supports delta, but doesn't support button option
+        action = MouseAction.wheel;
+        button = MouseButton.none;
 
-    //~ tclEvalFmt("bind dtk::intercept_tag <KeyRelease> { dtk::callback_handler keyboard release %N %A %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <ButtonPress-1> { dtk::callback_handler mouse press button1 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Double-ButtonPress-1> { dtk::callback_handler mouse release button1 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Triple-ButtonPress-1> { dtk::callback_handler mouse triple_click button1 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Quadruple-ButtonPress-1> { dtk::callback_handler mouse quadruple_click button1 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <ButtonRelease-1> { dtk::callback_handler mouse release button1 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <ButtonPress-2> { dtk::callback_handler mouse press button2 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Double-ButtonPress-2> { dtk::callback_handler mouse release button2 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Triple-ButtonPress-2> { dtk::callback_handler mouse triple_click button2 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Quadruple-ButtonPress-2> { dtk::callback_handler mouse quadruple_click button2 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <ButtonRelease-2> { dtk::callback_handler mouse release button2 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <ButtonPress-3> { dtk::callback_handler mouse press button3 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Double-ButtonPress-3> { dtk::callback_handler mouse release button3 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Triple-ButtonPress-3> { dtk::callback_handler mouse triple_click button3 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Quadruple-ButtonPress-3> { dtk::callback_handler mouse quadruple_click button3 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <ButtonRelease-3> { dtk::callback_handler mouse release button3 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <ButtonPress-4> { dtk::callback_handler mouse press button4 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Double-ButtonPress-4> { dtk::callback_handler mouse release button4 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Triple-ButtonPress-4> { dtk::callback_handler mouse triple_click button4 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Quadruple-ButtonPress-4> { dtk::callback_handler mouse quadruple_click button4 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <ButtonRelease-4> { dtk::callback_handler mouse release button4 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <ButtonPress-5> { dtk::callback_handler mouse press button5 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Double-ButtonPress-5> { dtk::callback_handler mouse release button5 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Triple-ButtonPress-5> { dtk::callback_handler mouse triple_click button5 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Quadruple-ButtonPress-5> { dtk::callback_handler mouse quadruple_click button5 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <ButtonRelease-5> { dtk::callback_handler mouse release button5 %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <Motion> { dtk::callback_handler mouse motion %b %D %s %W %x %y %X %Y %t } -- result:
-    //~ tclEvalFmt("bind dtk::intercept_tag <MouseWheel> { dtk::callback_handler mouse wheel %b %D %s %W %x %y %X %Y %t } -- result:
+        // test with key modifiers
+        foreach (newKeyMod; keyMods)
+        {
+            keyMod = newKeyMod;
+            wheel = sign * 120;
+            tclEvalFmt("event generate %s <MouseWheel> -delta %s -state %s",
+                       testWindow.getTclName(), wheel, cast(int)newKeyMod);
+        }
+    }
 
-    //~ tclEvalFmt("event generate %s "
+    action = MouseAction.motion;
+    button = MouseButton.none;
+    keyMod = KeyMod.none;
+    wheel = 0;
+
+    // test mouse move
+    foreach (x; 0 .. 5)
+    foreach (y; 5 .. 10)
+    {
+        motionTest = MotionTest.widget;
+        widgetMousePos = Point(x, y);
+        tclEvalFmt("event generate %s <Motion> -x %s -y %s",
+                    testWindow.getTclName(), widgetMousePos.x, widgetMousePos.y);
+
+        motionTest = MotionTest.desktop;
+        desktopMousePos = Point(x, y);
+        tclEvalFmt("event generate %s <Motion> -X %s -Y %s",
+                    testWindow.getTclName(), desktopMousePos.x, desktopMousePos.y);
+    }
 
     app.run();
 }
