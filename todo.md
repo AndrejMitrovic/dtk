@@ -4,7 +4,19 @@
     - style
     - takefocus (can take a command)
 
+Docs todo:
+- You can only send key events to the focused window. If we add support for manually creating events, we should
+  make sure we focus a window, or only allow sending the keyboard event to the focused window.
+
 Todo now:
+
+- Add callCount and expectedCallCount for mouse event testing just like for key event testing.
+
+- Add interpreter result checking in tcl eval calls, we're missing too many failed calls without knowing.
+
+- Add keyboard event tests.
+
+- The geometry module needs to have more methods and operators, e.g. +, +=, etc.
 
 - Use the 'when' option for sendEvent/postEvent:
     -when when
@@ -32,10 +44,6 @@ an API for this. E.g.:
     auto handler = makeKeySeqHandler(KeySeq(KeyMod.control | KeyMod.alt, KeySym.a),
                                     (scope KeySequence event) { ... } ));
     widget.onEvent.connect(handler);
-
-- The geometry module needs to have more methods and operators, e.g. +, +=, etc.
-
-- Rename parent to parentTree.
 
 - KeyMod seems to also be active when mouse buttons are held down:
 

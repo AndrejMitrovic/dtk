@@ -53,7 +53,8 @@ string tclEval(string cmd)
         //~ stderr.flush();
     }
 
-    Tcl_Eval(tclInterp, cast(char*)toStringz(cmd));
+    enforce(Tcl_Eval(tclInterp, cast(char*)toStringz(cmd)) != TCL_ERROR,
+        format("Tcl eval error: %s", to!string(tclInterp.result)));
 
     auto result = to!string(tclInterp.result);
     //~ stderr.writefln(" -- result: %s", result);

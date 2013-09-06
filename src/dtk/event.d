@@ -80,13 +80,13 @@ enum EventTravel
     /// The event is bubbling upwards towards the toplevel parent of this widget.
     bubble,
 
-
     // direct,  // todo
 }
 
 // All standard event types are listed here, in the same order as EventType.
 private alias EventClassMap = TypeTuple!(Event, Event, MouseEvent, KeyboardEvent);
 
+// todo: add toEventType.
 /**
     Return the Event class type that matches the EventType specified.
     If the event type is a user event, the $(D Event) base class is returned.
@@ -488,12 +488,12 @@ enum KeyboardAction
 ///
 class KeyboardEvent : Event
 {
-    this(Widget widget, KeyboardAction action, KeySym keySym, char uniChar, KeyMod keyMod, Point widgetMousePos, Point desktopMousePos, TimeMsec timeMsec)
+    this(Widget widget, KeyboardAction action, KeySym keySym, dchar unichar, KeyMod keyMod, Point widgetMousePos, Point desktopMousePos, TimeMsec timeMsec)
     {
         super(widget, EventType.keyboard, timeMsec);
         this.action = action;
         this.keySym = keySym;
-        this.uniChar = uniChar;
+        this.unichar = unichar;
         this.keyMod = keyMod;
         this.widgetMousePos = widgetMousePos;
         this.desktopMousePos = desktopMousePos;
@@ -519,18 +519,18 @@ class KeyboardEvent : Event
     /**
         The unicode character that was pressed or released.
 
-        Note: that this can equal $(D char.init) if only a
+        Note: that this can equal $(D dchar.init) if only a
         single key modifier was pressed (e.g. $(B control) key).
 
         Note: when a modifier is pressed together with a key,
-        e.g. $(B control + a) - the combination will store a
-        "sub" control unicode character to $(D uniChar),
+        e.g. $(B control + a) - this will store a
+        control unicode character such as 'SUB' to $(D unichar),
         but $(D keySym) will equal the $(B 'a') key.
 
         On the other hand, pressing $(B shift + a) will set
         both of these fields to $(B 'A').
     */
-    const(char) uniChar;
+    const(dchar) unichar;
 
     /**
         A bit mask of all key modifiers that were

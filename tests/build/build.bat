@@ -6,7 +6,8 @@ set dtkRoot=%thisPath%\..\..
 set binPath=%dtkRoot%\bin
 cd %thisPath%\..
 
-set versions=-version=DTK_LOG_EVAL -version=DTK_LOG_EVENTS
+rem set versions=-version=DTK_LOG_EVAL -version=DTK_LOG_EVENTS
+set versions=-version=DTK_LOG_EVAL
 
 if [%1]==[] goto :error
 if [%2]==[] goto :error

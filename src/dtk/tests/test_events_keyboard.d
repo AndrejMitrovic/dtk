@@ -1,4 +1,9 @@
-module test_events_keyboard;
+module dtk.tests.test_events_keyboard;
+
+version(unittest):
+version(DTK_UNITTEST):
+
+import core.thread;
 
 import std.algorithm;
 import std.range;
@@ -8,10 +13,10 @@ import std.typetuple;
 
 import dtk;
 
+import dtk.tests.globals;
+
 unittest
 {
-    auto app = new App;
-
     auto testWindow = new Window(app.mainWindow, 200, 200);
 
     KeyboardAction action;
@@ -50,59 +55,15 @@ unittest
 
     // workaround for missing enum
     static immutable keySyms = [
-        KeySym.a,
-        KeySym.b,
-        KeySym.c,
-        KeySym.d,
-        KeySym.e,
-        KeySym.f,
-        KeySym.g,
-        KeySym.h,
-        KeySym.i,
-        KeySym.j,
-        KeySym.k,
-        KeySym.l,
-        KeySym.m,
-        KeySym.n,
-        KeySym.o,
-        KeySym.p,
-        KeySym.q,
-        KeySym.r,
-        KeySym.s,
-        KeySym.t,
-        KeySym.u,
-        KeySym.v,
-        KeySym.w,
-        KeySym.x,
-        KeySym.y,
-        KeySym.z,
+        KeySym.a, KeySym.b, KeySym.c, KeySym.d, KeySym.e, KeySym.f, KeySym.g,
+        KeySym.h, KeySym.i, KeySym.j, KeySym.k, KeySym.l, KeySym.m, KeySym.n,
+        KeySym.o, KeySym.p, KeySym.q, KeySym.r, KeySym.s, KeySym.t, KeySym.u,
+        KeySym.v, KeySym.w, KeySym.x, KeySym.y, KeySym.z,
 
-        KeySym.A,
-        KeySym.B,
-        KeySym.C,
-        KeySym.D,
-        KeySym.E,
-        KeySym.F,
-        KeySym.G,
-        KeySym.H,
-        KeySym.I,
-        KeySym.J,
-        KeySym.K,
-        KeySym.L,
-        KeySym.M,
-        KeySym.N,
-        KeySym.O,
-        KeySym.P,
-        KeySym.Q,
-        KeySym.R,
-        KeySym.S,
-        KeySym.T,
-        KeySym.U,
-        KeySym.V,
-        KeySym.W,
-        KeySym.X,
-        KeySym.Y,
-        KeySym.Z,
+        KeySym.A, KeySym.B, KeySym.C, KeySym.D, KeySym.E, KeySym.F, KeySym.G,
+        KeySym.H, KeySym.I, KeySym.J, KeySym.K, KeySym.L, KeySym.M, KeySym.N,
+        KeySym.O, KeySym.P, KeySym.Q, KeySym.R, KeySym.S, KeySym.T, KeySym.U,
+        KeySym.V, KeySym.W, KeySym.X, KeySym.Y, KeySym.Z,
     ];
 
     alias keyMods = NoDuplicates!(EnumMembers!KeyMod);
@@ -158,9 +119,5 @@ unittest
 
     assert(callCount == expectedCallCount, text(callCount, " != ", expectedCallCount));
 
-    app.run();
-}
-
-void main()
-{
+    app.testRun();
 }

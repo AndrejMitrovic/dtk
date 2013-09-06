@@ -175,6 +175,8 @@ unittest
         tclEvalFmt("event generate %s <Motion> -x %s -y %s",
                     testWindow.getTclName(), widgetMousePos.x, widgetMousePos.y);
 
+        // major note: we didn't even test this, it failed:
+        // there is no -X and -Y
         motionTest = MotionTest.desktop;
         desktopMousePos = Point(x, y);
         tclEvalFmt("event generate %s <Motion> -X %s -Y %s",

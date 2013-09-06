@@ -8,6 +8,7 @@ module dtk.dispatch;
 
 import std.exception;
 import std.range;
+import std.stdio;
 import std.string;
 import std.typecons;
 
@@ -208,7 +209,7 @@ static:
 
         KeyboardAction action = getTclKeyboardAction(tclArr[0]);
         KeySym keySym = getTclKeySym(tclArr[1]);
-        char uniChar = getTclUniChar(tclArr[2]);
+        dchar unichar = getTclUnichar(tclArr[2]);
         KeyMod keyMod = getTclKeyMod(tclArr[3]);
 
         Widget widget = getTclWidget(tclArr[4]);
@@ -218,7 +219,7 @@ static:
         Point desktopMousePos = getTclPoint(tclArr[7 .. 9]);
         TimeMsec timeMsec = getTclTimestamp(tclArr[9]);
 
-        auto event = scoped!KeyboardEvent(widget, action, keySym, uniChar, keyMod, widgetMousePos, desktopMousePos, timeMsec);
+        auto event = scoped!KeyboardEvent(widget, action, keySym, unichar, keyMod, widgetMousePos, desktopMousePos, timeMsec);
         return _dispatchEvent(widget, event);
     }
 
@@ -490,10 +491,10 @@ private KeySym getTclKeySym(const(Tcl_Obj)* tclObj)
 }
 
 /** Extract the unicode character from the Tcl_Obj object. */
-private char getTclUniChar(const(Tcl_Obj)* tclObj)
+private dchar getTclUnichar(const(Tcl_Obj)* tclObj)
 {
     auto input = tclObj.tclPeekString();
-    return input.empty ? char.init : to!char(input.front);
+    return input.empty ? dchar.init : to!dchar(input.front);
 }
 
 /** Extract the Widget from the Tcl_Obj object. Return null if not found. */
