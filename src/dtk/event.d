@@ -298,22 +298,6 @@ enum MouseButton
     x2 = button5,
 }
 
-/+
-enum ShiftMask   = (1<<0);
-enum LockMask    = (1<<1);
-enum ControlMask = (1<<2);
-enum Mod1Mask    = (1<<3);
-enum Mod2Mask    = (1<<4);
-enum Mod3Mask    = (1<<5);
-enum Mod4Mask    = (1<<6);
-enum Mod5Mask    = (1<<7);
-
-enum META_MASK = (AnyModifier<<1);
-enum ALT_MASK = (AnyModifier<<2);
-enum EXTENDED_MASK = (AnyModifier<<3);
-private enum EXTENDED_MASK = 1 << 15;
-+/
-
 private enum AnyModifier = 1 << 15;
 
 /**
@@ -353,6 +337,20 @@ enum KeyMod
         See: http://en.wikipedia.org/wiki/Meta_key
     */
     meta = AnyModifier << 1,
+
+    /**
+        $(BLUE Windows-specific.)
+
+        The Extended modifier appears on events that are
+        associated with the keys on the extended keyboard.
+        On a US keyboard, the extended keys include the
+        Alt and Control keys at the right of the keyboard,
+        the cursor keys in the cluster to the left of the
+        numeric pad, the NumLock key, the Break key, the
+        PrintScreen key, and the forward slash '/' and
+        Enter keys in the numeric keypad.
+    */
+    extended = 1 << 15,
 
     /**
         The following are similarly named as the members of the
