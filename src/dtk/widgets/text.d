@@ -12,6 +12,7 @@ import dtk.app;
 import dtk.event;
 import dtk.geometry;
 import dtk.interpreter;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.widget;
@@ -30,7 +31,7 @@ class Text : Widget
     ///
     this(Widget master)
     {
-        super(master, TkType.text);
+        super(master, TkType.text, WidgetType.text);
     }
 
     /**

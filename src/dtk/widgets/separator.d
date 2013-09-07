@@ -6,13 +6,13 @@
  */
 module dtk.widgets.separator;
 
-import std.conv;
 import std.string;
 import std.range;
 
 import dtk.app;
 import dtk.event;
 import dtk.geometry;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.widget;
@@ -23,7 +23,7 @@ class Separator : Widget
     ///
     this(Widget master, Orientation orientation)
     {
-        super(master, TkType.separator);
+        super(master, TkType.separator, WidgetType.separator);
         this.setOption("orient", to!string(orientation));
     }
 

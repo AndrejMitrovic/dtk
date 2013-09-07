@@ -6,10 +6,7 @@
  */
 module dtk.event;
 
-import core.stdc.config : c_ulong;
-
 import std.array;
-import std.conv;
 import std.string;
 import std.traits;
 import std.typecons;
@@ -18,12 +15,10 @@ import std.typetuple;
 import dtk.geometry;
 import dtk.keymap;
 import dtk.signals;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.widget;
-
-/// The type of the $(D timeMsec) field in an event.
-public alias TimeMsec = c_ulong;
 
 /**
     All the possible event types. If the event is a custom user event type,
@@ -51,6 +46,12 @@ enum EventType
         or held long enough to trigger a key hold event.
     */
     keyboard,
+
+    /** A button widget event, e.g. a button widget could be pressed. */
+    button,
+
+    /** A check button widget event, e.g. a check button was toggled on or off. */
+    checkbutton,
 }
 
 /**
@@ -64,21 +65,20 @@ enum EventTravel
     invalid,  // sentinel
 
     /// The event is going through the target widget's filter list.
-    filtering,
+    filter,
 
     /// The event is sinking from the toplevel parent of this widget, towards the widget.
-    sinking,
+    sink,
 
     /// The event has reached its target widget, and is now being handled by either
     /// onEvent and/or one of its specific event handlers, such as onKeyboardEvent.
     target,
 
     /// The event was dispatched to the widget, and now explicit listeners are notified.
-    notifying,
+    notify,
 
     /// The event is bubbling upwards towards the toplevel parent of this widget.
-    bubbling,
-
+    bubble,
 
     // direct,  // todo
 }
@@ -86,6 +86,7 @@ enum EventTravel
 // All standard event types are listed here, in the same order as EventType.
 private alias EventClassMap = TypeTuple!(Event, Event, MouseEvent, KeyboardEvent);
 
+// todo: add toEventType.
 /**
     Return the Event class type that matches the EventType specified.
     If the event type is a user event, the $(D Event) base class is returned.
@@ -185,14 +186,26 @@ class Event
     public void toString(scope void delegate(const(char)[]) sink) { }
 
     /**
-        Used for reusability in derived classes, where we want the fields
-        but not the class name in the output.
+        Derived classes should call $(D toStringImpl(sink, this.tupleof) )
+        in their $(D toString) implementation.
     */
-    final protected void toStringMembers(scope void delegate(const(char)[]) sink)
+    protected final void toStringImpl(T...)(scope void delegate(const(char)[]) sink, T args)
     {
+        string qualClassName = typeid(this).name;
+        sink(qualClassName[qualClassName.lastIndexOf(".") + 1 .. $]);  // workaround
+
+        sink("(");
+
+        foreach (val; args)
+        {
+            sink(to!string(val));
+            sink(", ");
+        }
+
         sink(to!string(widget));
         sink(", ");
         sink(to!string(timeMsec));
+        sink(")");
     }
 
 package:
@@ -216,22 +229,22 @@ package:
 enum MouseAction
 {
     /** One of the mouse buttons was pressed. */
-    press,
+    press = 0,
 
     /** One of the mouse buttons was released. */
-    release,
+    release = 1,
 
     /** Convenience - equal to $(D press). */
     click = press,
 
     /** One of the mouse buttons was clicked twice in rapid succession. */
-    double_click,
+    double_click = 2,
 
     /** One of the mouse buttons was clicked three times in rapid succession. */
-    tripple_click,
+    triple_click = 3,
 
     /** One of the mouse buttons was clicked four times in rapid succession. */
-    quadruple_click,
+    quadruple_click = 4,
 
     /**
         The mouse wheel was moved. See the $(D wheelStep) field to determine
@@ -240,10 +253,10 @@ enum MouseAction
         $(BLUE Note): When the wheel is pressed as a mouse button,
         the action will equal $(D press), not $(D wheel).
     */
-    wheel,
+    wheel = 5,
 
     /** The mouse was moved. */
-    move,
+    motion = 6,
 }
 
 /**
@@ -251,54 +264,51 @@ enum MouseAction
 */
 enum MouseButton
 {
+    /** No button was pressed or released. */
+    none = 0,
+
     /** The left mouse button. */
-    button1,
+    button1 = 1,
 
     /** Convenience - equal to $(D button1). */
     left = button1,
 
     /** The middle mouse button. */
-    button2,
+    button2 = 2,
 
     /** Convenience - equal to $(D button2). */
     middle = button2,
 
     /** The right mouse button. */
-    button3,
+    button3 = 3,
 
     /** Convenience - equal to $(D button3). */
     right = button3,
+
+    /** First additional button - hardware-dependent. */
+    button4 = 4,
+
+    /** Convenience - equal to $(D button4) */
+    x1 = button4,
+
+    /** Second additional button - hardware-dependent. */
+    button5 = 5,
+
+    /** Convenience - equal to $(D button5) */
+    x2 = button5,
 }
 
-//~ enum ShiftMask   = (1<<0);
-//~ enum LockMask    = (1<<1);
-//~ enum ControlMask = (1<<2);
-//~ enum Mod1Mask    = (1<<3);
-//~ enum Mod2Mask    = (1<<4);
-//~ enum Mod3Mask    = (1<<5);
-//~ enum Mod4Mask    = (1<<6);
-//~ enum Mod5Mask    = (1<<7);
-
-//~ enum META_MASK = (AnyModifier<<1);
-//~ enum ALT_MASK = (AnyModifier<<2);
-//~ enum EXTENDED_MASK = (AnyModifier<<3);
-
 private enum AnyModifier = 1 << 15;
-//~ private enum EXTENDED_MASK = 1 << 15;
 
 /**
-    A set of possible key modifiers.
-    These are special keys such as the control
-    and alt keys.
+    A set of keyboard modifiers or active mouse buttons
+    while another event was generated.
 
-    todo: add bit checking for these, which means we have to init them
-    properly. See test in d_code somewhere
+    Examples:
+        - When the 'a' key is pressed, the shift keyboard modifier might be present.
+        - When the left mouse button is pressed, the right mouse button might already
+          be held down, in that case the right mouse button is the button modifier.
 */
-// major todo: the keysym already defines alt_l and alt_r, this enum should just
-// be a subgroup of that enum.
-// major todo: remove these bit initializers, and instead use a helper function to
-// extract this info when we need it (only for mice during %S substitution, because
-// otherwise we already have the %K substitution).
 enum KeyMod
 {
     none = 0,
@@ -318,8 +328,8 @@ enum KeyMod
     // todo: when caps lock is turned off, lock is set.
     // we can probably tell then if it's on or off.
 
-    ///
-    lock = 1 << 1,
+    /** Capslock key. */
+    capslock = 1 << 1,
 
     /**
         The meta key is present on special keyboards,
@@ -327,46 +337,198 @@ enum KeyMod
         See: http://en.wikipedia.org/wiki/Meta_key
     */
     meta = AnyModifier << 1,
+
+    /**
+        $(BLUE Windows-specific.)
+
+        The Extended modifier appears on events that are
+        associated with the keys on the extended keyboard.
+        On a US keyboard, the extended keys include the
+        Alt and Control keys at the right of the keyboard,
+        the cursor keys in the cluster to the left of the
+        numeric pad, the NumLock key, the Break key, the
+        PrintScreen key, and the forward slash '/' and
+        Enter keys in the numeric keypad.
+    */
+    extended = 1 << 15,
+
+    /**
+        The following are similarly named as the members of the
+        $(D MouseButton) enum, but have a "mouse_" prefix.
+
+        $(BLUE Note): The integral values of the following members
+        are not the same as the ones in $(D MouseButton), do not
+        attempt to cast between the two.
+    */
+
+    /** The left mouse button. */
+    mouse_button1 = 1 << 8,
+
+    /** Convenience - equal to $(D mouse_button1). */
+    mouse_left = mouse_button1,
+
+    /** The middle mouse button. */
+    mouse_button2 = 1 << 9,
+
+    /** Convenience - equal to $(D mouse_button2). */
+    mouse_middle = mouse_button2,
+
+    /** The right mouse button. */
+    mouse_button3 = 1 << 10,
+
+    /** Convenience - equal to $(D mouse_button3). */
+    mouse_right = mouse_button3,
+
+    /** First additional button - hardware-dependent. */
+    mouse_button4 = 1 << 11,
+
+    /** Convenience - equal to $(D mouse_button4) */
+    mouse_x1 = mouse_button4,
+
+    /** Second additional button - hardware-dependent. */
+    mouse_button5 = 1 << 12,
+
+    /** Convenience - equal to $(D mouse_button5) */
+    mouse_x2 = mouse_button5,
 }
 
+///
 class MouseEvent : Event
 {
-    MouseAction action;
-
-    this()
+    this(Widget widget, MouseAction action, MouseButton button, int wheel, KeyMod keyMod, Point widgetMousePos, Point desktopMousePos, TimeMsec timeMsec)
     {
-        // todo: we should pass a widget
-        super(null, EventType.mouse);
-    }
-}
+        super(widget, EventType.mouse, timeMsec);
 
-class KeyboardEvent : Event
-{
-    this(Widget widget, KeySym keySym, KeyMod keyMod, TimeMsec timeMsec)
-    {
-        super(widget, EventType.keyboard, timeMsec);
-        this.keySym = keySym;
+        this.action = action;
+        this.button = button;
+        this.wheel = wheel;
         this.keyMod = keyMod;
+        this.widgetMousePos = widgetMousePos;
+        this.desktopMousePos = desktopMousePos;
     }
 
     ///
     override void toString(scope void delegate(const(char)[]) sink)
     {
-        sink(__traits(identifier, typeof(this)));
-        sink("(");
-
-        foreach (i, val; this.tupleof)
-        {
-            sink(to!string(val));
-            sink(", ");
-        }
-
-        Event.toStringMembers(sink);
-        sink(")");
+        toStringImpl(sink, this.tupleof);
     }
 
-    /// The key symbol that was pressed or released
+    /**
+        Specifies what action the mouse performed,
+        e.g. a button click, a mouse motion, etc.
+    */
+    const(MouseAction) action;
+
+    /**
+        Specifies which button, if any, was pressed,
+        held, or released. If no buttons were pushed
+        or released then it equals $(D MouseButton.none).
+    */
+    const(MouseButton) button;
+
+    /**
+        The delta when the mouse wheel has been scrolled.
+        It is a positive value when pushed forward, and
+        negative otherwise. It equals zero if the wheel
+        was not scrolled.
+
+        Note: The delta is hardware-specific, based on the
+        hardware resolution of the mouse wheel. Typically
+        it equals 120/-120, however this number can be
+        arbitrary when the hardware supports finer-grained
+        scrolling resolution.
+
+        See also: todo: add MSDN note about wheel delta,
+        and a blog post.
+    */
+    const(int) wheel;
+
+    /**
+        A bit mask of all key modifiers that were
+        held when the mouse event was generated.
+
+        Examples:
+        -----
+        // test if control was held
+        if (keyMod & KeyMod.control) { }
+
+        // test if both control and alt were held at the same time
+        if (keyMod & (KeyMod.control | KeyMod.alt)) { }
+        -----
+    */
+    const(KeyMod) keyMod;
+
+    /**
+        The mouse position relative to the target widget
+        when the mouse event was generated.
+    */
+    const(Point) widgetMousePos;
+
+    /**
+        The mouse position relative to the desktop
+        when the mouse event was generated.
+    */
+    const(Point) desktopMousePos;
+}
+
+/**
+    A set of possible keyboard actions.
+*/
+enum KeyboardAction
+{
+    /** One of the keys was pressed. */
+    press,
+
+    /** One of the keys was released. */
+    release,
+}
+
+///
+class KeyboardEvent : Event
+{
+    this(Widget widget, KeyboardAction action, KeySym keySym, dchar unichar, KeyMod keyMod, Point widgetMousePos, Point desktopMousePos, TimeMsec timeMsec)
+    {
+        super(widget, EventType.keyboard, timeMsec);
+        this.action = action;
+        this.keySym = keySym;
+        this.unichar = unichar;
+        this.keyMod = keyMod;
+        this.widgetMousePos = widgetMousePos;
+        this.desktopMousePos = desktopMousePos;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /**
+        Specifies what action the keyboard performed,
+        e.g. a key press, a key release, etc.
+    */
+    const(KeyboardAction) action;
+
+    /**
+        The key symbol that was pressed or released.
+    */
     const(KeySym) keySym;
+
+    /**
+        The unicode character that was pressed or released.
+
+        Note: that this can equal $(D dchar.init) if only a
+        single key modifier was pressed (e.g. $(B control) key).
+
+        Note: when a modifier is pressed together with a key,
+        e.g. $(B control + a) - this will store a
+        control unicode character such as 'SUB' to $(D unichar),
+        but $(D keySym) will equal the $(B 'a') key.
+
+        On the other hand, pressing $(B shift + a) will set
+        both of these fields to $(B 'A').
+    */
+    const(dchar) unichar;
 
     /**
         A bit mask of all key modifiers that were
@@ -382,7 +544,76 @@ class KeyboardEvent : Event
         -----
     */
     const(KeyMod) keyMod;
+
+    /**
+        The mouse position relative to the target widget
+        when the keyboard event was generated.
+    */
+    const(Point) widgetMousePos;
+
+    /**
+        The mouse position relative to the desktop
+        when the keyboard event was generated.
+    */
+    const(Point) desktopMousePos;
 }
+
+/** Widget-specific events. */
+
+/// Button widget event.
+enum ButtonAction
+{
+    /// sentinel
+    invalid,
+
+    /// A button was pushed.
+    push,
+}
+
+///
+class ButtonEvent : Event
+{
+    this(Widget widget, ButtonAction action, TimeMsec timeMsec)
+    {
+        // todo: we should pass a widget
+        super(widget, EventType.button, timeMsec);
+        this.action = action;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    const(ButtonAction) action;
+}
+
+/// Check button widget event.
+enum CheckButtonAction
+{
+    /// sentinel
+    invalid,
+
+    /// A checkbutton was toggled on.
+    toggleOn,
+
+    /// A checkbutton was toggled off.
+    toggleOff,
+}
+
+/// todo: not handled yet
+class CheckButtonEvent : Event
+{
+    this(Widget widget, CheckButtonAction action, TimeMsec timeMsec)
+    {
+        super(widget, EventType.checkbutton, timeMsec);
+        this.action = action;
+    }
+
+    const(CheckButtonAction) action;
+}
+
 
 /** Old code below */
 
@@ -423,7 +654,6 @@ package enum TkEventType
     Visibility,
     Deactivate,
 
-    TkButtonPush,
     TkCheckButtonToggle,
     TkRadioButtonSelect,
     TkComboboxChange,

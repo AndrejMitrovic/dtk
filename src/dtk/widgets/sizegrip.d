@@ -9,6 +9,7 @@ module dtk.widgets.sizegrip;
 import dtk.app;
 import dtk.interpreter;
 import dtk.event;
+import dtk.types;
 
 import dtk.widgets.widget;
 import dtk.widgets.window;
@@ -19,7 +20,7 @@ class Sizegrip : Widget
     ///
     package this(Window master)
     {
-        super(master, TkType.sizegrip);
+        super(master, TkType.sizegrip, WidgetType.sizegrip);
         tclEvalFmt("pack %s -side right -anchor se", _name);
     }
 }

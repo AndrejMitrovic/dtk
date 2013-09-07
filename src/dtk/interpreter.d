@@ -11,7 +11,6 @@ import std.c.stdlib;
 
 import std.exception;
 import std.string;
-import std.conv;
 import std.path;
 
 import dtk.event;
@@ -49,10 +48,18 @@ package:
 string tclEval(string cmd)
 {
     version (DTK_LOG_EVAL)
-        stderr.writefln("tcl_eval %s", cmd);
+    {
+        stderr.writefln("tcl_eval: %s", cmd);
+        //~ stderr.flush();
+    }
 
-    Tcl_Eval(tclInterp, cast(char*)toStringz(cmd));
-    return to!string(tclInterp.result);
+    enforce(Tcl_Eval(tclInterp, cast(char*)toStringz(cmd)) != TCL_ERROR,
+        format("Tcl eval error: %s", to!string(tclInterp.result)));
+
+    auto result = to!string(tclInterp.result);
+    //~ stderr.writefln(" -- result: %s", result);
+
+    return result;
 }
 
 /** Ditto, but use a format string as a convenience. */

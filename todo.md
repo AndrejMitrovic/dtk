@@ -1,32 +1,62 @@
+Docs todo:
+- You can only send key events to the focused window. If we add support for manually creating events, we should
+  make sure we focus a window, or only allow sending the keyboard event to the focused window.
+
+- Make a note about having to use either -L/SUBSYSTEM:WINDOWS:5.01 (32bit) or -L/SUBSYSTEM:WINDOWS:5.02 (64bit) when compiling DTK apps on windows, or alternatively using WinMain. Otherwise some weird resizing behavior happens with windows instantiated by Tk. See also:
+https://github.com/aldacron/Derelict3/issues/143
+
+- Document how multi-click events are delivered:
+    event button: button1 action press
+    event button: button1 action release
+    event button: button1 action double_click
+    event button: button1 action release
+    event button: button1 action triple_click
+    event button: button1 action release
+    event button: button1 action quadruple_click
+    event button: button1 action release
+
+Todo now:
+
 - Standard Widget options to port:
     - class
     - cursor
     - style
     - takefocus (can take a command)
 
-Todo now:
+- The geometry module needs to have more methods and operators, e.g. +, +=, etc.
 
-- We could use a template getter for the timestamp, which returns a Duration. This avoids
-  huge build times for importing std.datetime until the timestamp is used.
+- Use the 'when' option for sendEvent/postEvent:
+    -when when
+        When determines when the event will be processed; it must have one of the following values:
+        now
+            Process the event immediately, before the command returns. This also happens if the -when option is omitted.
+        tail
+            Place the event on Tcl's event queue behind any events already queued for this application.
+        head
+            Place the event at the front of Tcl's event queue, so that it will be handled before any other events already queued.
+        mark
+            Place the event at the front of Tcl's event queue but behind any other events already queued with -when mark. This option is useful when generating a series of events that should be processed in order but at the front of the queue.
 
-- Use toString with a sink, to avoid allocating memory.
+- When can use virtual events, added with 'event add' to hook directly to key sequences, we should provide
+an API for this. E.g.:
 
-- Use better typeid extraction (see what it consists of, so we can get rid of the full path name)
+    auto seq = KeySeq(KeyMod.control | KeyMod.alt, KeySym.a);
+    widget.onKeySequence[seq] = (scope KeySequence event) { ... }
 
-- Key codes are in keysymdef.h
+    Perhaps we could make KeySeq a subclass of an Event, so a user can dynamically cast an event
+    to a key sequence event.
 
-- Percent substitution is made in ExpandPercents in tk/generic/tkBind.c
+    - Although maybe a better idea is to simply make this a helper function which does:
 
-- Find all valid substitutions for each event types.
+    auto handler = makeKeySeqHandler(KeySeq(KeyMod.control | KeyMod.alt, KeySym.a),
+                                    (scope KeySequence event) { ... } ));
+    widget.onEvent.connect(handler);
 
-- Remove as many fake widgets as possible, and simplify super ctor in Widget.
-- Call bindtags for all real widgets
+- Add test-suite for event handlers.
 
-- We can use 'generate window event' to simulate mouse clicks. We should use
-this for the unittests.
+- Find all valid substitutions for each event type.
 
-- Could use 'bind Button <event>' to bind all tk class types to static
-C functions in the D classes.
+- Remove fake widgets if we can.
 
 - Put place, pack, and grid commands into a separate layout file.
 
@@ -35,33 +65,10 @@ this via opDispatch, to ensure that calling these functions in D doesn't break
 cross-compilation. Instead of breaking compilation, we could issue a pragma(msg)
 for the unsupported OS calls, and tell the user to use version(Windows) statements.
 
-- Event propagation, should events propagate upwards and downwards? Harmonia has sinking and bubbling.
-
-- Include the new signals implementation, and make buttons emit signals instead of
-invoke a specific function or delegate. Update: We should avoid using signals
-for now, due to the complicated nature of adding/removing signal handlers
-while they're being called. Instead we should provide simple callbacks such as:
-button1.onClick(&handler);
-This is similar to GTKD, we should check it out there. Then, if the user wants
-he can use his own signals in a derived class or a supertype.
-
 - We could create our own animation framework, by creating tcl scripts which call
 the 'after' tcl command.
 Animation examples: http://wiki.tcl.tk/14082
 http://wiki.tcl.tk/_/search?S=%20animation
-
-- Use custom binding substitution or formatting arguments for each signal type:
-http://www.tcl.tk/man/tcl8.6/TkCmd/bind.htm#M24
-
-- Could also use custom event types instead of a generic Event class, that way
-we don't have to store everything into one giant event structure. This will
-require some metaprogramming at the callback site.
-
-This will enable us to use a single onMouseEvent instead of onMouseEnter+onMouseLeave
-
-- Use SendMessage to simulate keyboard and mouse input when unittesting.
-Note: We'll have to use PostThreadMessage instead since the main thread will
-be blocked in the event loop.
 
 - Could implement a setOptions, for multiple options. We can call ".widget configure -width 100 -height 100" instead of using two separate configure calls.
 
@@ -69,9 +76,9 @@ be blocked in the event loop.
 want to separate events into those triggered by the OS (e.g. user interaction),
 and those by internal user code.
 
-- Turn package methods into public methods, since they can be useful for people who write
-extensions in Tcl and want to provide a D wrapper for them. As a last resort we could
-move these functions into a helper module or helper package.
+- Turn some helper package methods into public methods, since they can be useful for people
+who write extensions in Tcl and want to provide a D wrapper for them. We could also move these
+functions into a helper module or helper package.
 
 - We might have to delay-initialize all widgets to avoid having to pass a parent widget in a widget constructor.
 However this means we have to check if a widget is initialized before attempting to call one of its methods,
@@ -81,53 +88,34 @@ Todo: See which other Tk widget types have an insert method, which would require
 
 - Add mnemonic support to menu items via "&", e.g. "&File". But make sure we allow escaping via "&&File", which would produce "&File" in the menu.
 
-- Make sure we're quoting all strings right. Add checks to each constructor or function taking a string and
-ensure strings with spaces work.
-
 - Check all 'todo' sections in the codebase.
 
-- Check all filed bugs.
+- Check all filed bugs for Tk.
 
 - Fix up signals so removal while iterating is handled properly:
 http://d.puremagic.com/issues/show_bug.cgi?id=10821
 Also make sure to document these issues.
 
-- Remove methods from Widget class that should be in derived classes, this should avoid confusion
-on their meaning.
-
-- Add Typed equivalents to most widgets which can have options set. E.g. we could have:
+- Add typed equivalents to most widgets which can have options set. E.g. we could have:
 
 auto button = new TypedCheckButton!float("label", 0.0, 1.0);
 auto button = new TypedCheckButton!char("label", 'a', 'z');
 
-- Make a big note about having to use either -L/SUBSYSTEM:WINDOWS:5.01 (32bit) or -L/SUBSYSTEM:WINDOWS:5.02 (64bit) when compiling DTK apps on windows, or alternatively using WinMain. Otherwise some weird resizing behavior happens with windows instantiated by Tk. See also:
-https://github.com/aldacron/Derelict3/issues/143
-
 - The .#widget issue has been resolved, see the reply on SO:
 http://stackoverflow.com/questions/18290171/strange-result-when-calling-winfo-children-on-implicitly-generated-toplevel-wi
-
-- We'll need to call _escapePath for any Tk API which takes paths (or even plain strings), since backslashes are problematic due to required escaping.
 
 - Instead of returning .init for canceled operations, return a struct with an ok/cancel value
 and the field with the result.
 
-- Some widgets have an identity function which returns the widget under position X and Y.
-We could try and generalize this by adding an event callback for onMouseMove or
-onMousePress, which would return the normal X/Y coordinates but also the widget under the
-mouse cursor.
+- Implement an exception hierarchy, which will be kept in a single module.
 
-- Error checking: must check all eval calls and throw D exceptions on any errors received.
-There should be an error state stored in the interpreter struct. See the eval docs.
+- Subclasses should try and catch tcl-eval exceptions, and maybe wrap them, e.g. Image class should throw
+  an Image Exception.
 
 - Expose all widget options, e.g. we missed some like bbox.
 See all the options for each widget type in the Tk command manual.
 
-- Implement toString for widget classes. Could use text option which most widgets have.
-
-- Instead of using DtkOptions and a super call, we should try to always call property functions
-in the ctor. This will avoid code duplication and will be more clean.
-
-- Could make evalFmt in widgets always prepend _name, since that's how we always use it anyway.
+- Implement toString for widget classes. Could use the text option which most widgets have.
 
 - Find a way to get the win32 cursor blinking time, and then use insertOffTime in the text widget
 to modify the blinking. Try to see if other widgets support this option, otherwise ask in the
@@ -136,17 +124,9 @@ system-default settings. Finally, we could try finding how insertOffTime is set 
 this to other input widgets and distribute these new widgets.
 
 - The _isDestroyed bool we added should likely be checked in most function calls, but this might be
-expensive. Perhaps we should simply use an invariant for this.
+expensive. Maybe we should use an invariant.
 
-- Replace all boolean parameters and fields with enums.
-
-- Read in detail about Tcl's string escaping and quoting rules because they seem complicated.
-Apparently we should only escape inner curly braces: http://stackoverflow.com/a/5302213/279684
-
-- See if we can replace fake widgets from inheriting the Widget class and instead use App.evalFmt directly,
-but only if _name isn't used.
-
-- Implement exceptions for all eval calls. E.g. image loading should throw an ImageLoad exception, etc.
+- Replace all boolean parameters and fields with enums, except where the usage is clear.
 
 - Once the toolkit is in place we should port the widget demo from Tcl:
 C:\Program Files (x86)\Tcl\demos\Tk8.6
@@ -154,7 +134,7 @@ C:\Program Files (x86)\Tcl\demos\Tk8.6
 - ttk::menubutton is not ported yet. See also which other ttk widgets we have to port that are not listed
 on tkdocs.com.
 
-- Text, canvas, and tree widgets (and maybe more) have a tagging ability, which enables to e.g.
+- Text, canvas, and tree widgets (and maybe more) have a tagging ability, which enables us to e.g.
 set the same image to multiple objects, and to generate events.
 
 - Port Cursors.
@@ -162,10 +142,10 @@ set the same image to multiple objects, and to generate events.
 - Info about what the event loop does, and what idle commands do:
 http://wiki.tcl.tk/1527
 
-- Can generate mouse moves, see "moving the mouse pointer" at the bottom of this page:
-http://www.tcl.tk/man/tcl8.6/TkCmd/event.htm
+- Can generate mouse moves, by setting -warp to true in the event generate command.
 
-- Disability features:
-PS: for the double-click timings: most people won't ever
-  touch them, but people with certain disabilities might
-  very strongly depend on being able to enlarge this time.
+Tk info (move this to an info.md file):
+
+- Key codes are in keysymdef.h
+
+- Percent substitution is made in ExpandPercents in tk/generic/tkBind.c

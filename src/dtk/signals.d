@@ -275,6 +275,13 @@ struct EventHandlerList(EventClass)
         return handler;
     }
 
+    /** Convenience append-assign operator, equivalent to calling $(D connect). */
+    T opOpAssign(string op : "~", T)(T handler)
+        if (isEventHandler!(T, EventClass))
+    {
+        return this.connect(handler);
+    }
+
     /** Add a handler to the list of handlers at the beginning of the list. */
     T connectFirst(T)(T handler)
         if (isEventHandler!(T, EventClass))

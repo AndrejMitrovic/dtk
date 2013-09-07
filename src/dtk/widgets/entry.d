@@ -6,7 +6,6 @@
  */
 module dtk.widgets.entry;
 
-import std.conv;
 import std.exception;
 import std.range;
 import std.string;
@@ -14,6 +13,7 @@ import std.traits;
 import std.typetuple;
 
 import dtk.app;
+import dtk.dispatch;
 import dtk.event;
 import dtk.geometry;
 import dtk.interpreter;
@@ -64,13 +64,17 @@ enum IsValidated
     yes,  ///
 }
 
+// todo: this should be handled in dispatch:
+// validation arguments captured by validatecommand
+private enum string validationArgs = "%d %i %P %s %S %v %V %W";
+
 ///
 class Entry : Widget
 {
     ///
     this(Widget master)
     {
-        super(master, TkType.entry);
+        super(master, TkType.entry, WidgetType.entry);
 
         string varName = makeTracedVar(TkEventType.TkTextChange);
         this.setOption("textvariable", varName);

@@ -11,7 +11,6 @@ import dtk.geometry;
 import std.range;
 import std.stdio;
 import std.algorithm;
-import std.conv;
 import std.range;
 import std.string;
 
@@ -46,7 +45,7 @@ class Window : Widget
     /** Instantiate a new Window. */
     this(Window parent, int width, int height)
     {
-        super(parent, TkType.toplevel);
+        super(parent, TkType.toplevel, WidgetType.window);
 
         this.setOption("width", width);
         this.setOption("height", height);
@@ -58,7 +57,7 @@ class Window : Widget
     /** Used for the initial implicitly-created Tk root window. */
     this(Tk_Window window)
     {
-        super(CreateToplevel.init);
+        super(CreateToplevel.init, WidgetType.window);
         tclEvalFmt("tkwait visibility %s", _name);
     }
 

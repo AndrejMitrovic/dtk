@@ -6,11 +6,11 @@
  */
 module dtk.widgets.labelframe;
 
-import std.conv;
 import std.range;
 import std.string;
 
 import dtk.geometry;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.widget;
@@ -21,7 +21,7 @@ class LabelFrame : Widget
     ///
     this(Widget master)
     {
-        super(master, TkType.labelframe);
+        super(master, TkType.labelframe, WidgetType.labelframe);
     }
 
     /** Get the current width of the border. */

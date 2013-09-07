@@ -11,13 +11,13 @@ import std.c.stdlib;
 
 import std.exception;
 import std.string;
-import std.conv;
 import std.path;
 
 import dtk.event;
 import dtk.interpreter;
 import dtk.loader;
 import dtk.types;
+import dtk.utils;
 
 import dtk.widgets.widget;
 import dtk.widgets.window;

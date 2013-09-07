@@ -6,7 +6,13 @@ package require Tk
     #~ puts "detail = %d"
 #~ }
 
-bind . <ButtonPress> {
+#~ ttk::button .button
+#~ pack .button
+
+tkwait visibility .
+
+#~ bind .button <KeyPress> {
+bind . <KeyPress> {
     puts "client_request = %#"
     puts "win_below_target = %a"
     puts "mouse_button = %b"
@@ -39,3 +45,27 @@ bind . <ButtonPress> {
     puts "y_root = %Y"
     puts ""
 }
+
+event generate . <KeyPress> -keysym a -keycode 65
+#~ event generate . <KeyPress> -keysym "a"
+#~ event generate . <KeyPress> -keysym "a"
+
+#~ bind . <ButtonPress-1> {
+#~ puts "single mouse_button = %b"
+#~ puts ""
+#~ }
+
+#~ bind . <Double-ButtonPress-1> {
+#~ puts "double mouse_button = %b"
+#~ puts ""
+#~ }
+
+#~ bind . <Triple-ButtonPress-1> {
+#~ puts "triple mouse_button = %b"
+#~ puts ""
+#~ }
+
+#~ bind . <Double-ButtonPress-3> {
+#~ puts "mouse_button = %b"
+#~ puts ""
+#~ }

@@ -7,7 +7,6 @@
 module dtk.widgets.dialog;
 
 import std.array;
-import std.conv;
 import std.exception;
 import std.path;
 import std.range;
@@ -39,7 +38,7 @@ package class GenericDialog : Widget
     ///
     this()
     {
-        super(CreateFakeWidget.init);
+        super(CreateFakeWidget.init, WidgetType.generic_dialog);
         _defaultFileTypeVar = makeTracedVar(TkEventType.TkComboboxChange);
     }
 
@@ -202,7 +201,7 @@ class SelectDirDialog : Widget
     ///
     this()
     {
-        super(CreateFakeWidget.init);
+        super(CreateFakeWidget.init, WidgetType.select_dir_dialog);
     }
 
     /**
@@ -234,7 +233,7 @@ class SelectColorDialog : Widget
     ///
     this()
     {
-        super(CreateFakeWidget.init);
+        super(CreateFakeWidget.init, WidgetType.select_color_dialog);
     }
 
     /**
@@ -324,7 +323,7 @@ class MessageBox : Widget
     ///
     this()
     {
-        super(CreateFakeWidget.init);
+        super(CreateFakeWidget.init, WidgetType.messagebox);
     }
 
     /**

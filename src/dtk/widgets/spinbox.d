@@ -6,7 +6,6 @@
  */
 module dtk.widgets.spinbox;
 
-import std.conv;
 import std.string;
 import std.range;
 
@@ -14,6 +13,7 @@ import dtk.app;
 import dtk.event;
 import dtk.geometry;
 import dtk.interpreter;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.widget;
@@ -22,9 +22,9 @@ import dtk.widgets.widget;
 abstract class SpinboxBase : Widget
 {
     ///
-    package this(Widget master)
+    package this(Widget master, WidgetType widgetType)
     {
-        super(master, TkType.spinbox);
+        super(master, TkType.spinbox, widgetType);
 
         _varName = makeTracedVar(TkEventType.TkSpinboxChange);
         this.setOption("textvariable", _varName);
@@ -58,7 +58,7 @@ class ScalarSpinbox : SpinboxBase
     {
         _minValue = minValue;
         _maxValue = maxValue;
-        super(master);
+        super(master, WidgetType.scalar_spinbox);
 
         this.setOption("from", minValue);
         this.setOption("to", maxValue);
@@ -108,7 +108,7 @@ class ListSpinbox : SpinboxBase
     ///
     this(Widget master, string[] values)
     {
-        super(master);
+        super(master, WidgetType.list_spinbox);
         this.setOption("values", values.join(" "));
     }
 

@@ -8,7 +8,6 @@ module dtk.widgets.tree;
 
 import std.algorithm;
 import std.array;
-import std.conv;
 import std.exception;
 import std.range;
 import std.string;
@@ -16,6 +15,7 @@ import std.string;
 import dtk.geometry;
 import dtk.image;
 import dtk.interpreter;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.options;
@@ -121,7 +121,7 @@ class Tree : Widget
     ///
     this(Widget master, string label, string[] columns)
     {
-        super(master, TkType.tree);
+        super(master, TkType.tree, WidgetType.tree);
 
         // create the columns
         tclEvalFmt("%s configure -columns %s", _name, columns.join(" ")._tclEscape);
@@ -145,7 +145,7 @@ class Tree : Widget
     */
     private this(Tree rootTree, string name, string treeIdent)
     {
-        super(CreateFakeWidget.init);
+        super(CreateFakeWidget.init, WidgetType.tree);
         _treeID = treeIdent;
         _name = name;
         _rootTree = rootTree;
@@ -204,8 +204,8 @@ class Tree : Widget
     */
     void detach()
     {
-        // note: this call must come before calling detach or .parent will return the root identifier
-        _detachInfo = DetachInfo(parent, index, IsDetached.yes);
+        // note: this call must come before calling detach or .parentTree will return the root identifier
+        _detachInfo = DetachInfo(parentTree, index, IsDetached.yes);
         tclEvalFmt("%s detach %s", _name, _treeID);
     }
 
@@ -213,7 +213,7 @@ class Tree : Widget
         Reattach this tree back to its original position.
         If the tree was not detached, the function returns early.
 
-        If the parent no longer exists, an exception is thrown.
+        If the parent tree no longer exists, an exception is thrown.
         If the index is out of bounds, the tree will be attached
         to the last position.
     */
@@ -223,19 +223,22 @@ class Tree : Widget
         if (_detachInfo.isDetached == IsDetached.no)
             return;
 
-        enforce(!_detachInfo.parent._isDestroyed,
-            "Cannot reattach tree because its parent was destroyed.");
+        enforce(!_detachInfo.parentTree._isDestroyed,
+            "Cannot reattach tree because its parent tree was destroyed.");
 
         // todo: provide a better implementation
-        auto treeCount = tclEvalFmt("%s children %s", _name, _detachInfo.parent._treeID).splitter(" ").walkLength;
+        auto treeCount = tclEvalFmt("%s children %s", _name, _detachInfo.parentTree._treeID).splitter(" ").walkLength;
 
         // readjust index if it's out of bounds
         if (_detachInfo.index >= treeCount)
             _detachInfo.index = treeCount - 1;
 
-        _detachInfo.parent.attach(this, _detachInfo.index);
+        _detachInfo.parentTree.attach(this, _detachInfo.index);
         _detachInfo.isDetached = IsDetached.no;
     }
+
+    ///
+    alias super.destroy destroy;
 
     /** Remove and destroy a tree. */
     void destroy(Tree tree)
@@ -253,8 +256,8 @@ class Tree : Widget
         tclEvalFmt("%s delete %s", _name, tree._treeID);
     }
 
-    /** Return the parent of this tree, or null if this is the root tree. */
-    @property Tree parent()
+    /** Return the parent tree of this tree, or null if this is the root tree. */
+    @property Tree parentTree()
     {
         if (this.isRootTree)
             return null;
@@ -275,7 +278,7 @@ class Tree : Widget
         return parent;
     }
 
-    /** Return the previous sibling tree, or null if this is the first child of its parent. */
+    /** Return the previous sibling tree, or null if this is the first child of its parent tree. */
     Tree prevTree()
     {
         string prevID = tclEvalFmt("%s prev %s", _name, _treeID);
@@ -289,7 +292,7 @@ class Tree : Widget
         return _rootTree._treeIDMap[prevID];
     }
 
-    /** Return the next sibling tree, or null if this is the last child of its parent. */
+    /** Return the next sibling tree, or null if this is the last child of its parent tree. */
     Tree nextTree()
     {
         string nextID = tclEvalFmt("%s next %s", _name, _treeID);
@@ -400,7 +403,7 @@ class Tree : Widget
         through all of its descendants.
 
         If you only want to check if a tree is a direct child of this tree,
-        use $(D targetTree.parent is containerTree).
+        use $(D targetTree.parentTree is containerTree).
     */
     @property bool contains(Tree tree)
     {
@@ -753,19 +756,19 @@ private:
     enum IsDetached { no, yes }
 
     /**
-        Note: parent and index are only kept up to date in the last detach
+        Note: parentTree and index are only kept up to date in the last detach
         call. Only use these in the reattach call, when isDetached
         equals IsDetached.yes.
     */
     static struct DetachInfo
     {
-        Tree parent;
+        Tree parentTree;
         int index;
         IsDetached isDetached;
     }
 
     /**
-        When a tree is detached, it loses its parent and index information.
+        When a tree is detached, it loses its parent tree and index information.
         We have to store this before detaching so we can re-attach back
         to its original place when reattach is called.
     */

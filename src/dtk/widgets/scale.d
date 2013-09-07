@@ -6,7 +6,6 @@
  */
 module dtk.widgets.scale;
 
-import std.conv;
 import std.string;
 import std.range;
 
@@ -14,6 +13,7 @@ import dtk.app;
 import dtk.event;
 import dtk.interpreter;
 import dtk.geometry;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.widget;
@@ -26,7 +26,7 @@ class Scale : Widget
     {
         _minValue = minValue;
         _maxValue = maxValue;
-        super(master, TkType.scale);
+        super(master, TkType.scale, WidgetType.scale);
 
         this.setOption("orient", to!string(orientation));
         this.setOption("length", to!string(length));

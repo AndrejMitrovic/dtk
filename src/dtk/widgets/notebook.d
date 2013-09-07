@@ -7,7 +7,6 @@
 module dtk.widgets.notebook;
 
 import std.array;
-import std.conv;
 import std.exception;
 import std.range;
 import std.string;
@@ -15,6 +14,7 @@ import std.string;
 import dtk.geometry;
 import dtk.image;
 import dtk.interpreter;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.options;
@@ -60,7 +60,7 @@ class Notebook : Widget
     ///
     this(Widget master)
     {
-        super(master, TkType.notebook);
+        super(master, TkType.notebook, WidgetType.notebook);
     }
 
     /** Add a widget to this notebook. */

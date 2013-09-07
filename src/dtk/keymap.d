@@ -37,6 +37,9 @@ struct KeySym
     // workaround for pretty printing
     string toString() const
     {
+        if (value == typeof(value).init)
+            return "";
+
         return keySymToName[value];
     }
 

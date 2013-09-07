@@ -7,13 +7,13 @@
 module dtk.widgets.panedwindow;
 
 import std.array;
-import std.conv;
 import std.exception;
 import std.range;
 import std.string;
 
 import dtk.geometry;
 import dtk.interpreter;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.widget;
@@ -24,7 +24,7 @@ class PanedWindow : Widget
     ///
     this(Widget master, Orientation orientation)
     {
-        super(master, TkType.panedwindow);
+        super(master, TkType.panedwindow, WidgetType.panedwindow);
         this.setOption("orient", to!string(orientation));
     }
 

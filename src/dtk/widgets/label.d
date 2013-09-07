@@ -6,13 +6,13 @@
  */
 module dtk.widgets.label;
 
-import std.conv;
 import std.range;
 import std.string;
 
 import dtk.color;
 import dtk.image;
 import dtk.geometry;
+import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.options;
@@ -24,7 +24,7 @@ class Label : Widget
     ///
     this(Widget master)
     {
-        super(master, TkType.label);
+        super(master, TkType.label, WidgetType.label);
     }
 
     /**

@@ -49,7 +49,7 @@ echo. > %stderr_log%
 rem Uncomment these as necessary
 rem
 set build_tests=1
-rem set run_tests=1
+set run_tests=1
 rem set build_lib=1
 
 if [%build_tests%]==[] goto :BUILD

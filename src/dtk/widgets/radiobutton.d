@@ -6,7 +6,6 @@
  */
 module dtk.widgets.radiobutton;
 
-import std.conv;
 import std.exception;
 import std.range;
 import std.string;
@@ -28,7 +27,7 @@ class RadioGroup : Widget
     // todo: this is not really a Widget, but it needs to have a callback mechanism
     this()
     {
-        super(CreateFakeWidget.init);
+        super(CreateFakeWidget.init, WidgetType.radiogroup);
         _varName = makeTracedVar(TkEventType.TkRadioButtonSelect);
     }
 
@@ -74,7 +73,7 @@ class RadioButton : Widget
     {
         enforce(radioGroup !is null, "radioGroup argument must not be null.");
 
-        super(master, TkType.radiobutton);
+        super(master, TkType.radiobutton, WidgetType.radiobutton);
 
         this.setOption("text", text);
         this.setOption("variable", radioGroup._varName);

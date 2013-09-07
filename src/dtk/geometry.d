@@ -9,11 +9,12 @@ module dtk.geometry;
 import core.exception;
 
 import std.algorithm;
-import std.conv;
 import std.exception;
 import std.string;
 import std.traits;
 import std.typetuple;
+
+import dtk.utils;
 
 ///
 struct Point
