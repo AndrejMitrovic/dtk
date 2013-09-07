@@ -19,7 +19,8 @@ unittest
 {
     auto testWindow = new Window(app.mainWindow, 200, 200);
 
-    bool ignoreEvents;  // Tk double-click behavior workaround
+    // Tk double-click behavior workaround
+    bool ignoreEvents;
 
     int wheel;
     MouseAction action;
@@ -76,8 +77,19 @@ unittest
         button = newButton;
         keyMod = KeyMod.none;
 
+        /** test single click. */
+        action = MouseAction.press;
+        tclEvalFmt("event generate %s <ButtonPress> -button %s", testWindow.getTclName(), idx + 1);
+        ++expectedCallCount;
+
+        action = MouseAction.release;
+        tclEvalFmt("event generate %s <ButtonRelease> -button %s", testWindow.getTclName(), idx + 1);
+        ++expectedCallCount;
+        genIgnoredEvent(idx);
+
+        // todo note: can't directly call double/triple-ButtonPress.
+        // workaround follows after this section.
         /+
-        // todo note: can't directly call double/triple-ButtonPress
         static immutable modifiers = ["", "Double-", "Triple-", "Quadruple-"];
         static immutable mouseActions = [MouseAction.click, MouseAction.double_click, MouseAction.triple_click, MouseAction.quadruple_click];
 
@@ -94,6 +106,30 @@ unittest
 
             genIgnoredEvent(idx);
         } +/
+
+        void testMultiClick(size_t count, MouseAction mouseAction)
+        {
+            ignoreEvents = true;
+            foreach (i; 1 .. count)
+            {
+                tclEvalFmt("event generate %s <ButtonPress> -button %s", testWindow.getTclName(), idx + 1);
+                tclEvalFmt("event generate %s <ButtonRelease> -button %s", testWindow.getTclName(), idx + 1);
+            }
+            ignoreEvents = false;
+
+            action = mouseAction;
+            tclEvalFmt("event generate %s <ButtonPress> -button %s", testWindow.getTclName(), idx + 1);
+            ++expectedCallCount;
+
+            action = MouseAction.release;
+            tclEvalFmt("event generate %s <ButtonRelease> -button %s", testWindow.getTclName(), idx + 1);
+            ++expectedCallCount;
+            genIgnoredEvent(idx);
+        }
+
+        testMultiClick(2, MouseAction.double_click);
+        testMultiClick(3, MouseAction.triple_click);
+        testMultiClick(4, MouseAction.quadruple_click);
 
         // test with key modifiers
         foreach (newKeyMod; keyMods)

@@ -8,9 +8,19 @@ Docs todo:
 - You can only send key events to the focused window. If we add support for manually creating events, we should
   make sure we focus a window, or only allow sending the keyboard event to the focused window.
 
+- Note how multi-click events are delivered:
+    event button: button1 action press
+    event button: button1 action release
+    event button: button1 action double_click
+    event button: button1 action release
+    event button: button1 action triple_click
+    event button: button1 action release
+    event button: button1 action quadruple_click
+    event button: button1 action release
+
 Todo now:
 
-- Add callCount and expectedCallCount for mouse event testing just like for key event testing.
+- Fix mouse event tests for double/triple clicks.
 
 - Add interpreter result checking in tcl eval calls, we're missing too many failed calls without knowing.
 

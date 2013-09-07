@@ -14,42 +14,33 @@ unittest
 
     auto testWindow = new Window(app.mainWindow, 200, 200);
 
-    bool ignoreEvents;  // Tk double-click behavior workaround
+    // Tk double-click behavior workaround
+    bool ignoreEvents;
 
     int wheel;
     MouseAction action;
     MouseButton button;
     KeyMod keyMod;
-    Point widgetMousePos;
 
     // we only want to test this when we explicitly generate move events,
     // since the mouse can be at an arbitrary point when generating non-move events.
-    enum MotionTest { none, widget, desktop }
-    MotionTest motionTest;
-    Point desktopMousePos;
+    bool motionTest;
+    Point widgetMousePos;
+
+    size_t callCount;
+    size_t expectedCallCount;
 
     auto handler = (scope MouseEvent e)
     {
         if (ignoreEvents)
             return;
 
-        assert(e.action == action, text(action, " ", e.action));
-        assert(e.button == button, text(button, " ", e.button));
-        assert(e.wheel  == wheel,  text(wheel,  " ", e.wheel));
-        assert(e.keyMod == keyMod, text(keyMod, " ", e.keyMod));
-
-        switch (motionTest)
-        {
-            case MotionTest.widget:
-                assert(e.widgetMousePos == widgetMousePos, text(widgetMousePos, " ", e.widgetMousePos));
-                break;
-
-            case MotionTest.desktop:
-                assert(e.desktopMousePos == desktopMousePos, text(desktopMousePos, " ", e.desktopMousePos));
-                break;
-
-            default:
-        }
+        assert(e.action == action, text(action, " != ", e.action));
+        assert(e.button == button, text(button, " != ", e.button));
+        assert(e.wheel  == wheel,  text(wheel,  " != ", e.wheel));
+        assert(e.keyMod == keyMod, text(keyMod, " != ", e.keyMod));
+        if (motionTest) assert(e.widgetMousePos == widgetMousePos, text(widgetMousePos, " ", e.widgetMousePos));
+        ++callCount;
     };
 
     testWindow.onMouseEvent = handler;
@@ -81,6 +72,19 @@ unittest
         button = newButton;
         keyMod = KeyMod.none;
 
+        /** test single click. */
+        action = MouseAction.press;
+        tclEvalFmt("event generate %s <ButtonPress> -button %s", testWindow.getTclName(), idx + 1);
+        ++expectedCallCount;
+
+        action = MouseAction.release;
+        tclEvalFmt("event generate %s <ButtonRelease> -button %s", testWindow.getTclName(), idx + 1);
+        ++expectedCallCount;
+        genIgnoredEvent(idx);
+
+        // todo note: can't directly call double/triple-ButtonPress.
+        // workaround follows after this section.
+        /+
         static immutable modifiers = ["", "Double-", "Triple-", "Quadruple-"];
         static immutable mouseActions = [MouseAction.click, MouseAction.double_click, MouseAction.triple_click, MouseAction.quadruple_click];
 
@@ -89,12 +93,38 @@ unittest
         {
             action = mouseAction;
             tclEvalFmt("event generate %s <%sButtonPress> -button %s", testWindow.getTclName(), modifier, idx + 1);
+            ++expectedCallCount;
 
             action = MouseAction.release;
             tclEvalFmt("event generate %s <ButtonRelease> -button %s", testWindow.getTclName(), idx + 1);
+            ++expectedCallCount;
 
             genIgnoredEvent(idx);
+        } +/
+
+        void testMultiClick(size_t count, MouseAction mouseAction)
+        {
+            ignoreEvents = true;
+            foreach (i; 1 .. count)
+            {
+                tclEvalFmt("event generate %s <ButtonPress> -button %s", testWindow.getTclName(), idx + 1);
+                tclEvalFmt("event generate %s <ButtonRelease> -button %s", testWindow.getTclName(), idx + 1);
+            }
+            ignoreEvents = false;
+
+            action = mouseAction;
+            tclEvalFmt("event generate %s <ButtonPress> -button %s", testWindow.getTclName(), idx + 1);
+            ++expectedCallCount;
+
+            action = MouseAction.release;
+            tclEvalFmt("event generate %s <ButtonRelease> -button %s", testWindow.getTclName(), idx + 1);
+            ++expectedCallCount;
+            genIgnoredEvent(idx);
         }
+
+        testMultiClick(2, MouseAction.double_click);
+        testMultiClick(3, MouseAction.triple_click);
+        testMultiClick(4, MouseAction.quadruple_click);
 
         // test with key modifiers
         foreach (newKeyMod; keyMods)
@@ -104,10 +134,12 @@ unittest
             action = MouseAction.press;
             tclEvalFmt("event generate %s <ButtonPress> -button %s -state %s",
                        testWindow.getTclName(), idx + 1, cast(int)newKeyMod);
+            ++expectedCallCount;
 
             action = MouseAction.release;
             tclEvalFmt("event generate %s <ButtonRelease> -button %s -state %s",
                        testWindow.getTclName(), idx + 1, cast(int)newKeyMod);
+            ++expectedCallCount;
 
             genIgnoredEvent(idx);
         }
@@ -125,21 +157,25 @@ unittest
         button = newButton;
         keyMod = KeyMod.none;
         tclEvalFmt("event generate %s <ButtonPress> -button %s", testWindow.getTclName(), idx + 1);
+        ++expectedCallCount;
 
         // last key becomes the modifier
         action = MouseAction.press;
         button = mouseButtons[(idx + 1) % mouseButtons.length];  // new button
         keyMod = mouseKeyMods[idx];
         tclEvalFmt("event generate %s <ButtonPress> -button %s", testWindow.getTclName(),   ((idx + 1) % mouseButtons.length) + 1);
+        ++expectedCallCount;
 
         action = MouseAction.release;
         tclEvalFmt("event generate %s <ButtonRelease> -button %s", testWindow.getTclName(), ((idx + 1) % mouseButtons.length) + 1);
+        ++expectedCallCount;
 
         // modifier button: release
         action = MouseAction.release;
         button = newButton;
         keyMod = KeyMod.none;
         tclEvalFmt("event generate %s <ButtonRelease> -button %s", testWindow.getTclName(), idx + 1);
+        ++expectedCallCount;
 
         genIgnoredEvent(idx);
     }
@@ -158,6 +194,7 @@ unittest
             wheel = sign * 120;
             tclEvalFmt("event generate %s <MouseWheel> -delta %s -state %s",
                        testWindow.getTclName(), wheel, cast(int)newKeyMod);
+            ++expectedCallCount;
         }
     }
 
@@ -170,18 +207,14 @@ unittest
     foreach (x; 0 .. 5)
     foreach (y; 5 .. 10)
     {
-        motionTest = MotionTest.widget;
+        motionTest = true;
         widgetMousePos = Point(x, y);
         tclEvalFmt("event generate %s <Motion> -x %s -y %s",
                     testWindow.getTclName(), widgetMousePos.x, widgetMousePos.y);
-
-        // major note: we didn't even test this, it failed:
-        // there is no -X and -Y
-        motionTest = MotionTest.desktop;
-        desktopMousePos = Point(x, y);
-        tclEvalFmt("event generate %s <Motion> -X %s -Y %s",
-                    testWindow.getTclName(), desktopMousePos.x, desktopMousePos.y);
+        ++expectedCallCount;
     }
+
+    assert(callCount == expectedCallCount, text(callCount, " != ", expectedCallCount));
 
     app.run();
 }
