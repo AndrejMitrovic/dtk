@@ -41,6 +41,17 @@ import dtk.widgets.scrollbar;
 abstract class Widget
 {
     /**
+        A list of event handlers which will be called in sequence
+        before any other event handlers.
+
+        You can assign $(D true) to $(D event.handled) in the
+        event handler if you want to stop the event from going
+        into the sinking phase. This will also stop other event
+        filters in this list from being called.
+    */
+    public Signal!Event onFilterEvent;
+
+    /**
         Intercept an event that is sinking towards a child widget,
         which has $(D this) widget as its direct or indirect parent.
 
@@ -88,6 +99,36 @@ abstract class Widget
     public Signal!Event onSinkEvent;
 
     /**
+        Handle an event for which the target is this widget.
+        This generic event handler is invoked before an
+        event-specific handler such as $(D onMouseEvent) is called.
+
+        Note that at this point click/push events may have already
+        caused the widget to physically change appearance.
+
+        You can assign $(D true) to $(D event.handled) in the
+        event handler if you want to stop the event from propagating
+        to event-specific event handlers.
+    */
+    public Signal!Event onEvent;
+
+    /**
+        A list of event handlers which will be called in sequence
+        after this widget's generic (onEvent) or specific
+        (e.g. onKeyboardEvent)event handler.
+
+        You can assign $(D true) to $(D event.handled) in the
+        event handler if you want to stop the event from reaching
+        other event handlers in this list. However this will not
+        stop the event from reaching $(D onBubbleEvent) handlers.
+
+        This event handler list is used for notifying event
+        handlers when an event has been received and handled
+        by $(D this) widget.
+    */
+    public Signal!Event onNotifyEvent;
+
+    /**
         Intercept an event that is bubbling toward the root parent.
         At this point the target child widget has already handled
         the event.
@@ -119,47 +160,6 @@ abstract class Widget
         target widget's $(D onNotifyEvent) list.
     */
     public Signal!Event onBubbleEvent;
-
-    /**
-        Handle an event for which the target is this widget.
-        This generic event handler is invoked before an
-        event-specific handler such as $(D onMouseEvent) is called.
-
-        Note that at this point click/push events may have already
-        caused the widget to physically change appearance.
-
-        You can assign $(D true) to $(D event.handled) in the
-        event handler if you want to stop the event from propagating
-        to event-specific event handlers.
-    */
-    public Signal!Event onEvent;
-
-    /**
-        A list of event handlers which will be called in sequence
-        before any other event handlers.
-
-        You can assign $(D true) to $(D event.handled) in the
-        event handler if you want to stop the event from going
-        into the sinking phase. This will also stop other event
-        filters in this list from being called.
-    */
-    public Signal!Event onFilterEvent;
-
-    /**
-        A list of event handlers which will be called in sequence
-        after this widget's generic (onEvent) or specific
-        (e.g. onKeyboardEvent)event handler.
-
-        You can assign $(D true) to $(D event.handled) in the
-        event handler if you want to stop the event from reaching
-        other event handlers in this list. However this will not
-        stop the event from reaching $(D onBubbleEvent) handlers.
-
-        This event handler list is used for notifying event
-        handlers when an event has been received and handled
-        by $(D this) widget.
-    */
-    public Signal!Event onNotifyEvent;
 
     /**
         Handle mouse-specific events.
