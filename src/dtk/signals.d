@@ -19,7 +19,7 @@ import std.typecons;
 import dtk.event;
 
 /**
-    Some of the EventHandlerList code is based off of Johannes Pfau's
+    Some of the Signal code is based off of Johannes Pfau's
     signals module, which he introduced here: https://gist.github.com/1194497
 */
 
@@ -76,7 +76,7 @@ struct EventHandler(EventClass)
         If no event handler was set, the function
         returns early.
     */
-    void call(scope EventClass event)
+    package void call(scope EventClass event)
     {
         if (_callback.deleg)
             _callback.deleg(event);
@@ -257,12 +257,12 @@ unittest
 }
 
 /**
-    An event handler list holds multiple event handlers.
+    A signal holds multiple event handlers to call.
 
     See the $(D EventHandler) documentation on which types
     of event handlers are allowed to be set.
 */
-struct EventHandlerList(EventClass)
+struct Signal(EventClass)
 {
     /** Add a handler to the list of handlers at the end of the list. */
     T connect(T)(T handler)
@@ -390,9 +390,20 @@ struct EventHandlerList(EventClass)
     }
 
     /** Get a forward range of all the handlers. */
-    @property auto handlers()
+    package @property auto handlers()
     {
         return _handlers[];
+    }
+
+    /** Emit a signal until the event is handled. */
+    void emit(scope EventClass event)
+    {
+        foreach (handler; _handlers)
+        {
+            handler.call(event);
+            if (event.handled)
+                break;
+        }
     }
 
 private:

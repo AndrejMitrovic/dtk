@@ -47,7 +47,7 @@ enum EventType
     */
     keyboard,
 
-    /** A button widget event, e.g. a button widget could be pressed. */
+    /** A button widget event, e.g. a button widget was pressed. */
     button,
 
     /** A check button widget event, e.g. a check button was toggled on or off. */
@@ -56,7 +56,7 @@ enum EventType
 
 /**
     Each event is traveling in a direction, either from the root window of
-    the target child towards the target child widget (sinking), or in the
+    the target widget towards the target widget (sinking), or in the
     opposite direction (bubbling).
 */
 enum EventTravel
@@ -67,17 +67,17 @@ enum EventTravel
     /// The event is going through the target widget's filter list.
     filter,
 
-    /// The event is sinking from the toplevel parent of this widget, towards the widget.
+    /// The event is sinking from the toplevel parent towards the target widget.
     sink,
 
     /// The event has reached its target widget, and is now being handled by either
-    /// onEvent and/or one of its specific event handlers, such as onKeyboardEvent.
+    /// onEvent and/or one of its specific event handlers such as onKeyboardEvent.
     target,
 
-    /// The event was dispatched to the widget, and now explicit listeners are notified.
+    /// The event was dispatched to the widget, and now event listeners are notified.
     notify,
 
-    /// The event is bubbling upwards towards the toplevel parent of this widget.
+    /// The event is bubbling upwards towards the toplevel window of this widget.
     bubble,
 
     // direct,  // todo
@@ -177,13 +177,13 @@ class Event
     }
 
     /** Return the current travel direction of this event. */
-    public @property EventTravel eventTravel()
+    @property EventTravel eventTravel()
     {
         return _eventTravel;
     }
 
     /** Output the string representation of this event. */
-    public void toString(scope void delegate(const(char)[]) sink) { }
+    void toString(scope void delegate(const(char)[]) sink) { }
 
     /**
         Derived classes should call $(D toStringImpl(sink, this.tupleof) )
@@ -221,11 +221,7 @@ package:
     EventTravel _eventTravel;
 }
 
-/**
-    A set of possible mouse actions.
-    Press and release actions include any mouse
-    button, such as the middle or wheel button.
-*/
+/** A set of possible mouse actions. */
 enum MouseAction
 {
     /** One of the mouse buttons was pressed. */
@@ -247,7 +243,7 @@ enum MouseAction
     quadruple_click = 4,
 
     /**
-        The mouse wheel was moved. See the $(D wheelStep) field to determine
+        The mouse wheel was moved. See the $(D wheel) field to determine
         the direction the mouse wheel was moved in.
 
         $(BLUE Note): When the wheel is pressed as a mouse button,
@@ -259,9 +255,7 @@ enum MouseAction
     motion = 6,
 }
 
-/**
-    A set of possible mouse buttons.
-*/
+/** A set of possible mouse buttons. */
 enum MouseButton
 {
     /** No button was pressed or released. */
@@ -322,7 +316,7 @@ enum KeyMod
     /** Convenience for OSX - equal to $(D alt). */
     option = alt,
 
-    ///
+    /** Shift key. */
     shift = 1 << 0,
 
     // todo: when caps lock is turned off, lock is set.
@@ -356,9 +350,9 @@ enum KeyMod
         The following are similarly named as the members of the
         $(D MouseButton) enum, but have a "mouse_" prefix.
 
-        $(BLUE Note): The integral values of the following members
-        are not the same as the ones in $(D MouseButton), do not
-        attempt to cast between the two.
+        $(BLUE Note): The integral values of these members
+        are not the same as the ones in the $(D MouseButton)
+        enum, do not attempt to cast between the two.
     */
 
     /** The left mouse button. */
@@ -398,7 +392,6 @@ class MouseEvent : Event
     this(Widget widget, MouseAction action, MouseButton button, int wheel, KeyMod keyMod, Point widgetMousePos, Point desktopMousePos, TimeMsec timeMsec)
     {
         super(widget, EventType.mouse, timeMsec);
-
         this.action = action;
         this.button = button;
         this.wheel = wheel;
@@ -421,8 +414,8 @@ class MouseEvent : Event
 
     /**
         Specifies which button, if any, was pressed,
-        held, or released. If no buttons were pushed
-        or released then it equals $(D MouseButton.none).
+        or released. If no buttons were pushed or
+        released then it equals $(D MouseButton.none).
     */
     const(MouseButton) button;
 
@@ -434,7 +427,7 @@ class MouseEvent : Event
 
         Note: The delta is hardware-specific, based on the
         hardware resolution of the mouse wheel. Typically
-        it equals 120/-120, however this number can be
+        it equals 120, 0, or -120, however this number can be
         arbitrary when the hardware supports finer-grained
         scrolling resolution.
 
@@ -517,7 +510,7 @@ class KeyboardEvent : Event
     /**
         The unicode character that was pressed or released.
 
-        Note: that this can equal $(D dchar.init) if only a
+        Note: this can equal $(D dchar.init) if only a
         single key modifier was pressed (e.g. $(B control) key).
 
         Note: when a modifier is pressed together with a key,
@@ -525,8 +518,8 @@ class KeyboardEvent : Event
         control unicode character such as 'SUB' to $(D unichar),
         but $(D keySym) will equal the $(B 'a') key.
 
-        On the other hand, pressing $(B shift + a) will set
-        both of these fields to $(B 'A').
+        On the other hand, pressing e.g. $(B shift + a) will
+        set both $(D unichar) and $(D keySym) to $(B 'A').
     */
     const(dchar) unichar;
 
@@ -575,7 +568,6 @@ class ButtonEvent : Event
 {
     this(Widget widget, ButtonAction action, TimeMsec timeMsec)
     {
-        // todo: we should pass a widget
         super(widget, EventType.button, timeMsec);
         this.action = action;
     }

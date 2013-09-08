@@ -73,9 +73,9 @@ class Button : Widget
     }
 
     /**
-        Event handler used when the button is pushed.
+        Signal emitted when the button is pushed.
     */
-    public EventHandler!ButtonEvent onButtonEvent;
+    public Signal!ButtonEvent onButtonEvent;
 
     /**
         Physically push the button and emit a ButtonEvent.

@@ -284,7 +284,6 @@ static:
     private static void _filterEvent(Widget widget, scope Event event)
     {
         auto handlers = widget.onFilterEvent.handlers;
-
         if (handlers.empty)
             return;
 
@@ -327,7 +326,12 @@ static:
             return;
 
         // handle the sinking event
-        widget.onSinkEvent.call(event);
+        foreach (handler; widget.onSinkEvent.handlers)
+        {
+            handler.call(event);
+            if (event.handled)
+                return;
+        }
     }
 
     /**
@@ -337,7 +341,9 @@ static:
     private static TkEventFlag _targetEvent(Widget widget, scope Event event)
     {
         event._eventTravel = EventTravel.target;
-        widget.onEvent.call(event);
+
+        // call event handlers for generic onEvent
+        widget.onEvent.emit(event);
 
         /**
             Most events are set up by 'bind', which allows continue/resume based on
@@ -358,15 +364,15 @@ static:
                 break;  // user events can be handled with onEvent
 
             case mouse:
-                widget.onMouseEvent.call(StaticCast!MouseEvent(event));
+                widget.onMouseEvent.emit(StaticCast!MouseEvent(event));
                 break;
 
             case keyboard:
-                widget.onKeyboardEvent.call(StaticCast!KeyboardEvent(event));
+                widget.onKeyboardEvent.emit(StaticCast!KeyboardEvent(event));
                 break;
 
             case button:
-                StaticCast!Button(widget).onButtonEvent.call(StaticCast!ButtonEvent(event));
+                StaticCast!Button(widget).onButtonEvent.emit(StaticCast!ButtonEvent(event));
                 result = TkEventFlag.ok;  // -command events can only return TCL_OK
                 break;
 
@@ -382,7 +388,6 @@ static:
     private static void _notifyEvent(Widget widget, scope Event event)
     {
         auto handlers = widget.onNotifyEvent.handlers;
-
         if (handlers.empty)
             return;
 
@@ -417,13 +422,14 @@ static:
     private static void _bubbleEventImpl(Widget widget, scope Event event)
     {
         // handle the bubbling event
-        widget.onBubbleEvent.call(event);
+        foreach (handler; widget.onBubbleEvent.handlers)
+        {
+            handler.call(event);
+            if (event.handled)
+                return;
+        }
 
-        // if handled, return
-        if (event.handled)
-            return;
-
-        // else, climb upwards and keep sending
+        // if not handled, climb upwards and keep sending
         if (auto parent = widget.parentWidget)
             _bubbleEventImpl(parent, event);
     }

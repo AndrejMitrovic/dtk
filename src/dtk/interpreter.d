@@ -48,16 +48,12 @@ package:
 string tclEval(string cmd)
 {
     version (DTK_LOG_EVAL)
-    {
         stderr.writefln("tcl_eval: %s", cmd);
-        //~ stderr.flush();
-    }
 
     enforce(Tcl_Eval(tclInterp, cast(char*)toStringz(cmd)) != TCL_ERROR,
         format("Tcl eval error: %s", to!string(tclInterp.result)));
 
     auto result = to!string(tclInterp.result);
-    //~ stderr.writefln(" -- result: %s", result);
 
     return result;
 }
@@ -85,7 +81,7 @@ package void tclMakeTracedVar(string varName, string varTag, string callbackName
 {
     tclMakeVar(varName);
 
-    // then hook the callback
+    // hook the callback
     tclEvalFmt(`trace add variable %s write %s "%s $%s"`, varName, varTag, callbackName, varName);
 }
 

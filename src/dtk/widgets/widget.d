@@ -85,7 +85,7 @@ abstract class Widget
         Note: To intercept an event of an arbitrary widget, add your
         event handler to the target widget's $(D onFilterEvent) list.
     */
-    public EventHandler!Event onSinkEvent;
+    public Signal!Event onSinkEvent;
 
     /**
         Intercept an event that is bubbling toward the root parent.
@@ -118,7 +118,7 @@ abstract class Widget
         handled in an arbitrary widget, add your event handler to the
         target widget's $(D onNotifyEvent) list.
     */
-    public EventHandler!Event onBubbleEvent;
+    public Signal!Event onBubbleEvent;
 
     /**
         Handle an event for which the target is this widget.
@@ -132,7 +132,7 @@ abstract class Widget
         event handler if you want to stop the event from propagating
         to event-specific event handlers.
     */
-    public EventHandler!Event onEvent;
+    public Signal!Event onEvent;
 
     /**
         A list of event handlers which will be called in sequence
@@ -143,7 +143,7 @@ abstract class Widget
         into the sinking phase. This will also stop other event
         filters in this list from being called.
     */
-    public EventHandlerList!Event onFilterEvent;
+    public Signal!Event onFilterEvent;
 
     /**
         A list of event handlers which will be called in sequence
@@ -159,7 +159,7 @@ abstract class Widget
         handlers when an event has been received and handled
         by $(D this) widget.
     */
-    public EventHandlerList!Event onNotifyEvent;
+    public Signal!Event onNotifyEvent;
 
     /**
         Handle mouse-specific events.
@@ -171,12 +171,12 @@ abstract class Widget
         the button area, ensure that the button does not lay directly on
         an edge of a window (e.g. add some padding space next to the button).
     */
-    public EventHandler!MouseEvent onMouseEvent;
+    public Signal!MouseEvent onMouseEvent;
 
     /**
         Handle keyboard-specific events.
     */
-    public EventHandler!KeyboardEvent onKeyboardEvent;
+    public Signal!KeyboardEvent onKeyboardEvent;
 
     /** Ctor for widgets which know their parent during construction. */
     this(Widget parent, TkType tkType, WidgetType widgetType)

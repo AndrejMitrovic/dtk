@@ -1,21 +1,10 @@
-Docs todo:
-- You can only send key events to the focused window. If we add support for manually creating events, we should
-  make sure we focus a window, or only allow sending the keyboard event to the focused window.
-
-- Make a note about having to use either -L/SUBSYSTEM:WINDOWS:5.01 (32bit) or -L/SUBSYSTEM:WINDOWS:5.02 (64bit) when compiling DTK apps on windows, or alternatively using WinMain. Otherwise some weird resizing behavior happens with windows instantiated by Tk. See also:
-https://github.com/aldacron/Derelict3/issues/143
-
-- Document how multi-click events are delivered:
-    event button: button1 action press
-    event button: button1 action release
-    event button: button1 action double_click
-    event button: button1 action release
-    event button: button1 action triple_click
-    event button: button1 action release
-    event button: button1 action quadruple_click
-    event button: button1 action release
-
 Todo now:
+
+- Make .emit() a package method, we don't want the user to be able to fire an event.
+
+- We should make everything a signal, so people can use connect() rather than = somewhere.
+
+- Add a .dup property for events.
 
 - Standard Widget options to port:
     - class
@@ -149,3 +138,20 @@ Tk info (move this to an info.md file):
 - Key codes are in keysymdef.h
 
 - Percent substitution is made in ExpandPercents in tk/generic/tkBind.c
+
+Docs todo:
+- You can only send key events to the focused window. If we add support for manually creating events, we should
+  make sure we focus a window, or only allow sending the keyboard event to the focused window.
+
+- Make a note about having to use either -L/SUBSYSTEM:WINDOWS:5.01 (32bit) or -L/SUBSYSTEM:WINDOWS:5.02 (64bit) when compiling DTK apps on windows, or alternatively using WinMain. Otherwise some weird resizing behavior happens with windows instantiated by Tk. See also:
+https://github.com/aldacron/Derelict3/issues/143
+
+- Document how multi-click events are delivered:
+    event button: button1 action press
+    event button: button1 action release
+    event button: button1 action double_click
+    event button: button1 action release
+    event button: button1 action triple_click
+    event button: button1 action release
+    event button: button1 action quadruple_click
+    event button: button1 action release

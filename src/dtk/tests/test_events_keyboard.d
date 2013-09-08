@@ -48,7 +48,7 @@ unittest
         ++callCount;
     };
 
-    testWindow.onKeyboardEvent = handler;
+    testWindow.onKeyboardEvent ~= handler;
 
     // note: you can only send key events to the focused window.
     testWindow.focus();

@@ -48,7 +48,7 @@ unittest
         ++callCount;
     };
 
-    testWindow.onMouseEvent = handler;
+    testWindow.onMouseEvent ~= handler;
 
     static mouseButtons = [MouseButton.button1, MouseButton.button2, MouseButton.button3, MouseButton.button4, MouseButton.button5];
 
