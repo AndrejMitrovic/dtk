@@ -23,8 +23,8 @@ public
     import dtk.widgets.panedwindow;
     import dtk.widgets.progressbar;
     import dtk.widgets.radiobutton;
-    import dtk.widgets.scale;
     import dtk.widgets.separator;
+    import dtk.widgets.slider;
     import dtk.widgets.spinbox;
     import dtk.widgets.sizegrip;
     import dtk.widgets.scrollbar;

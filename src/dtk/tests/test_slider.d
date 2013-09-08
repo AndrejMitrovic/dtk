@@ -1,4 +1,4 @@
-module dtk.tests.test_scale;
+module dtk.tests.test_slider;
 
 version(unittest):
 version(DTK_UNITTEST):
@@ -19,21 +19,21 @@ unittest
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
-    auto scale = new Scale(testWindow, Orientation.horizontal, 200);
-    scale.pack();
+    auto slider = new Slider(testWindow, Orientation.horizontal, 200);
+    slider.pack();
 
-    assert(scale.minValue > -1.0 && scale.minValue < 1.0);
-    assert(scale.maxValue > 99.0 && scale.maxValue < 101.0);
+    assert(slider.minValue > -1.0 && slider.minValue < 1.0);
+    assert(slider.maxValue > 99.0 && slider.maxValue < 101.0);
 
-    assert(scale.value == 0.0);
-    scale.value = 50.0;
+    assert(slider.value == 0.0);
+    slider.value = 50.0;
 
-    scale.onEvent.connect(
+    slider.onEvent.connect(
         (Widget widget, Event event)
         {
             if (event.type == EventType.TkScaleChange)
             {
-                logf("Current scale value: %s.", event.state);
+                logf("Current slider value: %s.", event.state);
             }
         }
     );

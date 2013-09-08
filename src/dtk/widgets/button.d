@@ -79,18 +79,12 @@ class Button : Widget
 
     /**
         Physically push the button and emit a ButtonEvent.
-        The button is automatically released after ~200 milliseconds.
+        The button is automatically released after ~100 milliseconds.
+        Note that this doesn't focus on the widget.
     */
     void push()
     {
-        // push the button
-        tclEvalFmt("%s state pressed", _name);
-
-        // queue unpush for later
-        tclEvalFmt("after 200 { %s state !pressed }", _name);
-
-        // meanwhile invoke the command
-        tclEvalFmt("%s invoke", _name);
+        tclEvalFmt("ttk::button::activate %s", _name);
     }
 
     /** Get the current button style. */

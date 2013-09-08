@@ -396,7 +396,7 @@ struct Signal(EventClass)
     }
 
     /** Emit a signal until the event is handled. */
-    void emit(scope EventClass event)
+    package void emit(scope EventClass event)
     {
         foreach (handler; _handlers)
         {

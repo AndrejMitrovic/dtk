@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.widgets.scale;
+module dtk.widgets.slider;
 
 import std.string;
 import std.range;
@@ -19,14 +19,14 @@ import dtk.utils;
 import dtk.widgets.widget;
 
 ///
-class Scale : Widget
+class Slider : Widget
 {
     ///
     this(Widget master, Orientation orientation, int length, float minValue = 0.0, float maxValue = 100.0)
     {
         _minValue = minValue;
         _maxValue = maxValue;
-        super(master, TkType.scale, WidgetType.scale);
+        super(master, TkType.scale, WidgetType.slider);
 
         this.setOption("orient", to!string(orientation));
         this.setOption("length", to!string(length));
@@ -37,7 +37,7 @@ class Scale : Widget
         this.setOption("variable", _varName);
     }
 
-    /** Get the current value of the scale. */
+    /** Get the current value of the slider. */
     @property float value()
     {
         string res = tclGetVar!string(_varName);
@@ -49,7 +49,7 @@ class Scale : Widget
     }
 
     /**
-        Set the current value of the scale.
+        Set the current value of the slider.
         This should be a value between minValue and maxValue set in
         the constructor.
     */

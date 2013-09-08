@@ -403,7 +403,7 @@ abstract class Widget
 
     /**
         The widget's value is invalid.
-        Potential uses: scale widget value out of bounds,
+        Potential uses: slider widget value out of bounds,
         entry widget value failed validation.
     */
     public final @property bool isInvalid()
@@ -665,11 +665,11 @@ enum WidgetType
     radiogroup,          ///
     radiobutton,         ///
     radiomenu_item,      ///
-    scale,               ///
+    scalar_spinbox,      ///
     scrollbar,           ///
     separator,           ///
     sizegrip,            ///
-    scalar_spinbox,      ///
+    slider,              ///
     text,                ///
     tree,                ///
     window,              ///
@@ -692,8 +692,8 @@ template toWidgetType(Class : Widget)
         Listbox, ListSpinbox, MessageBox, Menu,
         MenuBar, MenuItem, Notebook, PanedWindow,
         Progressbar, RadioGroupMenu, RadioGroup,
-        RadioButton, RadioMenuItem, Scale, Scrollbar,
-        Separator, Sizegrip, ScalarSpinbox, Text, Tree,
+        RadioButton, RadioMenuItem, ScalarSpinbox, Scrollbar,
+        Separator, Sizegrip, Slider, Text, Tree,
         Window
     );
 

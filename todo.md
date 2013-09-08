@@ -1,10 +1,14 @@
-Todo now:
+Todo:
 
-- Make .emit() a package method, we don't want the user to be able to fire an event.
+- Scale widget doesn't respond to up/down properly when it has an opposite orientation.
+There's a patch:
+https://core.tcl.tk/tk/ci/57f9af7736?sbs=1
+    - Check if tcl functions can be overwritten, it would make the above easily fixable.
 
-- We should make everything a signal, so people can use connect() rather than = somewhere.
+- We can override the ttk::button behavior and add button release events.
 
-- Add a .dup property for events.
+- Create bindings and a test-suite for all standard event types:
+http://www.tcl.tk/man/tcl8.6/TkCmd/bind.htm#M7
 
 - Standard Widget options to port:
     - class
@@ -25,6 +29,8 @@ Todo now:
             Place the event at the front of Tcl's event queue, so that it will be handled before any other events already queued.
         mark
             Place the event at the front of Tcl's event queue but behind any other events already queued with -when mark. This option is useful when generating a series of events that should be processed in order but at the front of the queue.
+
+- Add a .dup property for events.
 
 - When can use virtual events, added with 'event add' to hook directly to key sequences, we should provide
 an API for this. E.g.:
