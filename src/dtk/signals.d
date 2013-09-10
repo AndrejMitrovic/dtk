@@ -265,32 +265,30 @@ unittest
 struct Signal(EventClass)
 {
     /** Add a handler to the list of handlers at the end of the list. */
-    T connect(T)(T handler)
+    void connect(T)(T handler)
         if (isEventHandler!(T, EventClass))
     {
         auto call = HandlerType(handler);
         assert(find(_handlers[], call).empty, "Handler is already registered!");
         _handlers.stableInsertAfter(_handlers[], call);
         ++handlersCount;
-        return handler;
     }
 
     /** Convenience append-assign operator, equivalent to calling $(D connect). */
-    T opOpAssign(string op : "~", T)(T handler)
+    void opOpAssign(string op : "~", T)(T handler)
         if (isEventHandler!(T, EventClass))
     {
-        return this.connect(handler);
+        this.connect(handler);
     }
 
     /** Add a handler to the list of handlers at the beginning of the list. */
-    T connectFirst(T)(T handler)
+    void connectFirst(T)(T handler)
         if (isEventHandler!(T, EventClass))
     {
         auto call = HandlerType(handler);
         assert(find(_handlers[], call).empty, "Handler is already registered!");
         _handlers.stableInsertFront(call);
         ++handlersCount;
-        return handler;
     }
 
     /**
@@ -299,7 +297,7 @@ struct Signal(EventClass)
             beforeThis = The new attached handler will be called after this handler
             handler = The handler to be attached
     */
-    T connectBefore(T, U)(T beforeThis, U handler)
+    void connectBefore(T, U)(T beforeThis, U handler)
         if (isEventHandler!(T, EventClass) && isEventHandler!(U, EventClass))
     {
         auto before = HandlerType(beforeThis);
@@ -323,7 +321,6 @@ struct Signal(EventClass)
             _handlers.stableInsertAfter(take(location, new_location), call);
 
         ++handlersCount;
-        return handler;
     }
 
     /**
@@ -332,7 +329,7 @@ struct Signal(EventClass)
             afterThis = The new attached handler will be called after this handler
             handler = The handler to be attached
     */
-    T connectAfter(T, U)(T afterThis, U handler)
+    void connectAfter(T, U)(T afterThis, U handler)
        if (isEventHandler!(T, EventClass) && isEventHandler!(U, EventClass))
     {
         auto after = HandlerType(afterThis);
@@ -342,19 +339,31 @@ struct Signal(EventClass)
         if (location.empty)  // afterThis not found
         {
             // always connect before manager
-            return connectFirst(handler);
+            connectFirst(handler);
         }
         else
         {
             assert(find(_handlers[], call).empty, "Handler is already registered!");
             _handlers.stableInsertAfter(location.take(1), call);
             ++handlersCount;
-            return handler;
         }
     }
 
+    /**
+        Replace a handler with another handler.
+        Params:
+            oldHandler = The old handler which will be removed.
+            newHandler = The handler to be attached at the same position.
+    */
+    void replace(T, U)(T oldHandler, U newHandler)
+        if (isEventHandler!(T, EventClass) && isEventHandler!(U, EventClass))
+    {
+        this.connectAfter(newHandler, oldHandler);
+        this.disconnect(oldHandler);
+    }
+
     /** Remove a handler from the list of handlers. */
-    T disconnect(T)(T handler)
+    void disconnect(T)(T handler)
         if (isEventHandler!(T, EventClass))
     {
         auto call = HandlerType(handler);
@@ -365,7 +374,6 @@ struct Signal(EventClass)
         }
         _handlers.stableLinearRemove(pos.take(1));
         --handlersCount;
-        return handler;
     }
 
     /** Check whether a handler is in this list. */

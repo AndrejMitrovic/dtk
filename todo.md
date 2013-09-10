@@ -1,9 +1,27 @@
 Todo:
 
+- Change readme so it states this is alpha software.
+
+- Test resizing behavior, see why git-gui lags when resizing (it's a tcl script we can hack on)
+
+- Implement a Maya-style spinbox, which increases-decreases when you click and hold the up/down buttons.
+
 - Scale widget doesn't respond to up/down properly when it has an opposite orientation.
 There's a patch:
 https://core.tcl.tk/tk/ci/57f9af7736?sbs=1
     - Check if tcl functions can be overwritten, it would make the above easily fixable.
+
+    - Otherwise check if we can copy an entire style (there's a copy command used in ttk button.tcl
+    where they copy the behavior of buttons and checkbuttons):
+    ttk::copyBindings TButton TCheckbutton
+
+        - This would also allow us to set custom repeat delays and to provide custom widget features.
+
+        - We could use string imports to import a tcl script.
+
+- We could provide a set of helper functions with which to build custom widgets, e.g. see
+functions in ttk's utils.tcl. We should also provide the user to source their own
+tcl scripts via string imports or dynamically.
 
 - We can override the ttk::button behavior and add button release events.
 
