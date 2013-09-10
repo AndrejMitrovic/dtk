@@ -1,13 +1,14 @@
 Todo:
 
-- Change readme so it states this is alpha software.
+- Create bindings and a test-suite for all standard event types:
+http://www.tcl.tk/man/tcl8.6/TkCmd/bind.htm#M7
 
-- Test resizing behavior, see why git-gui lags when resizing (it's a tcl script we can hack on)
+- Add a status bar option to a Window.
 
 - Implement a Maya-style spinbox, which increases-decreases when you click and hold the up/down buttons.
 
 - Scale widget doesn't respond to up/down properly when it has an opposite orientation.
-There's a patch:
+Bugfix patch:
 https://core.tcl.tk/tk/ci/57f9af7736?sbs=1
     - Check if tcl functions can be overwritten, it would make the above easily fixable.
 
@@ -24,9 +25,6 @@ functions in ttk's utils.tcl. We should also provide the user to source their ow
 tcl scripts via string imports or dynamically.
 
 - We can override the ttk::button behavior and add button release events.
-
-- Create bindings and a test-suite for all standard event types:
-http://www.tcl.tk/man/tcl8.6/TkCmd/bind.htm#M7
 
 - Standard Widget options to port:
     - class
