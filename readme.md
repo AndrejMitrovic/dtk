@@ -2,7 +2,9 @@
 
 This is a D wrapper of the Tcl/Tk graphics library. It's based on Tcl/Tk v8.6.0.0.
 
-**Note:** The project is a work-in-progress and is in pre-alpha quality condition. Do not use yet.
+**Note: The project is a work-in-progress and is in a constant state of flux. It is not ready for usage yet.**
+
+**Do not use.**
 
 A previous porting attempt was lysevi's [dkinter](https://github.com/lysevi/dkinter) project, which has been stale for many years.
 
