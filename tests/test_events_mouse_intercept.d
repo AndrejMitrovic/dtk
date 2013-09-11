@@ -17,12 +17,13 @@ unittest
     auto button = new Button(testWindow, "Flash");
     button.pack();
 
-    auto handler = (scope MouseEvent e)
+    auto handler = (scope ButtonEvent e)
     {
-        e.handled = false;
+        stderr.writefln("Button event: %s", e);
+        e.handled = true;
     };
 
-    button.onMouseEvent ~= handler;
+    button.onButtonEvent ~= handler;
 
     app.run();
 }

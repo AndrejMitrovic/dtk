@@ -429,9 +429,15 @@ private alias storages = ParameterStorageClassTuple;
 template isEventHandler(T, Types...)
     if (isSomeFunction!T)
 {
-    enum bool isEventHandler = is(typeof(T.init(Types.init))) &&
-                          storages!(T)[0] == stcType.scope_ &&
-                          is(ReturnType!T == void);
+    alias stores = storages!T;
+
+    // eager evaluation workaround
+    static if (!stores.length)
+        enum bool isEventHandler = false;
+    else
+        enum bool isEventHandler = is(typeof(T.init(Types.init))) &&
+                                   stores[0] == stcType.scope_ &&
+                                   is(ReturnType!T == void);
 }
 
 /** Check whether $(D T) is a pointer to a struct with an $(D opCall) function which can be called with the $(D Types). */
@@ -447,7 +453,7 @@ template isEventHandler(T, Types...)
 template isEventHandler(T, Types...)
     if (is(T == class))
 {
-    // we need a static if due to eager logical 'and' operator semantics
+    // eager evaluation workaround
     static if (is(typeof(T.init.opCall(Types.init))))
     {
         enum bool isEventHandler = is(typeof(T.init.opCall(Types.init)) == void) &&

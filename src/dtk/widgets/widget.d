@@ -178,6 +178,14 @@ abstract class Widget
     */
     public Signal!KeyboardEvent onKeyboardEvent;
 
+    /**
+        Handle the event when a widget is destroyed.
+
+        $(B Note:) You cannot stop a widget from being destroyed,
+        the destroy event is generated after the widget is destroyed.
+    */
+    public Signal!DestroyEvent onDestroyEvent;
+
     /** Ctor for widgets which know their parent during construction. */
     this(Widget parent, TkType tkType, WidgetType widgetType)
     {

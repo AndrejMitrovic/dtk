@@ -102,6 +102,11 @@ static:
         tclEvalFmt("bind %s <MouseWheel> { %s %s %s %s %s }",
                     _dtkInterceptTag,
                     _dtkCallbackIdent, EventType.mouse, MouseAction.wheel, cast(string)TkSubs.mouse_button, mouseArgs);
+
+        /** Hook destroy. */
+        tclEvalFmt("bind %s <Destroy> { %s %s %s }",
+                    _dtkInterceptTag,
+                    _dtkCallbackIdent, EventType.destroy, cast(string)TkSubs.widget_path);
     }
 
     static extern(C)
@@ -134,9 +139,21 @@ static:
 
         switch (type) with (EventType)
         {
+            // case user:     return _handleUserEvent(args);  // todo
             case mouse:    return _handleMouseEvent(args);
             case keyboard: return _handleKeyboardEvent(args);
-            case button:   return _handleButtonEvent(args);  // todo: maybe we should return TCL_OK here
+            case destroy:  return _handleDestroyEvent(args);
+
+            /**
+                Most events are set up by 'bind', which allows continue/resume based on
+                what the D callback returns. Some events however are set up via -command,
+                which doesn't support bindtags. Returning TCL_CONTINUE/TCL_BREAK is invalid,
+                TCL_OK must be returned instead.
+            */
+            case button:
+                _handleButtonEvent(args);
+                return TkEventFlag.ok;
+
             default:       assert(0, format("Unhandled event type '%s'.", type));
         }
     }
@@ -223,8 +240,28 @@ static:
         return _dispatchEvent(widget, event);
     }
 
+    /// create and populate a destroy event and dispatch it.
+    private static TkEventFlag _handleDestroyEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 1, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => Widget path
+        */
+
+        Widget widget = getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        // note: timestamp missing since <Destroy> event doesn't support timestamps
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!DestroyEvent(widget, timeMsec);
+        return _dispatchEvent(widget, event);
+    }
+
     /// create and populate a button event and dispatch it.
-    private static TkEventFlag _handleButtonEvent(const Tcl_Obj*[] tclArr)
+    private static void _handleButtonEvent(const Tcl_Obj*[] tclArr)
     {
         assert(tclArr.length == 2, tclArr.length.text);
 
@@ -243,7 +280,7 @@ static:
         TimeMsec timeMsec = getTclTime();
 
         auto event = scoped!ButtonEvent(widget, action, timeMsec);
-        return _dispatchEvent(widget, event);
+        _dispatchEvent(widget, event);
     }
 
     /// main dispatch function
@@ -345,19 +382,12 @@ static:
         // call event handlers for generic onEvent
         widget.onEvent.emit(event);
 
-        /**
-            Most events are set up by 'bind', which allows continue/resume based on
-            what the D callback returns. Some events however are set up via -command,
-            which doesn't have bindtags, and where returning TCL_CONTINUE/TCL_BREAK
-            is invalid, TCL_OK must be returned instead.
-        */
-        TkEventFlag result = TkEventFlag.resume;
+        if (event.handled)
+            return TkEventFlag.stop;
+
+        assert(!event.handled);
 
         /** If the generic handler didn't handle it, try a specific handler. */
-
-        // todo: @bug: TkEventFlag.resume will be returned on a command that was handled
-        // in the generic onEvent, we should fix this.
-        if (!event.handled)
         switch (event.type) with (EventType)
         {
             case user:
@@ -365,27 +395,24 @@ static:
 
             case mouse:
                 widget.onMouseEvent.emit(StaticCast!MouseEvent(event));
-                goto common_handler;
+                break;
 
             case keyboard:
                 widget.onKeyboardEvent.emit(StaticCast!KeyboardEvent(event));
-                goto common_handler;
+                break;
 
-            /** All basic events return a handling status. */
-            common_handler:
-                if (event.handled)
-                    result = TkEventFlag.stop;
+            case destroy:
+                widget.onDestroyEvent.emit(StaticCast!DestroyEvent(event));
                 break;
 
             case button:
                 StaticCast!Button(widget).onButtonEvent.emit(StaticCast!ButtonEvent(event));
-                result = TkEventFlag.ok;  // -command events can only return TCL_OK
                 break;
 
             default: assert(0, format("Unhandled event type: '%s'", event.type));
         }
 
-        return result;
+        return event.handled ? TkEventFlag.stop : TkEventFlag.resume;
     }
 
     /**

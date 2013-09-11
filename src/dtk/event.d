@@ -47,6 +47,9 @@ enum EventType
     */
     keyboard,
 
+    /** A widget is about to be destroyed. */
+    destroy,
+
     /** A button widget event, e.g. a button widget was pressed. */
     button,
 
@@ -83,7 +86,8 @@ enum EventTravel
     // direct,  // todo
 }
 
-// All standard event types are listed here, in the same order as EventType.
+// todo: implement later
+/+ // All standard event types are listed here, in the same order as EventType.
 private alias EventClassMap = TypeTuple!(Event, Event, MouseEvent, KeyboardEvent);
 
 // todo: add toEventType.
@@ -105,7 +109,7 @@ unittest
     static assert(is(toEventClass!(EventType.user) == Event));
     static assert(is(toEventClass!(EventType.mouse) == MouseEvent));
     static assert(is(toEventClass!(EventType.keyboard) == KeyboardEvent));
-}
+} +/
 
 /** The root class of all event types. */
 class Event
@@ -549,6 +553,21 @@ class KeyboardEvent : Event
         when the keyboard event was generated.
     */
     const(Point) desktopMousePos;
+}
+
+///
+class DestroyEvent : Event
+{
+    this(Widget widget, TimeMsec timeMsec)
+    {
+        super(widget, EventType.destroy, timeMsec);
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
 }
 
 /** Widget-specific events. */
