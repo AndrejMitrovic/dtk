@@ -1,5 +1,8 @@
 Todo:
 
+- Replace these sort of calls with assertOp in the test-suite:
+    assert(e.action == action, text(e.action, " != ", action));
+
 - Add behavior tests for event handling of keyboard and mouse, e.g. when
 a entry widget has a keyboard event, when is it a request event v.s. when
 is it a post-action event.

@@ -39,11 +39,16 @@ unittest
     {
         //~ stderr.writefln(" keyboard: %s", e);
 
-        assert(e.action == action,   text(action,  " != ", e.action));
-        assert(e.keySym == keySym,   text(keySym,  " != ", e.keySym));
-        if (checkUnichar) assert(e.unichar == unichar, text(unichar, " != ", e.unichar));
-        assert(e.keyMod == keyMod,   text(keyMod,  " != ", e.keyMod));
-        if (motionTest) assert(e.widgetMousePos == widgetMousePos, text(widgetMousePos, " ", e.widgetMousePos));
+        assert(e.action == action, text(e.action,  " != ", action));
+        assert(e.keySym == keySym, text(e.keySym,  " != ", keySym));
+
+        if (checkUnichar)
+            assert(e.unichar == unichar, text(e.unichar, " != ", unichar));
+
+        assert(e.keyMod == keyMod, text(e.keyMod,  " != ", keyMod));
+
+        if (motionTest)
+            assert(e.widgetMousePos == widgetMousePos, text(e.widgetMousePos, " ", widgetMousePos));
 
         ++callCount;
     };

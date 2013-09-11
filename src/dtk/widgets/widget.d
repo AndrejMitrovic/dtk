@@ -179,6 +179,12 @@ abstract class Widget
     public Signal!KeyboardEvent onKeyboardEvent;
 
     /**
+        Handle geometry events, such as when the widget's
+        position, size, or border width changes.
+    */
+    public Signal!GeometryEvent onGeometryEvent;
+
+    /**
         Handle the event when a widget is destroyed.
 
         $(B Note:) You cannot stop a widget from being destroyed,

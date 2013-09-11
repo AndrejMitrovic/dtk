@@ -103,7 +103,16 @@ static:
                     _dtkInterceptTag,
                     _dtkCallbackIdent, EventType.mouse, MouseAction.wheel, cast(string)TkSubs.mouse_button, mouseArgs);
 
+        /** Hook geometry. */
+
+        static immutable geometryArgs = [TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.width, TkSubs.height, TkSubs.border_width].join(" ");
+
+        tclEvalFmt("bind %s <Configure> { %s %s %s }",
+                    _dtkInterceptTag,
+                    _dtkCallbackIdent, EventType.geometry, geometryArgs);
+
         /** Hook destroy. */
+
         tclEvalFmt("bind %s <Destroy> { %s %s %s }",
                     _dtkInterceptTag,
                     _dtkCallbackIdent, EventType.destroy, cast(string)TkSubs.widget_path);
@@ -142,6 +151,7 @@ static:
             // case user:     return _handleUserEvent(args);  // todo
             case mouse:    return _handleMouseEvent(args);
             case keyboard: return _handleKeyboardEvent(args);
+            case geometry: return _handleGeometryEvent(args);
             case destroy:  return _handleDestroyEvent(args);
 
             /**
@@ -237,6 +247,36 @@ static:
         TimeMsec timeMsec = getTclTimestamp(tclArr[9]);
 
         auto event = scoped!KeyboardEvent(widget, action, keySym, unichar, keyMod, widgetMousePos, desktopMousePos, timeMsec);
+        return _dispatchEvent(widget, event);
+    }
+
+    /// create and populate a geometry event and dispatch it.
+    private static TkEventFlag _handleGeometryEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 6, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => Widget path
+                1  => Widget x position
+                2  => Widget y position
+                3  => Widget width
+                4  => Widget height
+                5  => Widget border width
+        */
+
+        Widget widget = getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        Point position = getTclPoint(tclArr[1 .. 3]);
+        Size size = getTclSize(tclArr[3 .. 5]);
+        int borderWidth = to!int(tclArr[5].tclPeekString());
+
+        // note: timestamp missing since <Configure> event doesn't support timestamps
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!GeometryEvent(widget, position, size, borderWidth, timeMsec);
+        stderr.writefln("-- handle geometry event %s", cast(GeometryEvent)event);
         return _dispatchEvent(widget, event);
     }
 
@@ -401,6 +441,10 @@ static:
                 widget.onKeyboardEvent.emit(StaticCast!KeyboardEvent(event));
                 break;
 
+            case geometry:
+                widget.onGeometryEvent.emit(StaticCast!GeometryEvent(event));
+                break;
+
             case destroy:
                 widget.onDestroyEvent.emit(StaticCast!DestroyEvent(event));
                 break;
@@ -477,6 +521,13 @@ private Point getTclPoint(ref const(Tcl_Obj*)[2] tclArr)
 {
     return Point(to!int(tclArr[0].tclPeekString()),
                  to!int(tclArr[1].tclPeekString()));
+}
+
+/** Extract the integral width and height from the 2-dimensional Tcl_Obj array. */
+private Size getTclSize(ref const(Tcl_Obj*)[2] tclArr)
+{
+    return Size(to!int(tclArr[0].tclPeekString()),
+                to!int(tclArr[1].tclPeekString()));
 }
 
 /** Extract the mouse action from the Tcl_Obj object. */
