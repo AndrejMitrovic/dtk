@@ -170,6 +170,30 @@ class Window : Widget
         tclEval("update idletasks");
     }
 
+    /** Get the current width of the border. */
+    @property int borderWidth()
+    {
+        return this.getOption!int("borderwidth");
+    }
+
+    /** Set the desired width of the border. */
+    @property void borderWidth(int newBorderWidth)
+    {
+        this.setOption("borderwidth", newBorderWidth);
+    }
+
+    /** Get the current border style. */
+    @property BorderStyle borderStyle()
+    {
+        return this.getOption!BorderStyle("relief");
+    }
+
+    /** Set the border style. */
+    @property void borderStyle(BorderStyle newBorderStyle)
+    {
+        this.setOption("relief", newBorderStyle.text);
+    }
+
     /**
         Get the current alpha value for this window.
         A value of 0.0 indicates a fully-transparent window,

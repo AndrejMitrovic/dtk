@@ -47,6 +47,12 @@ enum EventType
     */
     keyboard,
 
+    /**
+        An event emitted when a widget's size, position, or border width changes,
+        and sometimes when it has changed position in the stacking order.
+    */
+    geometry,
+
     /** A widget is about to be destroyed. */
     destroy,
 
@@ -482,6 +488,81 @@ enum KeyboardAction
 
 ///
 class KeyboardEvent : Event
+{
+    this(Widget widget, KeyboardAction action, KeySym keySym, dchar unichar, KeyMod keyMod, Point widgetMousePos, Point desktopMousePos, TimeMsec timeMsec)
+    {
+        super(widget, EventType.keyboard, timeMsec);
+        this.action = action;
+        this.keySym = keySym;
+        this.unichar = unichar;
+        this.keyMod = keyMod;
+        this.widgetMousePos = widgetMousePos;
+        this.desktopMousePos = desktopMousePos;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /**
+        Specifies what action the keyboard performed,
+        e.g. a key press, a key release, etc.
+    */
+    const(KeyboardAction) action;
+
+    /**
+        The key symbol that was pressed or released.
+    */
+    const(KeySym) keySym;
+
+    /**
+        The unicode character that was pressed or released.
+
+        Note: this can equal $(D dchar.init) if only a
+        single key modifier was pressed (e.g. $(B control) key).
+
+        Note: when a modifier is pressed together with a key,
+        e.g. $(B control + a) - this will store a
+        control unicode character such as 'SUB' to $(D unichar),
+        but $(D keySym) will equal the $(B 'a') key.
+
+        On the other hand, pressing e.g. $(B shift + a) will
+        set both $(D unichar) and $(D keySym) to $(B 'A').
+    */
+    const(dchar) unichar;
+
+    /**
+        A bit mask of all key modifiers that were
+        held while keySym was pressed or released.
+
+        Examples:
+        -----
+        // test if control was held
+        if (keyMod & KeyMod.control) { }
+
+        // test if both control and alt were held at the same time
+        if (keyMod & (KeyMod.control | KeyMod.alt)) { }
+        -----
+    */
+    const(KeyMod) keyMod;
+
+    /**
+        The mouse position relative to the target widget
+        when the keyboard event was generated.
+    */
+    const(Point) widgetMousePos;
+
+    /**
+        The mouse position relative to the desktop
+        when the keyboard event was generated.
+    */
+    const(Point) desktopMousePos;
+}
+
+///
+class GeometryEvent : Event
 {
     this(Widget widget, KeyboardAction action, KeySym keySym, dchar unichar, KeyMod keyMod, Point widgetMousePos, Point desktopMousePos, TimeMsec timeMsec)
     {

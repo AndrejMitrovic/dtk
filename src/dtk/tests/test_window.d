@@ -220,5 +220,14 @@ unittest
     testWindow.size = Size(250, 250);
     assert(testWindow.size == Size(250, 250));
 
+    testWindow.borderWidth = 10;
+    assert(testWindow.borderWidth == 10);
+
+    testWindow.borderStyle = BorderStyle.flat;
+    assert(testWindow.borderStyle == BorderStyle.flat);
+
+    testWindow.borderStyle = BorderStyle.sunken;
+    assert(testWindow.borderStyle == BorderStyle.sunken);
+
     app.testRun();
 }
