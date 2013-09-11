@@ -1,5 +1,7 @@
 Todo:
 
+- Have to insert position/size to each widget, but some have a specific setting for these fields.
+
 - Replace these sort of calls with assertOp in the test-suite:
     assert(e.action == action, text(e.action, " != ", action));
 

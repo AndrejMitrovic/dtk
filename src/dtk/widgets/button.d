@@ -11,6 +11,7 @@ import std.string;
 
 import dtk.dispatch;
 import dtk.event;
+import dtk.geometry;
 import dtk.image;
 import dtk.interpreter;
 import dtk.signals;

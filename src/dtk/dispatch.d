@@ -111,6 +111,18 @@ static:
                     _dtkInterceptTag,
                     _dtkCallbackIdent, EventType.geometry, geometryArgs);
 
+        /** Hook hover. */
+
+        static immutable hoverArgs = [TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.state, TkSubs.timestamp].join(" ");
+
+        tclEvalFmt("bind %s <Enter> { %s %s %s %s }",
+                    _dtkInterceptTag,
+                    _dtkCallbackIdent, EventType.hover, HoverAction.enter, hoverArgs);
+
+        tclEvalFmt("bind %s <Leave> { %s %s %s %s }",
+                    _dtkInterceptTag,
+                    _dtkCallbackIdent, EventType.hover, HoverAction.leave, hoverArgs);
+
         /** Hook destroy. */
 
         tclEvalFmt("bind %s <Destroy> { %s %s %s }",
@@ -152,6 +164,7 @@ static:
             case mouse:    return _handleMouseEvent(args);
             case keyboard: return _handleKeyboardEvent(args);
             case geometry: return _handleGeometryEvent(args);
+            case hover:    return _handleHoverEvent(args);
             case destroy:  return _handleDestroyEvent(args);
 
             /**
@@ -276,7 +289,37 @@ static:
         TimeMsec timeMsec = getTclTime();
 
         auto event = scoped!GeometryEvent(widget, position, size, borderWidth, timeMsec);
-        stderr.writefln("-- handle geometry event %s", cast(GeometryEvent)event);
+        return _dispatchEvent(widget, event);
+    }
+
+    /// create and populate a hover event and dispatch it.
+    private static TkEventFlag _handleHoverEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 6, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => HoverAction
+                1  => Widget path
+                2  => Mouse x position
+                3  => Mouse y position
+                4  => Key modifier
+                5  => Timestamp
+        */
+
+        HoverAction hoverAction = to!HoverAction(tclArr[0].tclPeekString());
+
+        Widget widget = getTclWidget(tclArr[1]);
+        assert(widget !is null);
+
+        Point position = getTclPoint(tclArr[2 .. 4]);
+
+        KeyMod keyMod = getTclKeyMod(tclArr[4]);
+
+        // note: timestamp missing since <Configure> event doesn't support timestamps
+        TimeMsec timeMsec = getTclTimestamp(tclArr[5]);
+
+        auto event = scoped!HoverEvent(widget, hoverAction, position, keyMod, timeMsec);
         return _dispatchEvent(widget, event);
     }
 
@@ -443,6 +486,10 @@ static:
 
             case geometry:
                 widget.onGeometryEvent.emit(StaticCast!GeometryEvent(event));
+                break;
+
+            case hover:
+                widget.onHoverEvent.emit(StaticCast!HoverEvent(event));
                 break;
 
             case destroy:

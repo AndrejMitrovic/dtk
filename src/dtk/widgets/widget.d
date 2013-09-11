@@ -179,10 +179,15 @@ abstract class Widget
     public Signal!KeyboardEvent onKeyboardEvent;
 
     /**
-        Handle geometry events, such as when the widget's
+        Handle geometry events, such as when this widget's
         position, size, or border width changes.
     */
     public Signal!GeometryEvent onGeometryEvent;
+
+    /**
+        The mouse pointer entered or left this widget's area.
+    */
+    public Signal!HoverEvent onHoverEvent;
 
     /**
         Handle the event when a widget is destroyed.

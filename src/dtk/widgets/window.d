@@ -96,7 +96,9 @@ class Window : Widget
         this.geometry = rect;
     }
 
-    /** Get the current window size. */
+    /**
+        Get the current window size.
+    */
     @property Size size()
     {
         string width = tclEvalFmt("winfo width %s", _name);
@@ -113,6 +115,22 @@ class Window : Widget
         rect.width = newSize.width;
         rect.height = newSize.height;
         this.geometry = rect;
+    }
+
+    /** Get the current window geometry. */
+    @property Rect geometry()
+    {
+        return tclEvalFmt("wm geometry %s", _name).toGeometry();
+    }
+
+    /**
+        Set a new window geometry.
+        $(RED bug): See http://stackoverflow.com/questions/18043720/odd-results-for-wm-geometry
+    */
+    @property void geometry(Rect newGeometry)
+    {
+        tclEvalFmt("wm geometry %s %s", _name, newGeometry.toEvalString);
+        tclEval("update idletasks");
     }
 
     /**
@@ -152,22 +170,6 @@ class Window : Widget
         string width = tclEvalFmt("winfo screenwidth %s", _name);
         string height = tclEvalFmt("winfo screenheight %s", _name);
         return Size(to!int(width), to!int(height));
-    }
-
-    /** Get the current window geometry. */
-    @property Rect geometry()
-    {
-        return tclEvalFmt("wm geometry %s", _name).toGeometry();
-    }
-
-    /**
-        Set a new window geometry.
-        $(RED bug): See http://stackoverflow.com/questions/18043720/odd-results-for-wm-geometry
-    */
-    @property void geometry(Rect newGeometry)
-    {
-        tclEvalFmt("wm geometry %s %s", _name, newGeometry.toEvalString);
-        tclEval("update idletasks");
     }
 
     /** Get the current width of the border. */

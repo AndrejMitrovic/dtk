@@ -53,6 +53,11 @@ enum EventType
     */
     geometry,
 
+    /**
+        The mouse moved in or out of the area of a target widget.
+    */
+    hover,
+
     /** A widget is about to be destroyed. */
     destroy,
 
@@ -592,6 +597,59 @@ class GeometryEvent : Event
         The border width of the widget.
     */
     const(int) borderWidth;
+}
+
+///
+enum HoverAction
+{
+    /// The pointer entered the area of the target widget
+    enter,
+
+    /// The pointer left the area of the target widget
+    leave,
+}
+
+///
+class HoverEvent : Event
+{
+    this(Widget widget, HoverAction action, Point position, KeyMod keyMod, TimeMsec timeMsec)
+    {
+        super(widget, EventType.hover, timeMsec);
+        this.action = action;
+        this.position = position;
+        this.keyMod = keyMod;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /**
+        Whether the pointer moved in our out of the area of the target widget.
+    */
+    const(HoverAction) action;
+
+    /**
+        Position of the mouse pointer relative to the target widget.
+    */
+    const(Point) position;
+
+    /**
+        A bit mask of all key modifiers that were
+        held when the mouse enter/leave hover event was generated.
+
+        Examples:
+        -----
+        // test if control was held
+        if (keyMod & KeyMod.control) { }
+
+        // test if both control and alt were held at the same time
+        if (keyMod & (KeyMod.control | KeyMod.alt)) { }
+        -----
+    */
+    const(KeyMod) keyMod;
 }
 
 ///
