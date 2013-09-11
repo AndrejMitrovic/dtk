@@ -365,10 +365,16 @@ static:
 
             case mouse:
                 widget.onMouseEvent.emit(StaticCast!MouseEvent(event));
-                break;
+                goto common_handler;
 
             case keyboard:
                 widget.onKeyboardEvent.emit(StaticCast!KeyboardEvent(event));
+                goto common_handler;
+
+            /** All basic events return a handling status. */
+            common_handler:
+                if (event.handled)
+                    result = TkEventFlag.stop;
                 break;
 
             case button:
