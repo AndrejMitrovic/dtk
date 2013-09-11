@@ -1,6 +1,6 @@
 Todo:
 
-- Have to insert position/size to each widget, but some have a specific setting for these fields.
+- Have to add position/size properties to each widget, but some have a specific setting for these fields.
 
 - Replace these sort of calls with assertOp in the test-suite:
     assert(e.action == action, text(e.action, " != ", action));
@@ -8,18 +8,6 @@ Todo:
 - Add behavior tests for event handling of keyboard and mouse, e.g. when
 a entry widget has a keyboard event, when is it a request event v.s. when
 is it a post-action event.
-    - Note: Any subsequent notify events should then really be called only after
-    the event has been accepted. So we need to re-call our D callback in Tcl, e.g.:
-
-    mouse click:
-        -> onSinkEvent
-            -> onEvent
-                -> Tcl checks whether it's ok to click a button.
-                    -> onNotifyEvent
-                        -> onBubbleEvent
-
-- Create bindings and a test-suite for all standard event types:
-http://www.tcl.tk/man/tcl8.6/TkCmd/bind.htm#M7
 
 - Add a status bar option to a Window.
 

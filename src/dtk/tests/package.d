@@ -11,17 +11,14 @@ version(DTK_UNITTEST):
 
 private
 {
-    //~ import dtk.tests.test_app;  // todo: implement
-    //~ import dtk.tests.test_widget;  // todo: implement
+    //~ import dtk.tests.test_events_destroy;
+    //~ import dtk.tests.test_events_focus;
+    //~ import dtk.tests.test_events_geometry;
+    //~ import dtk.tests.test_events_hover;
+    //~ import dtk.tests.test_events_keyboard;
+    //~ import dtk.tests.test_events_mouse;
 
-    import dtk.tests.test_events_destroy;
-    import dtk.tests.test_events_focus;
-    import dtk.tests.test_events_geometry;
-    import dtk.tests.test_events_hover;
-    import dtk.tests.test_events_keyboard;
-    import dtk.tests.test_events_mouse;
-
-    //~ import dtk.tests.test_button;
+    import dtk.tests.test_button;
     //~ import dtk.tests.test_checkbutton;
     //~ import dtk.tests.test_contextmenu;
     //~ import dtk.tests.test_combobox;
@@ -44,4 +41,7 @@ private
     //~ import dtk.tests.test_scrollbar;
     //~ import dtk.tests.test_text;
     //~ import dtk.tests.test_window;
+
+    //~ import dtk.tests.test_app;  // todo: implement
+    //~ import dtk.tests.test_widget;  // todo: implement
 }
