@@ -43,6 +43,7 @@ final class App
 
         void testRun(Duration runTime = 0.seconds, SkipIdleTime skipIdleTime = SkipIdleTime.yes, string file = __FILE__, size_t line = __LINE__)
         {
+            _isAppRunning = true;
             _file = file;
             _line = line;
             auto displayTimer = StopWatch(AutoStart.yes);
@@ -133,7 +134,9 @@ final class App
     /** Start the App event loop. */
     void run()
     {
+        _isAppRunning = true;
         Tk_MainLoop();
+        _isAppRunning = false;
     }
 
     /** Return the main app window. */
@@ -141,6 +144,9 @@ final class App
     {
         return _window;
     }
+
+package:
+    __gshared bool _isAppRunning;
 
 private:
     long timestamp;

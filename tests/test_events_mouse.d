@@ -35,15 +35,18 @@ unittest
         if (ignoreEvents)
             return;
 
-        assert(e.action == action, text(action, " != ", e.action));
-        assert(e.button == button, text(button, " != ", e.button));
-        assert(e.wheel  == wheel,  text(wheel,  " != ", e.wheel));
-        assert(e.keyMod == keyMod, text(keyMod, " != ", e.keyMod));
-        if (motionTest) assert(e.widgetMousePos == widgetMousePos, text(widgetMousePos, " ", e.widgetMousePos));
+        assert(e.action == action, text(e.action, " != ", action));
+        assert(e.button == button, text(e.button, " != ", button));
+        assert(e.wheel  == wheel,  text(e.wheel,  " != ", wheel));
+        assert(e.keyMod == keyMod, text(e.keyMod, " != ", keyMod));
+
+        if (motionTest)
+            assert(e.widgetMousePos == widgetMousePos, text(e.widgetMousePos, " ", widgetMousePos));
+
         ++callCount;
     };
 
-    testWindow.onMouseEvent = handler;
+    testWindow.onMouseEvent ~= handler;
 
     static mouseButtons = [MouseButton.button1, MouseButton.button2, MouseButton.button3, MouseButton.button4, MouseButton.button5];
 

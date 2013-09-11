@@ -14,6 +14,10 @@ private
     //~ import dtk.tests.test_app;  // todo: implement
     //~ import dtk.tests.test_widget;  // todo: implement
 
+    import dtk.tests.test_events_destroy;
+    import dtk.tests.test_events_focus;
+    import dtk.tests.test_events_geometry;
+    import dtk.tests.test_events_hover;
     import dtk.tests.test_events_keyboard;
     import dtk.tests.test_events_mouse;
 
@@ -33,8 +37,8 @@ private
     //~ import dtk.tests.test_panedwindow;
     //~ import dtk.tests.test_progressbar;
     //~ import dtk.tests.test_radiobutton;
-    //~ import dtk.tests.test_scale;
     //~ import dtk.tests.test_separator;
+    //~ import dtk.tests.test_slider;
     //~ import dtk.tests.test_spinbox;
     //~ import dtk.tests.test_sizegrip;
     //~ import dtk.tests.test_scrollbar;

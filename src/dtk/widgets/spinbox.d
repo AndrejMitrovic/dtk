@@ -76,7 +76,7 @@ class ScalarSpinbox : SpinboxBase
     }
 
     /**
-        Set the current value of the scale.
+        Set the current value of the spinbox.
         This should be a value between minValue and maxValue set in
         the constructor.
     */

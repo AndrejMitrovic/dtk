@@ -41,6 +41,17 @@ import dtk.widgets.scrollbar;
 abstract class Widget
 {
     /**
+        A list of event handlers which will be called in sequence
+        before any other event handlers.
+
+        You can assign $(D true) to $(D event.handled) in the
+        event handler if you want to stop the event from going
+        into the sinking phase. This will also stop other event
+        filters in this list from being called.
+    */
+    public Signal!Event onFilterEvent;
+
+    /**
         Intercept an event that is sinking towards a child widget,
         which has $(D this) widget as its direct or indirect parent.
 
@@ -85,7 +96,37 @@ abstract class Widget
         Note: To intercept an event of an arbitrary widget, add your
         event handler to the target widget's $(D onFilterEvent) list.
     */
-    public EventHandler!Event onSinkEvent;
+    public Signal!Event onSinkEvent;
+
+    /**
+        Handle an event for which the target is this widget.
+        This generic event handler is invoked before an
+        event-specific handler such as $(D onMouseEvent) is called.
+
+        Note that at this point click/push events may have already
+        caused the widget to physically change appearance.
+
+        You can assign $(D true) to $(D event.handled) in the
+        event handler if you want to stop the event from propagating
+        to event-specific event handlers.
+    */
+    public Signal!Event onEvent;
+
+    /**
+        A list of event handlers which will be called in sequence
+        after this widget's generic (onEvent) or specific
+        (e.g. onKeyboardEvent)event handler.
+
+        You can assign $(D true) to $(D event.handled) in the
+        event handler if you want to stop the event from reaching
+        other event handlers in this list. However this will not
+        stop the event from reaching $(D onBubbleEvent) handlers.
+
+        This event handler list is used for notifying event
+        handlers when an event has been received and handled
+        by $(D this) widget.
+    */
+    public Signal!Event onNotifyEvent;
 
     /**
         Intercept an event that is bubbling toward the root parent.
@@ -118,48 +159,7 @@ abstract class Widget
         handled in an arbitrary widget, add your event handler to the
         target widget's $(D onNotifyEvent) list.
     */
-    public EventHandler!Event onBubbleEvent;
-
-    /**
-        Handle an event for which the target is this widget.
-        This generic event handler is invoked before an
-        event-specific handler such as $(D onMouseEvent) is called.
-
-        Note that at this point click/push events may have already
-        caused the widget to physically change appearance.
-
-        You can assign $(D true) to $(D event.handled) in the
-        event handler if you want to stop the event from propagating
-        to event-specific event handlers.
-    */
-    public EventHandler!Event onEvent;
-
-    /**
-        A list of event handlers which will be called in sequence
-        before any other event handlers.
-
-        You can assign $(D true) to $(D event.handled) in the
-        event handler if you want to stop the event from going
-        into the sinking phase. This will also stop other event
-        filters in this list from being called.
-    */
-    public EventHandlerList!Event onFilterEvent;
-
-    /**
-        A list of event handlers which will be called in sequence
-        after this widget's generic (onEvent) or specific
-        (e.g. onKeyboardEvent)event handler.
-
-        You can assign $(D true) to $(D event.handled) in the
-        event handler if you want to stop the event from reaching
-        other event handlers in this list. However this will not
-        stop the event from reaching $(D onBubbleEvent) handlers.
-
-        This event handler list is used for notifying event
-        handlers when an event has been received and handled
-        by $(D this) widget.
-    */
-    public EventHandlerList!Event onNotifyEvent;
+    public Signal!Event onBubbleEvent;
 
     /**
         Handle mouse-specific events.
@@ -171,12 +171,36 @@ abstract class Widget
         the button area, ensure that the button does not lay directly on
         an edge of a window (e.g. add some padding space next to the button).
     */
-    public EventHandler!MouseEvent onMouseEvent;
+    public Signal!MouseEvent onMouseEvent;
 
     /**
         Handle keyboard-specific events.
     */
-    public EventHandler!KeyboardEvent onKeyboardEvent;
+    public Signal!KeyboardEvent onKeyboardEvent;
+
+    /**
+        Handle geometry events, such as when this widget's
+        position, size, or border width changes.
+    */
+    public Signal!GeometryEvent onGeometryEvent;
+
+    /**
+        The mouse pointer entered or left this widget's area.
+    */
+    public Signal!HoverEvent onHoverEvent;
+
+    /**
+        The widget was either focused in or focused out.
+    */
+    public Signal!FocusEvent onFocusEvent;
+
+    /**
+        Handle the event when a widget is destroyed.
+
+        $(B Note:) You cannot stop a widget from being destroyed,
+        the destroy event is generated after the widget is destroyed.
+    */
+    public Signal!DestroyEvent onDestroyEvent;
 
     /** Ctor for widgets which know their parent during construction. */
     this(Widget parent, TkType tkType, WidgetType widgetType)
@@ -403,7 +427,7 @@ abstract class Widget
 
     /**
         The widget's value is invalid.
-        Potential uses: scale widget value out of bounds,
+        Potential uses: slider widget value out of bounds,
         entry widget value failed validation.
     */
     public final @property bool isInvalid()
@@ -665,11 +689,11 @@ enum WidgetType
     radiogroup,          ///
     radiobutton,         ///
     radiomenu_item,      ///
-    scale,               ///
+    scalar_spinbox,      ///
     scrollbar,           ///
     separator,           ///
     sizegrip,            ///
-    scalar_spinbox,      ///
+    slider,              ///
     text,                ///
     tree,                ///
     window,              ///
@@ -692,8 +716,8 @@ template toWidgetType(Class : Widget)
         Listbox, ListSpinbox, MessageBox, Menu,
         MenuBar, MenuItem, Notebook, PanedWindow,
         Progressbar, RadioGroupMenu, RadioGroup,
-        RadioButton, RadioMenuItem, Scale, Scrollbar,
-        Separator, Sizegrip, ScalarSpinbox, Text, Tree,
+        RadioButton, RadioMenuItem, ScalarSpinbox, Scrollbar,
+        Separator, Sizegrip, Slider, Text, Tree,
         Window
     );
 

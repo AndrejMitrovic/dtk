@@ -1,21 +1,48 @@
-Docs todo:
-- You can only send key events to the focused window. If we add support for manually creating events, we should
-  make sure we focus a window, or only allow sending the keyboard event to the focused window.
+Todo:
 
-- Make a note about having to use either -L/SUBSYSTEM:WINDOWS:5.01 (32bit) or -L/SUBSYSTEM:WINDOWS:5.02 (64bit) when compiling DTK apps on windows, or alternatively using WinMain. Otherwise some weird resizing behavior happens with windows instantiated by Tk. See also:
-https://github.com/aldacron/Derelict3/issues/143
+- Have to insert position/size to each widget, but some have a specific setting for these fields.
 
-- Document how multi-click events are delivered:
-    event button: button1 action press
-    event button: button1 action release
-    event button: button1 action double_click
-    event button: button1 action release
-    event button: button1 action triple_click
-    event button: button1 action release
-    event button: button1 action quadruple_click
-    event button: button1 action release
+- Replace these sort of calls with assertOp in the test-suite:
+    assert(e.action == action, text(e.action, " != ", action));
 
-Todo now:
+- Add behavior tests for event handling of keyboard and mouse, e.g. when
+a entry widget has a keyboard event, when is it a request event v.s. when
+is it a post-action event.
+    - Note: Any subsequent notify events should then really be called only after
+    the event has been accepted. So we need to re-call our D callback in Tcl, e.g.:
+
+    mouse click:
+        -> onSinkEvent
+            -> onEvent
+                -> Tcl checks whether it's ok to click a button.
+                    -> onNotifyEvent
+                        -> onBubbleEvent
+
+- Create bindings and a test-suite for all standard event types:
+http://www.tcl.tk/man/tcl8.6/TkCmd/bind.htm#M7
+
+- Add a status bar option to a Window.
+
+- Implement a Maya-style spinbox, which increases-decreases when you click and hold the up/down buttons.
+
+- Scale widget doesn't respond to up/down properly when it has an opposite orientation.
+Bugfix patch:
+https://core.tcl.tk/tk/ci/57f9af7736?sbs=1
+    - Check if tcl functions can be overwritten, it would make the above easily fixable.
+
+    - Otherwise check if we can copy an entire style (there's a copy command used in ttk button.tcl
+    where they copy the behavior of buttons and checkbuttons):
+    ttk::copyBindings TButton TCheckbutton
+
+        - This would also allow us to set custom repeat delays and to provide custom widget features.
+
+        - We could use string imports to import a tcl script.
+
+- We could provide a set of helper functions with which to build custom widgets, e.g. see
+functions in ttk's utils.tcl. We should also provide the user to source their own
+tcl scripts via string imports or dynamically.
+
+- We can override the ttk::button behavior and add button release events.
 
 - Standard Widget options to port:
     - class
@@ -36,6 +63,8 @@ Todo now:
             Place the event at the front of Tcl's event queue, so that it will be handled before any other events already queued.
         mark
             Place the event at the front of Tcl's event queue but behind any other events already queued with -when mark. This option is useful when generating a series of events that should be processed in order but at the front of the queue.
+
+- Add a .dup property for events.
 
 - When can use virtual events, added with 'event add' to hook directly to key sequences, we should provide
 an API for this. E.g.:
@@ -149,3 +178,20 @@ Tk info (move this to an info.md file):
 - Key codes are in keysymdef.h
 
 - Percent substitution is made in ExpandPercents in tk/generic/tkBind.c
+
+Docs todo:
+- You can only send key events to the focused window. If we add support for manually creating events, we should
+  make sure we focus a window, or only allow sending the keyboard event to the focused window.
+
+- Make a note about having to use either -L/SUBSYSTEM:WINDOWS:5.01 (32bit) or -L/SUBSYSTEM:WINDOWS:5.02 (64bit) when compiling DTK apps on windows, or alternatively using WinMain. Otherwise some weird resizing behavior happens with windows instantiated by Tk. See also:
+https://github.com/aldacron/Derelict3/issues/143
+
+- Document how multi-click events are delivered:
+    event button: button1 action press
+    event button: button1 action release
+    event button: button1 action double_click
+    event button: button1 action release
+    event button: button1 action triple_click
+    event button: button1 action release
+    event button: button1 action quadruple_click
+    event button: button1 action release

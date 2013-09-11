@@ -11,6 +11,7 @@ import std.string;
 
 import dtk.dispatch;
 import dtk.event;
+import dtk.geometry;
 import dtk.image;
 import dtk.interpreter;
 import dtk.signals;
@@ -73,24 +74,24 @@ class Button : Widget
     }
 
     /**
-        Event handler used when the button is pushed.
+        Signal emitted when the button is pushed.
     */
-    public EventHandler!ButtonEvent onButtonEvent;
+    public Signal!ButtonEvent onButtonEvent;
 
     /**
         Physically push the button and emit a ButtonEvent.
-        The button is automatically released after ~200 milliseconds.
+        The button is automatically released after ~100 milliseconds.
+        Note that this doesn't focus on the widget.
     */
     void push()
     {
-        // push the button
-        tclEvalFmt("%s state pressed", _name);
+        tclEvalFmt("ttk::button::activate %s", _name);
 
-        // queue unpush for later
-        tclEvalFmt("after 200 { %s state !pressed }", _name);
-
-        // meanwhile invoke the command
-        tclEvalFmt("%s invoke", _name);
+        // todo: could also use:
+        //~ proc activateButton {w} {
+            //~ event generate $w <Button-1> -warp yes
+            //~ event generate $w <ButtonRelease-1>
+        //~ }
     }
 
     /** Get the current button style. */

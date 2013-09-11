@@ -23,4 +23,10 @@ tk::text .t -width 40 -height 10
 # to get the text (line 1, char 0)
 puts "text is: [.t get 1.0 end]"
 
+tkwait visibility .
+#~ tkwait visibility .t
+
+puts [.t cget -width]
+puts [winfo width .t]
+
 pack .t

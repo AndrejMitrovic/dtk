@@ -96,7 +96,9 @@ class Window : Widget
         this.geometry = rect;
     }
 
-    /** Get the current window size. */
+    /**
+        Get the current window size.
+    */
     @property Size size()
     {
         string width = tclEvalFmt("winfo width %s", _name);
@@ -113,6 +115,22 @@ class Window : Widget
         rect.width = newSize.width;
         rect.height = newSize.height;
         this.geometry = rect;
+    }
+
+    /** Get the current window geometry. */
+    @property Rect geometry()
+    {
+        return tclEvalFmt("wm geometry %s", _name).toGeometry();
+    }
+
+    /**
+        Set a new window geometry.
+        $(RED bug): See http://stackoverflow.com/questions/18043720/odd-results-for-wm-geometry
+    */
+    @property void geometry(Rect newGeometry)
+    {
+        tclEvalFmt("wm geometry %s %s", _name, newGeometry.toEvalString);
+        tclEval("update idletasks");
     }
 
     /**
@@ -154,20 +172,28 @@ class Window : Widget
         return Size(to!int(width), to!int(height));
     }
 
-    /** Get the current window geometry. */
-    @property Rect geometry()
+    /** Get the current width of the border. */
+    @property int borderWidth()
     {
-        return tclEvalFmt("wm geometry %s", _name).toGeometry();
+        return this.getOption!int("borderwidth");
     }
 
-    /**
-        Set a new window geometry.
-        $(RED bug): See http://stackoverflow.com/questions/18043720/odd-results-for-wm-geometry
-    */
-    @property void geometry(Rect newGeometry)
+    /** Set the desired width of the border. */
+    @property void borderWidth(int newBorderWidth)
     {
-        tclEvalFmt("wm geometry %s %s", _name, newGeometry.toEvalString);
-        tclEval("update idletasks");
+        this.setOption("borderwidth", newBorderWidth);
+    }
+
+    /** Get the current border style. */
+    @property BorderStyle borderStyle()
+    {
+        return this.getOption!BorderStyle("relief");
+    }
+
+    /** Set the border style. */
+    @property void borderStyle(BorderStyle newBorderStyle)
+    {
+        this.setOption("relief", newBorderStyle.text);
     }
 
     /**

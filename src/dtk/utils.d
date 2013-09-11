@@ -51,7 +51,7 @@ template to(T)
         }
     }
 
-    // Fix issue 6175
+    // Issue 6175
     T to(S)(ref S input, string file = __FILE__, size_t line = __LINE__)
         if (isRawStaticArray!S)
     {
@@ -125,7 +125,6 @@ unittest
 {
     enum EI : int { x = 0 }
     enum EF : float { x = 1.5 }
-
     static assert(is(BaseEnumType!EI == int));
     static assert(is(BaseEnumType!EF == float));
 }

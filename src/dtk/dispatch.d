@@ -102,6 +102,42 @@ static:
         tclEvalFmt("bind %s <MouseWheel> { %s %s %s %s %s }",
                     _dtkInterceptTag,
                     _dtkCallbackIdent, EventType.mouse, MouseAction.wheel, cast(string)TkSubs.mouse_button, mouseArgs);
+
+        /** Hook geometry. */
+
+        static immutable geometryArgs = [TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.width, TkSubs.height, TkSubs.border_width].join(" ");
+
+        tclEvalFmt("bind %s <Configure> { %s %s %s }",
+                    _dtkInterceptTag,
+                    _dtkCallbackIdent, EventType.geometry, geometryArgs);
+
+        /** Hook hover. */
+
+        static immutable hoverArgs = [TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.state, TkSubs.timestamp].join(" ");
+
+        tclEvalFmt("bind %s <Enter> { %s %s %s %s }",
+                    _dtkInterceptTag,
+                    _dtkCallbackIdent, EventType.hover, HoverAction.enter, hoverArgs);
+
+        tclEvalFmt("bind %s <Leave> { %s %s %s %s }",
+                    _dtkInterceptTag,
+                    _dtkCallbackIdent, EventType.hover, HoverAction.leave, hoverArgs);
+
+        /** Hook focus. */
+
+        tclEvalFmt("bind %s <FocusIn> { %s %s %s %s }",
+                    _dtkInterceptTag,
+                    _dtkCallbackIdent, EventType.focus, FocusAction.enter, cast(string)TkSubs.widget_path);
+
+        tclEvalFmt("bind %s <FocusOut> { %s %s %s %s }",
+                    _dtkInterceptTag,
+                    _dtkCallbackIdent, EventType.focus, FocusAction.leave, cast(string)TkSubs.widget_path);
+
+        /** Hook destroy. */
+
+        tclEvalFmt("bind %s <Destroy> { %s %s %s }",
+                    _dtkInterceptTag,
+                    _dtkCallbackIdent, EventType.destroy, cast(string)TkSubs.widget_path);
     }
 
     static extern(C)
@@ -134,9 +170,24 @@ static:
 
         switch (type) with (EventType)
         {
+            // case user:     return _handleUserEvent(args);  // todo
             case mouse:    return _handleMouseEvent(args);
             case keyboard: return _handleKeyboardEvent(args);
-            case button:   return _handleButtonEvent(args);  // todo: maybe we should return TCL_OK here
+            case geometry: return _handleGeometryEvent(args);
+            case hover:    return _handleHoverEvent(args);
+            case focus:    return _handleFocusEvent(args);
+            case destroy:  return _handleDestroyEvent(args);
+
+            /**
+                Most events are set up by 'bind', which allows continue/resume based on
+                what the D callback returns. Some events however are set up via -command,
+                which doesn't support bindtags. Returning TCL_CONTINUE/TCL_BREAK is invalid,
+                TCL_OK must be returned instead.
+            */
+            case button:
+                _handleButtonEvent(args);
+                return TkEventFlag.ok;
+
             default:       assert(0, format("Unhandled event type '%s'.", type));
         }
     }
@@ -223,8 +274,111 @@ static:
         return _dispatchEvent(widget, event);
     }
 
+    /// create and populate a geometry event and dispatch it.
+    private static TkEventFlag _handleGeometryEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 6, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => Widget path
+                1  => Widget x position
+                2  => Widget y position
+                3  => Widget width
+                4  => Widget height
+                5  => Widget border width
+        */
+
+        Widget widget = getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        Point position = getTclPoint(tclArr[1 .. 3]);
+        Size size = getTclSize(tclArr[3 .. 5]);
+        int borderWidth = to!int(tclArr[5].tclPeekString());
+
+        // note: timestamp missing since <Configure> event doesn't support timestamps
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!GeometryEvent(widget, position, size, borderWidth, timeMsec);
+        return _dispatchEvent(widget, event);
+    }
+
+    /// create and populate a hover event and dispatch it.
+    private static TkEventFlag _handleHoverEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 6, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => HoverAction
+                1  => Widget path
+                2  => Mouse x position
+                3  => Mouse y position
+                4  => Key modifier
+                5  => Timestamp
+        */
+
+        HoverAction hoverAction = to!HoverAction(tclArr[0].tclPeekString());
+
+        Widget widget = getTclWidget(tclArr[1]);
+        assert(widget !is null);
+
+        Point position = getTclPoint(tclArr[2 .. 4]);
+
+        KeyMod keyMod = getTclKeyMod(tclArr[4]);
+
+        // note: timestamp missing since <Configure> event doesn't support timestamps
+        TimeMsec timeMsec = getTclTimestamp(tclArr[5]);
+
+        auto event = scoped!HoverEvent(widget, hoverAction, position, keyMod, timeMsec);
+        return _dispatchEvent(widget, event);
+    }
+
+    /// create and populate a focus event and dispatch it.
+    private static TkEventFlag _handleFocusEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 2, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => HoverAction
+                1  => Widget path
+        */
+
+        FocusAction focusAction = to!FocusAction(tclArr[0].tclPeekString());
+
+        Widget widget = getTclWidget(tclArr[1]);
+        assert(widget !is null);
+
+        // note: timestamp missing since <FocusIn/FocusOut> event doesn't support timestamps
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!FocusEvent(widget, focusAction, timeMsec);
+        return _dispatchEvent(widget, event);
+    }
+
+    /// create and populate a destroy event and dispatch it.
+    private static TkEventFlag _handleDestroyEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 1, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => Widget path
+        */
+
+        Widget widget = getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        // note: timestamp missing since <Destroy> event doesn't support timestamps
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!DestroyEvent(widget, timeMsec);
+        return _dispatchEvent(widget, event);
+    }
+
     /// create and populate a button event and dispatch it.
-    private static TkEventFlag _handleButtonEvent(const Tcl_Obj*[] tclArr)
+    private static void _handleButtonEvent(const Tcl_Obj*[] tclArr)
     {
         assert(tclArr.length == 2, tclArr.length.text);
 
@@ -243,7 +397,7 @@ static:
         TimeMsec timeMsec = getTclTime();
 
         auto event = scoped!ButtonEvent(widget, action, timeMsec);
-        return _dispatchEvent(widget, event);
+        _dispatchEvent(widget, event);
     }
 
     /// main dispatch function
@@ -284,7 +438,6 @@ static:
     private static void _filterEvent(Widget widget, scope Event event)
     {
         auto handlers = widget.onFilterEvent.handlers;
-
         if (handlers.empty)
             return;
 
@@ -327,7 +480,12 @@ static:
             return;
 
         // handle the sinking event
-        widget.onSinkEvent.call(event);
+        foreach (handler; widget.onSinkEvent.handlers)
+        {
+            handler.call(event);
+            if (event.handled)
+                return;
+        }
     }
 
     /**
@@ -337,43 +495,53 @@ static:
     private static TkEventFlag _targetEvent(Widget widget, scope Event event)
     {
         event._eventTravel = EventTravel.target;
-        widget.onEvent.call(event);
 
-        /**
-            Most events are set up by 'bind', which allows continue/resume based on
-            what the D callback returns. Some events however are set up via -command,
-            which doesn't have bindtags, and where returning TCL_CONTINUE/TCL_BREAK
-            is invalid, TCL_OK must be returned instead.
-        */
-        TkEventFlag result = TkEventFlag.resume;
+        // call event handlers for generic onEvent
+        widget.onEvent.emit(event);
+
+        if (event.handled)
+            return TkEventFlag.stop;
+
+        assert(!event.handled);
 
         /** If the generic handler didn't handle it, try a specific handler. */
-
-        // todo: @bug: TkEventFlag.resume will be returned on a command that was handled
-        // in the generic onEvent, we should fix this.
-        if (!event.handled)
         switch (event.type) with (EventType)
         {
             case user:
                 break;  // user events can be handled with onEvent
 
             case mouse:
-                widget.onMouseEvent.call(StaticCast!MouseEvent(event));
+                widget.onMouseEvent.emit(StaticCast!MouseEvent(event));
                 break;
 
             case keyboard:
-                widget.onKeyboardEvent.call(StaticCast!KeyboardEvent(event));
+                widget.onKeyboardEvent.emit(StaticCast!KeyboardEvent(event));
+                break;
+
+            case geometry:
+                widget.onGeometryEvent.emit(StaticCast!GeometryEvent(event));
+                break;
+
+            case hover:
+                widget.onHoverEvent.emit(StaticCast!HoverEvent(event));
+                break;
+
+            case focus:
+                widget.onFocusEvent.emit(StaticCast!FocusEvent(event));
+                break;
+
+            case destroy:
+                widget.onDestroyEvent.emit(StaticCast!DestroyEvent(event));
                 break;
 
             case button:
-                StaticCast!Button(widget).onButtonEvent.call(StaticCast!ButtonEvent(event));
-                result = TkEventFlag.ok;  // -command events can only return TCL_OK
+                StaticCast!Button(widget).onButtonEvent.emit(StaticCast!ButtonEvent(event));
                 break;
 
             default: assert(0, format("Unhandled event type: '%s'", event.type));
         }
 
-        return result;
+        return event.handled ? TkEventFlag.stop : TkEventFlag.resume;
     }
 
     /**
@@ -382,7 +550,6 @@ static:
     private static void _notifyEvent(Widget widget, scope Event event)
     {
         auto handlers = widget.onNotifyEvent.handlers;
-
         if (handlers.empty)
             return;
 
@@ -417,13 +584,14 @@ static:
     private static void _bubbleEventImpl(Widget widget, scope Event event)
     {
         // handle the bubbling event
-        widget.onBubbleEvent.call(event);
+        foreach (handler; widget.onBubbleEvent.handlers)
+        {
+            handler.call(event);
+            if (event.handled)
+                return;
+        }
 
-        // if handled, return
-        if (event.handled)
-            return;
-
-        // else, climb upwards and keep sending
+        // if not handled, climb upwards and keep sending
         if (auto parent = widget.parentWidget)
             _bubbleEventImpl(parent, event);
     }
@@ -438,6 +606,13 @@ private Point getTclPoint(ref const(Tcl_Obj*)[2] tclArr)
 {
     return Point(to!int(tclArr[0].tclPeekString()),
                  to!int(tclArr[1].tclPeekString()));
+}
+
+/** Extract the integral width and height from the 2-dimensional Tcl_Obj array. */
+private Size getTclSize(ref const(Tcl_Obj*)[2] tclArr)
+{
+    return Size(to!int(tclArr[0].tclPeekString()),
+                to!int(tclArr[1].tclPeekString()));
 }
 
 /** Extract the mouse action from the Tcl_Obj object. */
