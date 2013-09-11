@@ -1,9 +1,4 @@
-module dtk.tests.test_events_hover;
-
-version(unittest):
-version(DTK_UNITTEST):
-
-import core.thread;
+module test_events_focus;
 
 import std.algorithm;
 import std.range;
@@ -13,10 +8,10 @@ import std.typetuple;
 
 import dtk;
 
-import dtk.tests.globals;
-
 unittest
 {
+    auto app = new App;
+
     auto testWindow = new Window(app.mainWindow, 200, 200);
 
     auto frame = new Frame(testWindow);
@@ -25,29 +20,33 @@ unittest
     frame.pack();
     button1.pack();
 
-    HoverAction action;
+    FocusAction action;
 
     size_t callCount;
     size_t expectedCallCount;
 
-    auto handler = (scope HoverEvent e)
+    auto handler = (scope FocusEvent e)
     {
         assert(e.widget is button1);
         assert(e.action == action);
         ++callCount;
     };
 
-    button1.onHoverEvent ~= handler;
+    button1.onFocusEvent ~= handler;
 
-    action = HoverAction.enter;
-    tclEvalFmt("event generate %s <Enter> -x 0 -y 0", button1.getTclName());
+    action = FocusAction.enter;
+    tclEvalFmt("event generate %s <FocusIn>", button1.getTclName());
     ++expectedCallCount;
 
-    action = HoverAction.leave;
-    tclEvalFmt("event generate %s <Leave> -x 200 -y 200", button1.getTclName());
+    action = FocusAction.leave;
+    tclEvalFmt("event generate %s <FocusOut>", button1.getTclName());
     ++expectedCallCount;
 
     assert(callCount == expectedCallCount, text(callCount, " != ", expectedCallCount));
 
-    app.testRun();
+    app.run();
+}
+
+void main()
+{
 }

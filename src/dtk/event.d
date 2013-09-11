@@ -58,6 +58,11 @@ enum EventType
     */
     hover,
 
+    /**
+        The widget was focused in or focused out.
+    */
+    focus,
+
     /** A widget is about to be destroyed. */
     destroy,
 
@@ -650,6 +655,37 @@ class HoverEvent : Event
         -----
     */
     const(KeyMod) keyMod;
+}
+
+///
+enum FocusAction
+{
+    /// The widget was focused in (the focus has entered the widget)
+    enter,
+
+    /// The widget was focused out (the focus has left the widget)
+    leave,
+}
+
+///
+class FocusEvent : Event
+{
+    this(Widget widget, FocusAction action, TimeMsec timeMsec)
+    {
+        super(widget, EventType.focus, timeMsec);
+        this.action = action;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /**
+        Whether the target widget was focused in or focused out.
+    */
+    const(FocusAction) action;
 }
 
 ///

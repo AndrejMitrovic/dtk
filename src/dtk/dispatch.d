@@ -123,6 +123,16 @@ static:
                     _dtkInterceptTag,
                     _dtkCallbackIdent, EventType.hover, HoverAction.leave, hoverArgs);
 
+        /** Hook focus. */
+
+        tclEvalFmt("bind %s <FocusIn> { %s %s %s %s }",
+                    _dtkInterceptTag,
+                    _dtkCallbackIdent, EventType.focus, FocusAction.enter, cast(string)TkSubs.widget_path);
+
+        tclEvalFmt("bind %s <FocusOut> { %s %s %s %s }",
+                    _dtkInterceptTag,
+                    _dtkCallbackIdent, EventType.focus, FocusAction.leave, cast(string)TkSubs.widget_path);
+
         /** Hook destroy. */
 
         tclEvalFmt("bind %s <Destroy> { %s %s %s }",
@@ -165,6 +175,7 @@ static:
             case keyboard: return _handleKeyboardEvent(args);
             case geometry: return _handleGeometryEvent(args);
             case hover:    return _handleHoverEvent(args);
+            case focus:    return _handleFocusEvent(args);
             case destroy:  return _handleDestroyEvent(args);
 
             /**
@@ -320,6 +331,29 @@ static:
         TimeMsec timeMsec = getTclTimestamp(tclArr[5]);
 
         auto event = scoped!HoverEvent(widget, hoverAction, position, keyMod, timeMsec);
+        return _dispatchEvent(widget, event);
+    }
+
+    /// create and populate a focus event and dispatch it.
+    private static TkEventFlag _handleFocusEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 2, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => HoverAction
+                1  => Widget path
+        */
+
+        FocusAction focusAction = to!FocusAction(tclArr[0].tclPeekString());
+
+        Widget widget = getTclWidget(tclArr[1]);
+        assert(widget !is null);
+
+        // note: timestamp missing since <FocusIn/FocusOut> event doesn't support timestamps
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!FocusEvent(widget, focusAction, timeMsec);
         return _dispatchEvent(widget, event);
     }
 
@@ -490,6 +524,10 @@ static:
 
             case hover:
                 widget.onHoverEvent.emit(StaticCast!HoverEvent(event));
+                break;
+
+            case focus:
+                widget.onFocusEvent.emit(StaticCast!FocusEvent(event));
                 break;
 
             case destroy:

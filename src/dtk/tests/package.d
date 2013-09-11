@@ -15,6 +15,7 @@ private
     //~ import dtk.tests.test_widget;  // todo: implement
 
     import dtk.tests.test_events_destroy;
+    import dtk.tests.test_events_focus;
     import dtk.tests.test_events_geometry;
     import dtk.tests.test_events_hover;
     import dtk.tests.test_events_keyboard;

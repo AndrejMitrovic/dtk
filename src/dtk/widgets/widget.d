@@ -190,6 +190,11 @@ abstract class Widget
     public Signal!HoverEvent onHoverEvent;
 
     /**
+        The widget was either focused in or focused out.
+    */
+    public Signal!FocusEvent onFocusEvent;
+
+    /**
         Handle the event when a widget is destroyed.
 
         $(B Note:) You cannot stop a widget from being destroyed,
