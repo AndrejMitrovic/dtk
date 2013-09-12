@@ -1,5 +1,9 @@
 Todo:
 
+- Add indeterminate mode to checkbutton.
+
+- Remove hardcoded calls to 'Tcl_GetVar' and others like 'Tcl_SetVar'
+
 - Have to add position/size properties to each widget, but some have a specific setting for these fields.
 
 - Replace these sort of calls with assertOp in the test-suite:

@@ -10,7 +10,7 @@ import std.stdio;
 import std.c.stdlib;
 
 import std.exception;
-import std.string;
+import std.string : translate, toStringz;
 import std.path;
 
 import dtk.event;

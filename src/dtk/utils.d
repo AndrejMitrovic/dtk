@@ -11,12 +11,17 @@ static import std.conv;
 import std.algorithm;
 import std.functional;
 import std.stdio;
-import std.string;
+static import std.string;
 import std.traits;
 
 import dtk.loader;
 
 alias spaceJoin = pipe!(map!(to!string), reduce!("a ~ ' ' ~ b"));
+
+package alias translate = std.string.translate;
+package alias chomp = std.string.chomp;
+package alias chompPrefix = std.string.chompPrefix;
+package alias lastIndexOf = std.string.lastIndexOf;
 
  //~ to!int(value);
 
@@ -65,6 +70,23 @@ template to(T)
             ex.line = line;
             throw ex;
         }
+    }
+}
+
+/** Wrapper around format which sets the file and line of any exception to the call site. */
+string format(string file = __FILE__, size_t line = __LINE__, Args...)(string fmtStr, Args args)
+{
+    static import std.string;
+
+    try
+    {
+        return std.string.format(fmtStr, args);
+    }
+    catch (Exception exc)
+    {
+        exc.file = file;
+        exc.line = line;
+        throw exc;
     }
 }
 

@@ -14,7 +14,6 @@ import std.algorithm;
 import std.exception;
 import std.range;
 import std.stdio;
-import std.string;
 import std.traits;
 import std.typecons;
 

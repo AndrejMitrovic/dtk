@@ -9,10 +9,10 @@ module dtk.dispatch;
 import std.exception;
 import std.range;
 import std.stdio;
-import std.string;
 import std.typecons;
 
 import dtk.widgets.button;
+import dtk.widgets.checkbutton;
 import dtk.widgets.widget;
 
 import dtk.event;
@@ -178,14 +178,21 @@ static:
             case focus:    return _handleFocusEvent(args);
             case destroy:  return _handleDestroyEvent(args);
 
+            case button:
+                _handleButtonEvent(args);
+                goto ok_event;
+
+            case check_button:
+                _handleCheckButtonEvent(args);
+                goto ok_event;
+
             /**
                 Most events are set up by 'bind', which allows continue/resume based on
                 what the D callback returns. Some events however are set up via -command,
                 which doesn't support bindtags. Returning TCL_CONTINUE/TCL_BREAK is invalid,
                 TCL_OK must be returned instead.
             */
-            case button:
-                _handleButtonEvent(args);
+            ok_event:
                 return TkEventFlag.ok;
 
             default:       assert(0, format("Unhandled event type '%s'.", type));
@@ -400,6 +407,37 @@ static:
         _dispatchEvent(widget, event);
     }
 
+    /// create and populate a check button event and dispatch it.
+    private static void _handleCheckButtonEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 1, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => Widget path
+        */
+
+        Widget widget = getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        assert(widget.widgetType == WidgetType.checkbutton);
+        CheckButton button = StaticCast!CheckButton(widget);
+
+        // will be left in Invalid state if value does not match
+        CheckButtonAction action;
+        if (button.value == button.onValue)
+            action = CheckButtonAction.toggleOn;
+        else
+        if (button.value == button.offValue)
+            action = CheckButtonAction.toggleOff;
+
+        // note: timestamp missing since -command doesn't have percent substitution
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!CheckButtonEvent(widget, action, timeMsec);
+        _dispatchEvent(widget, event);
+    }
+
     /// main dispatch function
     private static TkEventFlag _dispatchEvent(Widget widget, scope Event event)
     {
@@ -536,6 +574,10 @@ static:
 
             case button:
                 StaticCast!Button(widget).onButtonEvent.emit(StaticCast!ButtonEvent(event));
+                break;
+
+            case check_button:
+                StaticCast!CheckButton(widget).onCheckButtonEvent.emit(StaticCast!CheckButtonEvent(event));
                 break;
 
             default: assert(0, format("Unhandled event type: '%s'", event.type));

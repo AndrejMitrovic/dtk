@@ -8,7 +8,6 @@ module dtk.widgets.entry;
 
 import std.exception;
 import std.range;
-import std.string;
 import std.traits;
 import std.typetuple;
 

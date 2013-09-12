@@ -7,9 +7,9 @@
 module dtk.widgets.checkbutton;
 
 import std.range;
-import std.string;
 
 import dtk.app;
+import dtk.dispatch;
 import dtk.event;
 import dtk.image;
 import dtk.interpreter;
@@ -27,17 +27,28 @@ class CheckButton : Widget
     this(Widget master, string text)
     {
         super(master, TkType.checkbutton, WidgetType.checkbutton);
-
         this.setOption("text", text);
 
-        _toggleVarName = makeTracedVar(TkEventType.TkCheckButtonToggle);
+        //~ _toggleVarName = makeTracedVar(EventType.check_button);
+        _toggleVarName = makeVar();
         this.setOption("variable", _toggleVarName);
 
         this.toggleOff();
 
+        tclEvalFmt("%s configure -command %s", _name,
+            format(`"%s %s %s"`,
+                _dtkCallbackIdent,
+                EventType.check_button,
+                _name));
+
         // keyboard binding
         tclEvalFmt("bind %s <Return> { %s invoke }", _name, _name);
     }
+
+    /**
+        Signal emitted when the check button is toggled.
+    */
+    public Signal!CheckButtonEvent onCheckButtonEvent;
 
     /**
         Toggle the chekbutton to On. This will set its value to the
@@ -46,6 +57,7 @@ class CheckButton : Widget
     void toggleOn()
     {
         tclEvalFmt("set %s %s", _toggleVarName, onValue());
+        this.callDtkCallback();
     }
 
     /**
@@ -55,20 +67,22 @@ class CheckButton : Widget
     void toggleOff()
     {
         tclEvalFmt("set %s %s", _toggleVarName, offValue());
+        this.callDtkCallback();
     }
 
     /**
-        Toggle the checkbutton. An event with type TkButtonPush will be emitted.
+        Toggle the checkbutton.
     */
     void toggle()
     {
+        // callback is called automatically
         tclEvalFmt("%s invoke", _name);
     }
 
     /** Get the current state of the checkbutton. It should equal to either onValue or offValue. */
     @property string value()
     {
-        return to!string(Tcl_GetVar(tclInterp, cast(char*)_toggleVarName.toStringz, 0));
+        return tclGetVar!string(_toggleVarName);
     }
 
     /** Return the value that's emitted when the check button is toggled on. */
@@ -174,6 +188,13 @@ class CheckButton : Widget
         this.setOption("width", newWidth);
     }
 
+    /* The callback has to be called manually since 'invoke' toggles the checkbutton. */
+    private void callDtkCallback()
+    {
+        tclEvalFmt("%s %s %s", _dtkCallbackIdent, EventType.check_button, _name);
+    }
+
 private:
+
     string _toggleVarName;
 }

@@ -10,7 +10,6 @@ import std.array;
 import std.exception;
 import std.path;
 import std.range;
-import std.string;
 
 import dtk.app;
 import dtk.color;

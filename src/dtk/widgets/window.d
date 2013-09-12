@@ -12,7 +12,6 @@ import std.range;
 import std.stdio;
 import std.algorithm;
 import std.range;
-import std.string;
 
 alias splitter = std.algorithm.splitter;
 

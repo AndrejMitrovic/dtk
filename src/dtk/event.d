@@ -7,7 +7,6 @@
 module dtk.event;
 
 import std.array;
-import std.string;
 import std.traits;
 import std.typecons;
 import std.typetuple;
@@ -69,8 +68,8 @@ enum EventType
     /** A button widget event, e.g. a button widget was pressed. */
     button,
 
-    /** A check button widget event, e.g. a check button was toggled on or off. */
-    checkbutton,
+    /** A check button widget event, e.g. a check button widget was toggled on or off. */
+    check_button,
 }
 
 /**
@@ -730,6 +729,14 @@ class ButtonEvent : Event
         toStringImpl(sink, this.tupleof);
     }
 
+    /** Get the button this event is targetted at. */
+    @property auto button()()
+    {
+        import dtk.widgets.button;
+        return cast(Button)widget;
+    }
+
+    /** The action that triggered this button event. */
     const(ButtonAction) action;
 }
 
@@ -751,10 +758,18 @@ class CheckButtonEvent : Event
 {
     this(Widget widget, CheckButtonAction action, TimeMsec timeMsec)
     {
-        super(widget, EventType.checkbutton, timeMsec);
+        super(widget, EventType.check_button, timeMsec);
         this.action = action;
     }
 
+    /** Get the checkbutton this event is targetted at. */
+    @property auto button()()
+    {
+        import dtk.widgets.checkbutton;
+        return cast(CheckButton)widget;
+    }
+
+    /** The action that triggered this checkbutton event. */
     const(CheckButtonAction) action;
 }
 

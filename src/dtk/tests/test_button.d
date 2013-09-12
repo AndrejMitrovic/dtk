@@ -32,6 +32,7 @@ unittest
     auto handler = (scope ButtonEvent e)
     {
         assert(e.widget is button1);
+        assert(e.button is button1);
         assert(e.action == ButtonAction.push);
         ++callCount;
     };

@@ -7,7 +7,6 @@
 module dtk.widgets.button;
 
 import std.range;
-import std.string;
 
 import dtk.dispatch;
 import dtk.event;
@@ -66,9 +65,6 @@ class Button : Widget
                 EventType.button,
                 ButtonAction.push,
                 _name));
-
-        // 'command' sends an event
-        //~ this.setOption("command",
 
         this.setOption("text", text);
     }

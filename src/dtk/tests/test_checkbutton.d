@@ -21,22 +21,19 @@ unittest
     CheckButton button1;
     button1 = new CheckButton(testWindow, "Flash");
 
-    button1.onEvent.connect(
-    (Widget widget, Event event)
+    CheckButtonAction action;
+    size_t expectedCallCount;
+    size_t callCount;
+
+    auto handler = (scope CheckButtonEvent e)
     {
-        static size_t pressCount;
+        assert(e.widget is button1);
+        assert(e.button is button1);
+        assert(e.action == action);
+        ++callCount;
+    };
 
-        switch (event.type) with (EventType)
-        {
-            case TkCheckButtonToggle:
-                logf("Button toggled to: %s.", event.state);
-                break;
-
-            default:
-        }
-
-        //~ logf("Event: %s", event);
-    });
+    button1.onCheckButtonEvent ~= handler;
 
     assert(button1.onValue == "1", button1.onValue);
     button1.onValue = "foo";
@@ -49,19 +46,27 @@ unittest
     button1.focus();
     button1.pack();
 
+    action = CheckButtonAction.toggleOn;
     button1.toggleOn();
     assert(button1.value == button1.onValue());
+    ++expectedCallCount;
 
+    action = CheckButtonAction.toggleOff;
     button1.toggleOff();
     assert(button1.value == button1.offValue());
+    ++expectedCallCount;
 
+    action = CheckButtonAction.toggleOn;
     button1.toggle();
     assert(button1.value == button1.onValue());
+    ++expectedCallCount;
 
     testStandard(button1);
     testButton(button1);
 
     app.testRun();
+
+    assert(callCount == expectedCallCount, text(callCount, " != ", expectedCallCount));
 }
 
 // test button-specific options

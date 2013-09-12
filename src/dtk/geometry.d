@@ -10,7 +10,6 @@ import core.exception;
 
 import std.algorithm;
 import std.exception;
-import std.string;
 import std.traits;
 import std.typetuple;
 

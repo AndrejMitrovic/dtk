@@ -9,7 +9,6 @@ module dtk.widgets.panedwindow;
 import std.array;
 import std.exception;
 import std.range;
-import std.string;
 
 import dtk.geometry;
 import dtk.interpreter;
