@@ -187,7 +187,7 @@ class CheckMenuItem : Widget
     /** Get the current state of the checkbutton. It should equal to either onValue or offValue. */
     @property string value()
     {
-        return to!string(Tcl_GetVar(tclInterp, cast(char*)_toggleVarName.toStringz, 0));
+        return tclGetVar!string(_toggleVarName);
     }
 
 private:
