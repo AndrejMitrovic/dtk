@@ -16,8 +16,6 @@ import std.traits;
 
 import dtk.loader;
 
-alias spaceJoin = pipe!(map!(to!string), reduce!("a ~ ' ' ~ b"));
-
 package alias translate = std.string.translate;
 package alias chomp = std.string.chomp;
 package alias chompPrefix = std.string.chompPrefix;
