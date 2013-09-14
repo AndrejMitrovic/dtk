@@ -308,12 +308,14 @@ class Window : Widget
         return cast(MenuBar)Widget.lookupWidgetPath(menubar);
     }
 
-    /** Set a menu bar for this window. */
-    @property void menubar(MenuBar newMenubar)
+    /**
+        Create the menu bar for this window, and return it.
+    */
+    MenuBar createMenuBar()
     {
-        newMenubar.initParent(this);
-        assert(!newMenubar._name.empty);
-        this.setOption("menu", newMenubar._name);
+        auto menuBar = new MenuBar(this);
+        this.setOption("menu", menuBar._name);
+        return menuBar;
     }
 
     /** Get the context menu, or $(D null) if one isn't set for this window. */
@@ -331,7 +333,9 @@ class Window : Widget
         // note: for now we'll ignore reparenting and only check if the widget has already
         // been parented.
 
-        if (!newContextMenu._isInitialized)
+        // todo: implement
+        assert(0);
+        /+ if (!newContextMenu._isInitialized)
             newContextMenu.initParent(this);
 
         assert(!newContextMenu._name.empty);
@@ -349,7 +353,7 @@ class Window : Widget
             tclEvalFmt(`bind %s <3> "tk_popup %s %s"`, _name, newContextMenu._name, "%X %Y");
         }
 
-        _contextMenu = newContextMenu;
+        _contextMenu = newContextMenu; +/
     }
 
 private:

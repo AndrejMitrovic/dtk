@@ -699,8 +699,9 @@ enum WidgetType
     user,                /// User-derived dynamic type
 }
 
+// todo: implement later
 /** Return the widget type based on the class type. */
-template toWidgetType(Class : Widget)
+/+ template toWidgetType(Class : Widget)
 {
     import std.traits;
     import std.typetuple;
@@ -737,7 +738,7 @@ unittest
     static assert(toWidgetType!Button == WidgetType.button);
     static class A : Widget { this() { super(CreateFakeWidget.init, WidgetType.generic_dialog); } }
     static assert(toWidgetType!A == WidgetType.user);
-}
+} +/
 
 package struct InitLater { }
 package struct CreateFakeWidget { }

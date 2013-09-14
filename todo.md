@@ -1,8 +1,9 @@
 Todo:
 
-- Add indeterminate mode to checkbutton.
+- Remove all phobos imports from all modules, and introduce public aliases in a phobos-import module, that way
+we can track and replace these dependencies.
 
-- Remove hardcoded calls to 'Tcl_GetVar' and others like 'Tcl_SetVar'
+- Add indeterminate mode to checkbutton.
 
 - Have to add position/size properties to each widget, but some have a specific setting for these fields.
 

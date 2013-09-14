@@ -13,6 +13,7 @@ import std.typecons;
 
 import dtk.widgets.button;
 import dtk.widgets.checkbutton;
+import dtk.widgets.menu;
 import dtk.widgets.widget;
 
 import dtk.event;
@@ -184,6 +185,10 @@ static:
 
             case check_button:
                 _handleCheckButtonEvent(args);
+                goto ok_event;
+
+            case menu:
+                _handleMenuEvent(args);
                 goto ok_event;
 
             /**
@@ -438,6 +443,33 @@ static:
         _dispatchEvent(widget, event);
     }
 
+    /// create and populate a menu event and dispatch it.
+    private static void _handleMenuEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 3, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => MenuAction
+                1  => MenuBar widget path
+                2  => Target menu item widget path
+        */
+
+        MenuAction action = to!MenuAction(tclArr[0].tclPeekString());
+
+        CommonMenu rootMenu = cast(CommonMenu)getTclWidget(tclArr[1]);
+        assert(rootMenu !is null);
+
+        Widget menuItem = getTclWidget(tclArr[2]);
+        assert(menuItem !is null);
+
+        // note: timestamp missing since -command doesn't have percent substitution
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!MenuEvent(menuItem, action, rootMenu, timeMsec);
+        _dispatchEvent(rootMenu, event);
+    }
+
     /// main dispatch function
     private static TkEventFlag _dispatchEvent(Widget widget, scope Event event)
     {
@@ -578,6 +610,10 @@ static:
 
             case check_button:
                 StaticCast!CheckButton(widget).onCheckButtonEvent.emit(StaticCast!CheckButtonEvent(event));
+                break;
+
+            case menu:
+                StaticCast!MenuBar(widget).onMenuEvent.emit(StaticCast!MenuEvent(event));
                 break;
 
             default: assert(0, format("Unhandled event type: '%s'", event.type));

@@ -17,6 +17,7 @@ import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
+import dtk.widgets.menu;
 import dtk.widgets.widget;
 
 /**
@@ -70,6 +71,9 @@ enum EventType
 
     /** A check button widget event, e.g. a check button widget was toggled on or off. */
     check_button,
+
+    /** A menu item was selected. */
+    menu,
 }
 
 /**
@@ -740,7 +744,7 @@ class ButtonEvent : Event
     const(ButtonAction) action;
 }
 
-/// Check button widget event.
+///
 enum CheckButtonAction
 {
     /// sentinel
@@ -753,7 +757,7 @@ enum CheckButtonAction
     toggleOff,
 }
 
-/// todo: not handled yet
+/// Check button widget event.
 class CheckButtonEvent : Event
 {
     this(Widget widget, CheckButtonAction action, TimeMsec timeMsec)
@@ -771,6 +775,42 @@ class CheckButtonEvent : Event
 
     /** The action that triggered this checkbutton event. */
     const(CheckButtonAction) action;
+}
+
+/// Menu widget event.
+enum MenuAction
+{
+    /// A regular menu item was selected.
+    command,
+
+    /// A check menu item was toggled on or off.
+    toggle,
+
+    /// A radio menu item was selected in a radio menu group.
+    radio,
+}
+
+/// Menu widget event.
+class MenuEvent : Event
+{
+    this(Widget menuItem, MenuAction action, CommonMenu rootMenu, TimeMsec timeMsec)
+    {
+        super(menuItem, EventType.menu, timeMsec);
+        this.action = action;
+        this.rootMenu = rootMenu;
+    }
+
+    /** The root menu where the signal was emitted from. */
+    CommonMenu rootMenu;
+
+    /** The menu item which was selected. */
+    @property Widget menuItem()
+    {
+        return widget;
+    }
+
+    /** The action that triggered this menu event. */
+    const(MenuAction) action;
 }
 
 

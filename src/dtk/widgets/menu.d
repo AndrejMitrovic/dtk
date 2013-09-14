@@ -8,20 +8,172 @@ module dtk.widgets.menu;
 
 import std.exception;
 import std.range;
-import std.string;
 
 import dtk.app;
 import dtk.dispatch;
 import dtk.event;
 import dtk.interpreter;
+import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
 import dtk.widgets.widget;
 import dtk.widgets.window;
 
+class CommonMenu : Widget
+{
+    ///
+    package this(Widget master, TkType tkType, WidgetType widgetType)
+    {
+        super(master, tkType, widgetType);
+        this.setOption("tearoff", 0);  // disable tearoff by default
+    }
+
+    /** Create and add a menu to this menu and return it. */
+    final Menu addMenu(string menuName)
+    {
+        auto menu = new Menu(this, menuName);
+        tclEvalFmt("%s add cascade -menu %s -label %s", _name, menu._name, menuName._tclEscape);
+        return menu;
+    }
+
+    /** Create and insert a menu at a specific position and return it. */
+    final Menu insertMenu(int index, string menuName)
+    {
+        auto menu = new Menu(this, menuName);
+        tclEvalFmt("%s insert %s cascade -menu %s -label %s", _name, index, menu._name, menuName._tclEscape);
+        return menu;
+    }
+
+    /** Add an item to this menu and return it. */
+    final MenuItem addItem(string menuItemName)
+    {
+        auto menuItem = new MenuItem(menuItemName);
+
+        tclEvalFmt("%s add command -label %s -command %s", _name, menuItemName,
+            getCommand(MenuAction.command, menuItem));
+
+        return menuItem;
+    }
+
+    /** Insert an item at a specific position and return it. */
+    final MenuItem insertItem(int index, string menuItemName)
+    {
+        auto menuItem = new MenuItem(menuItemName);
+
+        tclEvalFmt("%s insert %s command -label %s -command %s", _name, index, menuItemName,
+            getCommand(MenuAction.command, menuItem));
+
+        return menuItem;
+    }
+
+    /** Add a check menu item to this menu. */
+    final void addItem(string label, string offValue, string onValue)
+    {
+        //~ assert(!_name.empty);
+        //~ tclEvalFmt("%s add checkbutton -label %s -variable %s -onvalue %s -offvalue %s", _name, menuItem._label._tclEscape, menuItem._toggleVarName, menuItem._onValue._tclEscape, menuItem._offValue._tclEscape);
+    }
+
+    /** Insert a check menu item at a specific position. */
+    final void insertItem(int index, string label, string offValue, string onValue)
+    {
+        //~ assert(!_name.empty);
+        //~ tclEvalFmt("%s insert %s checkbutton -label %s -variable %s -onvalue %s -offvalue %s", _name, index, menuItem._label._tclEscape, menuItem._toggleVarName, menuItem._onValue._tclEscape, menuItem._offValue._tclEscape);
+    }
+
+    private MenuBar getRootMenuBar()
+    {
+        Widget parent = this;
+
+        do
+        {
+            if (parent.widgetType == WidgetType.menubar)
+                return StaticCast!MenuBar(parent);
+            else
+                parent = parent.parentWidget;
+        } while (parent !is null);
+
+        assert(0);
+    }
+
+    private string getCommand(MenuAction menuAction, Widget menuItem)
+    {
+        auto menuBar = this.getRootMenuBar();
+
+        return format(`"%s %s %s %s"`,
+                      _dtkCallbackIdent,
+                      EventType.menu,
+                      menuAction,
+                      menuBar._name,
+                      menuItem._name);
+    }
+}
+
+class MenuBar : CommonMenu
+{
+    /** Signal emitted when a menu item is selected. */
+    public Signal!MenuEvent onMenuEvent;
+
+    ///
+    package this(Widget master)
+    {
+        super(master, TkType.menu, WidgetType.menubar);
+    }
+}
+
+///
+class Menu : CommonMenu
+{
+    package this(Widget master, string label)
+    {
+        _label = label;
+        super(master, TkType.menu, WidgetType.menu);
+    }
+
+    /** Add a dividing line. */
+    final void addSeparator()
+    {
+        tclEvalFmt("%s add separator", _name);
+    }
+
+    /** Insert a dividing line at a specific position. */
+    final void insertSeparator(int index)
+    {
+        tclEvalFmt("%s insert %s separator", _name, index);
+    }
+
+    /** Get the menu label. */
+    @property string label()
+    {
+        return _label;
+    }
+
+private:
+    string _label;
+}
+
+///
+class MenuItem : Widget
+{
+    ///
+    package this(string label)
+    {
+        _label = label;
+        super(CreateFakeWidget.init, WidgetType.menuitem);
+    }
+
+    /** Get the menu item label. */
+    @property string label()
+    {
+        return _label;
+    }
+
+private:
+    string _label;
+}
+
 /// Common code for menu bars and menus
-abstract class MenuClass : Widget
+/+ abstract class MenuClass : Widget
 {
     this(InitLater initLater, WidgetType widgetType)
     {
@@ -169,11 +321,11 @@ private:
 class CheckMenuItem : Widget
 {
     ///
-    this(string label, string onValue = "0", string offValue = "1")
+    this(string label, string offValue = "0", string onValue = "1")
     {
         _label = label;
-        _onValue = onValue;
         _offValue = offValue;
+        _onValue = onValue;
         super(CreateFakeWidget.init, WidgetType.checkmenu_item);
         _toggleVarName = makeTracedVar(TkEventType.TkCheckMenuItemToggle);
     }
@@ -193,8 +345,8 @@ class CheckMenuItem : Widget
 private:
     string _label;
     string _toggleVarName;
-    string _onValue;
     string _offValue;
+    string _onValue;
 }
 
 ///
@@ -282,3 +434,4 @@ private:
     string _label;
     string _value;
 }
+ +/

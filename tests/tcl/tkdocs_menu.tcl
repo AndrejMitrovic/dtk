@@ -9,6 +9,7 @@ menu .win.menubar
 .win configure -menu .win.menubar
 
 #~ . configure -menu .menubar
+#~ puts [winfo children .]
 
 set m .win.menubar
 #~ set m .menubar
