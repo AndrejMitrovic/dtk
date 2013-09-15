@@ -48,21 +48,22 @@ unittest
 
     auto showWindowCheck = fileMenu.addCheckItem("Show Window", "0", "1");
 
-    //~ auto showTipsCheck = fileMenu.insertCheckItem(8, "Show Tips");
+    auto showTipsCheck = fileMenu.insertCheckItem(8, "Show Tips");
 
-    //~ fileMenu.addSeparator();
-    //~ fileMenu.addRadioGroup(RadioItem("Red", "set-red"),
-                           //~ RadioItem("Green", "set-green"),
-                           //~ RadioItem("Orange"),  // value is "Orange"
-                           //~ RadioItem("Blue", "set-blue"));
+    fileMenu.addSeparator();
+    auto colorMenu = fileMenu.addMenu("Color Scheme");
+    colorMenu.addRadioGroup(RadioItem("Red", "set-red"),
+                            RadioItem("Green", "set-green"),
+                            RadioItem("Orange"),  // value is "Orange"
+                            RadioItem("Blue", "set-blue"));
 
-    //~ fileMenu.insertSeparator(7);
-    //~ fileMenu.insertRadioGroup(8, RadioItem("First", "set-first"),
-                                 //~ RadioItem("Second", "set-second"),
-                                 //~ RadioItem("Third", "set-third"));
+    fileMenu.insertSeparator(7);
+    fileMenu.insertRadioGroup(8, RadioItem("First", "set-first"),
+                                 RadioItem("Second", "set-second"),
+                                 RadioItem("Third", "set-third"));
 
-    //~ auto encMenu = fileMenu.insertMenu(1, "Encoding");
-    //~ encMenu.addRadioGroup(RadioItem("UTF-8"), RadioItem("UTF-16"), RadioItem("UTF-32"));
+    auto encMenu = fileMenu.insertMenu(1, "Encoding");
+    encMenu.addRadioGroup(RadioItem("UTF-8"), RadioItem("UTF-16"), RadioItem("UTF-32"));
 
     app.run();
 }

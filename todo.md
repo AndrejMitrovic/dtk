@@ -1,7 +1,6 @@
 Todo:
 
-- Remove all phobos imports from all modules, and introduce public aliases in a phobos-import module, that way
-we can track and replace these dependencies.
+- All labels need to be called with _tclEscape
 
 - Add indeterminate mode to checkbutton.
 
