@@ -23,7 +23,8 @@ rem     - Logs all log/logf calls, for use with unittesting.
 rem
 
 set includes=-I%cd%
-set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_EVAL -version=DTK_LOG_TESTS
+rem set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_EVAL -version=DTK_LOG_TESTS
+set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_TESTS
 set flags=%includes% -g %debug_versions%
 
 rem Set this to enforce building with unittests even for the static library.
