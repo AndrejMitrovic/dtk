@@ -82,7 +82,7 @@ package void tclMakeTracedVar(string varName, string varTag, string callbackName
     tclMakeVar(varName);
 
     // hook the callback
-    tclEvalFmt(`trace add variable %s write %s "%s $%s"`, varName, callbackName, varTag, varName);
+    tclEvalFmt(`trace add variable %s write [list %s %s $%s]`, varName, callbackName, varTag, varName);
 }
 
 /** Get the value of the variable $(D varName) of type $(D T). */

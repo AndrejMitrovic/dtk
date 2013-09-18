@@ -6,6 +6,7 @@ version(DTK_UNITTEST):
 import core.thread;
 
 import std.algorithm;
+import std.conv;
 import std.range;
 import std.stdio;
 import std.traits;

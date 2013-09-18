@@ -11,17 +11,20 @@ version(DTK_UNITTEST):
 
 private
 {
-    //~ import dtk.tests.test_events_destroy;
-    //~ import dtk.tests.test_events_focus;
-    //~ import dtk.tests.test_events_geometry;
-    //~ import dtk.tests.test_events_hover;
-    //~ import dtk.tests.test_events_keyboard;
-    //~ import dtk.tests.test_events_mouse;
+    /* Generic events. */
+    import dtk.tests.test_events_destroy;
+    import dtk.tests.test_events_focus;
+    import dtk.tests.test_events_geometry;
+    import dtk.tests.test_events_hover;
+    import dtk.tests.test_events_keyboard;
+    import dtk.tests.test_events_mouse;
 
-    //~ import dtk.tests.test_button;
-    //~ import dtk.tests.test_checkbutton;
+    /* Widget behavior and events. */
+    import dtk.tests.test_button;
+    import dtk.tests.test_checkbutton;
+    import dtk.tests.test_combobox;
+
     //~ import dtk.tests.test_contextmenu;
-    //~ import dtk.tests.test_combobox;
     //~ import dtk.tests.test_dialog;
     //~ import dtk.tests.test_entry;
     //~ import dtk.tests.test_frame;

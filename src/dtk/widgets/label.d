@@ -133,22 +133,6 @@ class Label : Widget
         this.setOption("relief", newBorderStyle.text);
     }
 
-    /** Get the current requested size. */
-    @property Size size()
-    {
-        Size result;
-        result.width = this.getOption!int("width");
-        result.height = this.getOption!int("height");
-        return result;
-    }
-
-    /** Set a requested size for this label. */
-    @property void size(Size newSize)
-    {
-        this.setOption("width", newSize.width);
-        this.setOption("height", newSize.height);
-    }
-
     /**
         Get the current maximum line length before wrapping takes place.
         The wrapping length is measured in pixels.

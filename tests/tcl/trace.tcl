@@ -8,4 +8,8 @@ proc varlimit_re {re var key op} {
   }
 }
 
-trace add variable ::myvar {write} [list varlimit_re {^[A-H]\d{3}-[0-9a-f]+$}]`
+set ::myvar 1
+
+#~ trace add variable ::myvar {write} [list varlimit_re {^[A-H]\d{3}-[0-9a-f]+$}]`
+
+trace add variable ::myvar {write} [list varlimit_re TkComboboxChange $::myvar]

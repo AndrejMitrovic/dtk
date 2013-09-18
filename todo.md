@@ -1,4 +1,14 @@
+Now working on:
+Combobox events.
+
 Todo:
+
+- Hide format and other code from dtk.utils from user.
+
+- Work on menu's again later after fixing up events for other widgets.
+Menus and their items can also be configured in many ways, we have to export this.
+
+- Make library const-correct.
 
 - All labels need to be called with _tclEscape
 

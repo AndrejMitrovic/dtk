@@ -46,9 +46,9 @@ unittest
 
     fileMenu.addSeparator();
 
-    auto showWindowCheck = fileMenu.addCheckItem("Show Window", "0", "1");
+    auto showWindowCheck = fileMenu.addToggleItem("Show Window", "0", "1");
 
-    auto showTipsCheck = fileMenu.insertCheckItem(8, "Show Tips");
+    auto showTipsToggle = fileMenu.insertToggleItem(8, "Show Tips");
 
     fileMenu.addSeparator();
     auto colorMenu = fileMenu.addMenu("Color Scheme");
@@ -64,6 +64,11 @@ unittest
 
     auto encMenu = fileMenu.insertMenu(1, "Encoding");
     encMenu.addRadioGroup(RadioItem("UTF-8"), RadioItem("UTF-16"), RadioItem("UTF-32"));
+
+    menuBar.onMenuEvent ~= (scope MenuEvent e)
+    {
+        stderr.writefln("Menu event: %s", e);
+    };
 
     app.run();
 }

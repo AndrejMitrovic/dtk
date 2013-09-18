@@ -20,21 +20,6 @@ import dtk.utils;
 import dtk.widgets.widget;
 import dtk.widgets.window;
 
-private MenuBar getRootMenuBar(Widget widget)
-{
-    Widget parent = widget;
-
-    do
-    {
-        if (parent.widgetType == WidgetType.menubar)
-            return StaticCast!MenuBar(parent);
-        else
-            parent = parent.parentWidget;
-    } while (parent !is null);
-
-    assert(0);
-}
-
 class CommonMenu : Widget
 {
     ///
@@ -82,24 +67,26 @@ class CommonMenu : Widget
         return menuItem;
     }
 
-    /** Add a check menu item to this menu. */
-    final CheckMenuItem addCheckItem(string label, string offValue = "0", string onValue = "0")
+    /** Add a toggle menu item to this menu. */
+    final ToggleMenuItem addToggleItem(string label, string offValue = "0", string onValue = "1")
     {
-        auto menuItem = new CheckMenuItem(label, offValue, onValue);
+        auto menuItem = new ToggleMenuItem(label, offValue, onValue);
 
         tclEvalFmt("%s add checkbutton -label %s -variable %s -offvalue %s -onvalue %s -command %s",
-            _name, label._tclEscape, menuItem._toggleVarName, offValue._tclEscape, onValue._tclEscape, getCommand(MenuAction.command, menuItem));
+            _name, label._tclEscape, menuItem._toggleVarName, offValue._tclEscape, onValue._tclEscape,
+            getCommand(MenuAction.command, menuItem));
 
         return menuItem;
     }
 
-    /** Insert a check menu item at a specific position. */
-    final CheckMenuItem insertCheckItem(int index, string label, string offValue = "0", string onValue = "0")
+    /** Insert a toggle menu item at a specific position. */
+    final ToggleMenuItem insertToggleItem(int index, string label, string offValue = "0", string onValue = "1")
     {
-        auto menuItem = new CheckMenuItem(label, offValue, onValue);
+        auto menuItem = new ToggleMenuItem(label, offValue, onValue);
 
         tclEvalFmt("%s insert %s checkbutton -label %s -variable %s -offvalue %s -onvalue %s -command %s",
-            _name, index, label._tclEscape, menuItem._toggleVarName, offValue._tclEscape, onValue._tclEscape, getCommand(MenuAction.command, menuItem));
+            _name, index, label._tclEscape, menuItem._toggleVarName, offValue._tclEscape, onValue._tclEscape,
+            getCommand(MenuAction.command, menuItem));
 
         return menuItem;
     }
@@ -113,8 +100,9 @@ class CommonMenu : Widget
         {
             radioGroup.add(radioItem);
 
-            tclEvalFmt("%s add radiobutton -label %s -variable %s -value %s",
-                _name, radioItem.label._tclEscape, radioGroup._varName, radioItem.value);
+            tclEvalFmt("%s add radiobutton -label %s -variable %s -value %s -command %s",
+                _name, radioItem.label._tclEscape, radioGroup._varName, radioItem.value,
+                getCommand(MenuAction.radio, radioGroup));
         }
 
         return radioGroup;
@@ -129,14 +117,15 @@ class CommonMenu : Widget
         {
             radioGroup.add(radioItem);
 
-            tclEvalFmt("%s insert %s radiobutton -label %s -variable %s -value %s",
-                _name, index, radioItem.label._tclEscape, radioGroup._varName, radioItem.value);
+            tclEvalFmt("%s insert %s radiobutton -label %s -variable %s -value %s -command %s",
+                _name, index++, radioItem.label._tclEscape, radioGroup._varName, radioItem.value,
+                getCommand(MenuAction.radio, radioGroup));
         }
 
         return radioGroup;
     }
 
-    private string getCommand(MenuAction menuAction, Widget menuItem)
+    private string getCommand(MenuAction menuAction, Widget widget)
     {
         auto menuBar = this.getRootMenuBar();
 
@@ -145,7 +134,7 @@ class CommonMenu : Widget
                       EventType.menu,
                       menuAction,
                       menuBar._name,
-                      menuItem._name);
+                      widget._name);
     }
 }
 
@@ -203,9 +192,14 @@ class MenuItem : Widget
     }
 
     /** Get the menu item label. */
-    @property string label()
+    @property string label() const
     {
         return _label;
+    }
+
+    override string toString() const
+    {
+        return format("%s(%s)", __traits(identifier, typeof(this)), _label);
     }
 
 private:
@@ -214,7 +208,7 @@ private:
 
 ///
 // todo: add toggling from the API
-class CheckMenuItem : Widget
+class ToggleMenuItem : Widget
 {
     ///
     package this(string label, string offValue = "0", string onValue = "1")
@@ -227,37 +221,37 @@ class CheckMenuItem : Widget
     }
 
     /** Get the menu item label. */
-    @property string label()
+    @property string label() const
     {
         return _label;
     }
 
     /** Get the current state of the checkbutton. It should equal to either onValue or offValue. */
-    @property string value()
+    @property string value() const
     {
         return tclGetVar!string(_toggleVarName);
     }
 
     /** Get the on value. */
-    @property string onValue()
+    @property string onValue() const
     {
         return _onValue;
     }
 
     /** Get the off value. */
-    @property string offValue()
+    @property string offValue() const
     {
         return _offValue;
     }
 
-    /** Toggle the check menu on. */
+    /** Toggle the toggle menu on. */
     void toggleOn()
     {
         tclSetVar(_toggleVarName, onValue());
         this.invokeCallback();
     }
 
-    /** Toggle the check menu off. */
+    /** Toggle the toggle menu off. */
     void toggleOff()
     {
         tclSetVar(_toggleVarName, offValue());
@@ -269,6 +263,14 @@ class CheckMenuItem : Widget
         auto menuBar = this.getRootMenuBar();
         tclEvalFmt("%s %s %s %s %s",
             _dtkCallbackIdent, EventType.menu, MenuAction.toggle, menuBar._name, _name);
+    }
+
+    override string toString() const
+    {
+        bool isOn = value == onValue;
+
+        return format("%s(%s - %s : %s)",
+            __traits(identifier, typeof(this)), _label, isOn ? "on" : "off", isOn ? _onValue : _offValue);
     }
 
 private:
@@ -293,7 +295,7 @@ class RadioGroupMenu : Widget
         It should equal to the $(D value) property of one of
         the radio menus that are part of this radio group.
     */
-    @property string value()
+    @property string value() const
     {
         return tclGetVar!string(_varName);
     }
@@ -314,9 +316,14 @@ class RadioGroupMenu : Widget
     }
 
     ///
-    @property RadioItem[] radioItems()
+    @property const(RadioItem[]) radioItems() const
     {
         return _items;
+    }
+
+    override string toString() const
+    {
+        return format("%s(%s)", __traits(identifier, typeof(this)), value);
     }
 
 private:
@@ -435,14 +442,14 @@ struct RadioItem
     }
 
     /** Add a check menu item to this menu. */
-    final void addItem(CheckMenuItem menuItem)
+    final void addItem(ToggleMenuItem menuItem)
     {
         assert(!_name.empty);
         tclEvalFmt("%s add checkbutton -label %s -variable %s -onvalue %s -offvalue %s", _name, menuItem._label._tclEscape, menuItem._toggleVarName, menuItem._onValue._tclEscape, menuItem._offValue._tclEscape);
     }
 
     /** Insert a check menu item at a specific position. */
-    final void insertItem(CheckMenuItem menuItem, int index)
+    final void insertItem(ToggleMenuItem menuItem, int index)
     {
         assert(!_name.empty);
         tclEvalFmt("%s insert %s checkbutton -label %s -variable %s -onvalue %s -offvalue %s", _name, index, menuItem._label._tclEscape, menuItem._toggleVarName, menuItem._onValue._tclEscape, menuItem._offValue._tclEscape);
@@ -535,7 +542,7 @@ private:
 }
 
 ///
-class CheckMenuItem : Widget
+class ToggleMenuItem : Widget
 {
     ///
     this(string label, string offValue = "0", string onValue = "1")
@@ -652,3 +659,18 @@ private:
     string _value;
 }
  +/
+
+private MenuBar getRootMenuBar(Widget widget)
+{
+    Widget parent = widget;
+
+    do
+    {
+        if (parent.widgetType == WidgetType.menubar)
+            return StaticCast!MenuBar(parent);
+        else
+            parent = parent.parentWidget;
+    } while (parent !is null);
+
+    assert(0);
+}

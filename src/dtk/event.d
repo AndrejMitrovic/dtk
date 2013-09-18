@@ -17,6 +17,7 @@ import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
+import dtk.widgets.combobox;
 import dtk.widgets.menu;
 import dtk.widgets.widget;
 
@@ -74,6 +75,9 @@ enum EventType
 
     /** A menu item was selected. */
     menu,
+
+    /** An item in a combobox was selected. */
+    combobox,
 }
 
 /**
@@ -766,6 +770,12 @@ class CheckButtonEvent : Event
         this.action = action;
     }
 
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
     /** Get the checkbutton this event is targetted at. */
     @property auto button()()
     {
@@ -793,26 +803,90 @@ enum MenuAction
 /// Menu widget event.
 class MenuEvent : Event
 {
-    this(Widget menuItem, MenuAction action, CommonMenu rootMenu, TimeMsec timeMsec)
+    this(Widget widget, MenuAction action, CommonMenu rootMenu, TimeMsec timeMsec)
     {
-        super(menuItem, EventType.menu, timeMsec);
+        super(widget, EventType.menu, timeMsec);
         this.action = action;
         this.rootMenu = rootMenu;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /**
+        If $(D action) equals $(D MenuAction.command), returns the
+        $(D MenuItem) widget that was selected.
+        Otherwise, returns null.
+    */
+    @property MenuItem menuItem()
+    {
+        if (action != MenuAction.command)
+            return null;
+
+        return cast(MenuItem)widget;
+    }
+
+    /**
+        If $(D action) equals $(D MenuAction.toggle), returns the
+        $(D ToggleMenuItem) widget that was selected.
+        Otherwise, returns null.
+    */
+    @property ToggleMenuItem toggleMenuItem()
+    {
+        if (action != MenuAction.toggle)
+            return null;
+
+        return cast(ToggleMenuItem)widget;
+    }
+
+    /**
+        If $(D action) equals $(D MenuAction.radio), returns the
+        $(D RadioGroupMenu) associated with the radio menu button
+        that was selected. Otherwise, returns null.
+
+        To check which radio menu button was
+        selected, inspect the radio group's $(D value) property.
+    */
+    @property RadioGroupMenu radioGroupMenu()
+    {
+        if (action != MenuAction.radio)
+            return null;
+
+        return cast(RadioGroupMenu)widget;
     }
 
     /** The root menu where the signal was emitted from. */
     CommonMenu rootMenu;
 
-    /** The menu item which was selected. */
-    @property Widget menuItem()
-    {
-        return widget;
-    }
-
     /** The action that triggered this menu event. */
     const(MenuAction) action;
 }
 
+/// Combobox widget event.
+class ComboboxEvent : Event
+{
+    this(Widget widget, TimeMsec timeMsec)
+    {
+        super(widget, EventType.combobox, timeMsec);
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /**
+        Return the target Combobox widget for this event.
+    */
+    @property Combobox combobox()
+    {
+        return cast(Combobox)widget;
+    }
+}
 
 /** Old code below */
 

@@ -12,6 +12,7 @@ import std.stdio;
 import std.typecons;
 
 import dtk.widgets.button;
+import dtk.widgets.combobox;
 import dtk.widgets.checkbutton;
 import dtk.widgets.menu;
 import dtk.widgets.widget;
@@ -189,6 +190,10 @@ static:
 
             case menu:
                 _handleMenuEvent(args);
+                goto ok_event;
+
+            case combobox:
+                _handleComboboxEvent(args);
                 goto ok_event;
 
             /**
@@ -470,6 +475,31 @@ static:
         _dispatchEvent(rootMenu, event);
     }
 
+    /// create and populate a combobox event and dispatch it.
+    private static void _handleComboboxEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 4, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => Combobox widget path
+
+            Ignored, but implicitly passed by Tk:
+                1  => Name of the global traced variable
+                2  => Empty
+                3  => command (write or read). We only track writes.
+        */
+
+        Widget widget = getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        // note: timestamp missing since -command doesn't have percent substitution
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!ComboboxEvent(widget, timeMsec);
+        _dispatchEvent(widget, event);
+    }
+
     /// main dispatch function
     private static TkEventFlag _dispatchEvent(Widget widget, scope Event event)
     {
@@ -614,6 +644,10 @@ static:
 
             case menu:
                 StaticCast!MenuBar(widget).onMenuEvent.emit(StaticCast!MenuEvent(event));
+                break;
+
+            case combobox:
+                StaticCast!Combobox(widget).onComboboxEvent.emit(StaticCast!ComboboxEvent(event));
                 break;
 
             default: assert(0, format("Unhandled event type: '%s'", event.type));

@@ -11,6 +11,7 @@ import std.range;
 import std.string;
 
 import dtk.app;
+import dtk.dispatch;
 import dtk.event;
 import dtk.interpreter;
 import dtk.signals;
@@ -28,9 +29,18 @@ class Combobox : Widget
     {
         super(master, TkType.combobox, WidgetType.combobox);
 
-        _varName = makeTracedVar(TkEventType.TkComboboxChange);
+        _varName = getUniqueVarName();
+
+        // hook the callback
+        tclEvalFmt(`trace add variable %s write "%s %s %s"`, _varName, _dtkCallbackIdent, EventType.combobox, _name);
+
         this.setOption("textvariable", _varName);
     }
+
+    /**
+        Signal emitted when an item in the combobox is selected.
+    */
+    public Signal!ComboboxEvent onComboboxEvent;
 
     /** Get the currently selected combobox value. */
     @property string value()

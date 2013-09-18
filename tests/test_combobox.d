@@ -13,44 +13,47 @@ import dtk.tests.globals;
 unittest
 {
     auto app = new App;
-    auto label = new Label(app.mainWindow);
-    label.pack();
 
-    label.text = "some note\nsome larger note 2\nsmall note";
-    assert(label.text == "some note\nsome larger note 2\nsmall note");
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
 
-    label.anchor = Anchor.north;
-    assert(label.anchor == Anchor.north, label.anchor.text);
+    auto box1 = new Combobox(testWindow);
 
-    label.size = Size(100, 100);
+    string curVal;
 
-    label.anchor = Anchor.center;
-    assert(label.anchor == Anchor.center);
+    size_t callCount;
+    size_t expectedCallCount;
 
-    label.bgColor = RGB(64, 64, 64);
-    assert(label.bgColor == RGB(64, 64, 64));
+    box1.onComboboxEvent ~= (scope ComboboxEvent event)
+    {
+        assert(event.combobox is box1);
+        assert(event.combobox.value == curVal, format("%s != %s", event.combobox.value, curVal));
+        ++callCount;
+    };
 
-    label.fgColor = RGB(0, 128, 255);
-    assert(label.fgColor == RGB(0, 128, 255));
+    assert(box1.value.empty);
 
-    label.bgColorReset();
-    label.fgColorReset();
+    curVal = "foobar";
+    box1.value = "foobar";
+    ++expectedCallCount;
+    assert(box1.value == "foobar");
 
-    assert(label.justification == Justification.none);
+    assert(box1.values.empty);
+    box1.values = ["foo", "bar", "foobar"];
 
-    label.justification = Justification.left;
-    assert(label.justification == Justification.left);
+    foreach (value; box1.values)
+    {
+        curVal = value;
+        box1.value = value;
+        ++expectedCallCount;
+    }
 
-    assert(label.wrapLength == 0);
+    box1.readOnly = true;
+    box1.readOnly = false;
 
-    label.wrapLength = 50;
-    assert(label.wrapLength == 50);
+    box1.pack();
 
-    label.font = GenericFont.text;
-    assert(label.font == GenericFont.text);
-
-    label.padding = Padding(10, 10, 10, 10);
-    assert(label.padding == Padding(10, 10, 10, 10));
+    assert(callCount == expectedCallCount, text(callCount, " != ", expectedCallCount));
 
     app.run();
 }
