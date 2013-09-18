@@ -38,7 +38,7 @@ package class GenericDialog : Widget
     this()
     {
         super(CreateFakeWidget.init, WidgetType.generic_dialog);
-        _defaultFileTypeVar = makeTracedVar(TkEventType.TkComboboxChange);
+        _defaultFileTypeVar = makeVar();
     }
 
     /**
