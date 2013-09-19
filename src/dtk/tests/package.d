@@ -31,7 +31,7 @@ private
     // import dtk.tests.test_image;
 
     import dtk.tests.test_label;
-    //~ import dtk.tests.test_labelframe;
+    import dtk.tests.test_labelframe;
     //~ import dtk.tests.test_listbox;
     //~ import dtk.tests.test_notebook;
     //~ import dtk.tests.test_panedwindow;
