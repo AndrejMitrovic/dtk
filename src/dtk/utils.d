@@ -35,6 +35,7 @@ private template isRawStaticArray(T, A...)
 }
 
 public alias text = std.conv.text;
+public alias ConvException = std.conv.ConvException;
 
 /** Workaround for bad exception file and line info. */
 template to(T)
@@ -300,4 +301,42 @@ unittest
 
     auto r = ["foo", "bar"].joiner("_");
     assert(enquote(r) == `"foo_bar"`);
+}
+
+/**
+    Return the element type of Type.
+
+    Note: This is different from ElementType in
+    std.range which returns the type of the .front property.
+*/
+template ElementTypeOf(Type)
+{
+    static if(is(Type T : T[N], size_t N))
+    {
+        alias ElementTypeOf = T;
+    }
+    else
+    static if(is(Type T : T[]))
+    {
+        alias ElementTypeOf = T;
+    }
+    else
+    static if(is(Type T : T*))
+    {
+        alias ElementTypeOf = T;
+    }
+    else
+    {
+        alias ElementTypeOf = Type;
+    }
+}
+
+///
+unittest
+{
+    static assert(is(ElementTypeOf!int == int));
+    static assert(is(ElementTypeOf!(int[]) == int));
+    static assert(is(ElementTypeOf!(int[][]) == int[]));
+    static assert(is(ElementTypeOf!(int[1][2]) == int[1]));
+    static assert(is(ElementTypeOf!(int**) == int*));
 }

@@ -21,6 +21,7 @@ import dtk.widgets.button;
 import dtk.widgets.checkbutton;
 import dtk.widgets.combobox;
 import dtk.widgets.entry;
+import dtk.widgets.listbox;
 import dtk.widgets.menu;
 import dtk.widgets.widget;
 
@@ -87,6 +88,9 @@ enum EventType
 
     /** Validation event when widget needs to validate some text. */
     validate,
+
+    /** One or more items in a listbox widget were selected. */
+    listbox,
 }
 
 /**
@@ -998,7 +1002,7 @@ class ValidateEvent : Event
         return _validated;
     }
 
-    /** The action that triggered this event. */
+    /** The action that triggered this validate event. */
     const(ValidateAction) action;
 
     /** The index of the character in the string to be inserted/deleted, if any, otherwise -1. */
@@ -1031,6 +1035,42 @@ class ValidateEvent : Event
 package:
     bool _validated;
 }
+
+///
+enum ListboxAction
+{
+    /// The selection in the listbox was changed.
+    select,
+
+    /// The items in the listbox have changed.
+    edit,
+}
+
+/// Listbox widget event.
+class ListboxEvent : Event
+{
+    this(Widget widget, ListboxAction action, TimeMsec timeMsec)
+    {
+        super(widget, EventType.listbox, timeMsec);
+        this.action = action;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /** The action that triggered this listbox event. */
+    const(ListboxAction) action;
+
+    /** Return the target Listbox widget for this event. */
+    @property Listbox listbox()
+    {
+        return cast(Listbox)widget;
+    }
+}
+
 
 /** Old code below */
 

@@ -3,6 +3,12 @@ Entry events.
 
 Todo:
 
+- Replace this:
+override void toString(scope void delegate(const(char)[]) sink)
+
+With a template that does this:
+callFunc((cast(DynamicType)object).tupleof);
+
 - Rewrite image test after all other widgets are wrapped, since events have to be handled first.
 
 - Major todo: catch exceptions: http://www.gamedev.net/page/resources/_/technical/general-programming/d-exceptions-and-c-callbacks-r3323

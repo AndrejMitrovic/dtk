@@ -27,13 +27,14 @@ unittest
     assert(listbox.height == 2);
 
     listbox.height = 0;
-    assert(listbox.height >= 3);
 
     listbox.clear();
     assert(listbox.values.empty);
 
-    listbox.values = ["foo", "bar", "doo", "bee", "yes", "no"];
-    assert(listbox.values == ["foo", "bar", "doo", "bee", "yes", "no"]);
+    string[] values = ["foo", "bar", "doo", "bee", "yes", "no"];
+
+    listbox.values = values;
+    assert(listbox.values == values);
 
     assert(listbox.selectMode == SelectMode.single);
 
@@ -44,17 +45,50 @@ unittest
 
     listbox.selectRange(1, 3);
     assert(listbox.selection == [1, 2, 3]);
+    assert(listbox.selectedValues == values[1 .. 4]);
 
     listbox.selection = [0, 2, 4];
     assert(listbox.selection == [0, 2, 4]);
+    assert(listbox.selectedValues == [values[0], values[2], values[4]]);
 
     listbox.selection = 1;
     assert(listbox.selection == [1]);
+    assert(listbox.selectedValues.front == values[1]);
 
     listbox.clearSelection();
     assert(listbox.selection == []);
+    assert(listbox.selectedValues.empty);
+
+    string[] curVals;
+
+    size_t callCount;
+    size_t expectedCallCount;
+
+    size_t[] selection;
+
+    listbox.onListboxEvent ~= (scope ListboxEvent event)
+    {
+        if (event.action == ListboxAction.select)
+            assert(selection == event.listbox.selection);
+        else
+        if (event.action == ListboxAction.edit)
+            assert(values == event.listbox.values);
+
+        ++callCount;
+    };
+
+    selection = [0, 2, 4];
+    listbox.selection = selection;
+    ++expectedCallCount;
+
+    values = ["one", "two", "three", "four", "five"];
+    listbox.values = values;
+    ++expectedCallCount;
 
     listbox.pack();
+
+    assert(callCount == expectedCallCount, text(callCount, " != ", expectedCallCount));
+
     app.run();
 }
 

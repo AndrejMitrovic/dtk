@@ -14,6 +14,7 @@ import std.typecons;
 import dtk.widgets.button;
 import dtk.widgets.combobox;
 import dtk.widgets.checkbutton;
+import dtk.widgets.listbox;
 import dtk.widgets.entry;
 import dtk.widgets.menu;
 import dtk.widgets.widget;
@@ -141,6 +142,10 @@ static:
         tclEvalFmt("bind %s <Destroy> { %s %s %s }",
                     _dtkInterceptTag,
                     _dtkCallbackIdent, EventType.destroy, cast(string)TkSubs.widget_path);
+
+        /** Hook listbox select virtual event. */
+        tclEvalFmt("bind %s <<ListboxSelect>> { %s %s %s %s}",
+            _dtkInterceptTag, _dtkCallbackIdent, EventType.listbox, "%W", ListboxAction.select);
     }
 
     static extern(C)
@@ -203,6 +208,10 @@ static:
 
             case validate:
                 _handleValidateEvent(args);
+                goto ok_event;
+
+            case listbox:
+                _handleListboxEvent(args);
                 goto ok_event;
 
             /**
@@ -583,6 +592,34 @@ static:
         widget._setValidateState(event.validated);
     }
 
+    /// create and populate a listbox event and dispatch it.
+    private static void _handleListboxEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 2 || tclArr.length == 5, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => Listbox widget path
+                1  => Listbox action
+
+            Ignored, but implicitly passed by Tk when action equals "edit"
+                2  => Name of the global traced variable
+                3  => Empty
+                4  => command (write or read). We only track writes.
+        */
+
+        Listbox widget = cast(Listbox)getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        ListboxAction action = getTclListboxAction(tclArr[1]);
+
+        // note: timestamp missing since -command doesn't have percent substitution
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!ListboxEvent(widget, action, timeMsec);
+        _dispatchEvent(widget, event);
+    }
+
     /// main dispatch function
     private static TkEventFlag _dispatchEvent(Widget widget, scope Event event)
     {
@@ -741,6 +778,10 @@ static:
                 StaticCast!Entry(widget).onValidateEvent.emit(StaticCast!ValidateEvent(event));
                 break;
 
+            case listbox:
+                StaticCast!Listbox(widget).onListboxEvent.emit(StaticCast!ListboxEvent(event));
+                break;
+
             default: assert(0, format("Unhandled event type: '%s'", event.type));
         }
 
@@ -804,27 +845,27 @@ private:
     __gshared bool _dtkCallbackInitialized;
 }
 
-/** Extract the integral X and Y points from the 2-dimensional Tcl_Obj array. */
+/** Extract the integral X and Y points from the 2-dimensional tcl_Obj array. */
 private Point getTclPoint(ref const(Tcl_Obj*)[2] tclArr)
 {
     return Point(to!int(tclArr[0].tclPeekString()),
                  to!int(tclArr[1].tclPeekString()));
 }
 
-/** Extract the integral width and height from the 2-dimensional Tcl_Obj array. */
+/** Extract the integral width and height from the 2-dimensional tcl_Obj array. */
 private Size getTclSize(ref const(Tcl_Obj*)[2] tclArr)
 {
     return Size(to!int(tclArr[0].tclPeekString()),
                 to!int(tclArr[1].tclPeekString()));
 }
 
-/** Extract the mouse action from the Tcl_Obj object. */
+/** Extract the mouse action from the tcl_Obj object. */
 private MouseAction getTclMouseAction(const(Tcl_Obj)* tclObj)
 {
     return to!MouseAction(tclObj.tclPeekString());
 }
 
-/** Extract the mouse button from the Tcl_Obj object. */
+/** Extract the mouse button from the tcl_Obj object. */
 private MouseButton getTclMouseButton(const(Tcl_Obj)* tclObj)
 {
     auto buttonStr = tclObj.tclPeekString();
@@ -847,20 +888,20 @@ private MouseButton getTclEncodedMouseButton(const(Tcl_Obj)* tclObj)
     }
 }
 
-/** Extract the key modifier from the Tcl_Obj object. */
+/** Extract the key modifier from the tcl_Obj object. */
 private KeyMod getTclKeyMod(const(Tcl_Obj)* tclObj)
 {
     return cast(KeyMod)to!long(tclObj.tclPeekString());
 }
 
-/** Extract the mouse wheel delta from the Tcl_Obj object. */
+/** Extract the mouse wheel delta from the tcl_Obj object. */
 private int getTclMouseWheel(const(Tcl_Obj)* tclObj)
 {
     auto wheelStr = tclObj.tclPeekString();
     return (wheelStr == "??") ? 0 : to!int(wheelStr);
 }
 
-/** Extract the key symbol from the Tcl_Obj object. */
+/** Extract the key symbol from the tcl_Obj object. */
 private KeySym getTclKeySym(const(Tcl_Obj)* tclObj)
 {
     // note: change this to EnumBaseType after Issue 10942 is fixed for KeySym.
@@ -868,32 +909,32 @@ private KeySym getTclKeySym(const(Tcl_Obj)* tclObj)
     return to!KeySym(to!keyBaseType(tclObj.tclPeekString()));
 }
 
-/** Extract the unicode character from the Tcl_Obj object. */
+/** Extract the unicode character from the tcl_Obj object. */
 private dchar getTclUnichar(const(Tcl_Obj)* tclObj)
 {
     auto input = tclObj.tclPeekString();
     return input.empty ? dchar.init : to!dchar(input.front);
 }
 
-/** Extract the Widget from the Tcl_Obj object. Return null if not found. */
+/** Extract the Widget from the tcl_Obj object. Return null if not found. */
 private Widget getTclWidget(const(Tcl_Obj)* tclObj)
 {
     return Widget.lookupWidgetPath(tclObj.tclPeekString());
 }
 
-/** Extract the timestamp from the Tcl_Obj object. */
+/** Extract the timestamp from the tcl_Obj object. */
 private TimeMsec getTclTimestamp(const(Tcl_Obj)* tclObj)
 {
     return to!TimeMsec(tclObj.tclPeekString());
 }
 
-/** Extract the keyboard action from the Tcl_Obj object. */
+/** Extract the keyboard action from the tcl_Obj object. */
 private KeyboardAction getTclKeyboardAction(const(Tcl_Obj)* tclObj)
 {
     return to!KeyboardAction(tclObj.tclPeekString());
 }
 
-/** Extract the validate action from the Tcl_Obj object. */
+/** Extract the validate action from the tcl_Obj object. */
 private ValidateAction getTclValidateAction(const(Tcl_Obj)* tclObj)
 {
     int input = to!int(tclObj.tclPeekString());
@@ -906,7 +947,7 @@ private ValidateAction getTclValidateAction(const(Tcl_Obj)* tclObj)
     }
 }
 
-/** Extract the validate mode from the Tcl_Obj object. */
+/** Extract the validate mode from the tcl_Obj object. */
 package ValidateMode getTclValidateMode(const(Tcl_Obj)* tclObj)
 {
     auto input = tclObj.tclPeekString();
@@ -920,4 +961,10 @@ package ValidateMode getTclValidateMode(const(Tcl_Obj)* tclObj)
         case "all":      return all;
         default:         assert(0, format("Unhandled validation mode: '%s'", input));
     }
+}
+
+/** Extract the listbox action from the tcl_Obj object. */
+private ListboxAction getTclListboxAction(const(Tcl_Obj)* tclObj)
+{
+    return to!ListboxAction(tclObj.tclPeekString());
 }
