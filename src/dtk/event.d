@@ -84,6 +84,9 @@ enum EventType
 
     /** Text in an entry widget was changed. */
     entry,
+
+    /** Validation event when widget needs to validate some text. */
+    validate,
 }
 
 /**
@@ -916,7 +919,7 @@ class EntryEvent : Event
     }
 
     /**
-        Return the target Entry widget for this event.
+        Return the target Entry widget for this entry event.
     */
     @property Entry entry()
     {
@@ -930,9 +933,106 @@ class EntryEvent : Event
     const(string) value;
 }
 
-/** Old code below */
+///
+enum ValidateAction
+{
+    /// Requested when new text is being inputted.
+    insert,
 
-//~ import dtk.widgets.entry;
+    /// Requested when (part of) the target entry is being deleted.
+    remove,
+
+    /// Requested when the widget holding the target text re-validates
+    /// the text, e.g. during widget focus changes.
+    revalidate,
+}
+
+/// Validate event.
+class ValidateEvent : Event
+{
+    this(Widget widget, ValidateAction action, sizediff_t charIndex, string newValue, string curValue, string editValue, ValidateMode validateMode, ValidateMode validateCondition, TimeMsec timeMsec)
+    {
+        super(widget, EventType.validate, timeMsec);
+        this.action = action;
+        this.charIndex = charIndex;
+        this.newValue = newValue;
+        this.curValue = curValue;
+        this.editValue = editValue;
+        this.validateMode = validateMode;
+        this.validateCondition = validateCondition;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /**
+        Return the target Entry widget for this validate event.
+    */
+    @property Entry entry()
+    {
+        return cast(Entry)widget;
+    }
+
+    /**
+        Set this property to mark that the validator handler has
+        either validated the new entry or that the validation failed.
+
+        If this property is never called in any of the chain of
+        event handlers it is assumed the validation failed.
+
+        $(B Note:) Calling this also sets the $(D handled) field to
+        true, which will stop further propagation of the event.
+    */
+    @property void validated(bool isValidated)
+    {
+        this.handled = true;
+        _validated = isValidated;
+    }
+
+    /** Get the current state of validation. */
+    @property bool validated()
+    {
+        return _validated;
+    }
+
+    /** The action that triggered this event. */
+    const(ValidateAction) action;
+
+    /** The index of the character in the string to be inserted/deleted, if any, otherwise -1. */
+    const(sizediff_t) charIndex;
+
+    /**
+        In prevalidation, the new value to best of the entry if the edit is accepted.
+        In revalidation, the current value of the entry.
+    */
+    const(string) newValue;
+
+    /** The current value of entry prior to editing. */
+    const(string) curValue;
+
+    /** The text string being inserted/deleted, if any, otherwise empty. */
+    const(string) editValue;
+
+    /** The validation mode of the target widget. */
+    const(ValidateMode) validateMode;
+
+    /**
+        The validation condition that created the event.
+
+        For example, if the validateMode is set to $(B ValidateMode.all),
+        validationCondition will contain the condition that triggered the
+        validation (e.g. $(B ValidateMode.key)).
+    */
+    const(ValidateMode) validateCondition;
+
+package:
+    bool _validated;
+}
+
+/** Old code below */
 
 /** Tk event types. */
 package enum TkEventType
@@ -983,72 +1083,3 @@ package enum TkEventType
     TkCheckMenuItemToggle,
     TkRadioMenuSelect,
 }
-
-///
-enum ValidationType
-{
-    preInsert,
-    preDelete,
-    revalidate
-}
-
-ValidationType toValidationType(int input)
-{
-    switch (input) with (ValidationType)
-    {
-        case  1: return preInsert;
-        case  0: return preDelete;
-        case -1: return revalidate;
-        default: assert(0, format("Unhandled validation type: '%s'", input));
-    }
-}
-
-//~ ///
-//~ struct ValidateEvent
-//~ {
-    //~ /** type of validation action. */
-    //~ ValidationType type;
-
-    //~ /** index of character in string to be inserted/deleted, if any, otherwise -1. */
-    //~ sizediff_t charIndex;
-
-    //~ /**
-        //~ In prevalidation, the new value of the entry if the edit is accepted.
-        //~ In revalidation, the current value of the entry.
-    //~ */
-    //~ string newValue;
-
-    //~ /** The current value of entry prior to editing. */
-    //~ string curValue;
-
-    //~ /** The text string being inserted/deleted, if any, {} otherwise. */
-    //~ string changeValue;
-
-    //~ /** The current value of the validation mode for this widget. */
-    //~ ValidationMode validationMode;
-
-    //~ /**
-        //~ The validation condition that triggered the callback.
-        //~ If the validationMode is set to $(B all), validationCondition
-        //~ will contain the actual condition that triggered the
-        //~ validation (e.g. $(B key)).
-    //~ */
-    //~ ValidationMode validationCondition;
-//~ }
-
-//~ ///
-//~ struct Event
-//~ {
-    //~ EventType type;
-
-    //~ int x;
-    //~ int y;
-    //~ int keycode;
-    //~ int character;
-    //~ int width;
-    //~ int height;
-    //~ int root_x;
-    //~ int root_y;
-    //~ string state;  // e.g. toggle state
-    //~ ValidateEvent validateEvent;
-//~ }

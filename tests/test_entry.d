@@ -32,41 +32,51 @@ unittest
     entry.value = "foo";
     entry.justification = Justification.right;
 
-    assert(entry.validationMode == ValidationMode.none);
+    assert(entry.validateMode == ValidateMode.none);
 
-    entry.validationMode = ValidationMode.all;
-    assert(entry.validationMode == ValidationMode.all);
+    entry.validateMode = ValidateMode.key;
+    assert(entry.validateMode == ValidateMode.key);
 
     entry.value = "123";
-    string curVal;
+    string curValue;
 
     size_t callCount;
     size_t expectedCallCount;
 
     entry.onEntryEvent ~= (scope EntryEvent event)
     {
-        assert(event.value == curVal, format("%s != %s", event.value, curVal));
-        assert(event.entry.value == curVal, format("%s != %s", event.entry.value, curVal));
-        //~ stderr.writefln("Entry event: %s", event);
+        assert(event.value == curValue, format("%s != %s", event.value, curValue));
+        assert(event.entry.value == curValue, format("%s != %s", event.entry.value, curValue));
         ++callCount;
     };
 
-    curVal = "123";
+    curValue = "123";
     entry.value = "123";
     ++expectedCallCount;
 
-    curVal = "abc";
+    curValue = "abc";
     entry.value = "abc";
     ++expectedCallCount;
 
-    //~ entry.onValidateEvent ~= (scope ValidateEvent event)
-    //~ {
-        //~ event.validated = all!isDigit(event.changeValue);
-    //~ }
+    entry.onValidateEvent ~= (scope ValidateEvent event)
+    {
+        //~ stderr.writefln("Validate event: %s", event);
+        event.validated = all!isDigit(event.editValue);
+
+        // onEntryEvent will be called
+        if (event.validated)
+        {
+            curValue = event.newValue;
+            ++expectedCallCount;
+        }
+    };
 
     assert(callCount == expectedCallCount, format("%s != %s", callCount, expectedCallCount));
 
     app.run();
+
+    // test user input as well
+    assert(callCount == expectedCallCount, format("%s != %s", callCount, expectedCallCount));
 }
 
 void main()

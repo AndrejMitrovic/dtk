@@ -201,6 +201,10 @@ static:
                 _handleEntryEvent(args);
                 goto ok_event;
 
+            case validate:
+                _handleValidateEvent(args);
+                goto ok_event;
+
             /**
                 Most events are set up by 'bind', which allows continue/resume based on
                 what the D callback returns. Some events however are set up via -command,
@@ -499,7 +503,7 @@ static:
         Widget widget = getTclWidget(tclArr[0]);
         assert(widget !is null);
 
-        string value = to!string(tclArr[1].tclPeekString());
+        string value = tclArr[1].tclGetString();
 
         // note: timestamp missing since -command doesn't have percent substitution
         TimeMsec timeMsec = getTclTime();
@@ -527,13 +531,55 @@ static:
         Widget widget = getTclWidget(tclArr[0]);
         assert(widget !is null);
 
-        string value = to!string(tclArr[1].tclPeekString());
+        string value = tclArr[1].tclGetString();
 
         // note: timestamp missing since -command doesn't have percent substitution
         TimeMsec timeMsec = getTclTime();
 
         auto event = scoped!EntryEvent(widget, value, timeMsec);
         _dispatchEvent(widget, event);
+    }
+
+    /// create and populate a validate event and dispatch it.
+    private static void _handleValidateEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 8, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => Entry widget path
+                1  => Type of action - 1 for insert prevalidation, 0 for delete prevalidation, or -1 for revalidation.
+                2  => Index of character string to be inserted/deleted
+                3  => In prevalidation, the new value of the entry if the edit is accepted. In revalidation, the current value of the entry.
+                4  => The current value of entry prior to editing.
+                5  => The text string being inserted/deleted, if any.
+                6  => The current value of the -validate option
+                7  => The validation condition that triggered the callback (key, focusin, focusout, or forced).
+        */
+
+        Entry widget = cast(Entry)getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        ValidateAction action = getTclValidateAction(tclArr[1]);
+
+        sizediff_t charIndex = to!sizediff_t(tclArr[2].tclPeekString());
+
+        string newValue = tclArr[3].tclGetString();
+
+        string curValue = tclArr[4].tclGetString();
+
+        string editValue = tclArr[5].tclGetString();
+
+        ValidateMode validateMode = getTclValidateMode(tclArr[6]);
+
+        ValidateMode validateCondition = getTclValidateMode(tclArr[7]);
+
+        // note: timestamp missing since -command doesn't have percent substitution
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!ValidateEvent(widget, action, charIndex, newValue, curValue, editValue, validateMode, validateCondition, timeMsec);
+        _dispatchEvent(widget, event);
+        widget._setValidState(event.validated);
     }
 
     /// main dispatch function
@@ -690,6 +736,10 @@ static:
                 StaticCast!Entry(widget).onEntryEvent.emit(StaticCast!EntryEvent(event));
                 break;
 
+            case validate:
+                StaticCast!Entry(widget).onValidateEvent.emit(StaticCast!ValidateEvent(event));
+                break;
+
             default: assert(0, format("Unhandled event type: '%s'", event.type));
         }
 
@@ -840,4 +890,33 @@ private TimeMsec getTclTimestamp(const(Tcl_Obj)* tclObj)
 private KeyboardAction getTclKeyboardAction(const(Tcl_Obj)* tclObj)
 {
     return to!KeyboardAction(tclObj.tclPeekString());
+}
+
+/** Extract the validate action from the Tcl_Obj object. */
+private ValidateAction getTclValidateAction(const(Tcl_Obj)* tclObj)
+{
+    int input = to!int(tclObj.tclPeekString());
+    switch (input) with (ValidateAction)
+    {
+        case  1: return insert;
+        case  0: return remove;
+        case -1: return revalidate;
+        default: assert(0, format("Unhandled validation type: '%s'", input));
+    }
+}
+
+/** Extract the validate mode from the Tcl_Obj object. */
+package ValidateMode getTclValidateMode(const(Tcl_Obj)* tclObj)
+{
+    auto input = tclObj.tclPeekString();
+    switch (input) with (ValidateMode)
+    {
+        case "none":     return none;
+        case "focus":    return focus;
+        case "focusin":  return focusIn;
+        case "focusout": return focusOut;
+        case "key":      return key;
+        case "all":      return all;
+        default:         assert(0, format("Unhandled validation mode: '%s'", input));
+    }
 }

@@ -23,16 +23,8 @@ import dtk.utils;
 import dtk.widgets.button;
 import dtk.widgets.widget;
 
-/** Check whether type $(D T) is a validator function. */
-template isValidator(T)
-{
-    enum isValidator = isSomeFunction!T &&
-                       is(ReturnType!T == IsValidated) &&
-                       is(ParameterTypeTuple!T == TypeTuple!(Widget, ValidateEvent));
-}
-
 ///
-enum ValidationMode
+enum ValidateMode
 {
     none,       ///
     focus,      ///
@@ -40,20 +32,6 @@ enum ValidationMode
     focusOut,   ///
     key,        ///
     all,        ///
-}
-
-package ValidationMode toValidationMode(string input)
-{
-    switch (input) with (ValidationMode)
-    {
-        case "none":     return none;
-        case "focus":    return focus;
-        case "focusin":  return focusIn;
-        case "focusout": return focusOut;
-        case "key":      return key;
-        case "all":      return all;
-        default:         assert(0, format("Unhandled validation input: '%s'", input));
-    }
 }
 
 ///
@@ -68,19 +46,26 @@ class Entry : Widget
         tclEvalFmt(`trace add variable %s write { %s %s %s $%s }`, _entryVar, _dtkCallbackIdent, EventType.entry, _name, _entryVar);
         this.setOption("textvariable", _entryVar);
 
-        //~ enum string validationArgs = "%d %i %P %s %S %v %V";
+        enum string validationArgs = "%d %i %P %s %S %v %V";
 
-        //~ tclEvalFmt("%s configure -validatecommand %s", _name,
-            //~ format(`"%s %s %s %s %s"`,
-                //~ _dtkCallbackIdent,
-                //~ EventType.validate,
-                //~ _name, validationArgs));
+        _validateVar = getUniqueVarName();
+        tclSetVar(_validateVar, 0);
+
+        tclEvalFmt("%s configure -validatecommand %s", _name,
+            format(`{
+                %s %s %s %s
+                return $%s
+            }`,
+                _dtkCallbackIdent,
+                EventType.validate,
+                _name, validationArgs,
+                _validateVar));
     }
 
     /**
         Signal emitted when validation is requested.
     */
-    //~ public Signal!ValidateEvent onValidateEvent;
+    public Signal!ValidateEvent onValidateEvent;
 
     /**
         Signal emitted when the entry text has changed.
@@ -139,13 +124,13 @@ class Entry : Widget
     }
 
     /** Get the current validation mode for this entry. */
-    @property ValidationMode validationMode()
+    @property ValidateMode validateMode()
     {
-        return this.getOption!ValidationMode("validate");
+        return this.getOption!ValidateMode("validate");
     }
 
     /** Set the validation mode for this entry. */
-    @property void validationMode(ValidationMode newValidationMode)
+    @property void validateMode(ValidateMode newValidationMode)
     {
         this.setOption("validate", to!string(newValidationMode));
     }
@@ -162,6 +147,16 @@ class Entry : Widget
         this.setOption("justify", newJustification.toString());
     }
 
+    /**
+        $(B API-only): This is an internal function, do not use in user-code.
+        It is only public due to current package access limitations.
+    */
+    /*package*/ void _setValidState(bool state)
+    {
+        tclSetVar(_validateVar, state);
+    }
+
 private:
     string _entryVar;
+    string _validateVar;
 }
