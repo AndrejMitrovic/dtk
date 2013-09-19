@@ -47,8 +47,11 @@ unittest
     pane.add(button2);
     assert(pane.panes.length == 3);
 
-    pane.setWidth(button1, 50);
-    pane.setWidth(2, 50);
+    pane.setWeight(button1, 50);
+    assert(pane.getWeight(button1) == 50);
+
+    pane.setWeight(2, 50);
+    assert(pane.getWeight(2) == 50);
 
     pane.pack();
 

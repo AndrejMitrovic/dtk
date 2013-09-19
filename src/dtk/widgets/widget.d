@@ -202,10 +202,10 @@ abstract class Widget
     public Signal!DestroyEvent onDestroyEvent;
 
     /** Ctor for widgets which know their parent during construction. */
-    this(Widget parent, TkType tkType, WidgetType widgetType)
+    this(Widget parent, TkType tkType, WidgetType widgetType, string extraOpts = null)
     {
         this.widgetType = widgetType;
-        this.initialize(parent, tkType);
+        this.initialize(parent, tkType, extraOpts);
     }
 
     /**
@@ -578,7 +578,7 @@ package:
     }
 
     /** Factored out for delayed initialization. */
-    package final void initialize(Widget parent, TkType tkType)
+    package final void initialize(Widget parent, TkType tkType, string extraOpts = null)
     {
         enforce(parent !is null, "Parent cannot be null");
 
@@ -591,7 +591,7 @@ package:
             prefix = parent._name;
 
         string name = format("%s.%s%s%s", prefix, tkType.toString(), _threadID, _lastWidgetID++);
-        tclEvalFmt("%s %s", tkType.toBaseType(), name);
+        tclEvalFmt("%s %s %s", tkType.toBaseType(), name, extraOpts);
 
         this.initialize(name);
 

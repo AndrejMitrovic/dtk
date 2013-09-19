@@ -236,6 +236,6 @@ private:
     private void _checkParent(Widget widget)
     {
         enforce(widget.parentWidget is this,
-            format("The parent widget of passed widget this notebook widget."));
+            format("The parent widget of the widget argument must be this notebook widget."));
     }
 }
