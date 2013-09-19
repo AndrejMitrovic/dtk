@@ -7,12 +7,12 @@ ttk::entry .entry
 set ::myvar true
 
 proc validate_func {args} {
-    puts "$args"
+    #~ puts "$args"
 
-    .entry delete 0 end
-    .entry insert 0 "blabla"
+    #~ .entry delete 0 end
+    #~ .entry insert 0 "blabla"
 
-    return false
+    return true
 }
 
 # %d => Type of action - 1 for insert prevalidation, 0 for delete prevalidation, or -1 for revalidation.

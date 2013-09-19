@@ -579,7 +579,8 @@ static:
 
         auto event = scoped!ValidateEvent(widget, action, charIndex, newValue, curValue, editValue, validateMode, validateCondition, timeMsec);
         _dispatchEvent(widget, event);
-        widget._setValidState(event.validated);
+
+        widget._setValidateState(event.validated);
     }
 
     /// main dispatch function
