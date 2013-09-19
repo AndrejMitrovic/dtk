@@ -262,3 +262,42 @@ unittest
     static assert(isOneOf!(const(int), float, string, int));
     static assert(!isOneOf!(int, float, string));
 }
+
+/** Strip off the qualifiers of an object's dynamic class name. */
+string getClassName(inout(Object) object)
+{
+    string qualClassName = typeid(object).name;
+    return qualClassName[qualClassName.lastIndexOf(".") + 1 .. $];
+}
+
+/**
+    Return string representation of argument.
+    If argument is already a string or a
+    character, enquote it to make it more readable.
+*/
+string enquote(T)(T arg)
+{
+    import std.range : isInputRange, ElementEncodingType;
+
+    static if (isSomeString!T)
+        return format(`"%s"`, arg);
+    else
+    static if (isSomeChar!T)
+        return format("'%s'", arg);
+    else
+    static if (isInputRange!T && is(ElementEncodingType!T == dchar))
+        return format(`"%s"`, to!string(arg));
+    else
+        return to!string(arg);
+}
+
+unittest
+{
+    assert(enquote(0) == "0");
+    assert(enquote(enquote(0)) == `"0"`);
+    assert(enquote("foo") == `"foo"`);
+    assert(enquote('a') == "'a'");
+
+    auto r = ["foo", "bar"].joiner("_");
+    assert(enquote(r) == `"foo_bar"`);
+}

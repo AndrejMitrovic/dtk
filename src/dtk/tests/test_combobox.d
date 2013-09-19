@@ -29,6 +29,7 @@ unittest
     box1.onComboboxEvent ~= (scope ComboboxEvent event)
     {
         assert(event.combobox is box1);
+        assert(event.value == curVal, format("%s != %s", event.value, curVal));
         assert(event.combobox.value == curVal, format("%s != %s", event.combobox.value, curVal));
         ++callCount;
     };

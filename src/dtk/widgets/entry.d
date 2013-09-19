@@ -57,17 +57,6 @@ package ValidationMode toValidationMode(string input)
 }
 
 ///
-enum IsValidated
-{
-    no,   ///
-    yes,  ///
-}
-
-// todo: this should be handled in dispatch:
-// validation arguments captured by validatecommand
-private enum string validationArgs = "%d %i %P %s %S %v %V %W";
-
-///
 class Entry : Widget
 {
     ///
@@ -75,50 +64,45 @@ class Entry : Widget
     {
         super(master, TkType.entry, WidgetType.entry);
 
-        string varName = makeTracedVar(TkEventType.TkTextChange);
-        this.setOption("textvariable", varName);
+        _entryVar = makeVar();
+        tclEvalFmt(`trace add variable %s write { %s %s %s $%s }`, _entryVar, _dtkCallbackIdent, EventType.entry, _name, _entryVar);
+        this.setOption("textvariable", _entryVar);
 
-        /* Validation */
-        _validateVar = makeVar();
+        //~ enum string validationArgs = "%d %i %P %s %S %v %V";
 
-        string callValidator = format("%s %s", _dtkCallbackIdent, validationArgs);
-        string validateFunc = format("validate_%s", this.createCallbackName());
-
-        /**
-            // Note: unreliable, { } gets removed for empty arguments.
-
-            proc %s {type args} {
-                array set arg $args
-                %s $type {*}[array get arg]
-                return $%s
-            }
-        */
-
-        tclEvalFmt(
-            `
-            proc %s {type args} {
-                %s $type $args
-                return $%s
-            }
-            `, validateFunc,
-               _dtkCallbackIdent,
-               _validateVar);
-
-        tclEvalFmt("%s configure -validatecommand { %s %s %s }", _name, validateFunc, TkEventType.TkValidate, validationArgs);
-        tclEvalFmt("%s configure -invalidcommand { %s %s %s }", _name, validateFunc, TkEventType.TkFailedValidation, validationArgs);
+        //~ tclEvalFmt("%s configure -validatecommand %s", _name,
+            //~ format(`"%s %s %s %s %s"`,
+                //~ _dtkCallbackIdent,
+                //~ EventType.validate,
+                //~ _name, validationArgs));
     }
+
+    /**
+        Signal emitted when validation is requested.
+    */
+    //~ public Signal!ValidateEvent onValidateEvent;
+
+    /**
+        Signal emitted when the entry text has changed.
+    */
+    public Signal!EntryEvent onEntryEvent;
 
     /** Return the text in this entry. */
     @property string value()
     {
-        return tclEvalFmt("%s get", _name);
+        return tclGetVar!string(_entryVar);
     }
 
-    /** Set the text in this entry. */
+    /**
+        Set the text in this entry.
+
+        $(B Note:) If validation is enabled, the behavior of this
+        function follows special rules according to the type of
+        the validation. See $(D ValidateEvent) for more info.
+    */
     @property void value(string newText)
     {
-        tclEvalFmt("%s delete 0 end", _name);
-        tclEvalFmt(`%s insert 0 "%s"`, _name, newText);
+        tclSetVar(_entryVar, newText);
     }
 
     /**
@@ -166,35 +150,6 @@ class Entry : Widget
         this.setOption("validate", to!string(newValidationMode));
     }
 
-    /** Set the function to use for validation. */
-    @property void onValidation(Validator)(Validator validator)
-        if (isValidator!Validator)
-    {
-        this.onEvent.connect(
-            (Widget widget, Event event)
-            {
-                if (event.type == TkEventType.TkValidate)
-                    this.setValidState(validator(widget, event.validateEvent));
-            });
-    }
-
-    /** Set the function to invoke on a failed validation. */
-    @property void onFailedValidation(Func)(Func func)
-        if (isSomeFunction!Func && is(ParameterTypeTuple!Func == TypeTuple!(Widget, ValidateEvent)))
-    {
-        this.onEvent.connect(
-            (Widget widget, Event event)
-            {
-                if (event.type == TkEventType.TkFailedValidation)
-                    func(widget, event.validateEvent);
-            });
-    }
-
-    private void setValidState(IsValidated isValidated)
-    {
-        tclEvalFmt("set %s %s", _validateVar, cast(bool)isValidated);
-    }
-
     /** Get the current justification. */
     @property Justification justification()
     {
@@ -208,5 +163,5 @@ class Entry : Widget
     }
 
 private:
-    string _validateVar;
+    string _entryVar;
 }

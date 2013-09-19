@@ -1,7 +1,16 @@
 Now working on:
-Combobox events.
+Entry events.
 
 Todo:
+
+- Implement assertEqual to utils or somewhere.
+
+- toString for widget events should print more data rather than just use .tupleof. It should take @property
+functions into account.
+
+- Remove the private _varName variables where we don't need to keep a reference to them. They only waste memory.
+
+- All widget event types should have a property which returns the dynamic type of the target widget.
 
 - Hide format and other code from dtk.utils from user.
 

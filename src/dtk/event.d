@@ -17,7 +17,10 @@ import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
+import dtk.widgets.button;
+import dtk.widgets.checkbutton;
 import dtk.widgets.combobox;
+import dtk.widgets.entry;
 import dtk.widgets.menu;
 import dtk.widgets.widget;
 
@@ -76,8 +79,11 @@ enum EventType
     /** A menu item was selected. */
     menu,
 
-    /** An item in a combobox was selected. */
+    /** An item in a combobox widget was selected. */
     combobox,
+
+    /** Text in an entry widget was changed. */
+    entry,
 }
 
 /**
@@ -218,20 +224,18 @@ class Event
     */
     protected final void toStringImpl(T...)(scope void delegate(const(char)[]) sink, T args)
     {
-        string qualClassName = typeid(this).name;
-        sink(qualClassName[qualClassName.lastIndexOf(".") + 1 .. $]);  // workaround
-
+        sink(getClassName(this));
         sink("(");
 
         foreach (val; args)
         {
-            sink(to!string(val));
+            sink(enquote(val));
             sink(", ");
         }
 
         sink(to!string(widget));
         sink(", ");
-        sink(to!string(timeMsec));
+        sink(format("%sm%ss", time.minutes, time.seconds));
         sink(")");
     }
 
@@ -738,9 +742,8 @@ class ButtonEvent : Event
     }
 
     /** Get the button this event is targetted at. */
-    @property auto button()()
+    @property Button button()
     {
-        import dtk.widgets.button;
         return cast(Button)widget;
     }
 
@@ -777,11 +780,13 @@ class CheckButtonEvent : Event
     }
 
     /** Get the checkbutton this event is targetted at. */
-    @property auto button()()
+    @property CheckButton checkButton()
     {
-        import dtk.widgets.checkbutton;
         return cast(CheckButton)widget;
     }
+
+    /// ditto
+    public alias button = checkButton;
 
     /** The action that triggered this checkbutton event. */
     const(CheckButtonAction) action;
@@ -868,15 +873,16 @@ class MenuEvent : Event
 /// Combobox widget event.
 class ComboboxEvent : Event
 {
-    this(Widget widget, TimeMsec timeMsec)
+    this(Widget widget, string value, TimeMsec timeMsec)
     {
         super(widget, EventType.combobox, timeMsec);
+        this.value = value;
     }
 
     ///
     override void toString(scope void delegate(const(char)[]) sink)
     {
-        toStringImpl(sink, this.tupleof);
+        toStringImpl(sink, value);
     }
 
     /**
@@ -886,6 +892,42 @@ class ComboboxEvent : Event
     {
         return cast(Combobox)widget;
     }
+
+    /**
+        The value of the combobox which was selected
+        and which created this event.
+    */
+    const(string) value;
+}
+
+/// Entry widget event.
+class EntryEvent : Event
+{
+    this(Widget widget, string value, TimeMsec timeMsec)
+    {
+        super(widget, EventType.entry, timeMsec);
+        this.value = value;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, value);
+    }
+
+    /**
+        Return the target Entry widget for this event.
+    */
+    @property Entry entry()
+    {
+        return cast(Entry)widget;
+    }
+
+    /**
+        The value of the entry which was set
+        and which created this event.
+    */
+    const(string) value;
 }
 
 /** Old code below */

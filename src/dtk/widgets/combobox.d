@@ -29,12 +29,9 @@ class Combobox : Widget
     {
         super(master, TkType.combobox, WidgetType.combobox);
 
-        _varName = getUniqueVarName();
-
-        // hook the callback
-        tclEvalFmt(`trace add variable %s write "%s %s %s"`, _varName, _dtkCallbackIdent, EventType.combobox, _name);
-
-        this.setOption("textvariable", _varName);
+        string varName = makeVar();
+        tclEvalFmt(`trace add variable %s write { %s %s %s $%s }`, varName, _dtkCallbackIdent, EventType.combobox, _name, varName);
+        this.setOption("textvariable", varName);
     }
 
     /**
@@ -71,7 +68,4 @@ class Combobox : Widget
     {
         this.setState(doDisableWrite ? "readonly" : "!readonly");
     }
-
-private:
-    string _varName;
 }

@@ -14,6 +14,7 @@ import std.typecons;
 import dtk.widgets.button;
 import dtk.widgets.combobox;
 import dtk.widgets.checkbutton;
+import dtk.widgets.entry;
 import dtk.widgets.menu;
 import dtk.widgets.widget;
 
@@ -194,6 +195,10 @@ static:
 
             case combobox:
                 _handleComboboxEvent(args);
+                goto ok_event;
+
+            case entry:
+                _handleEntryEvent(args);
                 goto ok_event;
 
             /**
@@ -478,25 +483,56 @@ static:
     /// create and populate a combobox event and dispatch it.
     private static void _handleComboboxEvent(const Tcl_Obj*[] tclArr)
     {
-        assert(tclArr.length == 4, tclArr.length.text);
+        assert(tclArr.length == 5, tclArr.length.text);
 
         /**
             Indices:
                 0  => Combobox widget path
+                1  => Combobox value
 
             Ignored, but implicitly passed by Tk:
-                1  => Name of the global traced variable
-                2  => Empty
-                3  => command (write or read). We only track writes.
+                2  => Name of the global traced variable
+                3  => Empty
+                4  => command (write or read). We only track writes.
         */
 
         Widget widget = getTclWidget(tclArr[0]);
         assert(widget !is null);
 
+        string value = to!string(tclArr[1].tclPeekString());
+
         // note: timestamp missing since -command doesn't have percent substitution
         TimeMsec timeMsec = getTclTime();
 
-        auto event = scoped!ComboboxEvent(widget, timeMsec);
+        auto event = scoped!ComboboxEvent(widget, value, timeMsec);
+        _dispatchEvent(widget, event);
+    }
+
+    /// create and populate an entry event and dispatch it.
+    private static void _handleEntryEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 5, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => Entry widget path
+                1  => Entry value
+
+            Ignored, but implicitly passed by Tk:
+                2  => Name of the global traced variable
+                3  => Empty
+                4  => command (write or read). We only track writes.
+        */
+
+        Widget widget = getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        string value = to!string(tclArr[1].tclPeekString());
+
+        // note: timestamp missing since -command doesn't have percent substitution
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!EntryEvent(widget, value, timeMsec);
         _dispatchEvent(widget, event);
     }
 
@@ -648,6 +684,10 @@ static:
 
             case combobox:
                 StaticCast!Combobox(widget).onComboboxEvent.emit(StaticCast!ComboboxEvent(event));
+                break;
+
+            case entry:
+                StaticCast!Entry(widget).onEntryEvent.emit(StaticCast!EntryEvent(event));
                 break;
 
             default: assert(0, format("Unhandled event type: '%s'", event.type));

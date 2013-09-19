@@ -469,7 +469,7 @@ abstract class Widget
 
     override string toString() const
     {
-        return format("%s(%s)", typeid(this).name, _name);
+        return format("%s(%s)", getClassName(this), _name);
     }
 
 package:
