@@ -81,9 +81,12 @@ class Entry : Widget
     /**
         Set the text in this entry.
 
-        $(B Note:) If validation is enabled, the behavior of this
-        function follows special rules according to the type of
-        the validation. See $(D ValidateEvent) for more info.
+        $(B Note:) This does not invoke the validator.
+        Validation is only done for user-input.
+
+        This also prevents infinite loops, where a
+        validator function attempts to directly write
+        to a label but ends up re-calling itself.
     */
     @property void value(string newText)
     {
@@ -148,7 +151,7 @@ class Entry : Widget
     }
 
     /**
-        $(B API-only): This is an internal function, $(b do not use in user-code)!
+        $(B API-only): This is an internal function, $(B do not use in user-code).
         It is public due to a limitation of the package access attribute.
     */
     /*package*/ void _setValidateState(bool state)

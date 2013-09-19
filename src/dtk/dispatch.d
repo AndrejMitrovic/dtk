@@ -566,7 +566,7 @@ static:
 
         string newValue = tclArr[3].tclGetString();
 
-        string curValue = tclArr[4].tclGetString();
+        string oldValue = tclArr[4].tclGetString();
 
         string editValue = tclArr[5].tclGetString();
 
@@ -577,7 +577,7 @@ static:
         // note: timestamp missing since -command doesn't have percent substitution
         TimeMsec timeMsec = getTclTime();
 
-        auto event = scoped!ValidateEvent(widget, action, charIndex, newValue, curValue, editValue, validateMode, validateCondition, timeMsec);
+        auto event = scoped!ValidateEvent(widget, action, charIndex, newValue, oldValue, editValue, validateMode, validateCondition, timeMsec);
         _dispatchEvent(widget, event);
 
         widget._setValidateState(event.validated);

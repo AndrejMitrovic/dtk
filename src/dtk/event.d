@@ -950,13 +950,13 @@ enum ValidateAction
 /// Validate event.
 class ValidateEvent : Event
 {
-    this(Widget widget, ValidateAction action, sizediff_t charIndex, string newValue, string curValue, string editValue, ValidateMode validateMode, ValidateMode validateCondition, TimeMsec timeMsec)
+    this(Widget widget, ValidateAction action, sizediff_t charIndex, string newValue, string oldValue, string editValue, ValidateMode validateMode, ValidateMode validateCondition, TimeMsec timeMsec)
     {
         super(widget, EventType.validate, timeMsec);
         this.action = action;
         this.charIndex = charIndex;
         this.newValue = newValue;
-        this.curValue = curValue;
+        this.oldValue = oldValue;
         this.editValue = editValue;
         this.validateMode = validateMode;
         this.validateCondition = validateCondition;
@@ -1011,7 +1011,7 @@ class ValidateEvent : Event
     const(string) newValue;
 
     /** The current value of entry prior to editing. */
-    const(string) curValue;
+    const(string) oldValue;
 
     /** The text string being inserted/deleted, if any, otherwise empty. */
     const(string) editValue;

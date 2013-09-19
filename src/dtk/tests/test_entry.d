@@ -20,40 +20,77 @@ unittest
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
-    auto entry1 = new Entry(testWindow);
-    entry1.pack();
+    auto entry = new Entry(testWindow);
+    entry.pack();
 
-    assert(entry1.value.empty);
-    entry1.value = "foobar";
-    assert(entry1.value == "foobar");
+    assert(entry.value.empty);
+    entry.value = "foobar";
+    assert(entry.value == "foobar");
 
-    assert(entry1.displayChar == ' ');
-    entry1.displayChar = '*';
-    assert(entry1.displayChar == '*');
+    assert(entry.displayChar == ' ');
+    entry.displayChar = '*';
+    assert(entry.displayChar == '*');
 
-    entry1.resetDisplayChar();
-    entry1.value = "foo";
-    entry1.justification = Justification.right;
+    entry.resetDisplayChar();
+    entry.value = "foo";
+    entry.justification = Justification.right;
 
-    assert(entry1.validationMode == ValidationMode.none);
+    assert(entry.validateMode == ValidateMode.none);
 
-    entry1.validationMode = ValidationMode.all;
-    assert(entry1.validationMode == ValidationMode.all);
+    entry.validateMode = ValidateMode.all;
+    assert(entry.validateMode == ValidateMode.all);
 
-    entry1.value = "123";
+    entry.value = "123";
+    string curValue;
 
-    entry1.onValidation =
-        (Widget widget, ValidateEvent event)
+    size_t callCount;
+    size_t expectedCallCount;
+
+    entry.onKeyboardEvent ~= (scope Event event)
+    {
+        ++callCount;
+    };
+
+    entry.onEntryEvent ~= (scope EntryEvent event)
+    {
+        assert(event.value == curValue, format("%s != %s", event.value, curValue));
+        assert(event.entry.value == curValue, format("%s != %s", event.entry.value, curValue));
+        ++callCount;
+    };
+
+    curValue = "123";
+    entry.value = "123";
+    ++expectedCallCount;
+
+    curValue = "abc";
+    entry.value = "abc";
+    ++expectedCallCount;
+
+    entry.onValidateEvent ~= (scope ValidateEvent event)
+    {
+        // always allow removal
+        if (event.action == ValidateAction.remove)
         {
-            // only allow isDigit
-            return all!isDigit(event.changeValue) ? IsValidated.yes : IsValidated.no;
-        };
-
-    entry1.onFailedValidation =
-        (Widget widget, ValidateEvent event)
+            event.validated = true;
+            return;
+        }
+        else
+        if (event.action == ValidateAction.insert)
         {
-            log(" -- FAILED VALIDATION --");
-        };
+            // only allow new digits in
+            event.validated = all!isDigit(event.editValue);
+
+            stderr.writefln("newVal: %s validated: %s", event.newValue, event.validated);
+
+            // onEntryEvent will be called
+            if (event.validated)
+                curValue = event.newValue;
+
+            ++callCount;
+        }
+    };
+
+    assert(callCount == expectedCallCount, format("%s != %s", callCount, expectedCallCount));
 
     app.testRun();
 }

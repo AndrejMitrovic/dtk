@@ -3,6 +3,10 @@ Entry events.
 
 Todo:
 
+- Major todo: catch exceptions: http://www.gamedev.net/page/resources/_/technical/general-programming/d-exceptions-and-c-callbacks-r3323
+
+- Add note about using (scope BaseClass event) for event handlers.
+
 - Implement assertEqual to utils or somewhere.
 
 - toString for widget events should print more data rather than just use .tupleof. It should take @property

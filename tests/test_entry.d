@@ -34,14 +34,19 @@ unittest
 
     assert(entry.validateMode == ValidateMode.none);
 
-    entry.validateMode = ValidateMode.key;
-    assert(entry.validateMode == ValidateMode.key);
+    entry.validateMode = ValidateMode.all;
+    assert(entry.validateMode == ValidateMode.all);
 
     entry.value = "123";
     string curValue;
 
     size_t callCount;
     size_t expectedCallCount;
+
+    entry.onKeyboardEvent ~= (scope Event event)
+    {
+        ++callCount;
+    };
 
     entry.onEntryEvent ~= (scope EntryEvent event)
     {
@@ -60,14 +65,25 @@ unittest
 
     entry.onValidateEvent ~= (scope ValidateEvent event)
     {
-        //~ stderr.writefln("Validate event: %s", event);
-        event.validated = all!isDigit(event.editValue);
-
-        // onEntryEvent will be called
-        if (event.validated)
+        // always allow removal
+        if (event.action == ValidateAction.remove)
         {
-            curValue = event.newValue;
-            ++expectedCallCount;
+            event.validated = true;
+            return;
+        }
+        else
+        if (event.action == ValidateAction.insert)
+        {
+            // only allow new digits in
+            event.validated = all!isDigit(event.editValue);
+
+            stderr.writefln("newVal: %s validated: %s", event.newValue, event.validated);
+
+            // onEntryEvent will be called
+            if (event.validated)
+                curValue = event.newValue;
+
+            ++callCount;
         }
     };
 
@@ -75,7 +91,7 @@ unittest
 
     app.run();
 
-    // test user input as well
+    // test user input
     assert(callCount == expectedCallCount, format("%s != %s", callCount, expectedCallCount));
 }
 
