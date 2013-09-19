@@ -3,6 +3,8 @@ Entry events.
 
 Todo:
 
+- Rewrite image test after all other widgets are wrapped, since events have to be handled first.
+
 - Major todo: catch exceptions: http://www.gamedev.net/page/resources/_/technical/general-programming/d-exceptions-and-c-callbacks-r3323
 
 - Add note about using (scope BaseClass event) for event handlers.
