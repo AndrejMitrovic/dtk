@@ -11,12 +11,15 @@ static import std.conv;
 import std.algorithm;
 import std.functional;
 import std.stdio;
-import std.string;
+static import std.string;
 import std.traits;
 
 import dtk.loader;
 
-alias spaceJoin = pipe!(map!(to!string), reduce!("a ~ ' ' ~ b"));
+package alias translate = std.string.translate;
+package alias chomp = std.string.chomp;
+package alias chompPrefix = std.string.chompPrefix;
+package alias lastIndexOf = std.string.lastIndexOf;
 
  //~ to!int(value);
 
@@ -32,6 +35,7 @@ private template isRawStaticArray(T, A...)
 }
 
 public alias text = std.conv.text;
+public alias ConvException = std.conv.ConvException;
 
 /** Workaround for bad exception file and line info. */
 template to(T)
@@ -65,6 +69,23 @@ template to(T)
             ex.line = line;
             throw ex;
         }
+    }
+}
+
+/** Wrapper around format which sets the file and line of any exception to the call site. */
+string format(string file = __FILE__, size_t line = __LINE__, Args...)(string fmtStr, Args args)
+{
+    static import std.string;
+
+    try
+    {
+        return std.string.format(fmtStr, args);
+    }
+    catch (Exception exc)
+    {
+        exc.file = file;
+        exc.line = line;
+        throw exc;
     }
 }
 
@@ -241,4 +262,81 @@ unittest
     static assert(isOneOf!(int, float, string, const(int)));
     static assert(isOneOf!(const(int), float, string, int));
     static assert(!isOneOf!(int, float, string));
+}
+
+/** Strip off the qualifiers of an object's dynamic class name. */
+string getClassName(inout(Object) object)
+{
+    string qualClassName = typeid(object).name;
+    return qualClassName[qualClassName.lastIndexOf(".") + 1 .. $];
+}
+
+/**
+    Return string representation of argument.
+    If argument is already a string or a
+    character, enquote it to make it more readable.
+*/
+string enquote(T)(T arg)
+{
+    import std.range : isInputRange, ElementEncodingType;
+
+    static if (isSomeString!T)
+        return format(`"%s"`, arg);
+    else
+    static if (isSomeChar!T)
+        return format("'%s'", arg);
+    else
+    static if (isInputRange!T && is(ElementEncodingType!T == dchar))
+        return format(`"%s"`, to!string(arg));
+    else
+        return to!string(arg);
+}
+
+unittest
+{
+    assert(enquote(0) == "0");
+    assert(enquote(enquote(0)) == `"0"`);
+    assert(enquote("foo") == `"foo"`);
+    assert(enquote('a') == "'a'");
+
+    auto r = ["foo", "bar"].joiner("_");
+    assert(enquote(r) == `"foo_bar"`);
+}
+
+/**
+    Return the element type of Type.
+
+    Note: This is different from ElementType in
+    std.range which returns the type of the .front property.
+*/
+template ElementTypeOf(Type)
+{
+    static if(is(Type T : T[N], size_t N))
+    {
+        alias ElementTypeOf = T;
+    }
+    else
+    static if(is(Type T : T[]))
+    {
+        alias ElementTypeOf = T;
+    }
+    else
+    static if(is(Type T : T*))
+    {
+        alias ElementTypeOf = T;
+    }
+    else
+    {
+        alias ElementTypeOf = Type;
+    }
+}
+
+///
+unittest
+{
+    static assert(is(ElementTypeOf!int == int));
+    static assert(is(ElementTypeOf!(int[]) == int));
+    static assert(is(ElementTypeOf!(int[][]) == int[]));
+    static assert(is(ElementTypeOf!(int[1][2]) == int[1]));
+    static assert(is(ElementTypeOf!(int**) == int*));
 }

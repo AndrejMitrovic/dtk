@@ -14,7 +14,6 @@ import std.algorithm;
 import std.exception;
 import std.range;
 import std.stdio;
-import std.string;
 import std.traits;
 import std.typecons;
 
@@ -203,10 +202,10 @@ abstract class Widget
     public Signal!DestroyEvent onDestroyEvent;
 
     /** Ctor for widgets which know their parent during construction. */
-    this(Widget parent, TkType tkType, WidgetType widgetType)
+    this(Widget parent, TkType tkType, WidgetType widgetType, string extraOpts = null)
     {
         this.widgetType = widgetType;
-        this.initialize(parent, tkType);
+        this.initialize(parent, tkType, extraOpts);
     }
 
     /**
@@ -470,7 +469,7 @@ abstract class Widget
 
     override string toString() const
     {
-        return format("%s(%s)", typeid(this).name, _name);
+        return format("%s(%s)", getClassName(this), _name);
     }
 
 package:
@@ -579,7 +578,7 @@ package:
     }
 
     /** Factored out for delayed initialization. */
-    package final void initialize(Widget parent, TkType tkType)
+    package final void initialize(Widget parent, TkType tkType, string extraOpts = null)
     {
         enforce(parent !is null, "Parent cannot be null");
 
@@ -592,7 +591,7 @@ package:
             prefix = parent._name;
 
         string name = format("%s.%s%s%s", prefix, tkType.toString(), _threadID, _lastWidgetID++);
-        tclEvalFmt("%s %s", tkType.toBaseType(), name);
+        tclEvalFmt("%s %s %s", tkType.toBaseType(), name, extraOpts);
 
         this.initialize(name);
 
@@ -700,8 +699,9 @@ enum WidgetType
     user,                /// User-derived dynamic type
 }
 
+// todo: implement later
 /** Return the widget type based on the class type. */
-template toWidgetType(Class : Widget)
+/+ template toWidgetType(Class : Widget)
 {
     import std.traits;
     import std.typetuple;
@@ -738,7 +738,7 @@ unittest
     static assert(toWidgetType!Button == WidgetType.button);
     static class A : Widget { this() { super(CreateFakeWidget.init, WidgetType.generic_dialog); } }
     static assert(toWidgetType!A == WidgetType.user);
-}
+} +/
 
 package struct InitLater { }
 package struct CreateFakeWidget { }

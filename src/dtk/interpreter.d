@@ -6,11 +6,13 @@
  */
 module dtk.interpreter;
 
+import std.array;
 import std.stdio;
+import std.traits;
 import std.c.stdlib;
 
 import std.exception;
-import std.string;
+import std.string : translate, toStringz;
 import std.path;
 
 import dtk.event;
@@ -82,7 +84,38 @@ package void tclMakeTracedVar(string varName, string varTag, string callbackName
     tclMakeVar(varName);
 
     // hook the callback
-    tclEvalFmt(`trace add variable %s write %s "%s $%s"`, varName, varTag, callbackName, varName);
+    tclEvalFmt(`trace add variable %s write [list %s %s $%s]`, varName, callbackName, varTag, varName);
+}
+
+/** Get an array of type $(D T) from the tcl_Obj object. */
+T tclGetArray(T)(const(Tcl_Obj)* tclObj)
+    if (isArray!T && !isSomeString!T)
+{
+    Appender!T result;
+
+    int arrCount;
+    Tcl_Obj **array;
+    enforce(Tcl_ListObjGetElements(tclInterp, tclObj, &arrCount, &array) != TCL_ERROR);
+
+    try
+    {
+        foreach (index; 0 .. arrCount)
+            result ~= to!(ElementTypeOf!T)(array[index].tclPeekString());
+    }
+    catch (ConvException ex)
+    {
+        ex.msg ~= " - Input was:\n";
+
+        foreach (index; 0 .. arrCount)
+        {
+            ex.msg ~= array[index].tclGetString();
+            ex.msg ~= "\n";
+        }
+
+        throw ex;
+    }
+
+    return result.data;
 }
 
 /** Get the value of the variable $(D varName) of type $(D T). */
@@ -92,25 +125,12 @@ T tclGetVar(T)(string varName)
     // todo: check _interp error
     // todo: check all interpreter error codes
 
-    import std.array;
-    import std.traits;
-
     enum getFlags = 0;
     static if (isArray!T && !isSomeString!T)
     {
-        Appender!T result;
-
         auto tclObj = Tcl_GetVar2Ex(tclInterp, cast(char*)varName.toStringz, null, getFlags);
         enforce(tclObj !is null);
-
-        int arrCount;
-        Tcl_Obj **array;
-        enforce(Tcl_ListObjGetElements(tclInterp, tclObj, &arrCount, &array) != TCL_ERROR);
-
-        foreach (index; 0 .. arrCount)
-            result ~= to!string(Tcl_GetString(array[index]));
-
-        return result.data;
+        return tclGetArray!T(tclObj);
     }
     else
     {

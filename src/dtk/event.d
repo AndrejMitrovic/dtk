@@ -7,7 +7,6 @@
 module dtk.event;
 
 import std.array;
-import std.string;
 import std.traits;
 import std.typecons;
 import std.typetuple;
@@ -18,6 +17,12 @@ import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
+import dtk.widgets.button;
+import dtk.widgets.checkbutton;
+import dtk.widgets.combobox;
+import dtk.widgets.entry;
+import dtk.widgets.listbox;
+import dtk.widgets.menu;
 import dtk.widgets.widget;
 
 /**
@@ -69,8 +74,23 @@ enum EventType
     /** A button widget event, e.g. a button widget was pressed. */
     button,
 
-    /** A check button widget event, e.g. a check button was toggled on or off. */
-    checkbutton,
+    /** A check button widget event, e.g. a check button widget was toggled on or off. */
+    check_button,
+
+    /** A menu item was selected. */
+    menu,
+
+    /** An item in a combobox widget was selected. */
+    combobox,
+
+    /** Text in an entry widget was changed. */
+    entry,
+
+    /** Validation event when widget needs to validate some text. */
+    validate,
+
+    /** One or more items in a listbox widget were selected. */
+    listbox,
 }
 
 /**
@@ -211,20 +231,18 @@ class Event
     */
     protected final void toStringImpl(T...)(scope void delegate(const(char)[]) sink, T args)
     {
-        string qualClassName = typeid(this).name;
-        sink(qualClassName[qualClassName.lastIndexOf(".") + 1 .. $]);  // workaround
-
+        sink(getClassName(this));
         sink("(");
 
         foreach (val; args)
         {
-            sink(to!string(val));
+            sink(enquote(val));
             sink(", ");
         }
 
         sink(to!string(widget));
         sink(", ");
-        sink(to!string(timeMsec));
+        sink(format("%sm%ss", time.minutes, time.seconds));
         sink(")");
     }
 
@@ -730,10 +748,17 @@ class ButtonEvent : Event
         toStringImpl(sink, this.tupleof);
     }
 
+    /** Get the button this event is targetted at. */
+    @property Button button()
+    {
+        return cast(Button)widget;
+    }
+
+    /** The action that triggered this button event. */
     const(ButtonAction) action;
 }
 
-/// Check button widget event.
+///
 enum CheckButtonAction
 {
     /// sentinel
@@ -746,22 +771,308 @@ enum CheckButtonAction
     toggleOff,
 }
 
-/// todo: not handled yet
+/// Check button widget event.
 class CheckButtonEvent : Event
 {
     this(Widget widget, CheckButtonAction action, TimeMsec timeMsec)
     {
-        super(widget, EventType.checkbutton, timeMsec);
+        super(widget, EventType.check_button, timeMsec);
         this.action = action;
     }
 
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /** Get the checkbutton this event is targetted at. */
+    @property CheckButton checkButton()
+    {
+        return cast(CheckButton)widget;
+    }
+
+    /// ditto
+    public alias button = checkButton;
+
+    /** The action that triggered this checkbutton event. */
     const(CheckButtonAction) action;
+}
+
+/// Menu widget event.
+enum MenuAction
+{
+    /// A regular menu item was selected.
+    command,
+
+    /// A check menu item was toggled on or off.
+    toggle,
+
+    /// A radio menu item was selected in a radio menu group.
+    radio,
+}
+
+/// Menu widget event.
+class MenuEvent : Event
+{
+    this(Widget widget, MenuAction action, CommonMenu rootMenu, TimeMsec timeMsec)
+    {
+        super(widget, EventType.menu, timeMsec);
+        this.action = action;
+        this.rootMenu = rootMenu;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /**
+        If $(D action) equals $(D MenuAction.command), returns the
+        $(D MenuItem) widget that was selected.
+        Otherwise, returns null.
+    */
+    @property MenuItem menuItem()
+    {
+        if (action != MenuAction.command)
+            return null;
+
+        return cast(MenuItem)widget;
+    }
+
+    /**
+        If $(D action) equals $(D MenuAction.toggle), returns the
+        $(D ToggleMenuItem) widget that was selected.
+        Otherwise, returns null.
+    */
+    @property ToggleMenuItem toggleMenuItem()
+    {
+        if (action != MenuAction.toggle)
+            return null;
+
+        return cast(ToggleMenuItem)widget;
+    }
+
+    /**
+        If $(D action) equals $(D MenuAction.radio), returns the
+        $(D RadioGroupMenu) associated with the radio menu button
+        that was selected. Otherwise, returns null.
+
+        To check which radio menu button was
+        selected, inspect the radio group's $(D value) property.
+    */
+    @property RadioGroupMenu radioGroupMenu()
+    {
+        if (action != MenuAction.radio)
+            return null;
+
+        return cast(RadioGroupMenu)widget;
+    }
+
+    /** The root menu where the signal was emitted from. */
+    CommonMenu rootMenu;
+
+    /** The action that triggered this menu event. */
+    const(MenuAction) action;
+}
+
+/// Combobox widget event.
+class ComboboxEvent : Event
+{
+    this(Widget widget, string value, TimeMsec timeMsec)
+    {
+        super(widget, EventType.combobox, timeMsec);
+        this.value = value;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, value);
+    }
+
+    /**
+        Return the target Combobox widget for this event.
+    */
+    @property Combobox combobox()
+    {
+        return cast(Combobox)widget;
+    }
+
+    /**
+        The value of the combobox which was selected
+        and which created this event.
+    */
+    const(string) value;
+}
+
+/// Entry widget event.
+class EntryEvent : Event
+{
+    this(Widget widget, string value, TimeMsec timeMsec)
+    {
+        super(widget, EventType.entry, timeMsec);
+        this.value = value;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, value);
+    }
+
+    /**
+        Return the target Entry widget for this entry event.
+    */
+    @property Entry entry()
+    {
+        return cast(Entry)widget;
+    }
+
+    /**
+        The value of the entry which was set
+        and which created this event.
+    */
+    const(string) value;
+}
+
+///
+enum ValidateAction
+{
+    /// Requested when new text is being inputted.
+    insert,
+
+    /// Requested when (part of) the target entry is being deleted.
+    remove,
+
+    /// Requested when the widget holding the target text re-validates
+    /// the text, e.g. during widget focus changes.
+    revalidate,
+}
+
+/// Validate event.
+class ValidateEvent : Event
+{
+    this(Widget widget, ValidateAction action, sizediff_t charIndex, string newValue, string oldValue, string editValue, ValidateMode validateMode, ValidateMode validateCondition, TimeMsec timeMsec)
+    {
+        super(widget, EventType.validate, timeMsec);
+        this.action = action;
+        this.charIndex = charIndex;
+        this.newValue = newValue;
+        this.oldValue = oldValue;
+        this.editValue = editValue;
+        this.validateMode = validateMode;
+        this.validateCondition = validateCondition;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /**
+        Return the target Entry widget for this validate event.
+    */
+    @property Entry entry()
+    {
+        return cast(Entry)widget;
+    }
+
+    /**
+        Set this property to mark that the validator handler has
+        either validated the new entry or that the validation failed.
+
+        If this property is never called in any of the chain of
+        event handlers it is assumed the validation failed.
+
+        $(B Note:) Calling this also sets the $(D handled) field to
+        true, which will stop further propagation of the event.
+    */
+    @property void validated(bool isValidated)
+    {
+        this.handled = true;
+        _validated = isValidated;
+    }
+
+    /** Get the current state of validation. */
+    @property bool validated()
+    {
+        return _validated;
+    }
+
+    /** The action that triggered this validate event. */
+    const(ValidateAction) action;
+
+    /** The index of the character in the string to be inserted/deleted, if any, otherwise -1. */
+    const(sizediff_t) charIndex;
+
+    /**
+        In prevalidation, the new value to best of the entry if the edit is accepted.
+        In revalidation, the current value of the entry.
+    */
+    const(string) newValue;
+
+    /** The current value of entry prior to editing. */
+    const(string) oldValue;
+
+    /** The text string being inserted/deleted, if any, otherwise empty. */
+    const(string) editValue;
+
+    /** The validation mode of the target widget. */
+    const(ValidateMode) validateMode;
+
+    /**
+        The validation condition that created the event.
+
+        For example, if the validateMode is set to $(B ValidateMode.all),
+        validationCondition will contain the condition that triggered the
+        validation (e.g. $(B ValidateMode.key)).
+    */
+    const(ValidateMode) validateCondition;
+
+package:
+    bool _validated;
+}
+
+///
+enum ListboxAction
+{
+    /// The selection in the listbox was changed.
+    select,
+
+    /// The items in the listbox have changed.
+    edit,
+}
+
+/// Listbox widget event.
+class ListboxEvent : Event
+{
+    this(Widget widget, ListboxAction action, TimeMsec timeMsec)
+    {
+        super(widget, EventType.listbox, timeMsec);
+        this.action = action;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /** The action that triggered this listbox event. */
+    const(ListboxAction) action;
+
+    /** Return the target Listbox widget for this event. */
+    @property Listbox listbox()
+    {
+        return cast(Listbox)widget;
+    }
 }
 
 
 /** Old code below */
-
-//~ import dtk.widgets.entry;
 
 /** Tk event types. */
 package enum TkEventType
@@ -812,72 +1123,3 @@ package enum TkEventType
     TkCheckMenuItemToggle,
     TkRadioMenuSelect,
 }
-
-///
-enum ValidationType
-{
-    preInsert,
-    preDelete,
-    revalidate
-}
-
-ValidationType toValidationType(int input)
-{
-    switch (input) with (ValidationType)
-    {
-        case  1: return preInsert;
-        case  0: return preDelete;
-        case -1: return revalidate;
-        default: assert(0, format("Unhandled validation type: '%s'", input));
-    }
-}
-
-//~ ///
-//~ struct ValidateEvent
-//~ {
-    //~ /** type of validation action. */
-    //~ ValidationType type;
-
-    //~ /** index of character in string to be inserted/deleted, if any, otherwise -1. */
-    //~ sizediff_t charIndex;
-
-    //~ /**
-        //~ In prevalidation, the new value of the entry if the edit is accepted.
-        //~ In revalidation, the current value of the entry.
-    //~ */
-    //~ string newValue;
-
-    //~ /** The current value of entry prior to editing. */
-    //~ string curValue;
-
-    //~ /** The text string being inserted/deleted, if any, {} otherwise. */
-    //~ string changeValue;
-
-    //~ /** The current value of the validation mode for this widget. */
-    //~ ValidationMode validationMode;
-
-    //~ /**
-        //~ The validation condition that triggered the callback.
-        //~ If the validationMode is set to $(B all), validationCondition
-        //~ will contain the actual condition that triggered the
-        //~ validation (e.g. $(B key)).
-    //~ */
-    //~ ValidationMode validationCondition;
-//~ }
-
-//~ ///
-//~ struct Event
-//~ {
-    //~ EventType type;
-
-    //~ int x;
-    //~ int y;
-    //~ int keycode;
-    //~ int character;
-    //~ int width;
-    //~ int height;
-    //~ int root_x;
-    //~ int root_y;
-    //~ string state;  // e.g. toggle state
-    //~ ValidateEvent validateEvent;
-//~ }

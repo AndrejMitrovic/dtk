@@ -10,7 +10,6 @@ import std.array;
 import std.exception;
 import std.path;
 import std.range;
-import std.string;
 
 import dtk.app;
 import dtk.color;
@@ -39,7 +38,7 @@ package class GenericDialog : Widget
     this()
     {
         super(CreateFakeWidget.init, WidgetType.generic_dialog);
-        _defaultFileTypeVar = makeTracedVar(TkEventType.TkComboboxChange);
+        _defaultFileTypeVar = makeVar();
     }
 
     /**

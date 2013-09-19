@@ -9,7 +9,6 @@ module dtk.image;
 import std.exception;
 import std.file;
 import std.path;
-import std.string;
 
 import dtk.interpreter;
 import dtk.utils;

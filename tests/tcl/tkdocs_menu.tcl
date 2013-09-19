@@ -9,10 +9,15 @@ menu .win.menubar
 .win configure -menu .win.menubar
 
 #~ . configure -menu .menubar
+#~ puts [winfo children .]
 
 set m .win.menubar
 #~ set m .menubar
+
 menu $m.file
+
+bind $m.file <Button-1> { puts ". clicked file menu" }
+
 menu $m.edit
 $m add cascade -menu $m.file -label File
 $m add cascade -menu $m.edit -label Edit
@@ -24,7 +29,7 @@ $m.file add command -label "Close" -command "closeFile"
 $m.file add separator
 
 $m.file add checkbutton -label Check -variable check -onvalue 1 -offvalue 0
-$m.file add radiobutton -label One -variable radio -value 1
+$m.file add radiobutton -label One -variable radio -value 1 -command { puts "foo" }
 $m.file add radiobutton -label Two -variable radio -value 2
 
 puts [$m.file entrycget 0 -label]; # get label of top entry in menu

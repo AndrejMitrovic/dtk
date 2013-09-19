@@ -120,7 +120,7 @@ __gshared extern(C):
                                       Tcl_ObjCmdProc proc, ClientData clientData,
                                       Tcl_CmdDeleteProc deleteProc) Tcl_CreateObjCommand;
 
-    int function(Tcl_Interp* interp, Tcl_Obj* listPtr, int* objcPtr, Tcl_Obj*** objvPtr) Tcl_ListObjGetElements;
+    int function(Tcl_Interp* interp, const(Tcl_Obj)* listPtr, int* objcPtr, Tcl_Obj*** objvPtr) Tcl_ListObjGetElements;
 
     int function(Tcl_Interp* interp) Tcl_Init;
     void function(Tcl_Interp* interp) Tcl_DeleteInterp;

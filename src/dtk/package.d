@@ -18,7 +18,6 @@ public
     import dtk.keymap;
     import dtk.loader;
     import dtk.types;
-    import dtk.utils;
 
     import dtk.widgets;
 }

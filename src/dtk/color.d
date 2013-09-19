@@ -10,7 +10,6 @@ import std.algorithm;
 import std.exception;
 import std.range;
 import std.stdio;
-import std.string;
 
 import dtk.utils;
 

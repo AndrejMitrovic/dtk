@@ -34,19 +34,19 @@ unittest
 
         switch (event.type) with (EventType)
         {
-            case TkRadioButtonSelect:
-                logf("Radio button selected value: %s.", event.state);
+            //~ case TkRadioButtonSelect:
+                //~ logf("Radio button selected value: %s.", event.state);
 
-                if (event.state == radio1.value)
-                    radio3.enable();
+                //~ if (event.state == radio1.value)
+                    //~ radio3.enable();
 
-                // just to try things out
-                if (event.state == radio2.value)
-                    radio3.disable();
+                //~ // just to try things out
+                //~ if (event.state == radio2.value)
+                    //~ radio3.disable();
 
-                break;
+                //~ break;
 
-            default:
+            //~ default:
         }
     });
 

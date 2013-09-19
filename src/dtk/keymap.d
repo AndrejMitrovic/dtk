@@ -52,6 +52,8 @@ struct KeySym
          * tables in client code.
          */
 
+    // todo: we've screwed up the text at the right (e.g. "spaceenum")
+
     enum KeySym BackSpace                = 0xFF08;  /* back spaceenum KeySym  back char */
     enum KeySym Tab                      = 0xFF09;
     enum KeySym Linefeed                 = 0xFF0A;  /* Linefeedenum KeySym  LF */

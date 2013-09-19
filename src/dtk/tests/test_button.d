@@ -5,6 +5,7 @@ version(DTK_UNITTEST):
 
 import core.thread;
 
+import std.conv;
 import std.range;
 import std.stdio;
 import std.string;
@@ -13,56 +14,37 @@ import dtk;
 
 import dtk.tests.globals;
 
-class MyButton : Button
-{
-    this(Widget widget, string name)
-    {
-        super(widget, name);
-        this.onEvent = &handleEvent;
-    }
-
-    void handleEvent(scope Event event)
-    {
-        // todo: events have to be properly implemented
-
-        //~ switch (event.type) with (EventType)
-        //~ {
-            //~ case Enter:
-                //~ logf("Mouse entered button area, event: %s.", event);
-                //~ break;
-
-            //~ case Leave:
-                //~ logf("Mouse left button area, event: %s.", event);
-                //~ (cast(Button)event.widget).push();
-                //~ break;
-
-            //~ case TkButtonPush:
-                //~ logf("Button was pressed %s times.", ++pressCount);
-                //~ break;
-
-            //~ default: assert(0, format("Unhandled event type: %s", event.type));
-        //~ }
-
-        logf("Event: %s", event);
-    }
-
-    size_t pressCount;
-}
-
 unittest
 {
-    //~ auto testWindow = new Window(app.mainWindow, 200, 200);
-    //~ testWindow.position = Point(500, 500);
+    auto testWindow = new Window(app.mainWindow, 200, 200);
+    testWindow.position = Point(500, 500);
 
-    //~ auto button1 = new MyButton(testWindow, "Flash");
+    auto button1 = new Button(testWindow, "Flash");
 
-    //~ button1.focus();
-    //~ button1.pack();
+    button1.focus();
+    button1.pack();
 
-    //~ testStandard(button1);
-    //~ testButton(button1);
+    testStandard(button1);
+    testButton(button1);
 
-    //~ app.testRun();
+    size_t expectedCallCount;
+    size_t callCount;
+
+    auto handler = (scope ButtonEvent e)
+    {
+        assert(e.widget is button1);
+        assert(e.button is button1);
+        assert(e.action == ButtonAction.push);
+        ++callCount;
+    };
+
+    button1.onButtonEvent ~= handler;
+    button1.push();
+    ++expectedCallCount;
+
+    app.testRun();
+
+    assert(callCount == expectedCallCount, text(callCount, " != ", expectedCallCount));
 }
 
 // test button-specific options

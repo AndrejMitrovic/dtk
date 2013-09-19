@@ -11,8 +11,7 @@ package require Tk
 
 tkwait visibility .
 
-#~ bind .button <KeyPress> {
-bind . <KeyPress> {
+bind .  <KeyPress> {
     puts "client_request = %#"
     puts "win_below_target = %a"
     puts "mouse_button = %b"
@@ -46,7 +45,9 @@ bind . <KeyPress> {
     puts ""
 }
 
-event generate . <KeyPress> -keysym a -keycode 65
+#~ focus .
+
+#~ event generate . <ButtonPress> -button 1
 #~ event generate . <KeyPress> -keysym "a"
 #~ event generate . <KeyPress> -keysym "a"
 

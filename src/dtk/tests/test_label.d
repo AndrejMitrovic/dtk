@@ -32,7 +32,8 @@ unittest
     label.anchor = Anchor.north;
     assert(label.anchor == Anchor.north, label.anchor.text);
 
-    label.size = Size(100, 100);
+    label.textWidth = 100;
+    assert(label.textWidth == 100);
 
     label.anchor = Anchor.center;
     assert(label.anchor == Anchor.center);

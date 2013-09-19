@@ -274,6 +274,12 @@ struct Signal(EventClass)
         ++handlersCount;
     }
 
+    /** Assignment is not supported. */
+    void opAssign(T)(T handler)
+    {
+        static assert(0, "Cannot assign to a signal. You must either use the 'connect' method or the append-assign operator '~='.");
+    }
+
     /** Convenience append-assign operator, equivalent to calling $(D connect). */
     void opOpAssign(string op : "~", T)(T handler)
         if (isEventHandler!(T, EventClass))

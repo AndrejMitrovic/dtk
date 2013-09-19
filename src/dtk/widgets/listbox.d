@@ -9,7 +9,9 @@ module dtk.widgets.listbox;
 import std.range;
 import std.string;
 
+import dtk.dispatch;
 import dtk.event;
+import dtk.signals;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;
@@ -27,9 +29,15 @@ class Listbox : Widget
     {
         super(master, TkType.listbox, WidgetType.listbox);
 
-        _varName = makeTracedVar(TkEventType.TkListboxChange);
+        _varName = makeVar();
+        tclEvalFmt(`trace add variable %s write { %s %s %s %s }`, _varName, _dtkCallbackIdent, EventType.listbox, _name, ListboxAction.edit);
         this.setOption("listvariable", _varName);
     }
+
+    /**
+        Signal emitted when one or more items in the listbox are selected.
+    */
+    public Signal!ListboxEvent onListboxEvent;
 
     /** Get the current list in the listbox. */
     @property string[] values()
@@ -102,35 +110,74 @@ class Listbox : Widget
     /** Set a single selected item. This clears any previous selections. */
     @property void selection(size_t newIndex)
     {
-        this.clearSelection();
-        this.select(newIndex);
+        _selectNone();
+        _select(newIndex);
+        _emitSelectEvent();
     }
 
     /** Set a number of selected indices. This clears any previous selections. */
     @property void selection(size_t[] newIndices)
     {
-        this.clearSelection();
+        _selectNone();
         foreach (index; newIndices)
-            this.select(index);
+            _select(index);
+
+        _emitSelectEvent();
     }
 
-    /** Select a bounded range of items. This clears any previous selections. */
+    /**
+        Select a bounded range of items. This clears any previous selections.
+        $(D highIdx) is inclusive, meaning $(D selectRange(0, 2)) will select
+        items at indices 0 and 2.
+    */
     void selectRange(size_t lowIdx, size_t highIdx)
     {
-        this.clearSelection();
+        _selectNone();
         tclEvalFmt("%s selection set %s %s", _name, lowIdx, highIdx);
-    }
-
-    // select an item without clearing previous items.
-    private void select(size_t index)
-    {
-        tclEvalFmt("%s selection set %s", _name, index);
+        _emitSelectEvent();
     }
 
     /** Clear any selections in the listbox. */
     void clearSelection()
     {
+        _selectNone();
+        _emitSelectEvent();
+    }
+
+    /** Get the list of selected items in the listbox. */
+    @property string[] selectedValues()
+    {
+        string res = tclEvalFmt("%s curselection", _name);
+        if (res.empty)
+            return [];
+
+        string[] values = tclGetVar!(string[])(_varName);
+
+        Appender!(string[]) result;
+
+        auto indices = to!(size_t[])(res.split(" "));
+        foreach (index; indices)
+            result ~= values[index];
+
+        return result.data;
+    }
+
+    // select an item without clearing previous items.
+    private void _select(size_t index)
+    {
+        tclEvalFmt("%s selection set %s", _name, index);
+    }
+
+    // clear all selections
+    private void _selectNone()
+    {
         tclEvalFmt("%s selection clear 0 end", _name);
+    }
+
+    // select event is not implicitly generated in Tk when calling API functions.
+    private void _emitSelectEvent()
+    {
+        tclEvalFmt("event generate %s <<ListboxSelect>>", _name);
     }
 
 private:

@@ -28,15 +28,15 @@ unittest
     assert(slider.value == 0.0);
     slider.value = 50.0;
 
-    slider.onEvent.connect(
-        (Widget widget, Event event)
-        {
-            if (event.type == EventType.TkScaleChange)
-            {
-                logf("Current slider value: %s.", event.state);
-            }
-        }
-    );
+    //~ slider.onEvent.connect(
+        //~ (Widget widget, Event event)
+        //~ {
+            //~ if (event.type == EventType.TkScaleChange)
+            //~ {
+                //~ logf("Current slider value: %s.", event.state);
+            //~ }
+        //~ }
+    //~ );
 
     app.testRun();
 }

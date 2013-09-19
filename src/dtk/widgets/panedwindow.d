@@ -9,7 +9,6 @@ module dtk.widgets.panedwindow;
 import std.array;
 import std.exception;
 import std.range;
-import std.string;
 
 import dtk.geometry;
 import dtk.interpreter;
@@ -24,28 +23,23 @@ class PanedWindow : Widget
     ///
     this(Widget master, Orientation orientation)
     {
-        super(master, TkType.panedwindow, WidgetType.panedwindow);
-        this.setOption("orient", to!string(orientation));
+        string extraOpts = format("-orient %s", to!string(orientation));
+        super(master, TkType.panedwindow, WidgetType.panedwindow, extraOpts);
     }
 
-    /** Get the orientation of this scrollbar. */
+    /**
+        Get the orientation of this scrollbar.
+        The orientation cannot be changed once initially set.
+    */
     @property Orientation orientation()
     {
         return this.getOption!Orientation("orient");
     }
 
-    /** Set the orientation of this scrollbar. */
-    @property void orientation(Orientation newOrient)
-    {
-        this.setOption("orient", newOrient);
-    }
-
     /** Add a widget to this paned window. */
     void add(Widget widget, int weight = 0)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to add must be this paned window."));
-
+        _checkParent(widget);
         string weightStr = (weight == 0) ? "" : format("-weight %s", weight);
         tclEvalFmt("%s add %s %s", _name, widget._name, weightStr);
     }
@@ -53,9 +47,7 @@ class PanedWindow : Widget
     /** Insert a widget to this paned window at a specific position. */
     void insert(Widget widget, int index, int weight = 0)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to insert must be this paned window."));
-
+        _checkParent(widget);
         string weightStr = (weight == 0) ? "" : format("-weight %s", weight);
         tclEvalFmt("%s insert %s %s %s", _name, index, widget._name, weightStr);
     }
@@ -63,9 +55,7 @@ class PanedWindow : Widget
     /** Remove a widget from this paned window. */
     void remove(Widget widget)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to remove must be this paned window."));
-
+        _checkParent(widget);
         tclEvalFmt("%s forget %s", _name, widget._name);
     }
 
@@ -81,19 +71,35 @@ class PanedWindow : Widget
         tclEvalFmt("%s sashpos %s %s", _name, index, newIndex);
     }
 
-    /** Set the width of a pane in this paned window. */
-    void setWidth(Widget widget, int width)
+    /**
+        An integer specifying the relative stretchability of the pane.
+        When the paned window is resized, the extra space is added or
+        subtracted to each pane proportionally to its weight.
+    */
+    void setWeight(Widget widget, int weight)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to configure must be this paned window."));
-
-        tclEvalFmt("%s pane %s -width %s", _name, widget._name, width);
+        _checkParent(widget);
+        tclEvalFmt("%s pane %s -weight %s", _name, widget._name, weight);
     }
 
     /** ditto. */
-    void setWidth(int index, int width)
+    void setWeight(int index, int weight)
     {
-        tclEvalFmt("%s pane %s -width %s", _name, index, width);
+        tclEvalFmt("%s pane %s -weight %s", _name, index, weight);
+    }
+
+    /**
+        Get the weight of a paned widget.
+    */
+    int getWeight(Widget widget)
+    {
+        return to!int(tclEvalFmt("%s pane %s -weight", _name, widget._name));
+    }
+
+    /** ditto. */
+    int getWeight(int index)
+    {
+        return to!int(tclEvalFmt("%s pane %s -weight", _name, index));
     }
 
     /** Get all widgets that are part of this paned window. */
@@ -113,5 +119,13 @@ class PanedWindow : Widget
         }
 
         return panes.data;
+    }
+
+private:
+
+    private void _checkParent(Widget widget)
+    {
+        enforce(widget.parentWidget is this,
+            format("The parent widget of the widget argument must be this paned window."));
     }
 }

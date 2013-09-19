@@ -35,7 +35,7 @@ unittest
         {
             if (event.type == EventType.TkProgressbarChange)
             {
-                logf("Current progress: %s.", event.state);
+                //~ logf("Current progress: %s.", event.state);
 
                 float progress = to!float(event.state);
                 if (bar2.isRunning && progress > 5.0)
@@ -43,7 +43,7 @@ unittest
                     // Note: doesn't work, see bug report:
                     // https://core.tcl.tk/tk/tktview/c597acdab39212f2b5557e69e38eb3191f4a5927
                     bar2.stop();
-                    logf("Stopping progress at: %s.", progress);
+                    //~ logf("Stopping progress at: %s.", progress);
 
                     // workaround
                     bar2.onEvent.clear();

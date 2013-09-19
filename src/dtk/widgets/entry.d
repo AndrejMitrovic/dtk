@@ -8,7 +8,6 @@ module dtk.widgets.entry;
 
 import std.exception;
 import std.range;
-import std.string;
 import std.traits;
 import std.typetuple;
 
@@ -24,16 +23,8 @@ import dtk.utils;
 import dtk.widgets.button;
 import dtk.widgets.widget;
 
-/** Check whether type $(D T) is a validator function. */
-template isValidator(T)
-{
-    enum isValidator = isSomeFunction!T &&
-                       is(ReturnType!T == IsValidated) &&
-                       is(ParameterTypeTuple!T == TypeTuple!(Widget, ValidateEvent));
-}
-
 ///
-enum ValidationMode
+enum ValidateMode
 {
     none,       ///
     focus,      ///
@@ -43,31 +34,6 @@ enum ValidationMode
     all,        ///
 }
 
-package ValidationMode toValidationMode(string input)
-{
-    switch (input) with (ValidationMode)
-    {
-        case "none":     return none;
-        case "focus":    return focus;
-        case "focusin":  return focusIn;
-        case "focusout": return focusOut;
-        case "key":      return key;
-        case "all":      return all;
-        default:         assert(0, format("Unhandled validation input: '%s'", input));
-    }
-}
-
-///
-enum IsValidated
-{
-    no,   ///
-    yes,  ///
-}
-
-// todo: this should be handled in dispatch:
-// validation arguments captured by validatecommand
-private enum string validationArgs = "%d %i %P %s %S %v %V %W";
-
 ///
 class Entry : Widget
 {
@@ -76,50 +42,55 @@ class Entry : Widget
     {
         super(master, TkType.entry, WidgetType.entry);
 
-        string varName = makeTracedVar(TkEventType.TkTextChange);
-        this.setOption("textvariable", varName);
+        _entryVar = makeVar();
+        tclEvalFmt(`trace add variable %s write { %s %s %s $%s }`, _entryVar, _dtkCallbackIdent, EventType.entry, _name, _entryVar);
+        this.setOption("textvariable", _entryVar);
 
-        /* Validation */
-        _validateVar = makeVar();
+        enum string validationArgs = "%d %i %P %s %S %v %V";
 
-        string callValidator = format("%s %s", _dtkCallbackIdent, validationArgs);
-        string validateFunc = format("validate_%s", this.createCallbackName());
+        _validateVar = getUniqueVarName();
+        tclSetVar(_validateVar, 0);
 
-        /**
-            // Note: unreliable, { } gets removed for empty arguments.
-
-            proc %s {type args} {
-                array set arg $args
-                %s $type {*}[array get arg]
+        tclEvalFmt("%s configure -validatecommand %s", _name,
+            format(`{
+                %s %s %s %s
                 return $%s
-            }
-        */
-
-        tclEvalFmt(
-            `
-            proc %s {type args} {
-                %s $type $args
-                return $%s
-            }
-            `, validateFunc,
-               _dtkCallbackIdent,
-               _validateVar);
-
-        tclEvalFmt("%s configure -validatecommand { %s %s %s }", _name, validateFunc, TkEventType.TkValidate, validationArgs);
-        tclEvalFmt("%s configure -invalidcommand { %s %s %s }", _name, validateFunc, TkEventType.TkFailedValidation, validationArgs);
+            }`,
+                _dtkCallbackIdent,
+                EventType.validate,
+                _name, validationArgs,
+                _validateVar));
     }
+
+    /**
+        Signal emitted when validation is requested.
+    */
+    public Signal!ValidateEvent onValidateEvent;
+
+    /**
+        Signal emitted when the entry text has changed.
+    */
+    public Signal!EntryEvent onEntryEvent;
 
     /** Return the text in this entry. */
     @property string value()
     {
-        return tclEvalFmt("%s get", _name);
+        return tclGetVar!string(_entryVar);
     }
 
-    /** Set the text in this entry. */
+    /**
+        Set the text in this entry.
+
+        $(B Note:) This does not invoke the validator.
+        Validation is only done for user-input.
+
+        This also prevents infinite loops, where a
+        validator function attempts to directly write
+        to a label but ends up re-calling itself.
+    */
     @property void value(string newText)
     {
-        tclEvalFmt("%s delete 0 end", _name);
-        tclEvalFmt(`%s insert 0 "%s"`, _name, newText);
+        tclSetVar(_entryVar, newText);
     }
 
     /**
@@ -156,44 +127,15 @@ class Entry : Widget
     }
 
     /** Get the current validation mode for this entry. */
-    @property ValidationMode validationMode()
+    @property ValidateMode validateMode()
     {
-        return this.getOption!ValidationMode("validate");
+        return this.getOption!ValidateMode("validate");
     }
 
     /** Set the validation mode for this entry. */
-    @property void validationMode(ValidationMode newValidationMode)
+    @property void validateMode(ValidateMode newValidationMode)
     {
         this.setOption("validate", to!string(newValidationMode));
-    }
-
-    /** Set the function to use for validation. */
-    @property void onValidation(Validator)(Validator validator)
-        if (isValidator!Validator)
-    {
-        this.onEvent.connect(
-            (Widget widget, Event event)
-            {
-                if (event.type == TkEventType.TkValidate)
-                    this.setValidState(validator(widget, event.validateEvent));
-            });
-    }
-
-    /** Set the function to invoke on a failed validation. */
-    @property void onFailedValidation(Func)(Func func)
-        if (isSomeFunction!Func && is(ParameterTypeTuple!Func == TypeTuple!(Widget, ValidateEvent)))
-    {
-        this.onEvent.connect(
-            (Widget widget, Event event)
-            {
-                if (event.type == TkEventType.TkFailedValidation)
-                    func(widget, event.validateEvent);
-            });
-    }
-
-    private void setValidState(IsValidated isValidated)
-    {
-        tclEvalFmt("set %s %s", _validateVar, cast(bool)isValidated);
     }
 
     /** Get the current justification. */
@@ -208,6 +150,16 @@ class Entry : Widget
         this.setOption("justify", newJustification.toString());
     }
 
+    /**
+        $(B API-only): This is an internal function, $(B do not use in user-code).
+        It is public due to a limitation of the package access attribute.
+    */
+    /*package*/ void _setValidateState(bool state)
+    {
+        tclSetVar(_validateVar, state);
+    }
+
 private:
+    string _entryVar;
     string _validateVar;
 }

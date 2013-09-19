@@ -28,7 +28,6 @@ unittest
     assert(frame.size == Size(0, 0));
 
     frame.size = Size(100, 100);
-    log(frame.size);
     assert(frame.size == Size(100, 100));
 
     frame.borderWidth = 10;
@@ -68,6 +67,6 @@ unittest
 
     frame.padding = Padding(10, 10, 10, 10);
 
-    app.testRun(1.seconds);
+    app.testRun();
 }
 

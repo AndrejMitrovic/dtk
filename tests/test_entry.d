@@ -1,8 +1,5 @@
 module dtk.tests.test_entry;
 
-version(unittest):
-version(DTK_UNITTEST):
-
 import core.thread;
 
 import std.ascii;
@@ -13,10 +10,10 @@ import std.string;
 
 import dtk;
 
-import dtk.tests.globals;
-
 unittest
 {
+    auto app = new App;
+
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
@@ -80,6 +77,8 @@ unittest
             // only allow new digits in
             event.validated = all!isDigit(event.editValue);
 
+            stderr.writefln("newVal: %s validated: %s", event.newValue, event.validated);
+
             // onEntryEvent will be called
             if (event.validated)
                 curValue = event.newValue;
@@ -90,5 +89,12 @@ unittest
 
     assert(callCount == expectedCallCount, format("%s != %s", callCount, expectedCallCount));
 
-    app.testRun();
+    app.run();
+
+    // test user input
+    assert(callCount == expectedCallCount, format("%s != %s", callCount, expectedCallCount));
+}
+
+void main()
+{
 }

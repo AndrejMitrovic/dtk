@@ -20,7 +20,6 @@ version (Windows)
 {
     import core.runtime;
     import std.c.windows.windows;
-    import std.string;
 
     private void loadSymbol(alias field)(HANDLE handle)
     {

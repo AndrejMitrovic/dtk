@@ -7,7 +7,6 @@
 module dtk.widgets.button;
 
 import std.range;
-import std.string;
 
 import dtk.dispatch;
 import dtk.event;
@@ -66,9 +65,6 @@ class Button : Widget
                 EventType.button,
                 ButtonAction.push,
                 _name));
-
-        // 'command' sends an event
-        //~ this.setOption("command",
 
         this.setOption("text", text);
     }
@@ -134,7 +130,7 @@ class Button : Widget
     */
     @property void image(Image newImage)
     {
-        this.setOption("image", newImage ? newImage._name : "{}");
+        this.setOption("image", newImage ? newImage._name : "");
     }
 
     /** Get the 0-based index of the underlined character, or -1 if no character is underlined. */

@@ -1,6 +1,43 @@
+Now working on:
+Entry events.
+
 Todo:
 
-- Have to insert position/size to each widget, but some have a specific setting for these fields.
+- Try to wrap many more virtual events of each widget type.
+
+- Replace this:
+override void toString(scope void delegate(const(char)[]) sink)
+
+With a template that does this:
+callFunc((cast(DynamicType)object).tupleof);
+
+- Rewrite image test after all other widgets are wrapped, since events have to be handled first.
+
+- Major todo: catch exceptions: http://www.gamedev.net/page/resources/_/technical/general-programming/d-exceptions-and-c-callbacks-r3323
+
+- Add note about using (scope BaseClass event) for event handlers.
+
+- Implement assertEqual to utils or somewhere.
+
+- toString for widget events should print more data rather than just use .tupleof. It should take @property
+functions into account.
+
+- Remove the private _varName variables where we don't need to keep a reference to them. They only waste memory.
+
+- All widget event types should have a property which returns the dynamic type of the target widget.
+
+- Hide format and other code from dtk.utils from user.
+
+- Work on menu's again later after fixing up events for other widgets.
+Menus and their items can also be configured in many ways, we have to export this.
+
+- Make library const-correct.
+
+- All labels need to be called with _tclEscape
+
+- Add indeterminate mode to checkbutton.
+
+- Have to add position/size properties to each widget, but some have a specific setting for these fields.
 
 - Replace these sort of calls with assertOp in the test-suite:
     assert(e.action == action, text(e.action, " != ", action));
@@ -8,18 +45,6 @@ Todo:
 - Add behavior tests for event handling of keyboard and mouse, e.g. when
 a entry widget has a keyboard event, when is it a request event v.s. when
 is it a post-action event.
-    - Note: Any subsequent notify events should then really be called only after
-    the event has been accepted. So we need to re-call our D callback in Tcl, e.g.:
-
-    mouse click:
-        -> onSinkEvent
-            -> onEvent
-                -> Tcl checks whether it's ok to click a button.
-                    -> onNotifyEvent
-                        -> onBubbleEvent
-
-- Create bindings and a test-suite for all standard event types:
-http://www.tcl.tk/man/tcl8.6/TkCmd/bind.htm#M7
 
 - Add a status bar option to a Window.
 

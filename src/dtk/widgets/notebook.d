@@ -9,7 +9,6 @@ module dtk.widgets.notebook;
 import std.array;
 import std.exception;
 import std.range;
-import std.string;
 
 import dtk.geometry;
 import dtk.image;
@@ -66,18 +65,14 @@ class Notebook : Widget
     /** Add a widget to this notebook. */
     void add(Widget widget)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to add must be this notebook."));
-
+        _checkParent(widget);
         tclEvalFmt("%s add %s", _name, widget._name);
     }
 
     /** ditto. */
     void add(Widget widget, string text)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to add must be this notebook."));
-
+        _checkParent(widget);
         string opts = format("-text %s", text._tclEscape);
         tclEvalFmt("%s add %s %s", _name, widget._name, opts);
     }
@@ -85,27 +80,21 @@ class Notebook : Widget
     /** ditto. */
     void add(Widget widget, TabOptions tabOptions)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to add must be this notebook."));
-
+        _checkParent(widget);
         tclEvalFmt("%s add %s %s", _name, widget._name, tabOptions.toTclString());
     }
 
     /** Insert a widget to this notebook at a specific position. */
     void insert(Widget widget, int index)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to insert must be this notebook."));
-
+        _checkParent(widget);
         tclEvalFmt("%s insert %s %s", _name, index, widget._name);
     }
 
     /** ditto. */
     void insert(Widget widget, int index, string text)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to insert must be this notebook."));
-
+        _checkParent(widget);
         string opts = format("-text %s", text._tclEscape);
         tclEvalFmt("%s insert %s %s %s", _name, index, widget._name, opts);
     }
@@ -113,18 +102,14 @@ class Notebook : Widget
     /** ditto. */
     void insert(Widget widget, int index, TabOptions tabOptions)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to insert must be this notebook."));
-
+        _checkParent(widget);
         tclEvalFmt("%s insert %s %s %s", _name, index, widget._name, tabOptions.toTclString());
     }
 
     /** Remove a widget from this notebook. */
     void remove(Widget widget)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to remove must be this notebook."));
-
+        _checkParent(widget);
         tclEvalFmt("%s forget %s", _name, widget._name);
     }
 
@@ -149,9 +134,7 @@ class Notebook : Widget
     /** Set the selected notebook tab. */
     @property void selected(Widget widget)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to select must be this notebook."));
-
+        _checkParent(widget);
         tclEvalFmt("%s select %s", _name, widget._name);
     }
 
@@ -164,36 +147,28 @@ class Notebook : Widget
     /** Hide a tab. */
     void hideTab(Widget widget)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to hide must be this notebook."));
-
+        _checkParent(widget);
         tclEvalFmt("%s hide %s", _name, widget._name);
     }
 
     /** Un-hide a tab. */
     void unhideTab(Widget widget)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to un-hide must be this notebook."));
-
+        _checkParent(widget);
         this.add(widget);
     }
 
     /** Get the tab index of the widget. */
     int indexOf(Widget widget)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to get the index of must be this notebook."));
-
+        _checkParent(widget);
         return to!int(tclEvalFmt("%s index %s", _name, widget._name));
     }
 
     /** Get the tab options for a widget. */
     TabOptions options(Widget widget)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to get the options from must be this notebook."));
-
+        _checkParent(widget);
         return _getTabOptions(widget._name);
     }
 
@@ -227,9 +202,7 @@ class Notebook : Widget
     /** Set the tab options for a widget. */
     void setOptions(Widget widget, TabOptions options)
     {
-        enforce(widget.parentWidget is this,
-            format("The parent widget of the widget to set the options for must be this notebook."));
-
+        _checkParent(widget);
         tclEvalFmt("%s tab %s %s", _name, widget._name, options.toTclString());
     }
 
@@ -256,5 +229,13 @@ class Notebook : Widget
         }
 
         return tabs.data;
+    }
+
+private:
+
+    private void _checkParent(Widget widget)
+    {
+        enforce(widget.parentWidget is this,
+            format("The parent widget of the widget argument must be this notebook widget."));
     }
 }

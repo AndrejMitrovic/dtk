@@ -3,7 +3,8 @@ module dtk.tests.globals;
 version(unittest):
 version(DTK_UNITTEST):
 
-package:  // should only be used in the test-suite
+// Symbol conflict, issue: http://d.puremagic.com/issues/show_bug.cgi?id=11065
+/* package: */  // should only be used in the test-suite
 
 import std.stdio;
 
@@ -18,7 +19,7 @@ import dtk.tests.runner;
 __gshared App app;
 
 /// logging for unittests
-void log(Args...)(Args args)
+package void log(Args...)(Args args)
 {
     version (DTK_LOG_TESTS)
     {
@@ -27,7 +28,7 @@ void log(Args...)(Args args)
 }
 
 /// formatted logging for unittests
-void logf(Args...)(Args args)
+package void logf(Args...)(Args args)
 {
     version (DTK_LOG_TESTS)
     {

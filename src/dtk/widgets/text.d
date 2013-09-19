@@ -6,8 +6,6 @@
  */
 module dtk.widgets.text;
 
-import std.string;
-
 import dtk.app;
 import dtk.event;
 import dtk.geometry;
