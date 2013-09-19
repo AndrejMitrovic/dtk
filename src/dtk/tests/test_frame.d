@@ -68,6 +68,6 @@ unittest
 
     frame.padding = Padding(10, 10, 10, 10);
 
-    app.testRun(1.seconds);
+    app.testRun();
 }
 
