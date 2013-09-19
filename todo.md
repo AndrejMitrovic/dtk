@@ -3,6 +3,8 @@ Entry events.
 
 Todo:
 
+- Try to wrap many more virtual events of each widget type.
+
 - Replace this:
 override void toString(scope void delegate(const(char)[]) sink)
 

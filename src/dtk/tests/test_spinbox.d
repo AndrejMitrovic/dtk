@@ -32,15 +32,15 @@ unittest
     spinbox1.wrap = true;
     assert(spinbox1.wrap);
 
-    spinbox1.onEvent.connect(
-        (Widget widget, Event event)
-        {
-            if (event.type == EventType.TkSpinboxChange)
-            {
-                logf("Current scalar spinbox value: %s.", event.state);
-            }
-        }
-    );
+    //~ spinbox1.onEvent.connect(
+        //~ (Widget widget, Event event)
+        //~ {
+            //~ if (event.type == EventType.TkSpinboxChange)
+            //~ {
+                //~ logf("Current scalar spinbox value: %s.", event.state);
+            //~ }
+        //~ }
+    //~ );
 
     auto spinbox2 = new ListSpinbox(app.mainWindow, ["foo", "bar", "doo"]);
     assert(spinbox2.values == ["foo", "bar", "doo"]);
@@ -48,15 +48,15 @@ unittest
 
     spinbox2.wrap = true;
 
-    spinbox2.onEvent.connect(
-        (Widget widget, Event event)
-        {
-            if (event.type == EventType.TkSpinboxChange)
-            {
-                logf("Current list spinbox value: %s.", event.state);
-            }
-        }
-    );
+    //~ spinbox2.onEvent.connect(
+        //~ (Widget widget, Event event)
+        //~ {
+            //~ if (event.type == EventType.TkSpinboxChange)
+            //~ {
+                //~ logf("Current list spinbox value: %s.", event.state);
+            //~ }
+        //~ }
+    //~ );
 
     app.testRun();
 }

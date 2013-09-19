@@ -80,8 +80,6 @@ unittest
             // only allow new digits in
             event.validated = all!isDigit(event.editValue);
 
-            stderr.writefln("newVal: %s validated: %s", event.newValue, event.validated);
-
             // onEntryEvent will be called
             if (event.validated)
                 curValue = event.newValue;
