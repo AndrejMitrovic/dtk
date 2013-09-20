@@ -207,7 +207,6 @@ private:
 }
 
 ///
-// todo: add toggling from the API
 class ToggleMenuItem : Widget
 {
     ///
