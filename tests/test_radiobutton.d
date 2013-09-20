@@ -6,9 +6,6 @@
  */
 module dtk.tests.test_radiobutton;
 
-version(unittest):
-version(DTK_UNITTEST):
-
 import core.thread;
 
 import std.range;
@@ -17,10 +14,9 @@ import std.string;
 
 import dtk;
 
-import dtk.tests.globals;
-
 unittest
 {
+    auto app = new App;
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
@@ -95,5 +91,9 @@ unittest
 
     assert(callCount == expectedCallCount, format("%s != %s", callCount, expectedCallCount));
 
-    app.testRun();
+    app.run();
+}
+
+void main()
+{
 }

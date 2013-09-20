@@ -29,7 +29,6 @@ class CheckButton : Widget
         super(master, TkType.checkbutton, WidgetType.checkbutton);
         this.setOption("text", text);
 
-        //~ _toggleVarName = makeTracedVar(EventType.check_button);
         _toggleVarName = makeVar();
         this.setOption("variable", _toggleVarName);
 

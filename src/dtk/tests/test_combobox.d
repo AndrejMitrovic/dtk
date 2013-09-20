@@ -1,3 +1,9 @@
+/*
+ *             Copyright Andrej Mitrovic 2013.
+ *  Distributed under the Boost Software License, Version 1.0.
+ *     (See accompanying file LICENSE_1_0.txt or copy at
+ *           http://www.boost.org/LICENSE_1_0.txt)
+ */
 module dtk.tests.test_combobox;
 
 version(unittest):
@@ -29,7 +35,6 @@ unittest
     box1.onComboboxEvent ~= (scope ComboboxEvent event)
     {
         assert(event.combobox is box1);
-        assert(event.value == curVal, format("%s != %s", event.value, curVal));
         assert(event.combobox.value == curVal, format("%s != %s", event.combobox.value, curVal));
         ++callCount;
     };

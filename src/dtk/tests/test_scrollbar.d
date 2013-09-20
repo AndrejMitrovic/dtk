@@ -1,3 +1,9 @@
+/*
+ *             Copyright Andrej Mitrovic 2013.
+ *  Distributed under the Boost Software License, Version 1.0.
+ *     (See accompanying file LICENSE_1_0.txt or copy at
+ *           http://www.boost.org/LICENSE_1_0.txt)
+ */
 module dtk.tests.test_scrollbar;
 
 version(unittest):
@@ -22,10 +28,10 @@ unittest
 
     auto sbar = new Scrollbar(testWindow, listbox, Orientation.vertical);
 
-    app.evalFmt("grid %s -column 0 -row 0 -sticky nwes", listbox.getTclName());
-    app.evalFmt("grid %s -column 1 -row 0 -sticky ns", sbar.getTclName());
-    app.eval("grid columnconfigure . 0 -weight 1");
-    app.eval("grid rowconfigure . 0 -weight 1");
+    tclEvalFmt("grid %s -column 0 -row 0 -sticky nwes", listbox.getTclName());
+    tclEvalFmt("grid %s -column 1 -row 0 -sticky ns", sbar.getTclName());
+    tclEvalFmt("grid columnconfigure . 0 -weight 1");
+    tclEvalFmt("grid rowconfigure . 0 -weight 1");
 
     foreach (i; 0 .. 100)
         listbox.add(format("Line %s of 100", i));

@@ -233,6 +233,7 @@ abstract class Widget
         this.widgetType = widgetType;
         string name = format("%s%s%s", _fakeWidgetPrefix, _threadID, _lastWidgetID++);
         this.initialize(name);
+        _isFakeWidget = true;
     }
 
     /**
@@ -657,6 +658,15 @@ package:
         the child destroys the child (e.g. $(D tree.destroy(subTree))).
     */
     package bool _isDestroyed;
+
+    /**
+        Some widgets are fake, they don't have a Tk equivalent or a valid Tk path,
+        but they logically group their child widgets. E.g. a RadioGroup holds
+        RadioButton widgets together, even though in Tk there is no such parent-child
+        relationship. The flag is needed to avoid calling Tk functions on fake widgets
+        since any such call will fail.
+    */
+    private bool _isFakeWidget;
 }
 
 /** The dynamic type of a built-in Widget object. */

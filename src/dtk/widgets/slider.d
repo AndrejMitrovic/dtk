@@ -6,13 +6,16 @@
  */
 module dtk.widgets.slider;
 
+import std.algorithm;
 import std.string;
 import std.range;
 
 import dtk.app;
+import dtk.dispatch;
 import dtk.event;
-import dtk.interpreter;
 import dtk.geometry;
+import dtk.interpreter;
+import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
@@ -33,9 +36,15 @@ class Slider : Widget
         this.setOption("from", to!string(minValue));
         this.setOption("to", to!string(maxValue));
 
-        _varName = makeTracedVar(TkEventType.TkScaleChange);
+        _varName = makeVar();
+        tclEvalFmt(`trace add variable %s write { %s %s %s }`, _varName, _dtkCallbackIdent, EventType.slider, _name);
         this.setOption("variable", _varName);
     }
+
+    /**
+        Signal emitted when the slider value changes.
+    */
+    public Signal!SliderEvent onSliderEvent;
 
     /** Get the current value of the slider. */
     @property float value()
@@ -50,11 +59,12 @@ class Slider : Widget
 
     /**
         Set the current value of the slider.
-        This should be a value between minValue and maxValue set in
-        the constructor.
+        The value will be clipped between minValue and maxValue set
+        in the constructor.
     */
     @property void value(float newValue)
     {
+        newValue = min(newValue, _maxValue).max(newValue, _minValue);
         tclSetVar(_varName, newValue);
     }
 

@@ -11,20 +11,14 @@ import std.range;
 import std.stdio;
 import std.typecons;
 
-import dtk.widgets.button;
-import dtk.widgets.combobox;
-import dtk.widgets.checkbutton;
-import dtk.widgets.listbox;
-import dtk.widgets.entry;
-import dtk.widgets.menu;
-import dtk.widgets.widget;
-
 import dtk.event;
 import dtk.geometry;
 import dtk.interpreter;
 import dtk.keymap;
 import dtk.types;
 import dtk.utils;
+
+import dtk.widgets;
 
 /** The Tcl identifier for the D event callback. */
 package enum _dtkCallbackIdent = "dtk::callback_handler";
@@ -212,6 +206,22 @@ static:
 
             case listbox:
                 _handleListboxEvent(args);
+                goto ok_event;
+
+            case radio_button:
+                _handleRadioButtonEvent(args);
+                goto ok_event;
+
+            case slider:
+                _handleSliderEvent(args);
+                goto ok_event;
+
+            case scalar_spinbox:
+                _handleScalarSpinboxEvent(args);
+                goto ok_event;
+
+            case list_spinbox:
+                _handleListSpinboxEvent(args);
                 goto ok_event;
 
             /**
@@ -496,56 +506,50 @@ static:
     /// create and populate a combobox event and dispatch it.
     private static void _handleComboboxEvent(const Tcl_Obj*[] tclArr)
     {
-        assert(tclArr.length == 5, tclArr.length.text);
+        assert(tclArr.length == 4, tclArr.length.text);
 
         /**
             Indices:
                 0  => Combobox widget path
-                1  => Combobox value
 
             Ignored, but implicitly passed by Tk:
-                2  => Name of the global traced variable
-                3  => Empty
-                4  => command (write or read). We only track writes.
+                1  => Name of the global traced variable
+                2  => Empty
+                3  => command (write or read). We only track writes.
         */
 
         Widget widget = getTclWidget(tclArr[0]);
         assert(widget !is null);
 
-        string value = tclArr[1].tclGetString();
-
         // note: timestamp missing since -command doesn't have percent substitution
         TimeMsec timeMsec = getTclTime();
 
-        auto event = scoped!ComboboxEvent(widget, value, timeMsec);
+        auto event = scoped!ComboboxEvent(widget, timeMsec);
         _dispatchEvent(widget, event);
     }
 
     /// create and populate an entry event and dispatch it.
     private static void _handleEntryEvent(const Tcl_Obj*[] tclArr)
     {
-        assert(tclArr.length == 5, tclArr.length.text);
+        assert(tclArr.length == 4, tclArr.length.text);
 
         /**
             Indices:
                 0  => Entry widget path
-                1  => Entry value
 
             Ignored, but implicitly passed by Tk:
-                2  => Name of the global traced variable
-                3  => Empty
-                4  => command (write or read). We only track writes.
+                1  => Name of the global traced variable
+                2  => Empty
+                3  => command (write or read). We only track writes.
         */
 
         Widget widget = getTclWidget(tclArr[0]);
         assert(widget !is null);
 
-        string value = tclArr[1].tclGetString();
-
         // note: timestamp missing since -command doesn't have percent substitution
         TimeMsec timeMsec = getTclTime();
 
-        auto event = scoped!EntryEvent(widget, value, timeMsec);
+        auto event = scoped!EntryEvent(widget, timeMsec);
         _dispatchEvent(widget, event);
     }
 
@@ -617,6 +621,106 @@ static:
         TimeMsec timeMsec = getTclTime();
 
         auto event = scoped!ListboxEvent(widget, action, timeMsec);
+        _dispatchEvent(widget, event);
+    }
+
+    /// create and populate a radio button event and dispatch it.
+    private static void _handleRadioButtonEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 4, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => RadioGroup widget path
+
+            Ignored, but implicitly passed by Tk when action equals "edit"
+                1  => Name of the global traced variable
+                2  => Empty
+                3  => command (write or read). We only track writes.
+        */
+
+        Widget widget = getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        // note: timestamp missing since -command doesn't have percent substitution
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!RadioButtonEvent(widget, timeMsec);
+        _dispatchEvent(widget, event);
+    }
+
+    /// create and populate a slider event and dispatch it.
+    private static void _handleSliderEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 4, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => Slider widget path
+
+            Ignored, but implicitly passed by Tk when action equals "edit"
+                1  => Name of the global traced variable
+                2  => Empty
+                3  => command (write or read). We only track writes.
+        */
+
+        Widget widget = getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        // note: timestamp missing since -command doesn't have percent substitution
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!SliderEvent(widget, timeMsec);
+        _dispatchEvent(widget, event);
+    }
+
+    /// create and populate a scalar spinbox event and dispatch it.
+    private static void _handleScalarSpinboxEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 4, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => ScalarSpinbox widget path
+
+            Ignored, but implicitly passed by Tk when action equals "edit"
+                1  => Name of the global traced variable
+                2  => Empty
+                3  => command (write or read). We only track writes.
+        */
+
+        Widget widget = getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        // note: timestamp missing since -command doesn't have percent substitution
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!ScalarSpinboxEvent(widget, timeMsec);
+        _dispatchEvent(widget, event);
+    }
+
+    /// create and populate a list spinbox event and dispatch it.
+    private static void _handleListSpinboxEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 4, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => ListSPinbox widget path
+
+            Ignored, but implicitly passed by Tk when action equals "edit"
+                1  => Name of the global traced variable
+                2  => Empty
+                3  => command (write or read). We only track writes.
+        */
+
+        Widget widget = getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        // note: timestamp missing since -command doesn't have percent substitution
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!ListSpinboxEvent(widget, timeMsec);
         _dispatchEvent(widget, event);
     }
 
@@ -780,6 +884,22 @@ static:
 
             case listbox:
                 StaticCast!Listbox(widget).onListboxEvent.emit(StaticCast!ListboxEvent(event));
+                break;
+
+            case radio_button:
+                StaticCast!RadioGroup(widget).onRadioButtonEvent.emit(StaticCast!RadioButtonEvent(event));
+                break;
+
+            case slider:
+                StaticCast!Slider(widget).onSliderEvent.emit(StaticCast!SliderEvent(event));
+                break;
+
+            case scalar_spinbox:
+                StaticCast!ScalarSpinbox(widget).onScalarSpinboxEvent.emit(StaticCast!ScalarSpinboxEvent(event));
+                break;
+
+            case list_spinbox:
+                StaticCast!ListSpinbox(widget).onListSpinboxEvent.emit(StaticCast!ListSpinboxEvent(event));
                 break;
 
             default: assert(0, format("Unhandled event type: '%s'", event.type));

@@ -3,7 +3,7 @@ setlocal EnableDelayedExpansion
 
 set thisPath=%~dp0
 set dtkRoot=%thisPath%\..\..
-set binPath=%dtkRoot%\bin
+set binPath=%thisPath%\..\bin
 cd %thisPath%\..
 
 rem set versions=-version=DTK_LOG_EVAL

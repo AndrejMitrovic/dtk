@@ -1,13 +1,4 @@
-/*
- *             Copyright Andrej Mitrovic 2013.
- *  Distributed under the Boost Software License, Version 1.0.
- *     (See accompanying file LICENSE_1_0.txt or copy at
- *           http://www.boost.org/LICENSE_1_0.txt)
- */
-module dtk.tests.test_slider;
-
-version(unittest):
-version(DTK_UNITTEST):
+module test_slider;
 
 import core.thread;
 
@@ -17,13 +8,11 @@ import std.stdio;
 import std.string;
 
 import dtk;
-
 import dtk.tests.globals;
 
 unittest
 {
-    auto testWindow = new Window(app.mainWindow, 200, 200);
-    testWindow.position = Point(500, 500);
+    auto app = new App;
 
     auto slider = new Slider(app.mainWindow, Orientation.horizontal, 200);
     slider.pack();
@@ -52,5 +41,9 @@ unittest
 
     assert(callCount == expectedCallCount, format("%s != %s", callCount, expectedCallCount));
 
-    app.testRun();
+    app.run();
+}
+
+void main()
+{
 }

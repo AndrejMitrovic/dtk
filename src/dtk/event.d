@@ -17,13 +17,7 @@ import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
-import dtk.widgets.button;
-import dtk.widgets.checkbutton;
-import dtk.widgets.combobox;
-import dtk.widgets.entry;
-import dtk.widgets.listbox;
-import dtk.widgets.menu;
-import dtk.widgets.widget;
+import dtk.widgets;
 
 /**
     All the possible event types. If the event is a custom user event type,
@@ -91,6 +85,18 @@ enum EventType
 
     /** One or more items in a listbox widget were selected. */
     listbox,
+
+    /** A radio button was selected in a radio group. */
+    radio_button,
+
+    /** A slider was moved to select a new item. */
+    slider,
+
+    /** A scalar spinbox value was changed. */
+    scalar_spinbox,
+
+    /** A list spinbox value was changed. */
+    list_spinbox,
 }
 
 /**
@@ -880,16 +886,15 @@ class MenuEvent : Event
 /// Combobox widget event.
 class ComboboxEvent : Event
 {
-    this(Widget widget, string value, TimeMsec timeMsec)
+    this(Widget widget, TimeMsec timeMsec)
     {
         super(widget, EventType.combobox, timeMsec);
-        this.value = value;
     }
 
     ///
     override void toString(scope void delegate(const(char)[]) sink)
     {
-        toStringImpl(sink, value);
+        toStringImpl(sink, this.tupleof);
     }
 
     /**
@@ -899,27 +904,20 @@ class ComboboxEvent : Event
     {
         return cast(Combobox)widget;
     }
-
-    /**
-        The value of the combobox which was selected
-        and which created this event.
-    */
-    const(string) value;
 }
 
 /// Entry widget event.
 class EntryEvent : Event
 {
-    this(Widget widget, string value, TimeMsec timeMsec)
+    this(Widget widget, TimeMsec timeMsec)
     {
         super(widget, EventType.entry, timeMsec);
-        this.value = value;
     }
 
     ///
     override void toString(scope void delegate(const(char)[]) sink)
     {
-        toStringImpl(sink, value);
+        toStringImpl(sink, this.tupleof);
     }
 
     /**
@@ -929,12 +927,6 @@ class EntryEvent : Event
     {
         return cast(Entry)widget;
     }
-
-    /**
-        The value of the entry which was set
-        and which created this event.
-    */
-    const(string) value;
 }
 
 ///
@@ -1071,6 +1063,89 @@ class ListboxEvent : Event
     }
 }
 
+/// RadioButton event.
+class RadioButtonEvent : Event
+{
+    this(Widget widget, TimeMsec timeMsec)
+    {
+        super(widget, EventType.radio_button, timeMsec);
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /** Return the target RadioGroup widget for this event. */
+    @property RadioGroup radioGroup()
+    {
+        return cast(RadioGroup)widget;
+    }
+}
+
+///
+class SliderEvent : Event
+{
+    this(Widget widget, TimeMsec timeMsec)
+    {
+        super(widget, EventType.slider, timeMsec);
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /** Return the target Slider widget for this event. */
+    @property Slider slider()
+    {
+        return cast(Slider)widget;
+    }
+}
+
+///
+class ScalarSpinboxEvent : Event
+{
+    this(Widget widget, TimeMsec timeMsec)
+    {
+        super(widget, EventType.scalar_spinbox, timeMsec);
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /** Return the target ScalarSpinbox widget for this event. */
+    @property ScalarSpinbox scalarSpinbox()
+    {
+        return cast(ScalarSpinbox)widget;
+    }
+}
+
+///
+class ListSpinboxEvent : Event
+{
+    this(Widget widget, TimeMsec timeMsec)
+    {
+        super(widget, EventType.list_spinbox, timeMsec);
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /** Return the target ListSpinbox widget for this event. */
+    @property ListSpinbox listSpinbox()
+    {
+        return cast(ListSpinbox)widget;
+    }
+}
 
 /** Old code below */
 

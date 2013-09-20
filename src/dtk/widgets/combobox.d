@@ -30,7 +30,7 @@ class Combobox : Widget
         super(master, TkType.combobox, WidgetType.combobox);
 
         string varName = makeVar();
-        tclEvalFmt(`trace add variable %s write { %s %s %s $%s }`, varName, _dtkCallbackIdent, EventType.combobox, _name, varName);
+        tclEvalFmt(`trace add variable %s write { %s %s %s }`, varName, _dtkCallbackIdent, EventType.combobox, _name);
         this.setOption("textvariable", varName);
     }
 
