@@ -3,7 +3,7 @@ Entry events.
 
 Todo:
 
-- Instead of using fake widgets, we could use a frame.
+- Instead of using fake widgets, we should use a frame type as the Tk type.
 
 - Widget parameter should be called parent, not master.
 

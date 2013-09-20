@@ -28,7 +28,9 @@ class RadioGroup : Widget
 {
     this(Widget master)
     {
-        // we fake a frame to allow Tk calls to work
+        // we use a frame Tk type to allow Tk calls to work,
+        // but we don't subclass from Frame to disallow user
+        // configuration.
         super(master, TkType.frame, WidgetType.radiogroup);
 
         _varName = makeVar();
