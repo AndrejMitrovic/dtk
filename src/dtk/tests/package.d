@@ -40,10 +40,10 @@ private
     import dtk.tests.test_separator;
     //~ import dtk.tests.test_slider;
     //~ import dtk.tests.test_spinbox;
-    //~ import dtk.tests.test_sizegrip;
-    //~ import dtk.tests.test_scrollbar;
-    //~ import dtk.tests.test_text;
-    //~ import dtk.tests.test_window;
+    import dtk.tests.test_sizegrip;
+    import dtk.tests.test_scrollbar;
+    import dtk.tests.test_text;
+    import dtk.tests.test_window;
 
     //~ import dtk.tests.test_app;  // todo: implement
     //~ import dtk.tests.test_widget;  // todo: implement
