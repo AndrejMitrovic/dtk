@@ -26,10 +26,6 @@ private
     import dtk.tests.test_dialog;
     import dtk.tests.test_entry;
     import dtk.tests.test_frame;
-
-    // todo: rewrite after all other widgets are wrapped since events have to be handled first.
-    // import dtk.tests.test_image;
-
     import dtk.tests.test_label;
     import dtk.tests.test_labelframe;
     import dtk.tests.test_listbox;
@@ -44,6 +40,9 @@ private
     import dtk.tests.test_scrollbar;
     import dtk.tests.test_text;
     import dtk.tests.test_window;
+
+    /* Image. */
+    import dtk.tests.test_image;
 
     // todo: Need to add more features to menus, like dynamic configuration of menu items.
     // import dtk.tests.test_menu;

@@ -53,9 +53,9 @@ unittest
     assert(checkButton.image is image);
 
     // radio button
-    auto radioGroup = new RadioGroup();
-    auto radio1 = new RadioButton(testWindow, radioGroup, "Set On", "on");
-    auto radio2 = new RadioButton(testWindow, radioGroup, "Set Off", "off");
+    auto radioGroup = new RadioGroup(testWindow);
+    auto radio1 = new RadioButton(radioGroup, "Set On", "on");
+    auto radio2 = new RadioButton(radioGroup, "Set Off", "off");
 
     auto diskRed = new Image("../tests/disk_red.png");
     auto diskBlue = new Image("../tests/disk_blue.png");
