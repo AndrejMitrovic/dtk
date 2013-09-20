@@ -212,6 +212,10 @@ static:
                 _handleRadioButtonEvent(args);
                 goto ok_event;
 
+            case slider:
+                _handleSliderEvent(args);
+                goto ok_event;
+
             case scalar_spinbox:
                 _handleScalarSpinboxEvent(args);
                 goto ok_event;
@@ -645,6 +649,31 @@ static:
         _dispatchEvent(widget, event);
     }
 
+    /// create and populate a slider event and dispatch it.
+    private static void _handleSliderEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 4, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => Slider widget path
+
+            Ignored, but implicitly passed by Tk when action equals "edit"
+                1  => Name of the global traced variable
+                2  => Empty
+                3  => command (write or read). We only track writes.
+        */
+
+        Widget widget = getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        // note: timestamp missing since -command doesn't have percent substitution
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!SliderEvent(widget, timeMsec);
+        _dispatchEvent(widget, event);
+    }
+
     /// create and populate a scalar spinbox event and dispatch it.
     private static void _handleScalarSpinboxEvent(const Tcl_Obj*[] tclArr)
     {
@@ -859,6 +888,10 @@ static:
 
             case radio_button:
                 StaticCast!RadioGroup(widget).onRadioButtonEvent.emit(StaticCast!RadioButtonEvent(event));
+                break;
+
+            case slider:
+                StaticCast!Slider(widget).onSliderEvent.emit(StaticCast!SliderEvent(event));
                 break;
 
             case scalar_spinbox:

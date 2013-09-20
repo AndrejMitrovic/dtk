@@ -25,7 +25,7 @@ unittest
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
-    auto slider = new Slider(testWindow, Orientation.horizontal, 200);
+    auto slider = new Slider(app.mainWindow, Orientation.horizontal, 200);
     slider.pack();
 
     assert(slider.minValue > -1.0 && slider.minValue < 1.0);
@@ -34,15 +34,23 @@ unittest
     assert(slider.value == 0.0);
     slider.value = 50.0;
 
-    //~ slider.onEvent.connect(
-        //~ (Widget widget, Event event)
-        //~ {
-            //~ if (event.type == EventType.TkScaleChange)
-            //~ {
-                //~ logf("Current slider value: %s.", event.state);
-            //~ }
-        //~ }
-    //~ );
+    size_t callCount;
+    size_t expectedCallCount;
+
+    float value = 0;
+
+    slider.onSliderEvent ~= (scope SliderEvent event)
+    {
+        assert(event.slider is slider);
+        assert(event.slider.value > value - 1 && event.slider.value < value + 1);
+        ++callCount;
+    };
+
+    value = 10;
+    slider.value = 10;
+    ++expectedCallCount;
+
+    assert(callCount == expectedCallCount, format("%s != %s", callCount, expectedCallCount));
 
     app.testRun();
 }

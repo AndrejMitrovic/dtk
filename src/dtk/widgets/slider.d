@@ -11,9 +11,11 @@ import std.string;
 import std.range;
 
 import dtk.app;
+import dtk.dispatch;
 import dtk.event;
-import dtk.interpreter;
 import dtk.geometry;
+import dtk.interpreter;
+import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
@@ -35,8 +37,14 @@ class Slider : Widget
         this.setOption("to", to!string(maxValue));
 
         _varName = makeVar();
+        tclEvalFmt(`trace add variable %s write { %s %s %s }`, _varName, _dtkCallbackIdent, EventType.slider, _name);
         this.setOption("variable", _varName);
     }
+
+    /**
+        Signal emitted when the slider value changes.
+    */
+    public Signal!SliderEvent onSliderEvent;
 
     /** Get the current value of the slider. */
     @property float value()

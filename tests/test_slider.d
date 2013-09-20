@@ -26,11 +26,18 @@ unittest
     size_t callCount;
     size_t expectedCallCount;
 
+    float value = 0;
+
     slider.onSliderEvent ~= (scope SliderEvent event)
     {
         assert(event.slider is slider);
-        assert(event.slider.value == value);
+        assert(event.slider.value > value - 1 && event.slider.value < value + 1);
+        ++callCount;
     };
+
+    value = 10;
+    slider.value = 10;
+    ++expectedCallCount;
 
     assert(callCount == expectedCallCount, format("%s != %s", callCount, expectedCallCount));
 

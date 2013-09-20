@@ -89,6 +89,9 @@ enum EventType
     /** A radio button was selected in a radio group. */
     radio_button,
 
+    /** A slider was moved to select a new item. */
+    slider,
+
     /** A scalar spinbox value was changed. */
     scalar_spinbox,
 
@@ -1078,6 +1081,27 @@ class RadioButtonEvent : Event
     @property RadioGroup radioGroup()
     {
         return cast(RadioGroup)widget;
+    }
+}
+
+///
+class SliderEvent : Event
+{
+    this(Widget widget, TimeMsec timeMsec)
+    {
+        super(widget, EventType.slider, timeMsec);
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /** Return the target Slider widget for this event. */
+    @property Slider slider()
+    {
+        return cast(Slider)widget;
     }
 }
 

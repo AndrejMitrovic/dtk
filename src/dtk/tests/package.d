@@ -27,7 +27,7 @@ private
     import dtk.tests.test_entry;
     import dtk.tests.test_frame;
 
-    // todo: ewrite after all other widgets are wrapped since events have to be handled first.
+    // todo: rewrite after all other widgets are wrapped since events have to be handled first.
     // import dtk.tests.test_image;
 
     import dtk.tests.test_label;
@@ -38,15 +38,12 @@ private
     import dtk.tests.test_progressbar;
     import dtk.tests.test_radiobutton;
     import dtk.tests.test_separator;
-    //~ import dtk.tests.test_slider;
+    import dtk.tests.test_slider;
     import dtk.tests.test_spinbox;
     import dtk.tests.test_sizegrip;
     import dtk.tests.test_scrollbar;
     import dtk.tests.test_text;
     import dtk.tests.test_window;
-
-    //~ import dtk.tests.test_app;  // todo: implement
-    //~ import dtk.tests.test_widget;  // todo: implement
 
     // todo: Need to add more features to menus, like dynamic configuration of menu items.
     // import dtk.tests.test_menu;
