@@ -17,13 +17,7 @@ import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
-import dtk.widgets.button;
-import dtk.widgets.checkbutton;
-import dtk.widgets.combobox;
-import dtk.widgets.entry;
-import dtk.widgets.listbox;
-import dtk.widgets.menu;
-import dtk.widgets.widget;
+import dtk.widgets;
 
 /**
     All the possible event types. If the event is a custom user event type,
@@ -91,6 +85,9 @@ enum EventType
 
     /** One or more items in a listbox widget were selected. */
     listbox,
+
+    /** A radio button was selected in a radio group. */
+    radio_button,
 }
 
 /**
@@ -1071,6 +1068,26 @@ class ListboxEvent : Event
     }
 }
 
+/// RadioButton event.
+class RadioButtonEvent : Event
+{
+    this(Widget widget, TimeMsec timeMsec)
+    {
+        super(widget, EventType.radio_button, timeMsec);
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /** Return the target RadioGroup widget for this event. */
+    @property RadioGroup radioGroup()
+    {
+        return cast(RadioGroup)widget;
+    }
+}
 
 /** Old code below */
 

@@ -3,6 +3,10 @@ Entry events.
 
 Todo:
 
+- Instead of using fake widgets, we could use a frame.
+
+- Widget parameter should be called parent, not master.
+
 - Try to wrap many more virtual events of each widget type.
 
 - Replace this:

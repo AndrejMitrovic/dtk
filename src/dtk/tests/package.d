@@ -36,7 +36,7 @@ private
     import dtk.tests.test_notebook;
     import dtk.tests.test_panedwindow;
     import dtk.tests.test_progressbar;
-    //~ import dtk.tests.test_radiobutton;
+    import dtk.tests.test_radiobutton;
     //~ import dtk.tests.test_separator;
     //~ import dtk.tests.test_slider;
     //~ import dtk.tests.test_spinbox;

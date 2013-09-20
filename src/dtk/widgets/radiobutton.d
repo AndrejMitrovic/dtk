@@ -6,11 +6,13 @@
  */
 module dtk.widgets.radiobutton;
 
+import std.algorithm;
+import std.container;
 import std.exception;
 import std.range;
-import std.string;
 
 import dtk.app;
+import dtk.dispatch;
 import dtk.event;
 import dtk.image;
 import dtk.interpreter;
@@ -24,56 +26,106 @@ import dtk.widgets.widget;
 ///
 class RadioGroup : Widget
 {
-    // todo: this is not really a Widget, but it needs to have a callback mechanism
-    this()
+    this(Widget master)
     {
-        super(CreateFakeWidget.init, WidgetType.radiogroup);
-        _varName = makeTracedVar(TkEventType.TkRadioButtonSelect);
+        // we fake a frame to allow Tk calls to work
+        super(master, TkType.frame, WidgetType.radiogroup);
+
+        _varName = makeVar();
+        tclEvalFmt(`trace add variable %s write { %s %s %s }`, _varName, _dtkCallbackIdent, EventType.radio_button, _name);
     }
 
     /**
-        Get the currently selected radio button value.
+        Signal emitted when a radio button in the radio group is selected.
+    */
+    public Signal!RadioButtonEvent onRadioButtonEvent;
+
+    /** Get the currently selected radio button. */
+    @property RadioButton selectedButton()
+    {
+        return _findButton(selectedValue);
+    }
+
+    /**
+        Set the selected radio button.
+        The radio button must be part of this radio group.
+    */
+    @property void selectedButton(RadioButton button)
+    {
+        enforce(!find(_buttons[], button).empty,
+            format("Radion button '%s' is not part of this radio group", button));
+
+        _selectButton(button);
+    }
+
+    /**
+        Get the string value of the currently selected radio button.
         It should equal to the $(D value) property of one of
         the radio buttons that are part of this radio group.
     */
-    @property string value()
+    @property string selectedValue()
     {
         return tclGetVar!string(_varName);
     }
 
     /**
-        Set the currently selected radio button value.
-        It should equal to the $(D value) property of one of
-        the radio buttons that are part of this radio group.
+        Set the currently selected radio button by using the
+        matching string value. The value should equal to
+        one of the radio buttons' values that are part of
+        this radio group.
     */
-    @property void value(string newValue)
+    @property void selectedValue(string newValue)
     {
-        tclSetVar(_varName, newValue);
+        auto button = enforce(_findButton(newValue),
+            format("Radion button with value '%s' was not found in this radio group", newValue));
+
+        _selectButton(button);
     }
 
     private void add(RadioButton button)
     {
-        if (_isEmpty)
-        {
-            _isEmpty = false;
-            this.value = button.value;
-        }
+        if (_buttons.empty)
+            _selectButton(button);
+
+        enforce(find(_buttons[], button).empty,
+            format("Radion button '%s' is already part of this radio group", button));
+
+        _buttons.stableInsertAfter(_buttons[], button);
+    }
+
+    private void _selectButton(RadioButton button)
+    {
+        tclSetVar(_varName, button.value);
+    }
+
+    // find the button with this value
+    private RadioButton _findButton(string value)
+    {
+        auto range = find!((a, b) => a.value == b)(_buttons[], value);
+        return range.empty ? null : range.front;
+    }
+
+    // when a currently selected radio button has its value changed,
+    // this function needs to be called to reflect this.
+    private void _updateSelectedValue(string newValue)
+    {
+        tclSetVar(_varName, newValue);
     }
 
 private:
     string _varName;
-    bool _isEmpty = true;
+    SList!RadioButton _buttons;
 }
 
 ///
 class RadioButton : Widget
 {
     ///
-    this(Widget master, RadioGroup radioGroup, string text, string value)
+    this(RadioGroup radioGroup, string text, string value)
     {
         enforce(radioGroup !is null, "radioGroup argument must not be null.");
 
-        super(master, TkType.radiobutton, WidgetType.radiobutton);
+        super(radioGroup, TkType.radiobutton, WidgetType.radiobutton);
 
         this.setOption("text", text);
         this.setOption("variable", radioGroup._varName);
@@ -99,14 +151,16 @@ class RadioButton : Widget
 
         this.setOption("value", newValue);
 
-        if (_radioGroup.value == oldValue)
-            _radioGroup.value = newValue;
+        // if the radio group had this button selected,
+        // it needs a forced update to the new value of this button
+        if (_radioGroup.selectedValue == oldValue)
+            _radioGroup._updateSelectedValue(newValue);
     }
 
     /** Select this radio button. */
     void select()
     {
-        _radioGroup.value = this.value;
+        _radioGroup.selectedButton = this;
     }
 
     /** Get the current button style. */

@@ -11,20 +11,14 @@ import std.range;
 import std.stdio;
 import std.typecons;
 
-import dtk.widgets.button;
-import dtk.widgets.combobox;
-import dtk.widgets.checkbutton;
-import dtk.widgets.listbox;
-import dtk.widgets.entry;
-import dtk.widgets.menu;
-import dtk.widgets.widget;
-
 import dtk.event;
 import dtk.geometry;
 import dtk.interpreter;
 import dtk.keymap;
 import dtk.types;
 import dtk.utils;
+
+import dtk.widgets;
 
 /** The Tcl identifier for the D event callback. */
 package enum _dtkCallbackIdent = "dtk::callback_handler";
@@ -212,6 +206,10 @@ static:
 
             case listbox:
                 _handleListboxEvent(args);
+                goto ok_event;
+
+            case radio_button:
+                _handleRadioButtonEvent(args);
                 goto ok_event;
 
             /**
@@ -620,6 +618,31 @@ static:
         _dispatchEvent(widget, event);
     }
 
+    /// create and populate a radio button event and dispatch it.
+    private static void _handleRadioButtonEvent(const Tcl_Obj*[] tclArr)
+    {
+        assert(tclArr.length == 4, tclArr.length.text);
+
+        /**
+            Indices:
+                0  => RadioGroup widget path
+
+            Ignored, but implicitly passed by Tk when action equals "edit"
+                1  => Name of the global traced variable
+                2  => Empty
+                3  => command (write or read). We only track writes.
+        */
+
+        Widget widget = getTclWidget(tclArr[0]);
+        assert(widget !is null);
+
+        // note: timestamp missing since -command doesn't have percent substitution
+        TimeMsec timeMsec = getTclTime();
+
+        auto event = scoped!RadioButtonEvent(widget, timeMsec);
+        _dispatchEvent(widget, event);
+    }
+
     /// main dispatch function
     private static TkEventFlag _dispatchEvent(Widget widget, scope Event event)
     {
@@ -780,6 +803,10 @@ static:
 
             case listbox:
                 StaticCast!Listbox(widget).onListboxEvent.emit(StaticCast!ListboxEvent(event));
+                break;
+
+            case radio_button:
+                StaticCast!RadioGroup(widget).onRadioButtonEvent.emit(StaticCast!RadioButtonEvent(event));
                 break;
 
             default: assert(0, format("Unhandled event type: '%s'", event.type));
