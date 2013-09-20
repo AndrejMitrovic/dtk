@@ -6,6 +6,7 @@
  */
 module dtk.widgets.slider;
 
+import std.algorithm;
 import std.string;
 import std.range;
 
@@ -33,7 +34,7 @@ class Slider : Widget
         this.setOption("from", to!string(minValue));
         this.setOption("to", to!string(maxValue));
 
-        _varName = makeTracedVar(TkEventType.TkScaleChange);
+        _varName = makeVar();
         this.setOption("variable", _varName);
     }
 
@@ -50,11 +51,12 @@ class Slider : Widget
 
     /**
         Set the current value of the slider.
-        This should be a value between minValue and maxValue set in
-        the constructor.
+        The value will be clipped between minValue and maxValue set
+        in the constructor.
     */
     @property void value(float newValue)
     {
+        newValue = min(newValue, _maxValue).max(newValue, _minValue);
         tclSetVar(_varName, newValue);
     }
 

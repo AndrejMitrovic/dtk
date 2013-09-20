@@ -53,7 +53,7 @@ unittest
 
     box1.pack();
 
-    assert(callCount == expectedCallCount, text(callCount, " != ", expectedCallCount));
+    assert(callCount == expectedCallCount, format("%s != %s", callCount, expectedCallCount));
 
     app.run();
 }

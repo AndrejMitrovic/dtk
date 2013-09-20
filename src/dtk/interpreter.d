@@ -176,3 +176,14 @@ package const(char)[] tclPeekString(const Tcl_Obj* tclObj)
 {
     return tclObj.Tcl_GetString().peekCString();
 }
+
+version(Windows)
+{
+    import core.sys.windows.windows;
+
+    HWND getHWND(Widget widget)
+    {
+        Tk_Window tkwin = Tk_NameToWindow(tclInterp, widget.getTclName().toStringz, Tk_MainWindow(tclInterp));
+        return Tk_GetHWND(Tk_WindowId(tkwin));
+    }
+}

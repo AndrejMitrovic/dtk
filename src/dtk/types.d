@@ -23,6 +23,14 @@ enum uint TCL_RETURN = 2;
 enum uint TCL_BREAK = 3;
 enum uint TCL_CONTINUE = 4;
 
+struct _XIC
+{
+    @disable this();
+    @disable this(this);
+}
+
+alias XIC = _XIC*;
+
 struct CData
 {
     @disable this();
@@ -52,6 +60,94 @@ struct Tk_Window_
 
 /// opaque handle to a window
 alias Tk_Window = Tk_Window_*;
+
+version(X86_64)
+    alias XID = long;
+else
+    alias XID = c_ulong;
+
+alias Tk_Window_XID = XID;
+
+alias Tk_Uid = const(char)*;
+
+/*
+ * Data structure for XReconfigureWindow
+ */
+//~ struct XWindowChanges
+//~ {
+    //~ int x, y;
+    //~ int width, height;
+    //~ int border_width;
+    //~ Window sibling;
+    //~ int stack_mode;
+//~ }
+
+/*
+ * Data structure for setting window attributes.
+ */
+//~ struct XSetWindowAttributes
+//~ {
+    //~ Pixmap background_pixmap;	/* background or None or ParentRelative */
+    //~ unsigned long background_pixel;	/* background pixel */
+    //~ Pixmap border_pixmap;	/* border of the window */
+    //~ unsigned long border_pixel;	/* border pixel value */
+    //~ int bit_gravity;		/* one of bit gravity values */
+    //~ int win_gravity;		/* one of the window gravity values */
+    //~ int backing_store;		/* NotUseful, WhenMapped, Always */
+    //~ unsigned long backing_planes;/* planes to be preseved if possible */
+    //~ unsigned long backing_pixel;/* value to use in restoring planes */
+    //~ Bool save_under;		/* should bits under be saved? (popups) */
+    //~ long event_mask;		/* set of events that should be saved */
+    //~ long do_not_propagate_mask;	/* set of events that should not propagate */
+    //~ Bool override_redirect;	/* boolean value for override-redirect */
+    //~ Colormap colormap;		/* color map to be associated with window */
+    //~ Cursor cursor;		/* cursor to be displayed (or None) */
+//~ };
+
+struct Tk_FakeWin
+{
+    /* Display */ void *display;
+    char *dummy1;		/* dispPtr */
+    int screenNum;
+    /* Visual */ void *visual;
+    int depth;
+    Tk_Window_XID window;
+    //~ char *dummy2;		/* childList */
+    //~ char *dummy3;		/* lastChildPtr */
+    //~ Tk_Window parentPtr;	/* parentPtr */
+    //~ char *dummy4;		/* nextPtr */
+    //~ char *dummy5;		/* mainPtr */
+    //~ char *pathName;
+    //~ Tk_Uid nameUid;
+    //~ Tk_Uid classUid;
+    //~ XWindowChanges changes;
+    //~ uint dummy6;	/* dirtyChanges */
+    //~ XSetWindowAttributes atts;
+    //~ c_ulong dummy7;	/* dirtyAtts */
+    //~ uing flags;
+    //~ char *dummy8;		/* handlerList */
+//~ #ifdef TK_USE_INPUT_METHODS
+    //~ XIC dummy9;			/* inputContext */
+//~ #endif /* TK_USE_INPUT_METHODS */
+    //~ ClientData *dummy10;	/* tagPtr */
+    //~ int dummy11;		/* numTags */
+    //~ int dummy12;		/* optionLevel */
+    //~ char *dummy13;		/* selHandlerList */
+    //~ char *dummy14;		/* geomMgrPtr */
+    //~ ClientData dummy15;		/* geomData */
+    //~ int reqWidth, reqHeight;
+    //~ int internalBorderLeft;
+    //~ char *dummy16;		/* wmInfoPtr */
+    //~ char *dummy17;		/* classProcPtr */
+    //~ ClientData dummy18;		/* instanceData */
+    //~ char *dummy19;		/* privatePtr */
+    //~ int internalBorderRight;
+    //~ int internalBorderTop;
+    //~ int internalBorderBottom;
+    //~ int minReqWidth;
+    //~ int minReqHeight;
+    //~ char *dummy20;		/* geometryMaster */
+}
 
 struct Tcl_Command_
 {
@@ -128,13 +224,70 @@ __gshared extern(C):
     void function(Tcl_Time* timeBuf) Tcl_GetTime;
 }
 
+version(Windows)
+{
+    import core.sys.windows.windows;
+}
+
+/*
+ * Data structure for setting graphics context.
+ */
+//~ struct XGCValues
+//~ {
+	//~ int function;		/* logical operation */
+	//~ unsigned long plane_mask;/* plane mask */
+	//~ unsigned long foreground;/* foreground pixel */
+	//~ unsigned long background;/* background pixel */
+	//~ int line_width;		/* line width */
+	//~ int line_style;	 	/* LineSolid, LineOnOffDash, LineDoubleDash */
+	//~ int cap_style;	  	/* CapNotLast, CapButt,
+				   //~ CapRound, CapProjecting */
+	//~ int join_style;	 	/* JoinMiter, JoinRound, JoinBevel */
+	//~ int fill_style;	 	/* FillSolid, FillTiled,
+				   //~ FillStippled, FillOpaeueStippled */
+	//~ int fill_rule;	  	/* EvenOddRule, WindingRule */
+	//~ int arc_mode;		/* ArcChord, ArcPieSlice */
+	//~ Pixmap tile;		/* tile pixmap for tiling operations */
+	//~ Pixmap stipple;		/* stipple 1 plane pixmap for stipping */
+	//~ int ts_x_origin;	/* offset for tile or stipple operations */
+	//~ int ts_y_origin;
+        //~ Font font;	        /* default text font for text operations */
+	//~ int subwindow_mode;     /* ClipByChildren, IncludeInferiors */
+	//~ Bool graphics_exposures;/* boolean, should exposures be generated */
+	//~ int clip_x_origin;	/* origin for clipping */
+	//~ int clip_y_origin;
+	//~ Pixmap clip_mask;	/* bitmap clipping; other calls for rects */
+	//~ int dash_offset;	/* patterned/dashed line information */
+	//~ char dashes;
+//~ }
+
+/*
+ * Graphics context.  The contents of this structure are implementation
+ * dependent.  A GC should be treated as opaque by application code.
+ */
+
+//~ alias GC = XGCValues*;
+
 struct TkProcs
 {
 __gshared extern(C):
     int function(Tcl_Interp* interp) Tk_Init;
     Tk_Window function(Tcl_Interp* interp) Tk_MainWindow;
     void function() Tk_MainLoop;
-    //~ HWND function(Window window) tk_GetHWND;
+    Tk_Window function(Tcl_Interp* interp, const(char)* pathName, Tk_Window tkwin) Tk_NameToWindow;
+
+    version(Windows)
+    {
+        HWND function(Tk_Window_XID window) Tk_GetHWND;
+        Tk_Window function(HWND hwnd) Tk_HWNDToWindow;
+    }
+
+    //~ GC function(Tk_Window tkwin, c_ulong valueMask, XGCValues *valuePtr) Tk_GetGC;
+}
+
+Tk_Window_XID Tk_WindowId(Tk_Window tkwin)
+{
+    return (cast(Tk_FakeWin*)tkwin).window;
 }
 
 mixin ExportMembers!TkProcs;
