@@ -88,6 +88,12 @@ enum EventType
 
     /** A radio button was selected in a radio group. */
     radio_button,
+
+    /** A scalar spinbox value was changed. */
+    scalar_spinbox,
+
+    /** A list spinbox value was changed. */
+    list_spinbox,
 }
 
 /**
@@ -877,16 +883,15 @@ class MenuEvent : Event
 /// Combobox widget event.
 class ComboboxEvent : Event
 {
-    this(Widget widget, string value, TimeMsec timeMsec)
+    this(Widget widget, TimeMsec timeMsec)
     {
         super(widget, EventType.combobox, timeMsec);
-        this.value = value;
     }
 
     ///
     override void toString(scope void delegate(const(char)[]) sink)
     {
-        toStringImpl(sink, value);
+        toStringImpl(sink, this.tupleof);
     }
 
     /**
@@ -896,27 +901,20 @@ class ComboboxEvent : Event
     {
         return cast(Combobox)widget;
     }
-
-    /**
-        The value of the combobox which was selected
-        and which created this event.
-    */
-    const(string) value;
 }
 
 /// Entry widget event.
 class EntryEvent : Event
 {
-    this(Widget widget, string value, TimeMsec timeMsec)
+    this(Widget widget, TimeMsec timeMsec)
     {
         super(widget, EventType.entry, timeMsec);
-        this.value = value;
     }
 
     ///
     override void toString(scope void delegate(const(char)[]) sink)
     {
-        toStringImpl(sink, value);
+        toStringImpl(sink, this.tupleof);
     }
 
     /**
@@ -926,12 +924,6 @@ class EntryEvent : Event
     {
         return cast(Entry)widget;
     }
-
-    /**
-        The value of the entry which was set
-        and which created this event.
-    */
-    const(string) value;
 }
 
 ///
@@ -1086,6 +1078,48 @@ class RadioButtonEvent : Event
     @property RadioGroup radioGroup()
     {
         return cast(RadioGroup)widget;
+    }
+}
+
+///
+class ScalarSpinboxEvent : Event
+{
+    this(Widget widget, TimeMsec timeMsec)
+    {
+        super(widget, EventType.scalar_spinbox, timeMsec);
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /** Return the target ScalarSpinbox widget for this event. */
+    @property ScalarSpinbox scalarSpinbox()
+    {
+        return cast(ScalarSpinbox)widget;
+    }
+}
+
+///
+class ListSpinboxEvent : Event
+{
+    this(Widget widget, TimeMsec timeMsec)
+    {
+        super(widget, EventType.list_spinbox, timeMsec);
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /** Return the target ListSpinbox widget for this event. */
+    @property ListSpinbox listSpinbox()
+    {
+        return cast(ListSpinbox)widget;
     }
 }
 

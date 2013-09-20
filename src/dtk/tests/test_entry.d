@@ -59,7 +59,6 @@ unittest
 
     entry.onEntryEvent ~= (scope EntryEvent event)
     {
-        assert(event.value == curValue, format("%s != %s", event.value, curValue));
         assert(event.entry.value == curValue, format("%s != %s", event.entry.value, curValue));
         ++callCount;
     };

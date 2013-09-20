@@ -39,7 +39,7 @@ private
     import dtk.tests.test_radiobutton;
     import dtk.tests.test_separator;
     //~ import dtk.tests.test_slider;
-    //~ import dtk.tests.test_spinbox;
+    import dtk.tests.test_spinbox;
     import dtk.tests.test_sizegrip;
     import dtk.tests.test_scrollbar;
     import dtk.tests.test_text;

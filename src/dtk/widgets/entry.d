@@ -43,7 +43,7 @@ class Entry : Widget
         super(master, TkType.entry, WidgetType.entry);
 
         _entryVar = makeVar();
-        tclEvalFmt(`trace add variable %s write { %s %s %s $%s }`, _entryVar, _dtkCallbackIdent, EventType.entry, _name, _entryVar);
+        tclEvalFmt(`trace add variable %s write { %s %s %s }`, _entryVar, _dtkCallbackIdent, EventType.entry, _name);
         this.setOption("textvariable", _entryVar);
 
         enum string validationArgs = "%d %i %P %s %S %v %V";

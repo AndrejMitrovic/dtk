@@ -10,9 +10,11 @@ import std.string;
 import std.range;
 
 import dtk.app;
+import dtk.dispatch;
 import dtk.event;
 import dtk.geometry;
 import dtk.interpreter;
+import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
@@ -22,11 +24,12 @@ import dtk.widgets.widget;
 abstract class SpinboxBase : Widget
 {
     ///
-    package this(Widget master, WidgetType widgetType)
+    package this(Widget master, WidgetType widgetType, EventType eventType)
     {
         super(master, TkType.spinbox, widgetType);
 
-        _varName = makeTracedVar(TkEventType.TkSpinboxChange);
+        _varName = makeVar();
+        tclEvalFmt(`trace add variable %s write { %s %s %s }`, _varName, _dtkCallbackIdent, eventType, _name);
         this.setOption("textvariable", _varName);
     }
 
@@ -58,11 +61,16 @@ class ScalarSpinbox : SpinboxBase
     {
         _minValue = minValue;
         _maxValue = maxValue;
-        super(master, WidgetType.scalar_spinbox);
+        super(master, WidgetType.scalar_spinbox, EventType.scalar_spinbox);
 
         this.setOption("from", minValue);
         this.setOption("to", maxValue);
     }
+
+    /**
+        Signal emitted when an item in the scalar spinbox is selected.
+    */
+    public Signal!ScalarSpinboxEvent onScalarSpinboxEvent;
 
     /** Get the current value of the spinbox. */
     @property float value()
@@ -70,7 +78,7 @@ class ScalarSpinbox : SpinboxBase
         string res = tclGetVar!string(_varName);
 
         if (res.empty)
-            return 0.0;
+            return float.init;
 
         return to!float(res);
     }
@@ -108,9 +116,14 @@ class ListSpinbox : SpinboxBase
     ///
     this(Widget master, string[] values)
     {
-        super(master, WidgetType.list_spinbox);
+        super(master, WidgetType.list_spinbox, EventType.list_spinbox);
         this.setOption("values", values.join(" "));
     }
+
+    /**
+        Signal emitted when an item in the list spinbox is selected.
+    */
+    public Signal!ListSpinboxEvent onListSpinboxEvent;
 
     /** Get the values in this spinbox. */
     @property string[] values()
