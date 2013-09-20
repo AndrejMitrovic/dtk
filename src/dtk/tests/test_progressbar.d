@@ -1,3 +1,9 @@
+/*
+ *             Copyright Andrej Mitrovic 2013.
+ *  Distributed under the Boost Software License, Version 1.0.
+ *     (See accompanying file LICENSE_1_0.txt or copy at
+ *           http://www.boost.org/LICENSE_1_0.txt)
+ */
 module dtk.tests.test_progressbar;
 
 version(unittest):
@@ -30,30 +36,8 @@ unittest
 
     bar2.start(20);
 
-    bar2.onEvent.connect(
-        (Widget widget, Event event)
-        {
-            if (event.type == EventType.TkProgressbarChange)
-            {
-                //~ logf("Current progress: %s.", event.state);
-
-                float progress = to!float(event.state);
-                if (bar2.isRunning && progress > 5.0)
-                {
-                    // Note: doesn't work, see bug report:
-                    // https://core.tcl.tk/tk/tktview/c597acdab39212f2b5557e69e38eb3191f4a5927
-                    bar2.stop();
-                    //~ logf("Stopping progress at: %s.", progress);
-
-                    // workaround
-                    bar2.onEvent.clear();
-                }
-            }
-        }
-    );
-
     bar1.pack();
     bar2.pack();
 
-    app.testRun(1.seconds, SkipIdleTime.yes);  // avoid infinite running time
+    app.testRun();  // avoid infinite running time
 }
