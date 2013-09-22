@@ -20,7 +20,7 @@ unittest
 
     auto image = new Image("small_button.png");
 
-    auto tree = new Tree(testWindow);
+    auto tree = new Tree(testWindow, "Heading");
 
     auto child1 = tree.addChild();
 
@@ -28,6 +28,7 @@ unittest
 
     /* root header options. */
 
+    assert(child1.heading.text == "Heading");
     child1.heading.text = "Tree Name";
     assert(child1.heading.text == "Tree Name");
 
@@ -74,7 +75,7 @@ unittest
 
     static assert(!is(typeof({
         child1.column.text = "First Tree";
-        assert(child1.column.text == "First Tree");
+        assert(child1.column.text == "First Tree", child1.column.text);
     })));
 
     child1.column.anchor = Anchor.center;
@@ -96,10 +97,8 @@ unittest
 
     /* column options. */
 
-    static assert(!is(typeof({
-        child1.columns[0].text = "First Value";
-        assert(child1.columns[0].text == "First VAlue");
-    })));
+    child1.columns[0].text = "First Value";
+    assert(child1.columns[0].text == "First Value");
 
     child1.columns[0].anchor = Anchor.center;
     assert(child1.columns[0].anchor == Anchor.center);
