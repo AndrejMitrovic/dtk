@@ -39,6 +39,7 @@ private
     import dtk.tests.test_sizegrip;
     import dtk.tests.test_scrollbar;
     import dtk.tests.test_text;
+    import dtk.tests.test_tree;
     import dtk.tests.test_window;
 
     /* Image. */

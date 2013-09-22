@@ -116,21 +116,23 @@ unittest
     root2.add("Child 2.2");
     tree.pack();
 
-    auto rowOpts1 = RowOptions("Root 1", diskRed, ["2012-04-05", "2012-01-01"], IsOpened.yes);
-    root1.rowOptions = rowOpts1;
-    assert(root1.rowOptions == rowOpts1);
+    root1.values = ["2012-04-05", "2012-01-01"];
+    root1.isOpened = true;
+    root1.column.text = "Root 1";
+    root1.column.image = diskRed;
 
-    auto rowOpts2 = RowOptions("Root 2", diskBlue, ["2012-04-05", "2012-01-01"], IsOpened.yes);
-    root2.rowOptions = rowOpts2;
-    assert(root2.rowOptions == rowOpts2);
+    root2.values = ["2012-04-05", "2012-01-01"];
+    root2.isOpened = true;
+    root2.column.text = "Root 2";
+    root2.column.image = diskBlue;
 
-    auto headOpts1 = HeadingOptions("Dirname", Anchor.center, diskRed);
-    tree.setHeadingOptions(0, headOpts1);
-    assert(tree.headingOptions(0) == headOpts1);
+    tree.headings[0].text = "Dirname";
+    tree.headings[0].anchor = Anchor.center;
+    tree.headings[0].image = diskRed;
 
-    auto headOpts2 = HeadingOptions("Filename", Anchor.center, diskBlue);
-    tree.setHeadingOptions(1, headOpts2);
-    assert(tree.headingOptions(1) == headOpts2);
+    tree.headings[1].text = "Filename";
+    tree.headings[1].anchor = Anchor.center;
+    tree.headings[1].image = diskBlue;
 
     app.testRun();
 }

@@ -18,24 +18,132 @@ unittest
     auto testWindow = new Window(app.mainWindow, 500, 200);
     testWindow.position = Point(500, 500);
 
-    auto tree2 = new Tree(testWindow, "Directory", ["Filename", "Modified", "Created"]);
+    auto image = new Image("disk_blue.png");
 
-    auto tree = new Tree(testWindow, "Directory", ["Filename", "Modified", "Created"]);
+    auto tree = new Tree(testWindow, "Heading");
+
+    auto child1 = tree.add();
+
+    tree.setHeadings(["Heading 0", "Heading 1", "Heading 2"]);
+
+    /* root header options. */
+
+    assert(child1.heading.text == "Heading");
+    child1.heading.text = "Tree Name";
+    assert(child1.heading.text == "Tree Name");
+
+    child1.heading.anchor = Anchor.center;
+    assert(child1.heading.anchor == Anchor.center);
+
+    static assert(!is(typeof({
+        child1.heading.minWidth = 100;
+        assert(child1.heading.minWidth == 100);
+    })));
+
+    static assert(!is(typeof({
+        child1.heading.width = 100;
+        assert(child1.heading.width == 100);
+    })));
+
+    child1.heading.image = image;
+    assert(child1.heading.image is image);
+
+    /* header options. */
+
+    assert(child1.headings[0].text == "Heading 0");
+
+    child1.headings[0].text = "Tree Value";
+    assert(child1.headings[0].text == "Tree Value");
+
+    child1.headings[0].anchor = Anchor.center;
+    assert(child1.headings[0].anchor == Anchor.center);
+
+    static assert(!is(typeof({
+        child1.headings[0].minWidth = 100;
+        assert(child1.headings[0].minWidth == 100);
+    })));
+
+    static assert(!is(typeof({
+        child1.headings[0].width = 100;
+        assert(child1.headings[0].width == 100);
+    })));
+
+    child1.headings[0].image = image;
+    assert(child1.headings[0].image is image);
+
+    /* root column options. */
+
+    child1.column.text = "First Tree";
+    assert(child1.column.text == "First Tree", child1.column.text);
+
+    child1.column.anchor = Anchor.center;
+    assert(child1.column.anchor == Anchor.center);
+
+    child1.column.minWidth = 100;
+    assert(child1.column.minWidth == 100);
+
+    child1.column.width = 100;
+    assert(child1.column.width == 100);
+
+    child1.column.image = image;
+    assert(child1.column.image is image);
+
+    child1.column.stretch = true;
+    assert(child1.column.stretch == true);
+
+    /* column options. */
+
+    child1.columns[0].text = "First Value";
+    assert(child1.columns[0].text == "First Value");
+
+    child1.columns[0].anchor = Anchor.center;
+    assert(child1.columns[0].anchor == Anchor.center);
+
+    child1.columns[0].minWidth = 100;
+    assert(child1.columns[0].minWidth == 100);
+
+    child1.columns[0].width = 100;
+    assert(child1.columns[0].width == 100);
+
+    static assert(!is(typeof({
+        child1.columns[0].image = image;
+        assert(child1.columns[0].image is image);
+    })));
+
+    child1.columns[0].stretch = true;
+    assert(child1.columns[0].stretch == true);
+
+    /* column values. */
+    child1.values = ["First Value", "Second Value", "Third Value"];
+    assert(child1.values == ["First Value", "Second Value", "Third Value"]);
+
+    /* column tags. */
+    child1.tags = ["tag1", "tag2"];
+    assert(child1.tags == ["tag1", "tag2"]);
+
+    /* open. */
+    child1.isOpened = true;
+    assert(child1.isOpened);
+
+    child1.isOpened = false;
+    assert(!child1.isOpened);
+
     assert(tree.isRootTree);
     assert(tree.index == 0);
 
-    assert(tree.getFocus is null);
+    assert(tree.getFocusedTree is null);
 
     auto root1 = tree.add("Root 1");
-
     assert(tree.contains(root1));
-    assert(!tree2.contains(root1));
+
+    auto tree1 = tree.add("Tree 123");
+    assert(tree.contains(root1));
 
     assert(!root1.isRootTree);
     assert(root1.parentTree is tree);
     assert(root1.parentTree.isRootTree);
 
-    auto child1 = root1.add("Child 1");
+    child1 = root1.add("Child 1");
     auto child2 = root1.add("Child 2");
     auto child4 = root1.insert(2, "Child 4");
     auto child3 = root1.insert(2, "Child 3");
@@ -60,17 +168,21 @@ unittest
 
     assert(child1.children == [ch1_1, ch1_2, ch1_3]);
 
-    auto treeColOpts = ColumnOptions(Anchor.east, 100, DoStretch.yes, 100);
-    tree.treeColumnOptions = treeColOpts;
-    assert(tree.treeColumnOptions == treeColOpts);
+    /* test tree column options. */
+    tree.column.text = "Root tree";
+    assert(tree.column.text == "Root tree");
 
-    assert(tree.columnOptions(0).name == "Filename");
-    assert(tree.columnOptions(1).name == "Modified");
-    assert(tree.columnOptions(2).name == "Created");
+    tree.column.anchor = Anchor.east;
+    assert(tree.column.anchor == Anchor.east);
 
-    auto columnOpts = ColumnOptions(Anchor.east, 100, DoStretch.yes, 100);
-    tree.setColumnOptions(0, columnOpts);
-    assert(tree.columnOptions(0) == columnOpts, format("%s != %s", tree.columnOptions(0), columnOpts));
+    tree.column.minWidth = 100;
+    assert(tree.column.minWidth == 100);
+
+    tree.column.width = 100;
+    assert(tree.column.width == 100);
+
+    tree.column.stretch = true;
+    assert(tree.column.stretch == true);
 
     assert(tree.treeColumnVisible);
     assert(tree.headingsVisible);
@@ -139,26 +251,9 @@ unittest
     child1.reattach();
 
     child1.setFocus();
-    assert(tree.getFocus is child1);
+    assert(tree.getFocusedTree is child1);
 
-    assert(tree.headingOptions(0).text == "Filename");
-    assert(tree.headingOptions(1).text == "Modified");
-
-    auto headOpts = HeadingOptions("Dirname", Anchor.center);
-    tree.setHeadingOptions(0, headOpts);
-    assert(tree.headingOptions(0) == headOpts);
-
-    assert(tree.treeHeadingOptions.text == "Directory");
-
-    auto treeHeadOpts = HeadingOptions("Tree Dir", Anchor.center);
-    tree.treeHeadingOptions = treeHeadOpts;
-    assert(tree.treeHeadingOptions == treeHeadOpts, format("%s != %s", tree.treeHeadingOptions, treeHeadOpts));
-
-    auto rowOpts1 = RowOptions("Child 1", NoImage, ["2012-04-05", "2012-01-01"], IsOpened.yes);
-    child1.rowOptions = rowOpts1;
-    assert(child1.rowOptions == rowOpts1);
-
-    root1.rowOptions = RowOptions("Root 1", NoImage, [], IsOpened.yes);
+    root1.column.text = "Root 1";
 
     ch1_3_1.setVisible();
 
@@ -185,12 +280,9 @@ unittest
     tree.toggleSelection(child1);
     assert(tree.selection == [child1, ch1_3_1]);
 
-    ch1_3_1.setColumn(0, "Foo Dir");
-    ch1_3_1.setColumn(1, "Modified Date");
-    ch1_3_1.setColumn(2, "Created Date");
-
-    ch1_3_1.setColumn(2, `" Test [ String { $ # Stuff `);
-    ch1_3_1.setColumn(2, "Created Date");
+    ch1_3_1.columns[0].text = "Foo Dir";
+    ch1_3_1.columns[1].text = "Modified Date";
+    ch1_3_1.columns[2].text = `" Test [ String { $ # Stuff `;
 
     tree.pack();
 

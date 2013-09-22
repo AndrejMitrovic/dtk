@@ -1,5 +1,5 @@
 Now working on:
-Menus.
+Improving API for first gui example.
 
 Todo:
 
