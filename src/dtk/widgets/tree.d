@@ -21,9 +21,6 @@ import dtk.widgets.options;
 import dtk.widgets.widget;
 
 ///
-enum Image NoImage = null;
-
-///
 enum IsOpened
 {
     no,
@@ -38,104 +35,189 @@ enum DoStretch
 }
 
 ///
-struct RowOptions
+struct HeadingOption
 {
-    string text;
-    Image image;
-    string[] values;
-    IsOpened isOpened;
-    string[] tags;
-}
-
-///
-struct ColumnOptions
-{
-    /**
-        Note: Required due to allowed writing to inaccessible
-        fields via field initialization:
-        http://d.puremagic.com/issues/show_bug.cgi?id=10861
-    */
-    this(Anchor anchor, int minWidth, DoStretch doStretch, int width)
+    private this(Tree tree, string tkTag, string index)
     {
-        _anchor = anchor;
-        _minWidth = minWidth;
-        _doStretch = doStretch;
-        _width = width;
-        _userInited = true;
+        _tree = tree;
+        _tkTag = tkTag;
+        _index = index;
     }
 
-    /**
-        Read-only column name.
-        Only valid if it was returned from a dtk call.
-    */
-    @property string name()
+    private this(Tree tree, string tkTag, int index)
     {
-        return _name;
+        this(tree, tkTag, to!string(index));
+    }
+
+    /** Get the tree name. */
+    @property string text()
+    {
+        return tclEvalFmt("%s %s %s -text", _tree._name, _tkTag, _index);
+    }
+
+    /** Set a new tree text. */
+    @property void text(string newName)
+    {
+        tclEvalFmt("%s %s %s -text %s", _tree._name, _tkTag, _index, newName._tclEscape);
+    }
+
+    /** Get the current anchor for the column of the tree name display. */
+    @property Anchor anchor()
+    {
+        return tclEvalFmt("%s %s %s -anchor", _tree._name, _tkTag, _index).toAnchor();
+    }
+
+    /** Set a new anchor for the column of the tree name display. */
+    @property void anchor(Anchor newAnchor)
+    {
+        tclEvalFmt("%s %s %s -anchor %s", _tree._name, _tkTag, _index, newAnchor.toString());
     }
 
     ///
-    string toString() const
+    @property Image image()
     {
-        return format("%s(%s, %s, %s, %s, %s)",
-            typeof(this).stringof, _name, _anchor, _minWidth, _doStretch, _width);
+        string imagePath = tclEvalFmt("%s %s %s -image", _tree._name, _tkTag, _index);
+        return cast(Image)Widget.lookupWidgetPath(imagePath);
     }
 
-    bool opEquals(ColumnOptions rhs)
+    ///
+    @property void image(Image newImage)
     {
-        // if either options were user-initialized, don't compare names, since
-        // names are exclusively retrieved from Tk and never set by the user.
-        bool namesEqual = (_userInited || rhs._userInited);
-        if (!namesEqual)
-            namesEqual = _name == rhs.name;
-
-        return namesEqual &&
-            _anchor == rhs._anchor &&
-            _minWidth == rhs._minWidth &&
-            _doStretch == rhs._doStretch &&
-            _width == rhs._width;
+        tclEvalFmt("%s %s %s -image %s", _tree._name, _tkTag, _index, newImage ? newImage._name : "{}");
     }
 
 private:
-    string _name;
-    Anchor _anchor;
-    int _minWidth;
-    DoStretch _doStretch;
-    int _width;
-    bool _userInited;
+    Tree _tree;
+    string _tkTag;
+    string _index;
 }
 
 ///
 struct HeadingOptions
 {
-    string text;
-    Anchor anchor;
-    Image image;
+    mixin ItemOptions!HeadingOption;
+}
 
-    private void* command;  // do not use yet
+///
+struct ColumnOption
+{
+    private this(Tree tree, string tkTag, string index)
+    {
+        _tree = tree;
+        _tkTag = tkTag;
+        _index = index;
+    }
+
+    private this(Tree tree, string tkTag, int index)
+    {
+        this(tree, tkTag, to!string(index));
+    }
+
+    // avoid std.conv.text hijacking
+    @disable int text;
+
+    /** Get the current anchor for the column of the tree name display. */
+    @property Anchor anchor()
+    {
+        return tclEvalFmt("%s %s %s -anchor", _tree._name, _tkTag, _index).toAnchor();
+    }
+
+    /** Set a new anchor for the column of the tree name display. */
+    @property void anchor(Anchor newAnchor)
+    {
+        tclEvalFmt("%s %s %s -anchor %s", _tree._name, _tkTag, _index, newAnchor.toString());
+    }
+
+    ///
+    @property int minWidth()
+    {
+        return tclEvalFmt("%s %s %s -minwidth", _tree._name, _tkTag, _index).to!int;
+    }
+
+    ///
+    @property void minWidth(int newMinWidth)
+    {
+        tclEvalFmt("%s %s %s -minwidth %s", _tree._name, _tkTag, _index, newMinWidth);
+    }
+       ///
+    @property int width()
+    {
+        return tclEvalFmt("%s %s %s -width", _tree._name, _tkTag, _index).to!int;
+    }
+
+    ///
+    @property void width(int newWidth)
+    {
+        tclEvalFmt("%s %s %s -width %s", _tree._name, _tkTag, _index, newWidth);
+    }
+
+    ///
+    @property bool stretch()
+    {
+        return cast(bool)tclEvalFmt("%s %s %s -stretch", _tree._name, _tkTag, _index).to!int;
+    }
+
+    ///
+    @property void stretch(bool doStretch)
+    {
+        tclEvalFmt("%s %s %s -stretch %s", _tree._name, _tkTag, _index, cast(int)doStretch);
+    }
+
+private:
+    Tree _tree;
+    string _tkTag;
+    string _index;
+}
+
+///
+struct ColumnOptions
+{
+    mixin ItemOptions!ColumnOption;
+}
+
+mixin template ItemOptions(Type)
+{
+    this(Tree tree, string tkTag)
+    {
+        _tree = tree;
+        _tkTag = tkTag;
+    }
+
+    ///
+    Type opIndex(int index)
+    {
+        return typeof(return)(_tree, _tkTag, index);
+    }
+
+    ///
+    void opIndexAssign(int index, Type newOption)
+    {
+        auto option = Type(_tree, _tkTag, index);
+        option = newOption;
+    }
+
+private:
+    Tree _tree;
+    string _tkTag;
 }
 
 ///
 class Tree : Widget
 {
     ///
-    this(Widget master, string label, string[] columns)
+    this(Widget master, string label = null, string[] columns = null)
     {
         super(master, TkType.tree, WidgetType.tree);
 
-        // create the columns
-        tclEvalFmt("%s configure -columns %s", _name, columns.join(" ")._tclEscape);
+        if (!label.empty)
+        {
+            // set the tree column label
+            tclEvalFmt(`%s heading #0 -text %s`, _name, label._tclEscape);
+        }
 
-        // set the tree column label
-        tclEvalFmt(`%s heading #0 -text %s`, _name, label._tclEscape);
-
-        // set the column names
-        foreach (idx, col; columns)
-            tclEvalFmt(`%s heading %s -text %s`, _name, idx, col._tclEscape);
-
+        this.setColumns(columns);
         _rootTree = this;
         _treeIDMap[_rootTreeID] = this;
-
-        _columnIndexes = cast(int[])iota(0, columns.length).array;
     }
 
     /**
@@ -151,6 +233,22 @@ class Tree : Widget
         _rootTree._treeIDMap[treeIdent] = this;
     }
 
+    // set the columns
+    void setColumns(string[] columns)
+    {
+        if (columns.empty)
+            return;
+
+        // create the columns
+        tclEvalFmt("%s configure -columns { %s }", _name, map!_tclEscape(columns).join(" "));
+
+        // set the column names
+        foreach (idx, col; columns)
+            tclEvalFmt(`%s heading %s -text %s`, _name, idx, col._tclEscape);
+
+        _columnIndexes = cast(int[])iota(0, columns.length).array;
+    }
+
     /**
         Add an item to this tree.
 
@@ -159,7 +257,7 @@ class Tree : Widget
         to this tree.
     */
     // todo: handle all arguments
-    Tree add(string text, Image image = null, IsOpened isOpened = IsOpened.no, string[] values = null, string[] tags = null)
+    Tree addChild(string text = null, Image image = null, IsOpened isOpened = IsOpened.no, string[] values = null, string[] tags = null)
     {
         return new Tree(_rootTree, _name, tclEvalFmt("%s insert %s end -text %s", _name, _treeID, text._tclEscape));
     }
@@ -172,7 +270,7 @@ class Tree : Widget
         to this tree.
     */
     // todo: handle all arguments
-    Tree insert(int index, string text, Image image = null, IsOpened isOpened = IsOpened.no, string[] values = null, string[] tags = null)
+    Tree insertChild(int index, string text = null, Image image = null, IsOpened isOpened = IsOpened.no, string[] values = null, string[] tags = null)
     {
         return new Tree(_rootTree, _name, tclEvalFmt("%s insert %s %s -text %s", _name, _treeID, index, text._tclEscape));
     }
@@ -337,7 +435,7 @@ class Tree : Widget
         tclEvalFmt("%s selection set %s", _name, tree._treeID);
     }
 
-    /** Select the trees provided. */
+    /** Select multiple trees. */
     @property void selection(Tree[] trees)
     {
         foreach (tree; trees)
@@ -432,7 +530,7 @@ class Tree : Widget
         Get the current focused tree.
         If no tree is in focus, returns null.
     */
-    Tree getFocus()
+    Tree getFocusedTree()
     {
         string treePath = tclEvalFmt("%s focus", _name);
 
@@ -539,97 +637,101 @@ class Tree : Widget
         this.setOption("padding", newPadding.toString);
     }
 
-    /** Get the options for the row this tree belongs to. */
-    @property RowOptions rowOptions()
-    {
-        RowOptions options;
+    //~ /** Get the options for the row this tree belongs to. */
+    //~ @property RowOptions rowOptions()
+    //~ {
+        //~ RowOptions options;
 
-        options.text = tclEvalFmt("%s item %s -text", _name, _treeID);
+        //~ options.text = tclEvalFmt("%s item %s -text", _name, _treeID);
 
-        string imagePath = tclEvalFmt("%s item %s -image", _name, _treeID);
-        options.image = cast(Image)Widget.lookupWidgetPath(imagePath);
+        //~ string imagePath = tclEvalFmt("%s item %s -image", _name, _treeID);
+        //~ options.image = cast(Image)Widget.lookupWidgetPath(imagePath);
 
-        options.values = tclEvalFmt("%s item %s -values", _name, _treeID).split;
+        //~ options.values = tclEvalFmt("%s item %s -values", _name, _treeID).split;
 
-        string isOpenStr = tclEvalFmt("%s item %s -open", _name, _treeID);
-        options.isOpened = (isOpenStr == "1" || isOpenStr == "true") ? IsOpened.yes : IsOpened.no;
+        //~ string isOpenStr = tclEvalFmt("%s item %s -open", _name, _treeID);
+        //~ options.isOpened = (isOpenStr == "1" || isOpenStr == "true") ? IsOpened.yes : IsOpened.no;
 
-        options.tags = tclEvalFmt("%s item %s -tags", _name, _treeID).split;
+        //~ options.tags = tclEvalFmt("%s item %s -tags", _name, _treeID).split;
 
-        return options;
-    }
+        //~ return options;
+    //~ }
 
-    /** Set the options for the row this tree belongs to. */
-    @property void rowOptions(RowOptions options)
-    {
-        tclEvalFmt("%s item %s -text %s", _name, _treeID, options.text._tclEscape);
-        tclEvalFmt("%s item %s -values [list %s]", _name, _treeID, options.values.join(" "));
-        tclEvalFmt("%s item %s -open %s", _name, _treeID, cast(int)options.isOpened);
-        tclEvalFmt("%s item %s -tags [list %s]", _name, _treeID, options.tags.join(" "));
-        tclEvalFmt("%s item %s -image %s", _name, _treeID, options.image ? options.image._name : "{}");
-    }
+    //~ /** Set the options for the row this tree belongs to. */
+    //~ @property void rowOptions(RowOptions options)
+    //~ {
+        //~ tclEvalFmt("%s item %s -text %s", _name, _treeID, options.text._tclEscape);
+        //~ tclEvalFmt("%s item %s -values [list %s]", _name, _treeID, options.values.join(" "));
+        //~ tclEvalFmt("%s item %s -open %s", _name, _treeID, cast(int)options.isOpened);
+        //~ tclEvalFmt("%s item %s -tags [list %s]", _name, _treeID, options.tags.join(" "));
+        //~ tclEvalFmt("%s item %s -image %s", _name, _treeID, options.image ? options.image._name : "{}");
+    //~ }
 
     /** Set the value for the column at the specified index. */
-    void setColumn(int index, string value)
-    {
-        tclEvalFmt("%s set %s %s %s", _name, _treeID, index, value._tclEscape);
-    }
+    //~ void setColumn(int index, string value)
+    //~ {
+        //~ tclEvalFmt("%s set %s %s %s", _name, _treeID, index, value._tclEscape);
+    //~ }
 
-    /**
-        Return the column options of the column at the index.
+    /** Get the tree name. */
+    //~ @property string text()
+    //~ {
+        //~ return tclEvalFmt("%s item %s -text", _name, _treeID);
+    //~ }
 
-        Note: The index does not include the tree column,
-        for that use $(D treeColumnOptions) instead.
-    */
-    ColumnOptions columnOptions(int index)
-    {
-        ColumnOptions options;
+    //~ /** Set a new tree name. */
+    //~ @property void text(string newName)
+    //~ {
+        //~ tclEvalFmt("%s item %s -text %s", _name, _treeID, newName._tclEscape);
+    //~ }
 
-        options._name = tclEvalFmt("%s column %s -id", _name, index);
-        options._anchor = tclEvalFmt("%s column %s -anchor", _name, index).toAnchor();
-        options._minWidth = tclEvalFmt("%s column %s -minwidth", _name, index).to!int;
-        options._doStretch = cast(DoStretch)tclEvalFmt("%s column %s -stretch", _name, index).to!int;
-        options._width = tclEvalFmt("%s column %s -width", _name, index).to!int;
+    /** Get the current anchor for the column of the tree name display. */
+    //~ @property Anchor anchor()
+    //~ {
+        //~ return tclEvalFmt("%s column #0 -anchor", _name).toAnchor();
+    //~ }
 
-        return options;
-    }
+    //~ /** Set a new anchor for the column of the tree name display. */
+    //~ @property void anchor(Anchor newAnchor)
+    //~ {
+        //~ tclEvalFmt("%s column #0 -anchor %s", _name, newAnchor.toString());
+    //~ }
 
-    /**
-        Set the column options for the column at the index.
+    //~ ///
+    //~ @property int minWidth()
+    //~ {
+        //~ return tclEvalFmt("%s column #0 -minwidth", _name).to!int;
+    //~ }
 
-        Note: The index does not include the tree column,
-        for that use $(D treeColumnOptions) instead.
-    */
-    void setColumnOptions(int index, ColumnOptions options)
-    {
-        tclEvalFmt("%s column %s -anchor %s", _name, index, options._anchor.toString());
-        tclEvalFmt("%s column %s -minwidth %s", _name, index, options._minWidth);
-        tclEvalFmt("%s column %s -stretch %s", _name, index, cast(int)options._doStretch);
-        tclEvalFmt("%s column %s -width %s", _name, index, options._width);
-    }
+    //~ ///
+    //~ @property void minWidth(int newMinWidth)
+    //~ {
+        //~ tclEvalFmt("%s column #0 -minwidth %s", _name, newMinWidth);
+    //~ }
 
-    /** Get the tree column options. */
-    @property ColumnOptions treeColumnOptions()
-    {
-        ColumnOptions options;
+    //~ ///
+    //~ @property int width()
+    //~ {
+        //~ return tclEvalFmt("%s column #0 -width", _name).to!int;
+    //~ }
 
-        options._name = tclEvalFmt("%s column #0 -id", _name);
-        options._anchor = tclEvalFmt("%s column #0 -anchor", _name).toAnchor();
-        options._minWidth = tclEvalFmt("%s column #0 -minwidth", _name).to!int;
-        options._doStretch = cast(DoStretch)tclEvalFmt("%s column #0 -stretch", _name).to!int;
-        options._width = tclEvalFmt("%s column #0 -width", _name).to!int;
+    //~ ///
+    //~ @property void width(int newWidth)
+    //~ {
+        //~ tclEvalFmt("%s column #0 -width %s", _name, newWidth);
+    //~ }
 
-        return options;
-    }
+    //~ ///
+    //~ @property DoStretch stretch()
+    //~ {
+        //~ return cast(DoStretch)tclEvalFmt("%s column #0 -stretch", _name).to!int;
+    //~ }
 
-    /** Set the tree column options. */
-    @property void treeColumnOptions(ColumnOptions options)
-    {
-        tclEvalFmt("%s column #0 -anchor %s", _name, options._anchor.toString());
-        tclEvalFmt("%s column #0 -minwidth %s", _name, options._minWidth);
-        tclEvalFmt("%s column #0 -stretch %s", _name, cast(int)options._doStretch);
-        tclEvalFmt("%s column #0 -width %s", _name, options._width);
-    }
+    //~ ///
+    //~ @property void stretch(DoStretch doStretch)
+    //~ {
+        //~ tclEvalFmt("%s column #0 -stretch %s", _name, cast(int)doStretch);
+    //~ }
 
     /** Return the set of columns which are displayed. */
     int[] displayColumns()
@@ -669,62 +771,28 @@ class Tree : Widget
         this.setOption("displaycolumns", "#all");
     }
 
-    /**
-        Return the heading options of the column at the index.
-
-        Note: The index does not include the tree column heading,
-        for that use $(D treeHeadingOptions) instead.
-    */
-    HeadingOptions headingOptions(int index)
+    ///
+    @property HeadingOptions headings()
     {
-        HeadingOptions options;
-
-        // todo: command
-        options.text   = tclEvalFmt("%s heading %s -text", _name, index);
-        options.anchor = tclEvalFmt("%s heading %s -anchor", _name, index).toAnchor();
-
-        string imagePath = tclEvalFmt("%s heading %s -image", _name, index);
-        options.image = cast(Image)Widget.lookupWidgetPath(imagePath);
-
-        return options;
+        return typeof(return)(this, "heading");
     }
 
-    /**
-        Set the heading options for the column at the index.
-
-        Note: The index does not include the tree column,
-        for that use $(D treeHeadingOptions) instead.
-    */
-    void setHeadingOptions(int index, HeadingOptions options)
+    ///
+    @property HeadingOption heading()
     {
-        // todo: command
-        tclEvalFmt("%s heading %s -text %s", _name, index, options.text._tclEscape);
-        tclEvalFmt("%s heading %s -anchor %s", _name, index, options.anchor.toString());
-        tclEvalFmt("%s heading %s -image %s", _name, index, options.image ? options.image._name : "{}");
+        return typeof(return)(this, "heading", "#0");
     }
 
-    /** Get the tree column heading options. */
-    @property HeadingOptions treeHeadingOptions()
+    ///
+    @property ColumnOptions columns()
     {
-        HeadingOptions options;
-
-        // todo: command
-        options.text   = tclEvalFmt("%s heading #0 -text", _name);
-        options.anchor = tclEvalFmt("%s heading #0 -anchor", _name).toAnchor();
-
-        string imagePath = tclEvalFmt("%s heading #0 -image", _name);
-        options.image = cast(Image)Widget.lookupWidgetPath(imagePath);
-
-        return options;
+        return typeof(return)(this, "column");
     }
 
-    /** Set the tree column heading options. */
-    @property void treeHeadingOptions(HeadingOptions options)
+    ///
+    @property ColumnOption column()
     {
-        // todo: command
-        tclEvalFmt("%s heading #0 -text %s", _name, options.text._tclEscape);
-        tclEvalFmt("%s heading #0 -anchor %s", _name, options.anchor.toString());
-        tclEvalFmt("%s heading #0 -image %s", _name, options.image ? options.image._name : "{}");
+        return typeof(return)(this, "column", "#0");
     }
 
     ///

@@ -41,6 +41,9 @@ private
     import dtk.tests.test_text;
     import dtk.tests.test_window;
 
+    // todo: improve api first
+    // import dtk.tests.test_tree;
+
     /* Image. */
     import dtk.tests.test_image;
 
