@@ -39,10 +39,8 @@ private
     import dtk.tests.test_sizegrip;
     import dtk.tests.test_scrollbar;
     import dtk.tests.test_text;
+    import dtk.tests.test_tree;
     import dtk.tests.test_window;
-
-    // todo: improve api first
-    // import dtk.tests.test_tree;
 
     /* Image. */
     import dtk.tests.test_image;
