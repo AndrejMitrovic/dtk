@@ -21,8 +21,6 @@ override void toString(scope void delegate(const(char)[]) sink)
 With a template that does this:
 callFunc((cast(DynamicType)object).tupleof);
 
-- Rewrite image test after all other widgets are wrapped, since events have to be handled first.
-
 - Major todo: catch exceptions: http://www.gamedev.net/page/resources/_/technical/general-programming/d-exceptions-and-c-callbacks-r3323
 
 - Add note about using (scope BaseClass event) for event handlers.
@@ -222,11 +220,14 @@ Docs todo:
 https://github.com/aldacron/Derelict3/issues/143
 
 - Document how multi-click events are delivered:
-    event button: button1 action press
-    event button: button1 action release
-    event button: button1 action double_click
-    event button: button1 action release
-    event button: button1 action triple_click
-    event button: button1 action release
-    event button: button1 action quadruple_click
-    event button: button1 action release
+
+```
+event button: button1 action press
+event button: button1 action release
+event button: button1 action double_click
+event button: button1 action release
+event button: button1 action triple_click
+event button: button1 action release
+event button: button1 action quadruple_click
+event button: button1 action release
+```

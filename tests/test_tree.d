@@ -32,8 +32,8 @@ unittest
     assert(!tree2.contains(root1));
 
     assert(!root1.isRootTree);
-    assert(root1.parent is tree);
-    assert(root1.parent.isRootTree);
+    assert(root1.parentTree is tree);
+    assert(root1.parentTree.isRootTree);
 
     auto child1 = root1.add("Child 1");
     auto child2 = root1.add("Child 2");
@@ -121,7 +121,7 @@ unittest
     tree.destroy(child2);
     assert(root1.children.length == 3);
 
-    auto parent = child1.parent;
+    auto parent = child1.parentTree;
     assert(parent is root1);
 
     child1.detach();
@@ -194,7 +194,7 @@ unittest
 
     tree.pack();
 
-    app.testRun();
+    app.run();
 }
 
 void main()
