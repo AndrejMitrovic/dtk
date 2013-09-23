@@ -48,7 +48,7 @@ class Combobox : Widget
     /** Set the combobox value. */
     @property void value(string newValue)
     {
-        tclEvalFmt("%s set %s", _name, newValue);
+        tclEvalFmt("%s set %s", _name, newValue._tclEscape);
     }
 
     /** Get the values in this combobox. */

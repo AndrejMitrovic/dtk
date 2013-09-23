@@ -83,7 +83,7 @@ unittest
 
     auto msgBox = new MessageBox();
     msgBox.messageBoxType = MessageBoxType.ok;
-    msgBox.title = "Hello!";
+    msgBox.title = "Message title.";
     msgBox.message = "Informative message.";
     msgBox.extraMessage = "Another informative message.";
     msgBox.defaultButtonType = MessageButtonType.ok;

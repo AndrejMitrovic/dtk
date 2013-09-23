@@ -28,7 +28,7 @@ unittest
 
     auto frame = new Frame(testWindow);
 
-    auto button1 = new Button(frame, "Flash");
+    auto button1 = new Button(frame, "Flash Button");
     frame.pack();
     button1.pack();
 

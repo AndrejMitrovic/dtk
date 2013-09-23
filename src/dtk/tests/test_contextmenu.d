@@ -63,8 +63,8 @@ unittest
     auto editMenu = new Menu("Edit");
     menuBar.insertMenu(editMenu, 1);
 
-    auto openFileItem = new MenuItem("Open...");
-    assert(openFileItem.label == "Open...");
+    auto openFileItem = new MenuItem("Open Files...");
+    assert(openFileItem.label == "Open Files...");
     fileMenu.addItem(openFileItem);
 
     openFileItem.onEvent.connect(

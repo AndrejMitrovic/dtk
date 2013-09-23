@@ -43,12 +43,12 @@ unittest
     button1.onCheckButtonEvent ~= handler;
 
     assert(button1.onValue == "1", button1.onValue);
-    button1.onValue = "foo";
-    assert(button1.onValue == "foo");
+    button1.onValue = "on value";
+    assert(button1.onValue == "on value");
 
     assert(button1.offValue == "0");
-    button1.offValue = "bar";
-    assert(button1.offValue == "bar");
+    button1.offValue = "off value";
+    assert(button1.offValue == "off value");
 
     button1.focus();
     button1.pack();

@@ -55,7 +55,7 @@ class CheckButton : Widget
     */
     void toggleOn()
     {
-        tclEvalFmt("set %s %s", _toggleVarName, onValue());
+        tclEvalFmt("set %s %s", _toggleVarName, onValue()._tclEscape);
         this.callDtkCallback();
     }
 
@@ -65,7 +65,7 @@ class CheckButton : Widget
     */
     void toggleOff()
     {
-        tclEvalFmt("set %s %s", _toggleVarName, offValue());
+        tclEvalFmt("set %s %s", _toggleVarName, offValue()._tclEscape);
         this.callDtkCallback();
     }
 

@@ -30,8 +30,8 @@ unittest
     entry.pack();
 
     assert(entry.value.empty);
-    entry.value = "foobar";
-    assert(entry.value == "foobar");
+    entry.value = "foo bar";
+    assert(entry.value == "foo bar");
 
     assert(entry.displayChar == ' ');
     entry.displayChar = '*';

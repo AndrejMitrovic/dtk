@@ -1,6 +1,7 @@
 module test_events_keyboard;
 
 import std.algorithm;
+import std.conv;
 import std.range;
 import std.stdio;
 import std.traits;
@@ -35,7 +36,7 @@ unittest
         //~ stderr.writefln(" keyboard: %s", e);
 
         assert(e.action == action, text(e.action,  " != ", action));
-        assert(e.keySym == keySym,  text(e.keySym,  " != ", keySym));
+        assert(e.keySym == keySym, text(e.keySym,  " != ", keySym));
 
         if (checkUnichar)
             assert(e.unichar == unichar, text(e.unichar, " != ", unichar));
@@ -48,66 +49,22 @@ unittest
         ++callCount;
     };
 
-    testWindow.onKeyboardEvent = handler;
+    testWindow.onKeyboardEvent ~= handler;
 
     // note: you can only send key events to the focused window.
     testWindow.focus();
 
     // workaround for missing enum
     static immutable keySyms = [
-        KeySym.a,
-        KeySym.b,
-        KeySym.c,
-        KeySym.d,
-        KeySym.e,
-        KeySym.f,
-        KeySym.g,
-        KeySym.h,
-        KeySym.i,
-        KeySym.j,
-        KeySym.k,
-        KeySym.l,
-        KeySym.m,
-        KeySym.n,
-        KeySym.o,
-        KeySym.p,
-        KeySym.q,
-        KeySym.r,
-        KeySym.s,
-        KeySym.t,
-        KeySym.u,
-        KeySym.v,
-        KeySym.w,
-        KeySym.x,
-        KeySym.y,
-        KeySym.z,
+        KeySym.a, KeySym.b, KeySym.c, KeySym.d, KeySym.e, KeySym.f, KeySym.g,
+        KeySym.h, KeySym.i, KeySym.j, KeySym.k, KeySym.l, KeySym.m, KeySym.n,
+        KeySym.o, KeySym.p, KeySym.q, KeySym.r, KeySym.s, KeySym.t, KeySym.u,
+        KeySym.v, KeySym.w, KeySym.x, KeySym.y, KeySym.z,
 
-        KeySym.A,
-        KeySym.B,
-        KeySym.C,
-        KeySym.D,
-        KeySym.E,
-        KeySym.F,
-        KeySym.G,
-        KeySym.H,
-        KeySym.I,
-        KeySym.J,
-        KeySym.K,
-        KeySym.L,
-        KeySym.M,
-        KeySym.N,
-        KeySym.O,
-        KeySym.P,
-        KeySym.Q,
-        KeySym.R,
-        KeySym.S,
-        KeySym.T,
-        KeySym.U,
-        KeySym.V,
-        KeySym.W,
-        KeySym.X,
-        KeySym.Y,
-        KeySym.Z,
+        KeySym.A, KeySym.B, KeySym.C, KeySym.D, KeySym.E, KeySym.F, KeySym.G,
+        KeySym.H, KeySym.I, KeySym.J, KeySym.K, KeySym.L, KeySym.M, KeySym.N,
+        KeySym.O, KeySym.P, KeySym.Q, KeySym.R, KeySym.S, KeySym.T, KeySym.U,
+        KeySym.V, KeySym.W, KeySym.X, KeySym.Y, KeySym.Z,
     ];
 
     alias keyMods = NoDuplicates!(EnumMembers!KeyMod);

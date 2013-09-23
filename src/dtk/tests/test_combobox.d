@@ -41,13 +41,13 @@ unittest
 
     assert(box1.value.empty);
 
-    curVal = "foobar";
-    box1.value = "foobar";
+    curVal = "foo bar";
+    box1.value = "foo bar";
     ++expectedCallCount;
-    assert(box1.value == "foobar");
+    assert(box1.value == "foo bar");
 
     assert(box1.values.empty);
-    box1.values = ["foo", "bar", "foobar"];
+    box1.values = ["foo", "bar", "foo bar"];
 
     foreach (value; box1.values)
     {

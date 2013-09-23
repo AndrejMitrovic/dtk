@@ -6,7 +6,7 @@ set dtkRoot=%thisPath%\..\..
 set binPath=%thisPath%\..\bin
 cd %thisPath%\..
 
-set versions=-version=DTK_LOG_EVAL
+rem set versions=-version=DTK_LOG_EVAL
 rem set versions=-version=DTK_LOG_EVENTS
 rem set versions=-version=DTK_LOG_EVAL -version=DTK_LOG_EVENTS
 
