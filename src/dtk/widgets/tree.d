@@ -70,7 +70,7 @@ class Tree : Widget
             return;
 
         // create the columns
-        tclEvalFmt("%s configure -columns { %s }", _name, map!_tclEscape(columns).join(" "));
+        tclEvalFmt("%s configure -columns [list %s]", _name, map!_tclEscape(columns).join(" "));
 
         // set the column names
         foreach (idx, col; columns)

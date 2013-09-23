@@ -40,7 +40,7 @@ unittest
     listbox.clear();
     assert(listbox.values.empty);
 
-    string[] values = ["foo", "bar", "doo", "bee", "yes", "no"];
+    string[] values = ["foo val", "bar val", "doo", "bee", "yes", "no"];
 
     listbox.values = values;
     assert(listbox.values == values);
