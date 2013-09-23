@@ -3,8 +3,6 @@ Improving API for first gui example.
 
 Todo:
 
-- Use spaces in test-cases for string arguments to verify we're calling tclEscape everywhere.
-
 - Check the last few commits to see if we've missed testing some functionality.
 
 - Cairo support should be handled somehow.
