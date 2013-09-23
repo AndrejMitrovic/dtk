@@ -18,9 +18,9 @@ import dtk.widgets.window;
 class Sizegrip : Widget
 {
     ///
-    package this(Window master)
+    package this(Window parent)
     {
-        super(master, TkType.sizegrip, WidgetType.sizegrip);
+        super(parent, TkType.sizegrip, WidgetType.sizegrip);
         tclEvalFmt("pack %s -side right -anchor se", _name);
     }
 }

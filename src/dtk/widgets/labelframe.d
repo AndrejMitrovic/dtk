@@ -19,9 +19,9 @@ import dtk.widgets.widget;
 class LabelFrame : Widget
 {
     ///
-    this(Widget master)
+    this(Widget parent)
     {
-        super(master, TkType.labelframe, WidgetType.labelframe);
+        super(parent, TkType.labelframe, WidgetType.labelframe);
     }
 
     /** Get the current width of the border. */

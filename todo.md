@@ -3,14 +3,6 @@ Improving API for first gui example.
 
 Todo:
 
-- Check the last few commits to see if we've missed testing some functionality.
-
-- Cairo support should be handled somehow.
-
-- Slider should become templated, and we should allow a limited range slider as well, e.g.:
-new Slider!int(0, 10, 2);  // from 0 to 10, stepping 2
-new Slider!int([0, 1, 2, 3, 4]);  // only allow these items.
-
 - Instead of using fake widgets, we should use a frame type as the Tk type.
 
 - Widget parameter should be called parent, not master.
@@ -225,3 +217,9 @@ event button: button1 action release
 event button: button1 action quadruple_click
 event button: button1 action release
 ```
+
+- Cairo support should be added somehow.
+
+- Slider should become templated, and we should allow a limited range slider as well, e.g.:
+new Slider!int(0, 10, 2);  // from 0 to 10, stepping 2
+new Slider!int([0, 1, 2, 3, 4]);  // only allow these items.

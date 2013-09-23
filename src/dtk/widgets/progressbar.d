@@ -29,10 +29,10 @@ enum ProgressMode
 class Progressbar : Widget
 {
     ///
-    this(Widget master, Orientation orientation, int length, ProgressMode progressMode, float maxValue = 100)
+    this(Widget parent, Orientation orientation, int length, ProgressMode progressMode, float maxValue = 100)
     {
         _maxValue = maxValue;
-        super(master, TkType.progressbar, WidgetType.progressbar);
+        super(parent, TkType.progressbar, WidgetType.progressbar);
 
         this.setOption("orient", to!string(orientation));
         this.setOption("mode", to!string(progressMode));

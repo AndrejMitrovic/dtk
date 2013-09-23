@@ -18,9 +18,9 @@ import dtk.widgets.widget;
 class Frame : Widget
 {
     ///
-    this(Widget master)
+    this(Widget parent)
     {
-        super(master, TkType.frame, WidgetType.frame);
+        super(parent, TkType.frame, WidgetType.frame);
     }
 
     /** Get the current width of the border. */

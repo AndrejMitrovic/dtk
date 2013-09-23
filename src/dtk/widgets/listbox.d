@@ -25,9 +25,9 @@ class Listbox : Widget
     // todo: could implelent a listbox with a ttk::treeview rather than tk::listbox
 
     ///
-    this(Widget master)
+    this(Widget parent)
     {
-        super(master, TkType.listbox, WidgetType.listbox);
+        super(parent, TkType.listbox, WidgetType.listbox);
 
         _varName = makeVar();
         tclEvalFmt(`trace add variable %s write { %s %s %s %s }`, _varName, _dtkCallbackIdent, EventType.listbox, _name, ListboxAction.edit);

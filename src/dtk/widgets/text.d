@@ -27,9 +27,9 @@ enum WrapMode
 class Text : Widget
 {
     ///
-    this(Widget master)
+    this(Widget parent)
     {
-        super(master, TkType.text, WidgetType.text);
+        super(parent, TkType.text, WidgetType.text);
     }
 
     /**

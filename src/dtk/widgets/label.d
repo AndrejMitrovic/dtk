@@ -22,9 +22,9 @@ import dtk.widgets.widget;
 class Label : Widget
 {
     ///
-    this(Widget master)
+    this(Widget parent)
     {
-        super(master, TkType.label, WidgetType.label);
+        super(parent, TkType.label, WidgetType.label);
     }
 
     /**

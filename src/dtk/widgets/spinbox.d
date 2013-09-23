@@ -25,9 +25,9 @@ import dtk.widgets.widget;
 abstract class SpinboxBase : Widget
 {
     ///
-    package this(Widget master, WidgetType widgetType, EventType eventType)
+    package this(Widget parent, WidgetType widgetType, EventType eventType)
     {
-        super(master, TkType.spinbox, widgetType);
+        super(parent, TkType.spinbox, widgetType);
 
         _varName = makeVar();
         tclEvalFmt(`trace add variable %s write { %s %s %s }`, _varName, _dtkCallbackIdent, eventType, _name);
@@ -58,11 +58,11 @@ private:
 class ScalarSpinbox : SpinboxBase
 {
     ///
-    this(Widget master, float minValue = 0.0, float maxValue = 100.0)
+    this(Widget parent, float minValue = 0.0, float maxValue = 100.0)
     {
         _minValue = minValue;
         _maxValue = maxValue;
-        super(master, WidgetType.scalar_spinbox, EventType.scalar_spinbox);
+        super(parent, WidgetType.scalar_spinbox, EventType.scalar_spinbox);
 
         this.setOption("from", minValue);
         this.setOption("to", maxValue);
@@ -115,9 +115,9 @@ private:
 class ListSpinbox : SpinboxBase
 {
     ///
-    this(Widget master, string[] values)
+    this(Widget parent, string[] values)
     {
-        super(master, WidgetType.list_spinbox, EventType.list_spinbox);
+        super(parent, WidgetType.list_spinbox, EventType.list_spinbox);
         this.setOption("values", values);
     }
 

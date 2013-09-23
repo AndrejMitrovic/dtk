@@ -38,9 +38,9 @@ enum ValidateMode
 class Entry : Widget
 {
     ///
-    this(Widget master)
+    this(Widget parent)
     {
-        super(master, TkType.entry, WidgetType.entry);
+        super(parent, TkType.entry, WidgetType.entry);
 
         _entryVar = makeVar();
         tclEvalFmt(`trace add variable %s write { %s %s %s }`, _entryVar, _dtkCallbackIdent, EventType.entry, _name);

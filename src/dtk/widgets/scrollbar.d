@@ -20,9 +20,9 @@ import dtk.widgets.widget;
 class Scrollbar : Widget
 {
     ///
-    this(Widget master, Widget target, Orientation orientation)
+    this(Widget parent, Widget target, Orientation orientation)
     {
-        super(master, TkType.scrollbar, WidgetType.scrollbar);
+        super(parent, TkType.scrollbar, WidgetType.scrollbar);
 
         this.setOption("orient", to!string(orientation));
 

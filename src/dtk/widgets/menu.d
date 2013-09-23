@@ -23,9 +23,9 @@ import dtk.widgets.window;
 class CommonMenu : Widget
 {
     ///
-    package this(Widget master, TkType tkType, WidgetType widgetType)
+    package this(Widget parent, TkType tkType, WidgetType widgetType)
     {
-        super(master, tkType, widgetType);
+        super(parent, tkType, widgetType);
         this.setOption("tearoff", 0);  // disable tearoff by default
     }
 
@@ -144,19 +144,19 @@ class MenuBar : CommonMenu
     public Signal!MenuEvent onMenuEvent;
 
     ///
-    package this(Widget master)
+    package this(Widget parent)
     {
-        super(master, TkType.menu, WidgetType.menubar);
+        super(parent, TkType.menu, WidgetType.menubar);
     }
 }
 
 ///
 class Menu : CommonMenu
 {
-    package this(Widget master, string label)
+    package this(Widget parent, string label)
     {
         _label = label;
-        super(master, TkType.menu, WidgetType.menu);
+        super(parent, TkType.menu, WidgetType.menu);
     }
 
     /** Add a dividing line. */
@@ -404,9 +404,9 @@ struct RadioItem
     }
 
     /** A menu must always have a parent, so proper initialization is required. */
-    package void initParent(Widget master)
+    package void initParent(Widget parent)
     {
-        this.initialize(master, TkType.menu);
+        this.initialize(parent, TkType.menu);
         this.setOption("tearoff", 0);  // disable tearoff by default
     }
 

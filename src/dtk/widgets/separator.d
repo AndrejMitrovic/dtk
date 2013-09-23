@@ -21,9 +21,9 @@ import dtk.widgets.widget;
 class Separator : Widget
 {
     ///
-    this(Widget master, Orientation orientation)
+    this(Widget parent, Orientation orientation)
     {
-        super(master, TkType.separator, WidgetType.separator);
+        super(parent, TkType.separator, WidgetType.separator);
         this.setOption("orient", to!string(orientation));
     }
 

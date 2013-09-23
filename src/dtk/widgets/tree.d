@@ -38,9 +38,9 @@ enum DoStretch
 class Tree : Widget
 {
     ///
-    this(Widget master, string label = null, string[] columns = null)
+    this(Widget parent, string label = null, string[] columns = null)
     {
-        super(master, TkType.tree, WidgetType.tree);
+        super(parent, TkType.tree, WidgetType.tree);
 
         if (!label.empty)
             heading.text = label;

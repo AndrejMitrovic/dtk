@@ -21,10 +21,10 @@ import dtk.widgets.widget;
 class PanedWindow : Widget
 {
     ///
-    this(Widget master, Orientation orientation)
+    this(Widget parent, Orientation orientation)
     {
         string extraOpts = format("-orient %s", to!string(orientation));
-        super(master, TkType.panedwindow, WidgetType.panedwindow, extraOpts);
+        super(parent, TkType.panedwindow, WidgetType.panedwindow, extraOpts);
     }
 
     /**

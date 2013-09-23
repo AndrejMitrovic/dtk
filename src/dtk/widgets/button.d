@@ -52,9 +52,9 @@ enum DefaultMode
 class Button : Widget
 {
     ///
-    this(Widget master, string text)
+    this(Widget parent, string text)
     {
-        super(master, TkType.button, WidgetType.button);
+        super(parent, TkType.button, WidgetType.button);
 
         // return key issues invoke, which calls 'command'
         tclEvalFmt("bind %s <Return> { %s invoke }", _name, _name);

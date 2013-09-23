@@ -25,9 +25,9 @@ import dtk.widgets.widget;
 class Combobox : Widget
 {
     ///
-    this(Widget master)
+    this(Widget parent)
     {
-        super(master, TkType.combobox, WidgetType.combobox);
+        super(parent, TkType.combobox, WidgetType.combobox);
 
         string varName = makeVar();
         tclEvalFmt(`trace add variable %s write { %s %s %s }`, varName, _dtkCallbackIdent, EventType.combobox, _name);

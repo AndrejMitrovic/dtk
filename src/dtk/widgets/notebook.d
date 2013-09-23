@@ -57,9 +57,9 @@ struct TabOptions
 class Notebook : Widget
 {
     ///
-    this(Widget master)
+    this(Widget parent)
     {
-        super(master, TkType.notebook, WidgetType.notebook);
+        super(parent, TkType.notebook, WidgetType.notebook);
     }
 
     /** Add a widget to this notebook. */

@@ -26,12 +26,12 @@ import dtk.widgets.widget;
 ///
 class RadioGroup : Widget
 {
-    this(Widget master)
+    this(Widget parent)
     {
         // we use a frame Tk type to allow Tk calls to work,
         // but we don't subclass from Frame to disallow user
         // configuration.
-        super(master, TkType.frame, WidgetType.radiogroup);
+        super(parent, TkType.frame, WidgetType.radiogroup);
 
         _varName = makeVar();
         tclEvalFmt(`trace add variable %s write { %s %s %s }`, _varName, _dtkCallbackIdent, EventType.radio_button, _name);
