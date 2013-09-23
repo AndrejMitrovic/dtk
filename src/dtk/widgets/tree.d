@@ -165,8 +165,17 @@ class Tree : Widget
     ///
     alias super.destroy destroy;
 
+    /** Destroy this tree. */
+    override void destroy()
+    {
+        if (_treeID == _rootTreeID)
+            super.destroy();
+        else
+            this.destroy(this);
+    }
+
     /** Remove and destroy a tree. */
-    void destroy(Tree tree)
+    private void destroy(Tree tree)
     {
         enforce(tree._treeID in _rootTree._treeIDMap,
             format("Cannot destroy tree which is not part of the root tree of this tree."));
@@ -338,20 +347,23 @@ class Tree : Widget
     /** Return the children of this tree. */
     @property Tree[] children()
     {
-        Appender!(Tree[]) result;
+        return this.walkChildren.array;
+    }
 
+    /** Lazily return the children of this tree as an input range. */
+    @property auto walkChildren()
+    {
         string treePaths = tclEvalFmt("%s children %s", _name, _treeID);
 
-        foreach (treePath; treePaths.splitter(" "))
-        {
-            enforce(treePath in _rootTree._treeIDMap, format("%s not in %s", treePath, _rootTree._treeIDMap));
+        return map!(
+            (string treePath)
+            {
+                enforce(treePath in _rootTree._treeIDMap, format("%s not in %s", treePath, _rootTree._treeIDMap));
 
-            auto tree = _rootTree._treeIDMap[treePath];
-            if (tree !is null)
-                result ~= tree;
-        }
-
-        return result.data;
+                auto tree = _rootTree._treeIDMap[treePath];
+                return tree;
+            }
+        )(treePaths.splitter(" "));
     }
 
     /**

@@ -8,34 +8,34 @@ module dtk.signals;
 
 import std.algorithm;
 import std.container;
-//~ import std.functional;
-//~ import std.range;
 import std.traits;
 import std.typecons;
-//~ import std.exception;
-//~ import std.stdio;
-//~ import std.typetuple;
 
 import dtk.event;
+import dtk.utils;
 
 /**
-    Some of the Signal code is based off of Johannes Pfau's
-    signals module, which he introduced here: https://gist.github.com/1194497
+    Some of the Signal code is based off of Johannes Pfau's signals module,
+    which he introduced here: https://gist.github.com/1194497
 */
 
 /**
     A single event handler. A user can assign a function or delegate
     event handler, a class with an $(D opCall) function, or a struct
-    pointer with an $(D opCall) function. The event handler must take
-    a single $(D EventClass) parameter with the $(D scope) storage class.
+    pointer with an $(D opCall) function.
 
-    $(D EventClass) is typically $(D Event) or one of its derived classes.
+    The event handler must either take a single $(D EventClass) parameter
+    with the $(D scope) storage class, or no parameters at all.
 
-    Multiple assignment is possible, however each new assignment will
+    The event handler must have a void return type.
+
+    The $(D EventClass) type should be $(D Event) any of its descendants.
+
+    Multiple assignment is possible, but each new assignment will
     remove any existing handler.
 
     Assigning $(D null) or calling $(D clear) will remove the event
-    handler, and it will no longer be invoked when $(D call) is called.
+    handler, and calling $(D call) will have no effect.
 */
 struct EventHandler(EventClass)
 {
@@ -72,20 +72,56 @@ struct EventHandler(EventClass)
     }
 
     /**
-        Call the event handler with the $(D event).
-        If no event handler was set, the function
-        returns early.
+        Call the event handler with the $(D event),
+        or no arguments if the handler doesn't take any.
+
+        If no event handler was set, this function becomes a no-op.
     */
     package void call(scope EventClass event)
     {
+        version(DTK_LOG_EVENT_HANDLER)
+        {
+            import std.stdio;
+            if (_callback.deleg)
+            {
+                if (_callback.hasParams)
+                    stderr.writefln("Calling: delegate(scope Event)");
+                else
+                    stderr.writefln("Calling: delegate()");
+            }
+            else
+            if (_callback.func)
+            {
+                if (_callback.hasParams)
+                    stderr.writefln("Calling: function(scope Event)");
+                else
+                    stderr.writefln("Calling: function()");
+            }
+        }
+
         if (_callback.deleg)
-            _callback.deleg(event);
+        {
+            if (_callback.hasParams)
+                _callback.deleg(event);
+            else
+                (*cast(DelegZero*)&_callback.deleg)();
+        }
         else
         if (_callback.func)
-            _callback.func(event);
+        {
+            if (_callback.hasParams)
+                _callback.func(event);
+            else
+                (*cast(FuncZero*)&_callback.func)();
+        }
     }
 
 private:
+
+    alias Func      = void function(scope EventClass);
+    alias FuncZero  = void function();
+    alias Deleg     = void delegate(scope EventClass);
+    alias DelegZero = void delegate();
 
     static struct Callback
     {
@@ -93,6 +129,8 @@ private:
         {
             static if (is(T == class))
             {
+                this.hasParams = ParameterTypeTuple!(T.opCall).length != 0;
+
                 static if (isDelegate!(typeof(&handler.opCall)))
                     this.deleg = cast(Deleg)&handler.opCall;
                 else
@@ -101,6 +139,8 @@ private:
             else
             static if (isPointer!T && is(pointerTarget!T == struct))
             {
+                this.hasParams = ParameterTypeTuple!(pointerTarget!T.opCall).length != 0;
+
                 static if (isDelegate!(typeof(&pointerTarget!T.init.opCall)))
                     this.deleg = cast(Deleg)&handler.opCall;
                 else
@@ -109,22 +149,22 @@ private:
             else
             static if (isDelegate!T)
             {
+                this.hasParams = ParameterTypeTuple!T.length != 0;
                 this.deleg = cast(Deleg)handler;
             }
             else
             static if (isFunctionPointer!T)
             {
+                this.hasParams = ParameterTypeTuple!T.length != 0;
                 this.func = cast(Func)handler;
             }
             else
             static assert(0);
         }
 
-        alias Func  = void function(scope EventClass);
-        alias Deleg = void delegate(scope EventClass);
-
         Deleg deleg;
         Func func;
+        bool hasParams;
 
         void clear()
         {
@@ -164,19 +204,23 @@ unittest
     auto event = scoped!MyEvent(1, 2);
 
     static assert(!is(typeof( handler = 1 )));
-    static assert(!is(typeof( handler = () { } )));
+    static assert(!is(typeof( handler = () { return 0; } )));
     static assert(!is(typeof( handler = (MyEvent event) { } )));
+    static assert(is(typeof( handler = () { } )));
     static assert(is(typeof( handler = (scope MyEvent event) { } )));
 
-    struct SF1 { void opCall() { } }
+    struct SF1 { int opCall() { return 0; } }
     struct SF2 { void opCall(MyEvent event) { } }
+    struct SF3 { void opCall(int) { } }
     struct SK1 { void opCall(scope MyEvent event) { hasDgRun = true; assert(event.x == 1 && event.y == 2); } }
     struct SK2 { static void opCall(scope MyEvent event) { assert(event.x == 1 && event.y == 2); } }
+    struct SK3 { void opCall() {} }
 
     SF1 sf1;
     SF2 sf2;
     SK1 sk1;
     SK2 sk2;
+    SK3 sk3;
 
     static assert(!is(typeof( handler = sf1 )));
     static assert(!is(typeof( handler = sf2 )));
@@ -185,23 +229,30 @@ unittest
 
     static assert(!is(typeof( handler = &sf1 )));
     static assert(!is(typeof( handler = &sf2 )));
+    static assert(!is(typeof( handler = &sf3 )));
     static assert(is(typeof( handler = &sk1 )));
     static assert(is(typeof( handler = &sk2 )));
+    static assert(is(typeof( handler = &sk3 )));
 
-    class CF1 { void opCall() { } }
+    class CF1 { int opCall() { return 0; } }
     class CF2 { void opCall(MyEvent event) { } }
+    class CF3 { void opCall(int) { } }
     class CK1 { void opCall(scope MyEvent event) { hasDgRun = true; assert(event.x == 1 && event.y == 2); } }
     class CK2 { static void opCall(scope MyEvent event) { assert(event.x == 1 && event.y == 2); } }
+    class CK3 { void opCall() { } }
 
     CF1 cf1;
     CF2 cf2;
     CK1 ck1 = new CK1();
     CK2 ck2 = new CK2();
+    CK3 ck3 = new CK3();
 
     static assert(!is(typeof( handler = cf1 )));
     static assert(!is(typeof( handler = cf2 )));
+    static assert(!is(typeof( handler = cf3 )));
     static assert(is(typeof( handler = ck1 )));
     static assert(is(typeof( handler = ck2 )));
+    static assert(is(typeof( handler = ck3 )));
 
     /* test delegate lambda. */
     handler = (scope MyEvent event) { hasDgRun = true; assert(event.x == 1 && event.y == 2); };
@@ -439,7 +490,8 @@ template isEventHandler(T, Types...)
 
     // eager evaluation workaround
     static if (!stores.length)
-        enum bool isEventHandler = false;
+        enum bool isEventHandler = is(typeof(T.init())) &&
+                                   is(ReturnType!T == void);
     else
         enum bool isEventHandler = is(typeof(T.init(Types.init))) &&
                                    stores[0] == stcType.scope_ &&
@@ -450,9 +502,15 @@ template isEventHandler(T, Types...)
 template isEventHandler(T, Types...)
     if (isPointer!T && is(pointerTarget!T == struct))
 {
-    enum bool isEventHandler = is(typeof(pointerTarget!T.init.opCall(Types.init))) &&
-                          storages!(pointerTarget!T.init.opCall)[0] == stcType.scope_ &&
-                          is(ReturnType!T == void);
+    alias stores = storages!(pointerTarget!T.init.opCall);
+
+    static if (!stores.length)
+        enum bool isEventHandler = is(typeof(pointerTarget!T.init.opCall())) &&
+                                   is(ReturnType!(pointerTarget!T.opCall) == void);
+    else
+        enum bool isEventHandler = is(typeof(pointerTarget!T.init.opCall(Types.init))) &&
+                                   stores[0] == stcType.scope_ &&
+                                   is(ReturnType!(pointerTarget!T.opCall) == void);
 }
 
 /** Check whether $(D T) is a class with an $(D opCall) function which can be called with the $(D Types). */
@@ -460,10 +518,17 @@ template isEventHandler(T, Types...)
     if (is(T == class))
 {
     // eager evaluation workaround
+    static if (is(typeof(T.init.opCall())))
+    {
+        enum bool isEventHandler = is(typeof(T.init.opCall()) == void) &&
+                                   is(ReturnType!(T.opCall) == void);
+    }
+    else
     static if (is(typeof(T.init.opCall(Types.init))))
     {
         enum bool isEventHandler = is(typeof(T.init.opCall(Types.init)) == void) &&
-                              storages!(T.init.opCall)[0] == stcType.scope_;
+                                   storages!(T.init.opCall)[0] == stcType.scope_ &&
+                                   is(ReturnType!(T.opCall) == void);
     }
     else
     {

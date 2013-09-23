@@ -449,7 +449,7 @@ abstract class Widget
     /** End widget styles. */
 
     /** Destroy this widget. */
-    public final void destroy()
+    public void destroy()
     {
         tclEvalFmt("destroy %s", _name);
         _isDestroyed = true;

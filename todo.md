@@ -3,6 +3,8 @@ Improving API for first gui example.
 
 Todo:
 
+- Check the last few commits to see if we've missed testing some functionality.
+
 - Cairo support should be handled somehow.
 
 - Slider should become templated, and we should allow a limited range slider as well, e.g.:

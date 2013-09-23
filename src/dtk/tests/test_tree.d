@@ -237,7 +237,7 @@ unittest
 
     assert(root1.children.length == 4, root1.children.length.text);
 
-    tree.destroy(child2);
+    child2.destroy();
     assert(root1.children.length == 3);
 
     auto parent = child1.parentTree;
