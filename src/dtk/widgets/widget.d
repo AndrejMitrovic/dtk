@@ -498,12 +498,24 @@ package:
 
     package final T getOption(T)(string option)
     {
-        return to!T(tclEvalFmt("%s cget -%s", _name, option));
+        static if (isArray!T && !isSomeString!T)
+        {
+            tclEvalFmt("set %s [%s cget -%s]", _dtkScratchArrVar, _name, option);
+            return tclGetVar!T(_dtkScratchArrVar);
+        }
+        else
+        {
+            return to!T(tclEvalFmt("%s cget -%s", _name, option));
+        }
     }
 
-    package final string setOption(T)(string option, T value)
+    package final void setOption(T)(string option, T value)
     {
-        return tclEvalFmt(`%s configure -%s %s`, _name, option, value._tclEscape);
+        static if (isArray!T && !isSomeString!T)
+            tclEvalFmt(`%s configure -%s [list %s]`, _name, option, map!_tclEscape(value).join(" "));
+        else
+            tclEvalFmt(`%s configure -%s %s`, _name, option, value._tclEscape);
+
     }
 
     /**
@@ -614,10 +626,17 @@ package:
     static this()
     {
         _threadID = cast(size_t)cast(void*)Thread.getThis;
+        _dtkScratchArrVar = makeVar();
     }
 
     /** Unique Thread ID. Needed to create thread-global unique identifiers for Tcl/Tk. */
     package static size_t _threadID;
+
+    /**
+        For list retrieval of a Tk widget option (e.g. -values of a spinbox),
+        we first assign the values to a Tcl var and then read from it using tclGetVar.
+    */
+    static string _dtkScratchArrVar;
 
     /**
         API-only: public due to package disallowing access to super packages.

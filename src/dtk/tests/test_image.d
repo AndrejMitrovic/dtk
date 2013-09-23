@@ -107,7 +107,7 @@ unittest
 
     book.pack();
 
-    auto tree = new Tree(testWindow, "Directory", ["Filename", "Modified", "Created"]);
+    auto tree = new Tree(testWindow, "Directory Name", ["File Name", "Modified Date", "Created"]);
     auto root1 = tree.add("Root 1");
     auto root2 = tree.add("Root 2");
     root1.add("Child 1.1");

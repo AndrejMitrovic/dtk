@@ -6,6 +6,7 @@
  */
 module dtk.widgets.spinbox;
 
+import std.algorithm;
 import std.string;
 import std.range;
 
@@ -117,7 +118,7 @@ class ListSpinbox : SpinboxBase
     this(Widget master, string[] values)
     {
         super(master, WidgetType.list_spinbox, EventType.list_spinbox);
-        this.setOption("values", values.join(" "));
+        this.setOption("values", values);
     }
 
     /**
@@ -128,13 +129,13 @@ class ListSpinbox : SpinboxBase
     /** Get the values in this spinbox. */
     @property string[] values()
     {
-        return this.getOption!string("values").split(" ");
+        return this.getOption!(string[])("values");
     }
 
     /** Set the values in this spinbox. */
     @property void values(string[] newValues)
     {
-        this.setOption("values", newValues.join(" "));
+        this.setOption("values", newValues);
     }
 
     /** Get the current value of the spinbox. */

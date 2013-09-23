@@ -6,6 +6,7 @@
  */
 module dtk.interpreter;
 
+import std.algorithm;
 import std.array;
 import std.stdio;
 import std.traits;
@@ -149,7 +150,7 @@ void tclSetVar(T)(string varName, T value)
 
     static if (isArray!T && !isSomeString!T)
     {
-        tclEvalFmt("set %s [list %s]", varName, value.join(" "));
+        tclEvalFmt("set %s [list %s]", varName, map!_tclEscape(value).join(" "));
     }
     else
     {

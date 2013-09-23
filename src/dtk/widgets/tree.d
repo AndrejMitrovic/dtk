@@ -480,11 +480,8 @@ class Tree : Widget
     /** Get the .text field of every column as an array. */
     @property string[] values()
     {
-        if (_tempVar.empty)
-            _tempVar = makeVar();
-
-        tclEvalFmt("set %s [%s item %s -values]", _tempVar, _name, _treeID);
-        return tclGetVar!(string[])(_tempVar);
+        tclEvalFmt("set %s [%s item %s -values]", _dtkScratchArrVar, _name, _treeID);
+        return tclGetVar!(string[])(_dtkScratchArrVar);
     }
 
     /** Assign the .text field of every column. */
@@ -496,11 +493,8 @@ class Tree : Widget
     /** Get the .tag field of every column as an array. */
     @property string[] tags()
     {
-        if (_tempVar.empty)
-            _tempVar = makeVar();
-
-        tclEvalFmt("set %s [%s item %s -tags]", _tempVar, _name, _treeID);
-        return tclGetVar!(string[])(_tempVar);
+        tclEvalFmt("set %s [%s item %s -tags]", _dtkScratchArrVar, _name, _treeID);
+        return tclGetVar!(string[])(_dtkScratchArrVar);
     }
 
     /** Assign the .text field of every column. */
@@ -627,9 +621,6 @@ private:
         to its original place when reattach is called.
     */
     DetachInfo _detachInfo;
-
-    // for easier retrieval of tcl arrays
-    string _tempVar;
 }
 
 ///

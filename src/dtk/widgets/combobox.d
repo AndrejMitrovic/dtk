@@ -54,7 +54,7 @@ class Combobox : Widget
     /** Get the values in this combobox. */
     @property string[] values()
     {
-        return this.getOption!string("values").split(" ");
+        return this.getOption!(string[])("values");
     }
 
     /** Set the values for this combobox. */

@@ -26,11 +26,11 @@ unittest
 
     assert(listbox.values.empty);
 
-    listbox.values = ["foo", "bar"];
-    assert(listbox.values == ["foo", "bar"]);
+    listbox.values = ["foo val", "bar"];
+    assert(listbox.values == ["foo val", "bar"], listbox.values.text);
 
-    listbox.add("doo");
-    assert(listbox.values == ["foo", "bar", "doo"]);
+    listbox.add("doo val");
+    assert(listbox.values == ["foo val", "bar", "doo val"]);
 
     listbox.height = 2;
     assert(listbox.height == 2);

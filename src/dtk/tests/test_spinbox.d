@@ -54,8 +54,8 @@ unittest
     spinbox1.value = 1;
     ++expectedCallCount;
 
-    auto spinbox2 = new ListSpinbox(app.mainWindow, ["foo", "bar", "doo"]);
-    assert(spinbox2.values == ["foo", "bar", "doo"]);
+    auto spinbox2 = new ListSpinbox(app.mainWindow, ["foo val", "bar val", "doo val"]);
+    assert(spinbox2.values == ["foo val", "bar val", "doo val"], spinbox2.values.text);
     spinbox2.pack();
 
     spinbox2.wrap = true;

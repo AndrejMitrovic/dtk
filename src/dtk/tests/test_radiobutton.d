@@ -26,12 +26,12 @@ unittest
 
     // todo: radiogroup should take a list of radio buttons instead of passing it like this
     auto radioGroup = new RadioGroup(testWindow);
-    auto radio1 = new RadioButton(radioGroup, "Set On", "on");
-    auto radio2 = new RadioButton(radioGroup, "Set Off", "off");
-    auto radio3 = new RadioButton(radioGroup, "Set No", "invalid");
+    auto radio1 = new RadioButton(radioGroup, "Set On", "on value");
+    auto radio2 = new RadioButton(radioGroup, "Set Off", "off value");
+    auto radio3 = new RadioButton(radioGroup, "Set No", "invalid value");
 
-    radio1.value = "on_value";
-    radio2.value = "off_value";
+    radio1.value = "on value";
+    radio2.value = "off value";
 
     radioGroup.pack();
     radio1.pack();
