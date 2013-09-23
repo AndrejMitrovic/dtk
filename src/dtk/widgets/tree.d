@@ -70,7 +70,7 @@ class Tree : Widget
             return;
 
         // create the columns
-        tclEvalFmt("%s configure -columns [list %s]", _name, map!_tclEscape(columns).join(" "));
+        tclEvalFmt("%s configure -columns %s", _name, columns._tclEscape);
 
         // set the column names
         foreach (idx, col; columns)
@@ -487,7 +487,7 @@ class Tree : Widget
     /** Assign the .text field of every column. */
     @property void values(string[] newValues)
     {
-        tclEvalFmt("%s item %s -values { %s }", _name, _treeID, map!_tclEscape(newValues).join(" "));
+        tclEvalFmt("%s item %s -values %s", _name, _treeID, newValues._tclEscape);
     }
 
     /** Get the .tag field of every column as an array. */
@@ -500,7 +500,7 @@ class Tree : Widget
     /** Assign the .text field of every column. */
     @property void tags(string[] newValues)
     {
-        tclEvalFmt("%s item %s -tags { %s }", _name, _treeID, map!_tclEscape(newValues).join(" "));
+        tclEvalFmt("%s item %s -tags %s", _name, _treeID, newValues._tclEscape);
     }
 
     @property bool isOpened()

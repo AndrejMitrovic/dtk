@@ -511,11 +511,7 @@ package:
 
     package final void setOption(T)(string option, T value)
     {
-        static if (isArray!T && !isSomeString!T)
-            tclEvalFmt(`%s configure -%s [list %s]`, _name, option, map!_tclEscape(value).join(" "));
-        else
-            tclEvalFmt(`%s configure -%s %s`, _name, option, value._tclEscape);
-
+        tclEvalFmt(`%s configure -%s %s`, _name, option, value._tclEscape);
     }
 
     /**

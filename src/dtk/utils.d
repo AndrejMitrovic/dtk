@@ -122,14 +122,21 @@ package string _makeAggregateAliases(T)()
 /** Return an escaped Tcl string literal which can be used in Tcl commands. */
 string _tclEscape(T)(T input)
 {
-    // todo: use a buffer once Issue 10868 is implemented:
-    // http://d.puremagic.com/issues/show_bug.cgi?id=10868
+    static if (isArray!T && !isSomeString!T)
+    {
+        return format("[list %s]", map!(._tclEscape)(input).join(" "));
+    }
+    else
+    {
+        // todo: use a buffer once Issue 10868 is implemented:
+        // http://d.puremagic.com/issues/show_bug.cgi?id=10868
 
-    // note: have to use to!string because there is a lot of implicit conversions in D:
-    // char -> int
-    // dchar and int can't be overloaded
-    // enum -> int
-    return format(`"%s"`, to!string(input).translate(_tclTransTable));
+        // note: have to use to!string because there is a lot of implicit conversions in D:
+        // char -> int
+        // dchar and int can't be overloaded
+        // enum -> int
+        return format(`"%s"`, to!string(input).translate(_tclTransTable));
+    }
 }
 
 /// similar to OriginalType, but without the modifier stripping

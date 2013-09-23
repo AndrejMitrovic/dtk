@@ -150,7 +150,7 @@ void tclSetVar(T)(string varName, T value)
 
     static if (isArray!T && !isSomeString!T)
     {
-        tclEvalFmt("set %s [list %s]", varName, map!_tclEscape(value).join(" "));
+        tclEvalFmt("set %s %s", varName, value._tclEscape);
     }
     else
     {
