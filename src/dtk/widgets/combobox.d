@@ -60,7 +60,7 @@ class Combobox : Widget
     /** Set the values for this combobox. */
     @property void values(string[] newValues)
     {
-        this.setOption("values", newValues.join(" "));
+        this.setOption("values", newValues);
     }
 
     /** Allow or disallow inputting custom values to this combobox. */

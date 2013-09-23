@@ -47,7 +47,9 @@ unittest
     assert(box1.value == "foo bar");
 
     assert(box1.values.empty);
+
     box1.values = ["foo", "bar", "foo bar"];
+    assert(box1.values == ["foo", "bar", "foo bar"]);
 
     foreach (value; box1.values)
     {
