@@ -232,3 +232,34 @@ enum Orientation
     horizontal,  ///
     vertical     ///
 }
+
+/** Phobos parse functions can't use a custom delimiter. */
+package Rect toGeometry(string input)
+{
+    typeof(return) result;
+
+    sizediff_t xOffset = input.countUntil("x");
+    sizediff_t firstPlus = input.countUntil("+");
+    sizediff_t secondPlus = input.countUntil("+") + 1 + input[input.countUntil("+") + 1 .. $].countUntil("+");
+
+    string width = input[0 .. xOffset];
+    string height = input[xOffset + 1 .. firstPlus];
+
+    string x = input[firstPlus + 1 .. secondPlus];
+    string y = input[secondPlus + 1 .. $];
+
+    result.x = to!int(x);
+    result.y = to!int(y);
+    result.width = to!int(width);
+    result.height = to!int(height);
+
+    return result;
+}
+
+///
+unittest
+{
+    assert("200x200+88+-88".toGeometry == Rect(88, -88, 200, 200));
+    assert("200x200+-88+88".toGeometry == Rect(-88, 88, 200, 200));
+    assert("200x200+88+88".toGeometry == Rect(88, 88, 200, 200));
+}

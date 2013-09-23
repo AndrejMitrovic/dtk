@@ -72,16 +72,7 @@ class Window : Widget
         tclEvalFmt("wm title %s %s", _name, newTitle._tclEscape);
     }
 
-    /**
-        Get the current window position, relative to its parent.
-        The parent is either another window, or the desktop.
-    */
-    @property Point position()
-    {
-        string x = tclEvalFmt("winfo x %s", _name);
-        string y = tclEvalFmt("winfo y %s", _name);
-        return Point(to!int(x), to!int(y));
-    }
+    alias position = super.position;
 
     /**
         Set a new window position, relative to its parent.
@@ -95,15 +86,7 @@ class Window : Widget
         this.geometry = rect;
     }
 
-    /**
-        Get the current window size.
-    */
-    @property Size size()
-    {
-        string width = tclEvalFmt("winfo width %s", _name);
-        string height = tclEvalFmt("winfo height %s", _name);
-        return Size(to!int(width), to!int(height));
-    }
+    alias size = super.size;
 
     /**
         Set a new window size.
@@ -116,11 +99,7 @@ class Window : Widget
         this.geometry = rect;
     }
 
-    /** Get the current window geometry. */
-    @property Rect geometry()
-    {
-        return tclEvalFmt("wm geometry %s", _name).toGeometry();
-    }
+    alias geometry = super.geometry;
 
     /**
         Set a new window geometry.
@@ -359,37 +338,6 @@ class Window : Widget
 private:
     MenuBar _contextMenu;
     Sizegrip _sizegrip;
-}
-
-/** Phobos parse functions can't use a custom delimiter. */
-private Rect toGeometry(string input)
-{
-    typeof(return) result;
-
-    sizediff_t xOffset = input.countUntil("x");
-    sizediff_t firstPlus = input.countUntil("+");
-    sizediff_t secondPlus = input.countUntil("+") + 1 + input[input.countUntil("+") + 1 .. $].countUntil("+");
-
-    string width = input[0 .. xOffset];
-    string height = input[xOffset + 1 .. firstPlus];
-
-    string x = input[firstPlus + 1 .. secondPlus];
-    string y = input[secondPlus + 1 .. $];
-
-    result.x = to!int(x);
-    result.y = to!int(y);
-    result.width = to!int(width);
-    result.height = to!int(height);
-
-    return result;
-}
-
-///
-unittest
-{
-    assert("200x200+88+-88".toGeometry == Rect(88, -88, 200, 200));
-    assert("200x200+-88+88".toGeometry == Rect(-88, 88, 200, 200));
-    assert("200x200+88+88".toGeometry == Rect(88, 88, 200, 200));
 }
 
 private string toEvalString(Rect geometry)

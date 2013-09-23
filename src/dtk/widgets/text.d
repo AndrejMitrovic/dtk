@@ -35,7 +35,7 @@ class Text : Widget
     /**
         Get the current screen size of the text widget, in characters and rows.
     */
-    @property Size size()
+    @property Size textSize()
     {
         Size result;
         result.width = this.getOption!int("width");
@@ -46,7 +46,7 @@ class Text : Widget
     /**
         Set a requested size for this text widget, in characters and rows.
     */
-    @property void size(Size newSize)
+    @property void textSize(Size newSize)
     {
         this.setOption("width", newSize.width);
         this.setOption("height", newSize.height);

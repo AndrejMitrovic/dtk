@@ -285,6 +285,43 @@ abstract class Widget
     public const(WidgetType) widgetType;
 
     /**
+        Get the current widget position, relative to its parent.
+        The parent is either another window, or the desktop.
+    */
+    @property Point position()
+    {
+        string x = tclEvalFmt("winfo x %s", _name);
+        string y = tclEvalFmt("winfo y %s", _name);
+        return Point(to!int(x), to!int(y));
+    }
+
+    /**
+        Get the current widget position, relative to the root window.
+    */
+    @property Point absPosition()
+    {
+        string x = tclEvalFmt("winfo rootx %s", _name);
+        string y = tclEvalFmt("winfo rooty %s", _name);
+        return Point(to!int(x), to!int(y));
+    }
+
+    /**
+        Get the current widget size.
+    */
+    @property Size size()
+    {
+        string width = tclEvalFmt("winfo width %s", _name);
+        string height = tclEvalFmt("winfo height %s", _name);
+        return Size(to!int(width), to!int(height));
+    }
+
+    /** Get the current widget geometry. */
+    @property Rect geometry()
+    {
+        return tclEvalFmt("wm geometry %s", _name).toGeometry();
+    }
+
+    /**
         Signal emitted for various widget events.
 
         $(RED Behavior note:) If the mouse cursor leaves the button area

@@ -64,7 +64,7 @@ class LabelFrame : Widget
         Get the current requested Frame size. This often returns Size(0, 0)
         since a frame typically doesn't explicitly request a specific size.
     */
-    @property Size size()
+    @property Size frameSize()
     {
         Size result;
         result.width = this.getOption!int("width");
@@ -80,7 +80,7 @@ class LabelFrame : Widget
 
         Todo: pack propagate and grid propagate can be used to change this.
     */
-    @property void size(Size newSize)
+    @property void frameSize(Size newSize)
     {
         this.setOption("width", newSize.width);
         this.setOption("height", newSize.height);

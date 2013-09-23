@@ -40,10 +40,10 @@ unittest
     frame.anchor = Anchor.north;
     assert(frame.anchor == Anchor.north, frame.anchor.text);
 
-    assert(frame.size == Size(0, 0));
+    assert(frame.frameSize == Size(0, 0));
 
-    frame.size = Size(100, 100);
-    assert(frame.size == Size(100, 100));
+    frame.frameSize = Size(100, 100);
+    assert(frame.frameSize == Size(100, 100));
 
     frame.borderWidth = 10;
     assert(frame.borderWidth == 10);

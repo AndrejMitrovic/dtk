@@ -31,10 +31,10 @@ unittest
     frame.pack();
     button1.pack();
 
-    assert(frame.size == Size(0, 0));
+    assert(frame.frameSize == Size(0, 0));
 
-    frame.size = Size(100, 100);
-    assert(frame.size == Size(100, 100));
+    frame.frameSize = Size(100, 100);
+    assert(frame.frameSize == Size(100, 100));
 
     frame.borderWidth = 10;
     assert(frame.borderWidth == 10);

@@ -27,8 +27,8 @@ unittest
     auto text = new Text(testWindow);
     text.pack();
 
-    text.size = Size(50, 10);
-    assert(text.size == Size(50, 10));
+    text.textSize = Size(50, 10);
+    assert(text.textSize == Size(50, 10));
 
     text.wrapMode = WrapMode.none;
     assert(text.wrapMode == WrapMode.none);
