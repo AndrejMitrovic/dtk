@@ -310,8 +310,8 @@ unittest
 /**
     A signal holds multiple event handlers to call.
 
-    See the $(D EventHandler) documentation on which types
-    of event handlers are allowed to be set.
+    See the $(D EventHandler) documentation to see
+    which types of event handlers are allowed to be used.
 */
 struct Signal(EventClass)
 {
@@ -425,10 +425,8 @@ struct Signal(EventClass)
     {
         auto call = HandlerType(handler);
         auto pos = find(_handlers[], call);
-        if (pos.empty)
-        {
-            throw new Exception("Handler is not connected");
-        }
+        enforce(!pos.empty, "Handler is not connected");
+
         _handlers.stableLinearRemove(pos.take(1));
         --handlersCount;
     }
@@ -488,7 +486,6 @@ template isEventHandler(T, Types...)
 {
     alias stores = storages!T;
 
-    // eager evaluation workaround
     static if (!stores.length)
         enum bool isEventHandler = is(typeof(T.init())) &&
                                    is(ReturnType!T == void);
@@ -517,7 +514,6 @@ template isEventHandler(T, Types...)
 template isEventHandler(T, Types...)
     if (is(T == class))
 {
-    // eager evaluation workaround
     static if (is(typeof(T.init.opCall())))
     {
         enum bool isEventHandler = is(typeof(T.init.opCall()) == void) &&

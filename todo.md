@@ -3,6 +3,8 @@ Improving API for first gui example.
 
 Todo:
 
+- Use spaces in test-cases for string arguments to verify we're calling tclEscape everywhere.
+
 - Check the last few commits to see if we've missed testing some functionality.
 
 - Cairo support should be handled somehow.
@@ -15,7 +17,7 @@ new Slider!int([0, 1, 2, 3, 4]);  // only allow these items.
 
 - Widget parameter should be called parent, not master.
 
-- Try to wrap many more virtual events of each widget type.
+- Try to wrap more virtual events of each widget type.
 
 - Replace this:
 override void toString(scope void delegate(const(char)[]) sink)
@@ -38,7 +40,7 @@ functions into account.
 
 - Hide format and other code from dtk.utils from user.
 
-- Work on menu's again later after fixing up events for other widgets.
+- Work on menus again later after fixing up events for other widgets.
 Menus and their items can also be configured in many ways, we have to export this.
 
 - Make library const-correct.
@@ -51,10 +53,6 @@ Menus and their items can also be configured in many ways, we have to export thi
 
 - Replace these sort of calls with assertOp in the test-suite:
     assert(e.action == action, text(e.action, " != ", action));
-
-- Add behavior tests for event handling of keyboard and mouse, e.g. when
-a entry widget has a keyboard event, when is it a request event v.s. when
-is it a post-action event.
 
 - Add a status bar option to a Window.
 
@@ -116,11 +114,7 @@ an API for this. E.g.:
                                     (scope KeySequence event) { ... } ));
     widget.onEvent.connect(handler);
 
-- Add test-suite for event handlers.
-
 - Find all valid substitutions for each event type.
-
-- Remove fake widgets if we can.
 
 - Put place, pack, and grid commands into a separate layout file.
 
