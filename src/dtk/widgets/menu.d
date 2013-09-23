@@ -101,7 +101,7 @@ class CommonMenu : Widget
             radioGroup.add(radioItem);
 
             tclEvalFmt("%s add radiobutton -label %s -variable %s -value %s -command %s",
-                _name, radioItem.label._tclEscape, radioGroup._varName, radioItem.value,
+                _name, radioItem.label._tclEscape, radioGroup._varName, radioItem.value._tclEscape,
                 getCommand(MenuAction.radio, radioGroup));
         }
 
@@ -118,7 +118,7 @@ class CommonMenu : Widget
             radioGroup.add(radioItem);
 
             tclEvalFmt("%s insert %s radiobutton -label %s -variable %s -value %s -command %s",
-                _name, index++, radioItem.label._tclEscape, radioGroup._varName, radioItem.value,
+                _name, index++, radioItem.label._tclEscape, radioGroup._varName, radioItem.value._tclEscape,
                 getCommand(MenuAction.radio, radioGroup));
         }
 

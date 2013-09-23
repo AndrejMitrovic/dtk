@@ -73,8 +73,7 @@ class Notebook : Widget
     void add(Widget widget, string text)
     {
         _checkParent(widget);
-        string opts = format("-text %s", text._tclEscape);
-        tclEvalFmt("%s add %s %s", _name, widget._name, opts);
+        tclEvalFmt("%s add %s -text %s", _name, widget._name, text._tclEscape);
     }
 
     /** ditto. */

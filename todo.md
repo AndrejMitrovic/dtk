@@ -5,19 +5,13 @@ Todo:
 
 - Instead of using fake widgets, we should use a frame type as the Tk type.
 
-- Widget parameter should be called parent, not master.
-
-- Try to wrap more virtual events of each widget type.
-
 - Replace this:
 override void toString(scope void delegate(const(char)[]) sink)
 
 With a template that does this:
 callFunc((cast(DynamicType)object).tupleof);
 
-- Major todo: catch exceptions: http://www.gamedev.net/page/resources/_/technical/general-programming/d-exceptions-and-c-callbacks-r3323
-
-- Add note about using (scope BaseClass event) for event handlers.
+- Todo: catch exceptions: http://www.gamedev.net/page/resources/_/technical/general-programming/d-exceptions-and-c-callbacks-r3323
 
 - Implement assertEqual to utils or somewhere.
 
@@ -26,18 +20,11 @@ functions into account.
 
 - Remove the private _varName variables where we don't need to keep a reference to them. They only waste memory.
 
-- All widget event types should have a property which returns the dynamic type of the target widget.
-
 - Hide format and other code from dtk.utils from user.
 
-- Work on menus again later after fixing up events for other widgets.
-Menus and their items can also be configured in many ways, we have to export this.
+- Work on menus again. Menus and their items can also be configured in many ways, we have to export this.
 
 - Make library const-correct.
-
-- All labels need to be called with _tclEscape
-
-- Add indeterminate mode to checkbutton.
 
 - Have to add position/size properties to each widget, but some have a specific setting for these fields.
 
@@ -198,6 +185,16 @@ Tk info (move this to an info.md file):
 
 - Percent substitution is made in ExpandPercents in tk/generic/tkBind.c
 
+- Cairo support should be added somehow.
+
+- Slider should become templated, and we should allow a limited range slider as well, e.g.:
+new Slider!int(0, 10, 2);  // from 0 to 10, stepping 2
+new Slider!int([0, 1, 2, 3, 4]);  // only allow these items.
+
+- Try to wrap more virtual events of each widget type.
+
+- Add indeterminate mode to checkbutton.
+
 Docs todo:
 - You can only send key events to the focused window. If we add support for manually creating events, we should
   make sure we focus a window, or only allow sending the keyboard event to the focused window.
@@ -218,8 +215,4 @@ event button: button1 action quadruple_click
 event button: button1 action release
 ```
 
-- Cairo support should be added somehow.
-
-- Slider should become templated, and we should allow a limited range slider as well, e.g.:
-new Slider!int(0, 10, 2);  // from 0 to 10, stepping 2
-new Slider!int([0, 1, 2, 3, 4]);  // only allow these items.
+- Add note about using (scope BaseClass event) for event handlers.

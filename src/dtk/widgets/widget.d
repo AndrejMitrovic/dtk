@@ -526,20 +526,6 @@ package:
         return varName;
     }
 
-    /**
-        Create a traced Tcl variable, which will invoke the
-        dtk callback and pass event type and the variable value
-        whenever the variable is changed.
-
-        The function returns the variable name.
-    */
-    package static string makeTracedVar(TkEventType eventType)
-    {
-        string varName = getUniqueVarName();
-        tclMakeTracedVar(varName, eventType.text, _dtkCallbackIdent);
-        return varName;
-    }
-
     /** Create a unique new callback name. */
     package static string createCallbackName()
     {
