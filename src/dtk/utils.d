@@ -124,7 +124,7 @@ string _tclEscape(T)(T input)
 {
     static if (isArray!T && !isSomeString!T)
     {
-        return format("[list %s]", map!(._tclEscape)(input).join(" "));
+        return format("[list %s]", map!(._tclEscape)(input).joiner(" "));
     }
     else
     {
