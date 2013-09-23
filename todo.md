@@ -26,8 +26,6 @@ functions into account.
 
 - Make library const-correct.
 
-- Have to add position/size properties to each widget, but some have a specific setting for these fields.
-
 - Replace these sort of calls with assertOp in the test-suite:
     assert(e.action == action, text(e.action, " != ", action));
 
@@ -54,11 +52,11 @@ tcl scripts via string imports or dynamically.
 
 - We can override the ttk::button behavior and add button release events.
 
-- Standard Widget options to port:
-    - class
-    - cursor
-    - style
-    - takefocus (can take a command)
+- Port cursors
+
+- Port styles
+
+- Port takefocus (keyboard focus traversal)
 
 - The geometry module needs to have more methods and operators, e.g. +, +=, etc.
 
