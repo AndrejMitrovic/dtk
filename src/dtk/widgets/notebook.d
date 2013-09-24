@@ -114,7 +114,7 @@ struct Tab
 
     @property Sticky sticky()
     {
-        return toSticky(tclEvalFmt("%s tab %s -sticky", _book._name, _tabName));
+        return Sticky(tclEvalFmt("%s tab %s -sticky", _book._name, _tabName));
     }
 
     @property void sticky(Sticky newSticky)

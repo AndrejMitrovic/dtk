@@ -102,27 +102,83 @@ unittest
     assertThrown!AssertError("10 20 30 40 50".toPadding);
 }
 
-///
-enum Sticky
+private bool _isStickyString(string sticky)
 {
-    none,
-    n,
-    ns,
-    nse,
-    nsew,
+    char[4] elems = ['n', 's', 'e', 'w'];
+
+    return all!(a => elems[].canFind(a))(sticky)
+           && sticky.count('n') <= 1
+           && sticky.count('s') <= 1
+           && sticky.count('e') <= 1
+           && sticky.count('w') <= 1;
 }
 
-Sticky toSticky(string sticky)
+/** Sticky type. */
+struct Sticky
 {
-    switch (sticky) with (Sticky)
+    /**
+        E.g. use:
+        -----
+        auto sticky = Sticky.nsew;
+        -----
+    */
+    static Sticky opDispatch(string sticky)()
     {
-        case "":            return none;
-        case "n":           return n;
-        case "ns":          return ns;
-        case "nse":         return nse;
-        case "nsew":        return nsew;
-        default:            assert(0, format("Unhandled sticky: '%s'", sticky));
+        static assert(sticky.length <= 4, "Can only list 4 sides.");
+        static assert(sticky._isStickyString, "All sticky options must be one of nsew");
+        return Sticky(sticky);
     }
+
+    package this(string sticky)
+    {
+        _sticky = sticky;
+    }
+
+    string toString() const
+    {
+        return _sticky;
+    }
+
+    bool opEquals(const(Sticky) rhs) const
+    {
+        if (_sticky.length != rhs._sticky.length)
+            return false;
+
+        foreach (ch; _sticky)
+        {
+            if (!rhs._sticky.canFind(ch))
+                return false;
+        }
+
+        return true;
+    }
+
+private:
+    const(string) _sticky;
+}
+
+unittest
+{
+    // too many chars
+    static assert(!__traits(compiles, Sticky.nnsew));
+
+    // non-existent chars
+    static assert(!__traits(compiles, Sticky.asdf));
+
+    // duplicate chars
+    static assert(!__traits(compiles, Sticky.nnnn));
+
+    static assert(__traits(compiles, Sticky.n));
+    static assert(__traits(compiles, Sticky.ns));
+    static assert(__traits(compiles, Sticky.nse));
+    static assert(__traits(compiles, Sticky.nsew));
+
+    assert(Sticky.ns == Sticky.ns);
+    assert(Sticky.ns == Sticky.sn);
+    assert(Sticky.sn == Sticky.ns);
+    assert(Sticky.nsew == Sticky.wesn);
+    assert(Sticky.ns != Sticky.ne);
+    assert(Sticky.ns != Sticky.nsew);
 }
 
 ///

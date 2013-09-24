@@ -13,9 +13,12 @@ ttk::button .c.ok -text Okay
 ttk::button .c.cancel -text Cancel
 
 grid .c -column 0 -row 0 -sticky nsew
+
+# Span makes widgets occupy multiple cells in the grid
 grid .c.f -column 0 -row 0 -columnspan 3 -rowspan 2 -sticky nsew
 grid .c.namelbl -column 3 -row 0 -columnspan 2 -sticky nw -padx 5
 grid .c.name -column 3 -row 1 -columnspan 2 -sticky new -pady 5 -padx 5
+
 grid .c.one -column 0 -row 3
 grid .c.two -column 1 -row 3
 grid .c.three -column 2 -row 3

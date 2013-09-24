@@ -321,32 +321,7 @@ abstract class Widget
         return tclEvalFmt("wm geometry %s", _name).toGeometry();
     }
 
-    /**
-        Signal emitted for various widget events.
-
-        $(RED Behavior note:) If the mouse cursor leaves the button area
-        too quickly, and at the same time leaves the window area, the
-        signal may be emitted with a delay of several ~100 milliseconds.
-        To make sure the signal is emmitted as soon as the cursor leaves
-        the button area, ensure that the button does not lay directly on
-        an edge of a window (e.g. add some padding space to the button).
-
-        Example:
-
-        ----
-        auto button = new Button(...);
-        button.onEvent.connect((Widget w, Event e) {  }
-        ----
-    */
-    //~ public Signal!(Widget, Event) onEvent;
-
     /** Commands: */
-
-    // todo: this should be moved to a layout module
-    public final void pack()
-    {
-        tclEvalFmt("pack %s", _name);
-    }
 
     /// Note: These properties are implemented in specific subclasses.
     @disable public string text;
