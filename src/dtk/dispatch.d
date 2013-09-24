@@ -742,6 +742,10 @@ static:
         /** Notify any listeners. */
         _notifyEvent(widget, event);
 
+        /** Notify events cannot block bubble events. */
+        if (event.handled)
+            event.handled = false;
+
         /** Handle event bubbling, this is the final dispatch stage. */
         _bubbleEvent(widget, event);
 

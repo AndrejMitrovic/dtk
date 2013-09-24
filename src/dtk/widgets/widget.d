@@ -114,7 +114,7 @@ abstract class Widget
     /**
         A list of event handlers which will be called in sequence
         after this widget's generic (onEvent) or specific
-        (e.g. onKeyboardEvent)event handler.
+        (e.g. onKeyboardEvent) event handler.
 
         You can assign $(D true) to $(D event.handled) in the
         event handler if you want to stop the event from reaching

@@ -8,6 +8,8 @@ module dtk.signals;
 
 import std.algorithm;
 import std.container;
+import std.exception;
+import std.range;
 import std.traits;
 import std.typecons;
 
@@ -338,8 +340,8 @@ struct Signal(EventClass)
         this.connect(handler);
     }
 
-    /** Add a handler to the list of handlers at the beginning of the list. */
-    void connectFirst(T)(T handler)
+    /** Add a handler to the front of the list of handlers. */
+    void connectFront(T)(T handler)
         if (isEventHandler!(T, EventClass))
     {
         auto call = HandlerType(handler);
@@ -396,7 +398,7 @@ struct Signal(EventClass)
         if (location.empty)  // afterThis not found
         {
             // always connect before manager
-            connectFirst(handler);
+            connectFront(handler);
         }
         else
         {
@@ -423,12 +425,32 @@ struct Signal(EventClass)
     void disconnect(T)(T handler)
         if (isEventHandler!(T, EventClass))
     {
-        auto call = HandlerType(handler);
-        auto pos = find(_handlers[], call);
-        enforce(!pos.empty, "Handler is not connected");
+        _disconnect(HandlerType(handler));
+    }
 
-        _handlers.stableLinearRemove(pos.take(1));
+    /** Disconnect the handler at the front of the handlers list. */
+    void disconnectFront()
+    {
+        _handlers.stableRemoveFront();
         --handlersCount;
+    }
+
+    /** Disconnect the handler at the back of the handlers list. */
+    void disconnectBack()
+    {
+        auto handlers = _handlers[];
+        if (handlers.empty)
+            return;
+
+        HandlerType handler;
+
+        while (!handlers.empty)
+        {
+            handler = handlers.front;
+            handlers.popFront();
+        }
+
+        _disconnect(handler);
     }
 
     /** Check whether a handler is in this list. */
@@ -471,6 +493,16 @@ struct Signal(EventClass)
 
 private:
     alias HandlerType = EventHandler!EventClass;
+
+    /** Remove a handler from the list of handlers. */
+    private void _disconnect(HandlerType handler)
+    {
+        auto pos = find(_handlers[], handler);
+        enforce(!pos.empty, "Handler is not connected");
+
+        _handlers.stableLinearRemove(pos.take(1));
+        --handlersCount;
+    }
 
 private:
     SList!HandlerType _handlers;

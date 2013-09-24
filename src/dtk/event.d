@@ -29,8 +29,7 @@ enum EventType
     invalid,
 
     /**
-        Any user-derived events will automatically have this event type set.
-        The $(D userType) field can be used for user-defined tagging of the event.
+        Any user-derived or 3rd-party-derived events will have this event type set.
     */
     user,
 
@@ -162,16 +161,14 @@ class Event
 
         It can optionally take a user event type tag.
     */
-    this(Widget targetWidget, long userType = 0, TimeMsec timeMsec = 0)
+    this(Widget targetWidget, TimeMsec timeMsec = 0)
     {
-        this.userType = userType;
         this(targetWidget, EventType.user, timeMsec);
     }
 
     package this(Widget targetWidget, EventType type, TimeMsec timeMsec)
     {
         this.type = type;
-        this.userType = 0;
         this.timeMsec = timeMsec;
         _targetWidget = targetWidget;
     }
@@ -199,13 +196,6 @@ class Event
         You can use the $(D toEventClass) to get the class type based on a known event type.
     */
     public const(EventType) type;
-
-    /**
-        A user-defined value which is typically usedto tag the dynamic type of the user event.
-        This field is empty when the event is not a user-event, but otherwise can equal any
-        value the user specifies.
-    */
-    public const(long) userType;
 
     /**
         Event handlers can set this field to true to  stop the event propagation mechanism.

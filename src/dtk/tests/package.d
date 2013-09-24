@@ -11,7 +11,8 @@ version(DTK_UNITTEST):
 
 private
 {
-    /* Generic events. */
+    /* Test generic events and event propagation. */
+    import dtk.tests.test_events_generic;
     import dtk.tests.test_events_destroy;
     import dtk.tests.test_events_focus;
     import dtk.tests.test_events_geometry;
@@ -19,7 +20,7 @@ private
     import dtk.tests.test_events_keyboard;
     import dtk.tests.test_events_mouse;
 
-    /* Widget behavior and events. */
+    /* Widget behavior and widget-specific events. */
     import dtk.tests.test_button;
     import dtk.tests.test_checkbutton;
     import dtk.tests.test_combobox;
