@@ -35,8 +35,8 @@ unittest
     label.text = "some note\nsome larger note 2\nsmall note";
     assert(label.text == "some note\nsome larger note 2\nsmall note");
 
-    label.anchor = Anchor.north;
-    assert(label.anchor == Anchor.north, label.anchor.text);
+    label.anchor = Anchor.n;
+    assert(label.anchor == Anchor.n, label.anchor.text);
 
     label.textWidth = 100;
     assert(label.textWidth == 100);

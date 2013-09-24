@@ -37,8 +37,8 @@ unittest
     frame.text = "My frame";
     assert(frame.text == "My frame");
 
-    frame.anchor = Anchor.north;
-    assert(frame.anchor == Anchor.north, frame.anchor.text);
+    frame.anchor = Anchor.n;
+    assert(frame.anchor == Anchor.n, frame.anchor.text);
 
     assert(frame.frameSize == Size(0, 0));
 

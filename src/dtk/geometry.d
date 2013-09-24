@@ -186,35 +186,34 @@ unittest
 ///
 enum Anchor
 {
-    invalid,  // sentinel
-
-    none,       ///
-    north,      ///
-    northEast,  ///
-    east,       ///
-    southEast,  ///
-    south,      ///
-    southWest,  ///
-    west,       ///
-    northWest,  ///
-    center,     ///
+    invalid, /// sentinel
+    none,    ///
+    n,       ///
+    ne,      ///
+    e,       ///
+    se,      ///
+    s,       ///
+    sw,      ///
+    w,       ///
+    nw,      ///
+    center,  ///
 }
 
 Anchor toAnchor(string anchor)
 {
     switch (anchor) with (Anchor)
     {
-        case "":            return none;
-        case "n":           return north;
-        case "ne":          return northEast;
-        case "e":           return east;
-        case "se":          return southEast;
-        case "s":           return south;
-        case "sw":          return southWest;
-        case "w":           return west;
-        case "nw":          return northWest;
-        case "center":      return center;
-        default:            assert(0, format("Unhandled anchor: '%s'", anchor));
+        case "":        return none;
+        case "n":       return n;
+        case "ne":      return ne;
+        case "e":       return e;
+        case "se":      return se;
+        case "s":       return s;
+        case "sw":      return sw;
+        case "w":       return w;
+        case "nw":      return nw;
+        case "center":  return center;
+        default:        assert(0, format("Unhandled anchor: '%s'", anchor));
     }
 }
 
@@ -222,17 +221,17 @@ string toString(Anchor anchor)
 {
     final switch (anchor) with (Anchor)
     {
-        case none:          return "";
-        case north:         return "n";
-        case northEast:     return "ne";
-        case east:          return "e";
-        case southEast:     return "se";
-        case south:         return "s";
-        case southWest:     return "sw";
-        case west:          return "w";
-        case northWest:     return "nw";
-        case center:        return "center";
-        case invalid:       assert(0, format("Uninitialized anchor: '%s'", anchor));
+        case none:     return "";
+        case n:        return "n";
+        case ne:       return "ne";
+        case e:        return "e";
+        case se:       return "se";
+        case s:        return "s";
+        case sw:       return "sw";
+        case w:        return "w";
+        case nw:       return "nw";
+        case center:   return "center";
+        case invalid:  assert(0, format("Uninitialized anchor: '%s'", anchor));
     }
 }
 
