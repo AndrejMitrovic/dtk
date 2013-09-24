@@ -55,10 +55,11 @@ unittest
 
     assert(book.selected is button1);
 
-    // todo: could add removeAll
     book.remove(0);
-    book.remove(0);
-    book.remove(0);
+    assert(book.tabs.length == 2);
+
+    book.removeAll();
+    assert(book.tabs.length == 0);
 
     book.add(button3, TabOptions(button3.text));
     book.insert(button2, 0, TabOptions(button2.text));

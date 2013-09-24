@@ -42,6 +42,22 @@ class RadioGroup : Widget
     */
     public Signal!RadioButtonEvent onRadioButtonEvent;
 
+    /** Add a new radio button to this radio group. */
+    RadioButton addButton(string text, string value)
+    {
+        auto button = new RadioButton(this, text, value);
+
+        if (_buttons.empty)
+            _selectButton(button);
+
+        enforce(find(_buttons[], button).empty,
+            format("Radion button '%s' is already part of this radio group", button));
+
+        _buttons.stableInsertAfter(_buttons[], button);
+
+        return button;
+    }
+
     /** Get the currently selected radio button. */
     @property RadioButton selectedButton()
     {
@@ -84,17 +100,6 @@ class RadioGroup : Widget
         _selectButton(button);
     }
 
-    private void add(RadioButton button)
-    {
-        if (_buttons.empty)
-            _selectButton(button);
-
-        enforce(find(_buttons[], button).empty,
-            format("Radion button '%s' is already part of this radio group", button));
-
-        _buttons.stableInsertAfter(_buttons[], button);
-    }
-
     private void _selectButton(RadioButton button)
     {
         tclSetVar(_varName, button.value);
@@ -123,7 +128,7 @@ private:
 class RadioButton : Widget
 {
     ///
-    this(RadioGroup radioGroup, string text, string value)
+    private this(RadioGroup radioGroup, string text, string value)
     {
         enforce(radioGroup !is null, "radioGroup argument must not be null.");
 
@@ -135,8 +140,6 @@ class RadioButton : Widget
 
         // keyboard binding
         tclEvalFmt("bind %s <Return> { %s invoke }", _name, _name);
-
-        radioGroup.add(this);
         _radioGroup = radioGroup;
     }
 

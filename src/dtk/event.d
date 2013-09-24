@@ -363,9 +363,6 @@ enum KeyMod
     /** Shift key. */
     shift = 1 << 0,
 
-    // todo: when caps lock is turned off, lock is set.
-    // we can probably tell then if it's on or off.
-
     /** Capslock key. */
     capslock = 1 << 1,
 
@@ -475,8 +472,9 @@ class MouseEvent : Event
         arbitrary when the hardware supports finer-grained
         scrolling resolution.
 
-        See also: todo: add MSDN note about wheel delta,
-        and a blog post.
+        See also the MSDN article mentioning the mouse
+        wheel delta here:
+        http://msdn.microsoft.com/en-us/library/windows/desktop/ms645617%28v=vs.85%29.aspx
     */
     const(int) wheel;
 

@@ -97,7 +97,7 @@ unittest
         ++expectedCallCount;
         genIgnoredEvent(idx);
 
-        // todo note: can't directly call double/triple-ButtonPress.
+        // note: can't directly call double/triple-ButtonPress.
         // workaround follows after this section.
         /+
         static immutable modifiers = ["", "Double-", "Triple-", "Quadruple-"];

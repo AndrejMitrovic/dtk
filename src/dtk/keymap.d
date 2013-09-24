@@ -47,23 +47,21 @@ struct KeySym
 
         // #ifdef MISCELLANY
         /*
-         * TTY Functionsenum KeySym  cleverly chosen to map to asciienum KeySym  for convenience of
-         * programmingenum KeySym  but could have been arbitrary (at the cost of lookup
+         * TTY Functions, cleverly chosen to map to ascii, for convenience of
+         * programming, but could have been arbitrary (at the cost of lookup
          * tables in client code.
          */
 
-    // todo: we've screwed up the text at the right (e.g. "spaceenum")
-
-    enum KeySym BackSpace                = 0xFF08;  /* back spaceenum KeySym  back char */
+    enum KeySym BackSpace                = 0xFF08;  /* back space, back char */
     enum KeySym Tab                      = 0xFF09;
-    enum KeySym Linefeed                 = 0xFF0A;  /* Linefeedenum KeySym  LF */
+    enum KeySym Linefeed                 = 0xFF0A;  /* Linefeed, LF */
     enum KeySym Clear                    = 0xFF0B;
-    enum KeySym Return                   = 0xFF0D;  /* Returnenum KeySym  enter */
-    enum KeySym Pause                    = 0xFF13;  /* Pauseenum KeySym  hold */
+    enum KeySym Return                   = 0xFF0D;  /* Return, enter */
+    enum KeySym Pause                    = 0xFF13;  /* Pause, hold */
     enum KeySym Scroll_Lock              = 0xFF14;
     enum KeySym Sys_Req                  = 0xFF15;
     enum KeySym Escape                   = 0xFF1B;
-    enum KeySym Delete                   = 0xFFFF;  /* Deleteenum KeySym  rubout */
+    enum KeySym Delete                   = 0xFFFF;  /* Delete, rubout */
 
 
 
@@ -73,7 +71,7 @@ struct KeySym
 
         /* Japanese keyboard support */
 
-    enum KeySym Kanji                    = 0xFF21;  /* Kanjienum KeySym  Kanji convert */
+    enum KeySym Kanji                    = 0xFF21;  /* Kanji, Kanji convert */
     enum KeySym Muhenkan                 = 0xFF22;  /* Cancel Conversion */
     enum KeySym Henkan_Mode              = 0xFF23;  /* Start/Stop Conversion */
     enum KeySym Henkan                   = 0xFF23;  /* Alias for Henkan_Mode */
@@ -94,11 +92,11 @@ struct KeySym
         /* Cursor control & motion */
 
     enum KeySym Home                    = 0xFF50;
-    enum KeySym Left                    = 0xFF51;  /* Move leftenum KeySym  left arrow */
-    enum KeySym Up                      = 0xFF52;  /* Move upenum KeySym  up arrow */
-    enum KeySym Right                   = 0xFF53;  /* Move rightenum KeySym  right arrow */
-    enum KeySym Down                    = 0xFF54;  /* Move downenum KeySym  down arrow */
-    enum KeySym Prior                   = 0xFF55;  /* Priorenum KeySym  previous */
+    enum KeySym Left                    = 0xFF51;  /* Move left, left arrow */
+    enum KeySym Up                      = 0xFF52;  /* Move up, up arrow */
+    enum KeySym Right                   = 0xFF53;  /* Move right, right arrow */
+    enum KeySym Down                    = 0xFF54;  /* Move down, down arrow */
+    enum KeySym Prior                   = 0xFF55;  /* Prior, previous */
     enum KeySym Page_Up                 = 0xFF55;
     enum KeySym Next                    = 0xFF56;  /* Next */
     enum KeySym Page_Down               = 0xFF56;
@@ -113,27 +111,27 @@ struct KeySym
 
         /* Misc Functions */
 
-    enum KeySym Select                  = 0xFF60;  /* Selectenum KeySym  mark */
+    enum KeySym Select                  = 0xFF60;  /* Select, mark */
     enum KeySym Print                   = 0xFF61;
-    enum KeySym Execute                 = 0xFF62;  /* Executeenum KeySym  runenum KeySym  do */
-    enum KeySym Insert                  = 0xFF63;  /* Insertenum KeySym  insert here */
-    enum KeySym Undo                    = 0xFF65;  /* Undoenum KeySym  oops */
-    enum KeySym Redo                    = 0xFF66;  /* redoenum KeySym  again */
+    enum KeySym Execute                 = 0xFF62;  /* Execute, run, do */
+    enum KeySym Insert                  = 0xFF63;  /* Insert, insert here */
+    enum KeySym Undo                    = 0xFF65;  /* Undo, oops */
+    enum KeySym Redo                    = 0xFF66;  /* redo, again */
     enum KeySym Menu                    = 0xFF67;
-    enum KeySym Find                    = 0xFF68;  /* Findenum KeySym  search */
-    enum KeySym Cancel                  = 0xFF69;  /* Cancelenum KeySym  stopenum KeySym  abortenum KeySym  exit */
-    enum KeySym Help                    = 0xFF6A;  /* Helpenum KeySym  ? */
+    enum KeySym Find                    = 0xFF68;  /* Find, search */
+    enum KeySym Cancel                  = 0xFF69;  /* Cancel, stop, abort, exit */
+    enum KeySym Help                    = 0xFF6A;  /* Help, ? */
     enum KeySym Break                   = 0xFF6B;
     enum KeySym Mode_switch             = 0xFF7E;  /* Character set switch */
     enum KeySym script_switch           = 0xFF7E;  /* Alias for mode_switch */
     enum KeySym Num_Lock                = 0xFF7F;
 
-        /* Keypad Functionsenum KeySym  keypad numbers cleverly chosen to map to ascii */
+        /* Keypad Functions, keypad numbers cleverly chosen to map to ascii */
 
     enum KeySym KP_Space                 = 0xFF80;  /* space */
     enum KeySym KP_Tab                   = 0xFF89;
     enum KeySym KP_Enter                 = 0xFF8D;  /* enter */
-    enum KeySym KP_F1                    = 0xFF91;  /* PF1enum KeySym  KP_Aenum KeySym  ... */
+    enum KeySym KP_F1                    = 0xFF91;  /* PF1enum KeySym  KP_A, ... */
     enum KeySym KP_F2                    = 0xFF92;
     enum KeySym KP_F3                    = 0xFF93;
     enum KeySym KP_F4                    = 0xFF94;
@@ -153,7 +151,7 @@ struct KeySym
     enum KeySym KP_Equal                 = 0xFFBD;  /* equals */
     enum KeySym KP_Multiply              = 0xFFAA;
     enum KeySym KP_Add                   = 0xFFAB;
-    enum KeySym KP_Separator             = 0xFFAC;  /* separatorenum KeySym  often comma */
+    enum KeySym KP_Separator             = 0xFFAC;  /* separator, often comma */
     enum KeySym KP_Subtract              = 0xFFAD;
     enum KeySym KP_Decimal               = 0xFFAE;
     enum KeySym KP_Divide                = 0xFFAF;

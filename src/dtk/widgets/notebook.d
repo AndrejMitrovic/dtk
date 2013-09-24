@@ -118,6 +118,14 @@ class Notebook : Widget
         tclEvalFmt("%s forget %s", _name, index);
     }
 
+    /** Remove all widgets from this notebook. */
+    void removeAll()
+    {
+        string result = tclEvalFmt("%s tabs", _name);
+        foreach (widgetName; result.splitter(" "))
+            tclEvalFmt("%s forget %s", _name, widgetName);
+    }
+
     /**
         Get the selected notebook tab.
         Note that by default the selected tab is the one which was first

@@ -123,6 +123,9 @@ Todo: See which other Tk widget types have an insert method, which would require
 
 - Check all 'todo' sections in the codebase.
 
+- Instead of returning .init for canceled operations, return a struct with an ok/cancel value
+and the field with the result. (also see RGB struct).
+
 - Check all filed bugs for Tk.
 
 - Fix up signals so removal while iterating is handled properly:
@@ -136,9 +139,6 @@ auto button = new TypedCheckButton!char("label", 'a', 'z');
 
 - The .#widget issue has been resolved, see the reply on SO:
 http://stackoverflow.com/questions/18290171/strange-result-when-calling-winfo-children-on-implicitly-generated-toplevel-wi
-
-- Instead of returning .init for canceled operations, return a struct with an ok/cancel value
-and the field with the result.
 
 - Implement an exception hierarchy, which will be kept in a single module.
 

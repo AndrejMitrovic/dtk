@@ -54,8 +54,8 @@ unittest
 
     // radio button
     auto radioGroup = new RadioGroup(testWindow);
-    auto radio1 = new RadioButton(radioGroup, "Set On", "on");
-    auto radio2 = new RadioButton(radioGroup, "Set Off", "off");
+    auto radio1 = radioGroup.addButton("Set On", "on");
+    auto radio2 = radioGroup.addButton("Set Off", "off");
 
     auto diskRed = new Image("../tests/disk_red.png");
     auto diskBlue = new Image("../tests/disk_blue.png");

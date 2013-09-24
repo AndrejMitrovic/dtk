@@ -24,11 +24,10 @@ unittest
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
-    // todo: radiogroup should take a list of radio buttons instead of passing it like this
     auto radioGroup = new RadioGroup(testWindow);
-    auto radio1 = new RadioButton(radioGroup, "Set On", "on value");
-    auto radio2 = new RadioButton(radioGroup, "Set Off", "off value");
-    auto radio3 = new RadioButton(radioGroup, "Set No", "invalid value");
+    auto radio1 = radioGroup.addButton("Set On", "on value");
+    auto radio2 = radioGroup.addButton("Set Off", "off value");
+    auto radio3 = radioGroup.addButton("Set No", "invalid value");
 
     radio1.value = "on value";
     radio2.value = "off value";

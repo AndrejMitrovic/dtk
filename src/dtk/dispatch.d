@@ -53,7 +53,6 @@ static:
         _dtkCallbackInitialized = true;
     }
 
-    // todo: add all bindings here
     private static void _initDtkInterceptor()
     {
         /** Hook keyboard" */
