@@ -149,7 +149,7 @@ unittest
 
     testWindow.setTopWindow();
 
-    // todo: this can sometimes fail, probably due to delayed
+    // note: this can sometimes fail, probably due to delayed
     // geometry changes in Tk
     assert(testWindow.isAbove(childWin));
 

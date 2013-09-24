@@ -82,12 +82,6 @@ class Button : Widget
     void push()
     {
         tclEvalFmt("ttk::button::activate %s", _name);
-
-        // todo: could also use:
-        //~ proc activateButton {w} {
-            //~ event generate $w <Button-1> -warp yes
-            //~ event generate $w <ButtonRelease-1>
-        //~ }
     }
 
     /** Get the current button style. */

@@ -27,30 +27,113 @@ enum TabState
     hidden,
 }
 
-// todo: add these to add/insert methods.
-// note: could use typeof(TabOptions.tupleof) in an argument list.
 ///
-struct TabOptions
+struct Tab
 {
-    string text;
-    Image image;
-    Compound compound;
-    int underline = -1;
-    TabState tabState;
-    Sticky sticky = Sticky.nsew;  // default is nsew
-    Padding padding;
-
-    string toTclString()
+    /** Hide this tab. */
+    void hide()
     {
-        return format("-text %s -image %s -compound %s %s -state %s -sticky %s -padding %s",
-            text._tclEscape,
-            image ? image._name : "{}",
-            compound,
-            (underline == -1) ? "" : format("-underline %s", underline),
-            tabState,
-            sticky,
-            padding.toString()._tclEscape);
+        tclEvalFmt("%s hide %s", _book._name, _tabName);
     }
+
+    /** Un-hide this tab. */
+    void show()
+    {
+        _book._add(_tabName);
+    }
+
+    /** Get the index of this tab. */
+    int index()
+    {
+        return to!int(tclEvalFmt("%s index %s", _book._name, _tabName));
+    }
+
+    /** Select this tab. */
+    void select()
+    {
+        tclEvalFmt("%s select %s", _book._name, _tabName);
+    }
+
+    /** Remove this tab. */
+    void remove()
+    {
+        _book._remove(_tabName);
+    }
+
+    @property string text()
+    {
+        return tclEvalFmt("%s tab %s -text", _book._name, _tabName);
+    }
+
+    @property void text(string newText)
+    {
+        tclEvalFmt("%s tab %s -text %s", _book._name, _tabName, newText._tclEscape);
+    }
+
+    @property Image image()
+    {
+        string imagePath = tclEvalFmt("%s tab %s -image", _book._name, _tabName);
+        return cast(Image)Widget.lookupWidgetPath(imagePath);
+    }
+
+    @property void image(Image newImage)
+    {
+        tclEvalFmt("%s tab %s -image %s", _book._name, _tabName, newImage ? newImage._name : "{}");
+    }
+
+    @property Compound compound()
+    {
+        return to!Compound(tclEvalFmt("%s tab %s -compound", _book._name, _tabName));
+    }
+
+    @property void compound(Compound newCompound)
+    {
+        tclEvalFmt("%s tab %s -compound %s", _book._name, _tabName, newCompound);
+    }
+
+    @property int underline()
+    {
+        return to!int(tclEvalFmt("%s tab %s -underline", _book._name, _tabName));
+    }
+
+    @property void underline(int newUnderline)
+    {
+        tclEvalFmt("%s tab %s -underline %s", _book._name, _tabName, newUnderline);
+    }
+
+    @property TabState tabState()
+    {
+        return to!TabState(tclEvalFmt("%s tab %s -state", _book._name, _tabName));
+    }
+
+    @property void tabState(TabState newTabState)
+    {
+        tclEvalFmt("%s tab %s -state %s", _book._name, _tabName, newTabState);
+    }
+
+    @property Sticky sticky()
+    {
+        return toSticky(tclEvalFmt("%s tab %s -sticky", _book._name, _tabName));
+    }
+
+    @property void sticky(Sticky newSticky)
+    {
+        tclEvalFmt("%s tab %s -sticky %s", _book._name, _tabName, newSticky);
+    }
+
+    @property Padding padding()
+    {
+        return toPadding(tclEvalFmt("%s tab %s -padding", _book._name, _tabName));
+    }
+
+    @property void padding(Padding newPadding)
+    {
+        tclEvalFmt("%s tab %s -padding %s", _book._name, _tabName, newPadding.toString()._tclEscape);
+    }
+
+private:
+    Notebook _book;
+    string _tabName;
 }
 
 ///
@@ -76,13 +159,6 @@ class Notebook : Widget
         tclEvalFmt("%s add %s -text %s", _name, widget._name, text._tclEscape);
     }
 
-    /** ditto. */
-    void add(Widget widget, TabOptions tabOptions)
-    {
-        _checkParent(widget);
-        tclEvalFmt("%s add %s %s", _name, widget._name, tabOptions.toTclString());
-    }
-
     /** Insert a widget to this notebook at a specific position. */
     void insert(Widget widget, int index)
     {
@@ -98,28 +174,8 @@ class Notebook : Widget
         tclEvalFmt("%s insert %s %s %s", _name, index, widget._name, opts);
     }
 
-    /** ditto. */
-    void insert(Widget widget, int index, TabOptions tabOptions)
-    {
-        _checkParent(widget);
-        tclEvalFmt("%s insert %s %s %s", _name, index, widget._name, tabOptions.toTclString());
-    }
-
-    /** Remove a widget from this notebook. */
-    void remove(Widget widget)
-    {
-        _checkParent(widget);
-        tclEvalFmt("%s forget %s", _name, widget._name);
-    }
-
-    /** ditto. */
-    void remove(int index)
-    {
-        tclEvalFmt("%s forget %s", _name, index);
-    }
-
     /** Remove all widgets from this notebook. */
-    void removeAll()
+    void clear()
     {
         string result = tclEvalFmt("%s tabs", _name);
         foreach (widgetName; result.splitter(" "))
@@ -138,85 +194,24 @@ class Notebook : Widget
         return cast(Widget)Widget.lookupWidgetPath(widgetPath);
     }
 
-    /** Set the selected notebook tab. */
-    @property void selected(Widget widget)
-    {
-        _checkParent(widget);
-        tclEvalFmt("%s select %s", _name, widget._name);
-    }
-
-    /** ditto. */
-    @property void selected(int index)
-    {
-        tclEvalFmt("%s select %s", _name, index);
-    }
-
-    /** Hide a tab. */
-    void hideTab(Widget widget)
-    {
-        _checkParent(widget);
-        tclEvalFmt("%s hide %s", _name, widget._name);
-    }
-
-    /** Un-hide a tab. */
-    void unhideTab(Widget widget)
-    {
-        _checkParent(widget);
-        this.add(widget);
-    }
-
-    /** Get the tab index of the widget. */
-    int indexOf(Widget widget)
-    {
-        _checkParent(widget);
-        return to!int(tclEvalFmt("%s index %s", _name, widget._name));
-    }
-
     /** Get the tab options for a widget. */
-    TabOptions options(Widget widget)
+    Tab opIndex(Widget widget)
     {
         _checkParent(widget);
-        return _getTabOptions(widget._name);
+        return Tab(this, widget._name);
     }
 
     /** ditto. */
-    TabOptions options(int index)
+    Tab opIndex(int index)
     {
-        return _getTabOptions(index);
+        enforce(index < length);
+        return Tab(this, to!string(index));
     }
 
-    // ident is either widget._name or an index
-    private TabOptions _getTabOptions(T)(T ident)
+    /** Get the number of tabs. */
+    @property int length()
     {
-        TabOptions options;
-
-        options.text = tclEvalFmt("%s tab %s -text", _name, ident);
-
-        string underlineRes = tclEvalFmt("%s tab %s -underline", _name, ident);
-        options.underline = underlineRes.empty ? -1 : to!int(underlineRes);
-
-        options.tabState = to!TabState(tclEvalFmt("%s tab %s -state", _name, ident));
-        options.sticky = toSticky(tclEvalFmt("%s tab %s -sticky", _name, ident));
-        options.padding = toPadding(tclEvalFmt("%s tab %s -padding", _name, ident));
-        options.compound = to!Compound(tclEvalFmt("%s tab %s -compound", _name, ident));
-
-        string imagePath = tclEvalFmt("%s tab %s -image", _name, ident);
-        options.image = cast(Image)Widget.lookupWidgetPath(imagePath);
-
-        return options;
-    }
-
-    /** Set the tab options for a widget. */
-    void setOptions(Widget widget, TabOptions options)
-    {
-        _checkParent(widget);
-        tclEvalFmt("%s tab %s %s", _name, widget._name, options.toTclString());
-    }
-
-    /** ditto. */
-    void setOptions(int index, TabOptions options)
-    {
-        tclEvalFmt("%s tab %s %s", _name, index, options.toTclString());
+        return to!int(tclEvalFmt("%s index end", _name));
     }
 
     /** Get all widgets that are part of this notebook. */
@@ -239,6 +234,17 @@ class Notebook : Widget
     }
 
 private:
+
+    // for unhiding
+    private void _add(string path)
+    {
+        tclEvalFmt("%s add %s", _name, path);
+    }
+
+    private void _remove(string pathName)
+    {
+        tclEvalFmt("%s forget %s", _name, pathName);
+    }
 
     private void _checkParent(Widget widget)
     {

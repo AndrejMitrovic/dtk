@@ -85,12 +85,6 @@ unittest
     label.compound = Compound.center;
     assert(label.compound == Compound.center);
 
-
-    TabOptions options;
-    options.text = "Cool button 1";
-    options.image = image;
-    options.compound = Compound.center;
-
     // notebook
     auto book = new Notebook(testWindow);
 
@@ -102,8 +96,8 @@ unittest
     book.add(button2, button2.text);
     book.add(button3, button3.text);
 
-    book.setOptions(button1, options);
-    assert(book.options(button1) == options, format("\n%s\n!=\n%s", book.options(button1), options));
+    book[button1].image = image;
+    assert(book[button1].image is image);
 
     book.pack();
 

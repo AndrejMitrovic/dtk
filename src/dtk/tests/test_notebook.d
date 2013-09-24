@@ -41,11 +41,11 @@ unittest
 
     assert(book.tabs.length == 3);
 
-    book.remove(button1);
-    book.remove(1);
+    book[button1].remove();
+    book[0].remove();
     assert(book.tabs.length == 1);
 
-    book.remove(0);
+    book[0].remove();
     assert(book.tabs.length == 0);
 
     book.add(button1, button1.text);
@@ -55,46 +55,58 @@ unittest
 
     assert(book.selected is button1);
 
-    book.remove(0);
+    book[0].remove();
     assert(book.tabs.length == 2);
 
-    book.removeAll();
+    book.clear();
     assert(book.tabs.length == 0);
 
-    book.add(button3, TabOptions(button3.text));
-    book.insert(button2, 0, TabOptions(button2.text));
-    book.insert(button1, 0, TabOptions(button1.text));
+    book.add(button3);
+    book.insert(button2, 0);
+    book.insert(button1, 0);
 
     assert(book.selected is button3);
 
-    book.selected = button3;
+    book[button3].select();
     assert(book.selected is button3);
 
-    book.selected = 1;
+    book[1].select();
     assert(book.selected is button2);
 
-    assert(book.indexOf(button1) == 0);
-    assert(book.indexOf(button2) == 1);
-    assert(book.indexOf(button3) == 2);
+    assert(book[button1].index == 0);
+    assert(book[button2].index == 1);
+    assert(book[button3].index == 2);
 
-    assert(book.options(button1) == book.options(0));
-    assert(book.options(button1).text == button1.text);
+    book[button1].text = "Cool button 1";
+    assert(book[button1].text == "Cool button 1");
+    assert(book[0].text == "Cool button 1");
 
-    TabOptions options;
-    options.text = "Cool button 1";
+    book[0].text = "Button 1";
+    assert(book[button1].text == "Button 1");
+    assert(book[0].text == "Button 1");
 
-    book.setOptions(button1, options);
+    book[button1].compound = Compound.center;
+    assert(book[button1].compound == Compound.center);
 
-    assert(book.options(button1) == options, format("%s != %s", book.options(button1), options));
-    assert(book.options(0) == options);
+    assert(book[button1].underline == -1);
 
-    options.text = "A button 1";
-    book.setOptions(0, options);
-    assert(book.options(button1) == options);
-    assert(book.options(0) == options);
+    book[button1].underline = 3;
+    assert(book[button1].underline == 3);
 
-    book.hideTab(button1);
-    book.unhideTab(button1);
+    book[button1].underline = -1;
+    assert(book[button1].underline == -1);
+
+    book[button1].tabState = TabState.disabled;
+    assert(book[button1].tabState == TabState.disabled);
+
+    book[button1].sticky = Sticky.nse;
+    assert(book[button1].sticky == Sticky.nse);
+
+    book[button1].padding = Padding(1, 2, 3, 4);
+    assert(book[button1].padding == Padding(1, 2, 3, 4));
+
+    book[button1].hide();
+    book[button1].show();
 
     book.pack();
 
