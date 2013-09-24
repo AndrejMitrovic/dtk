@@ -262,12 +262,14 @@ class Window : Widget
         return tclEvalFmt("wm stackorder %s isbelow %s", _name, otherWindow._name) == "1";
     }
 
-    /**
-        Return a range of all child widgets. This is a range rather than a container
-        since there is a required lookup of the mapping of a Tcl widget path name
-        into a D widget.
-    */
-    @property auto childWidgets()
+    /** Return an array of all child widgets. */
+    @property Widget[] childWidgets()
+    {
+        return walkChildWidgets.array;
+    }
+
+    /** Lazily return a range of all child widgets. */
+    @property auto walkChildWidgets()
     {
         string paths = tclEvalFmt("winfo children %s", _name);
         return map!(a => Widget.lookupWidgetPath(a))(paths.splitter);

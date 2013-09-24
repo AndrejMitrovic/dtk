@@ -113,7 +113,25 @@ private bool _isStickyString(string sticky)
            && sticky.count('w') <= 1;
 }
 
-/** Sticky type. */
+/**
+    Marks which sides a widget should stick to.
+
+    Sticky.n will jam the widget up against the top side,
+    with any extra vertical space on the bottom;
+    the widget will still be centered horizontally.
+
+    Sticky.nw (north-west) means the widget will be stuck to the
+    top left corner, with extra space on the bottom and right.
+
+    Specifying two opposite edges, such as Sticky.we (west, east)
+    means that the widget will be stretched, in this case so it is
+    stuck both to the left and right edge. So the widget will then be
+    wider than its "ideal" size. Most widgets have options that can
+    control how they are displayed if they are larger than needed.
+
+    For example, a label widget has an "anchor" option which
+    controls where the text of the label will be positioned.
+*/
 struct Sticky
 {
     @disable this();
