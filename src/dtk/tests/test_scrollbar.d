@@ -28,10 +28,23 @@ unittest
 
     auto sbar = new Scrollbar(testWindow, listbox, Orientation.vertical);
 
-    tclEvalFmt("grid %s -column 0 -row 0 -sticky nwes", listbox.getTclName());
-    tclEvalFmt("grid %s -column 1 -row 0 -sticky ns", sbar.getTclName());
-    tclEvalFmt("grid columnconfigure . 0 -weight 1");
-    tclEvalFmt("grid rowconfigure . 0 -weight 1");
+    listbox.grid
+        .setCol(0)
+        .setRow(0)
+        .setSticky(Sticky.nwes);
+
+    sbar.grid
+        .setCol(1)
+        .setRow(0)
+        .setSticky(Sticky.ns);
+
+    app.mainWindow.grid
+        .colOptions(0)
+        .setWeight(1);
+
+    app.mainWindow.grid
+        .rowOptions(0)
+        .setWeight(1);
 
     foreach (i; 0 .. 100)
         listbox.add(format("Line %s of 100", i));
