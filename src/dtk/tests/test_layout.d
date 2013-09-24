@@ -1,30 +1,39 @@
-module test_layout;
+/*
+ *             Copyright Andrej Mitrovic 2013.
+ *  Distributed under the Boost Software License, Version 1.0.
+ *     (See accompanying file LICENSE_1_0.txt or copy at
+ *           http://www.boost.org/LICENSE_1_0.txt)
+ */
+module dtk.tests.test_layout;
 
-import std.algorithm;
+version(unittest):
+version(DTK_UNITTEST):
+
+import core.thread;
+
 import std.conv;
 import std.range;
 import std.stdio;
-import std.traits;
-import std.typetuple;
+import std.string;
 
 import dtk;
 
+import dtk.tests.globals;
+
 unittest
 {
-    auto app = new App;
-
     auto testWindow = new Window(app.mainWindow, 200, 200);
 
     auto frame = new Frame(testWindow);
-    tclEvalFmt("grid %s -row 0 -column 0", frame.getTclName());
+    frame.grid.setRow(0).setCol(0);
 
     auto button1 = new Button(frame, "Ok");
     auto button2 = new Button(frame, "Cancel");
     auto button3 = new Button(frame, "Ignore");
 
-    tclEvalFmt("grid %s -row 0 -column 0", button1.getTclName());
-    tclEvalFmt("grid %s -row 0 -column 1", button2.getTclName());
-    tclEvalFmt("grid %s -row 0 -column 2", button3.getTclName());
+    button1.grid.setRow(0).setCol(0);
+    button2.grid.setRow(0).setCol(1);
+    button3.grid.setRow(0).setCol(2);
 
     button1.onButtonEvent ~= ()
     {
@@ -192,9 +201,6 @@ unittest
 
     button1.push();
 
-    app.run();
+    app.testRun();
 }
 
-void main()
-{
-}

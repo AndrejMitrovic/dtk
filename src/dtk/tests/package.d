@@ -43,6 +43,9 @@ private
     import dtk.tests.test_tree;
     import dtk.tests.test_window;
 
+    /* Test geometry layout. */
+    import dtk.tests.test_layout;
+
     /* Image. */
     import dtk.tests.test_image;
 
