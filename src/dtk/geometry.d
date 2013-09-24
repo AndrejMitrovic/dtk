@@ -116,6 +116,8 @@ private bool _isStickyString(string sticky)
 /** Sticky type. */
 struct Sticky
 {
+    @disable this();
+
     /**
         E.g. use:
         -----
