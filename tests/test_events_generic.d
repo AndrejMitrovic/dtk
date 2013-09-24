@@ -94,8 +94,8 @@ unittest
 
     /* Prepare event handlers for new tests. */
 
-    button.onMouseEvent ~= (scope MouseEvent e) { ++callCount; };
-    button.onMouseEvent ~= (scope Event e) { ++callCount; };
+    button.onMouseEvent ~= () { ++callCount; };
+    button.onMouseEvent ~= () { ++callCount; };
     button.onMouseEvent ~= () { ++callCount; };
 
     /* Test event filtering. */
@@ -121,8 +121,8 @@ unittest
 
     /* Test event notification. */
 
-    button.onNotifyEvent ~= (scope Event e) { ++callCount; };
-    button.onNotifyEvent ~= (scope Event e) { ++callCount; };
+    button.onNotifyEvent ~= () { ++callCount; };
+    button.onNotifyEvent ~= () { ++callCount; };
 
     button.onFilterEvent ~= (scope Event e) { e.handled = true; };
     genEvent();  // event handled
@@ -135,12 +135,12 @@ unittest
 
     button.onNotifyEvent.connectFront((scope Event e) { ++callCount; e.handled = true; });
     genEvent();
-    expectedCallCount += 3 + 1 /* + 2 */;  // 3 handlers and 1 notify listener which blocked the extra 2
+    expectedCallCount += 3 + 1 /* + 2 */;  // 3 handlers, 1 notify, (2 notify blocked)
     checkCallCount();
     button.onNotifyEvent.clear();
 
     /* Test event bubbling. */
-    button.parentWidget.onBubbleEvent ~= (scope Event e) { ++callCount; };
+    button.parentWidget.onBubbleEvent ~= () { ++callCount; };
     genEvent();
     expectedCallCount += 3 + 1;  // 3 handlers and 1 bubble event
     checkCallCount();
@@ -151,7 +151,7 @@ unittest
     expectedCallCount += 3 + 1 + 1;  // 3 handlers, 1 notify, 1 bubble
     checkCallCount();
 
-    button.parentWidget.parentWidget.onBubbleEvent ~= (scope Event e) { ++callCount; };
+    button.parentWidget.parentWidget.onBubbleEvent ~= () { ++callCount; };
     genEvent();
     expectedCallCount += 3 + 1 + 1 + 1;  // 3 handlers, 1 notify, 1 bubble, 1 bubble
     checkCallCount();
@@ -159,7 +159,43 @@ unittest
     // block further parents from getting bubble events
     button.parentWidget.onBubbleEvent.connectFront((scope Event e) { ++callCount; e.handled = true; });
     genEvent();
-    expectedCallCount += 3 + 1 + 1 /* + 1 */;  // 3 handlers, 1 notify, 1 bubble (1 bubble blocked)
+    expectedCallCount += 3 + 1 + 1 /* + 1 */;  // 3 handlers, 1 notify, 1 bubble, (1 bubble blocked)
+    checkCallCount();
+
+    button.parentWidget.onBubbleEvent.clear();
+    button.parentWidget.parentWidget.onBubbleEvent.clear();
+    button.onNotifyEvent.clear();
+
+    /* Test generic and specific event handling. */
+    button.onEvent ~= () { ++callCount; };
+    genEvent();
+    expectedCallCount += 1 + 3;  // 1 generic, 3 specific
+    checkCallCount();
+
+    button.parentWidget.onBubbleEvent ~= () { ++callCount; };
+    genEvent();
+    expectedCallCount += 1 + 3 + 1;  // 1 generic, 3 specific, 1 bubble
+    checkCallCount();
+    button.parentWidget.onBubbleEvent.clear();
+
+    button.onEvent.connectFront((scope Event event) { ++callCount; event.handled = true; });
+    genEvent();
+    expectedCallCount += 1 /* + 3*/;  // 1 generic, (3 specific blocked)
+    checkCallCount();
+
+    button.parentWidget.onBubbleEvent ~= () { ++callCount; };
+    genEvent();
+    expectedCallCount += 1 /* + 3 */ + 1;  // 1 generic, (3 specific blocked), 1 bubble
+    checkCallCount();
+    button.onEvent.clear();
+    button.onMouseEvent.clear();
+    button.parentWidget.onBubbleEvent.clear();
+
+    button.onEvent ~= () { ++callCount; };
+    button.onMouseEvent ~= (scope Event event) { ++callCount; event.handled = true; };
+    button.parentWidget.onBubbleEvent ~= () { ++callCount; };
+    genEvent();
+    expectedCallCount += 1 + 1 + 1;  // 1 generic, 1 specific, 1 bubble
     checkCallCount();
 
     app.run();
