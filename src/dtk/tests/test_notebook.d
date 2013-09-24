@@ -35,31 +35,42 @@ unittest
     auto button2 = new Button(book, "Button2");
     auto button3 = new Button(book, "Button3");
 
+    assert(book.walkTabs.empty);
+
     book.add(button1, button1.text);
     book.add(button3, button3.text);
     book.insert(button2, 1, button2.text);
 
-    assert(book.tabs.length == 3);
+    assert(!book.walkTabs.empty);
+
+    size_t idx;
+    foreach (tab; book.walkTabs)
+    {
+        assert(tab == book[idx], text(tab, " != ", book[idx]));
+        idx++;
+    }
+
+    assert(book.length == 3);
 
     book[button1].remove();
     book[0].remove();
-    assert(book.tabs.length == 1);
+    assert(book.length == 1);
 
     book[0].remove();
-    assert(book.tabs.length == 0);
+    assert(book.length == 0);
 
     book.add(button1, button1.text);
     book.add(button2, button2.text);
     book.add(button3, button3.text);
-    assert(book.tabs.length == 3);
+    assert(book.length == 3);
 
     assert(book.selected is button1);
 
     book[0].remove();
-    assert(book.tabs.length == 2);
+    assert(book.length == 2);
 
     book.clear();
-    assert(book.tabs.length == 0);
+    assert(book.length == 0);
 
     book.add(button3);
     book.insert(button2, 0);

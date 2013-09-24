@@ -6,6 +6,7 @@
  */
 module dtk.widgets.notebook;
 
+import std.algorithm;
 import std.array;
 import std.exception;
 import std.range;
@@ -194,7 +195,7 @@ class Notebook : Widget
         return cast(Widget)Widget.lookupWidgetPath(widgetPath);
     }
 
-    /** Get the tab options for a widget. */
+    /** Read or manipulate the tab options for a widget. */
     Tab opIndex(Widget widget)
     {
         _checkParent(widget);
@@ -204,8 +205,21 @@ class Notebook : Widget
     /** ditto. */
     Tab opIndex(int index)
     {
-        enforce(index < length);
-        return Tab(this, to!string(index));
+        _checkIndex(index);
+
+        /*
+            Note: Tk notebook operations work with both indexes and path names,
+            however returning a Tab with an index instead of a path can lead to
+            issues if the user manipulates the tab after a new tab was inserted
+            before it - the index of the old tab will become invalid.
+        */
+        foreach (tab; walkTabs)
+        {
+            if (tab.index == index)
+                return tab;
+        }
+
+        assert(0);
     }
 
     /** Get the number of tabs. */
@@ -214,23 +228,17 @@ class Notebook : Widget
         return to!int(tclEvalFmt("%s index end", _name));
     }
 
-    /** Get all widgets that are part of this notebook. */
-    @property Widget[] tabs()
+    /** Get all tabs that are part of this notebook. */
+    @property Tab[] tabs()
+    {
+        return walkTabs.array;
+    }
+
+    /** Lazily get all tabs that are part of this notebook as a range. */
+    @property auto walkTabs()
     {
         string result = tclEvalFmt("%s tabs", _name);
-        if (result.empty)
-            return null;
-
-        Appender!(Widget[]) tabs;
-
-        foreach (widgetPath; result.splitter(" "))
-        {
-            auto widget = cast(Widget)Widget.lookupWidgetPath(widgetPath);
-            if (widget !is null)
-                tabs ~= widget;
-        }
-
-        return tabs.data;
+        return map!(a => Tab(this, a))(result.splitter(" "));
     }
 
 private:
@@ -250,5 +258,10 @@ private:
     {
         enforce(widget.parentWidget is this,
             format("The parent widget of the widget argument must be this notebook widget."));
+    }
+
+    private void _checkIndex(int index)
+    {
+        enforce(index < length, format("Index %s is out of bounds for this notebook", index));
     }
 }

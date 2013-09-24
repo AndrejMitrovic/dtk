@@ -1,11 +1,5 @@
-set var1 5
-set var2 3
-#~ set var3 = $var1 - $var2; # error line
-
-#~ puts $var3
-
-set var3 [expr {$var1 - $var2}]
-puts $var3
-
-set newDiff [::tcl::mathfunc::max $var3 100]
-puts $newDiff
+ttk::notebook .c.note
+ttk::frame .c.note.f1; # first page, which would get widgets gridded into it
+ttk::frame .c.note.f2; # second page
+.c.note add .c.note.f1 -text "One"
+.c.note add .c.note.f2 -text "Two"
