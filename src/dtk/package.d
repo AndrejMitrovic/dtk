@@ -10,6 +10,7 @@ public
 {
     import dtk.app;
     import dtk.color;
+    import dtk.command;
     import dtk.event;
     import dtk.font;
     import dtk.geometry;
@@ -19,7 +20,6 @@ public
     import dtk.layout;
     import dtk.loader;
     import dtk.types;
-
     import dtk.widgets;
 }
 

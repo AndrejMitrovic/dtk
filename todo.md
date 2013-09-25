@@ -3,6 +3,9 @@ Improving API for first gui example.
 
 Todo:
 
+- Some info on using OpenGL in Tk:
+http://stackoverflow.com/questions/17367089/non-top-level-opengl-widget-in-tkinter
+
 - Instead of using fake widgets, we should use a frame type as the Tk type.
 
 - Replace this:

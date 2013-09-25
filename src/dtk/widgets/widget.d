@@ -35,6 +35,7 @@ import dtk.widgets.button;
 import dtk.widgets.entry;
 import dtk.widgets.options;
 import dtk.widgets.scrollbar;
+import dtk.widgets.window;
 
 /** The main class of all Dtk widgets. */
 abstract class Widget
@@ -480,6 +481,18 @@ abstract class Widget
         return cast(Widget)Widget.lookupWidgetPath(widgetPath);
     }
 
+    /**
+        Return the root Window this widget belongs to.
+
+        The window may or may not be the direct parent of this widget,
+        you can use $(D rootWindow is parentWidget) to check this.
+    */
+    public final @property Window rootWindow()
+    {
+        string widgetPath = tclEvalFmt("winfo toplevel %s", _name);
+        return cast(Window)Widget.lookupWidgetPath(widgetPath);
+    }
+
     override string toString() const
     {
         return format("%s(%s)", getClassName(this), _name);
@@ -621,6 +634,7 @@ package:
     {
         _threadID = cast(size_t)cast(void*)Thread.getThis;
         _dtkScratchArrVar = makeVar();
+        _dtkDummyWidget = format("%s_%s", _fakeWidgetPrefix, getUniqueVarName());
     }
 
     /** Unique Thread ID. Needed to create thread-global unique identifiers for Tcl/Tk. */
@@ -631,6 +645,9 @@ package:
         we first assign the values to a Tcl var and then read from it using tclGetVar.
     */
     static string _dtkScratchArrVar;
+
+    /** API-only: Used to unfocus widgets during a 'tk busy' command */
+    static public string _dtkDummyWidget;
 
     /**
         API-only: public due to package disallowing access to super packages.
