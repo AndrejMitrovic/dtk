@@ -25,7 +25,9 @@ rem
 set includes=-I%cd%
 rem set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_EVAL -version=DTK_LOG_TESTS
 set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_TESTS
-set flags=%includes% -g %debug_versions%
+set import_libs=comctl32.lib ole32.lib
+set flags=%includes% -g %debug_versions% %import_libs%
+
 
 rem Set this to enforce building with unittests even for the static library.
 rem Only use this during DTK development.

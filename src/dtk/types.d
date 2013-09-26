@@ -167,7 +167,6 @@ enum TCL_TIMER_EVENTS   = (1<<4);
 enum TCL_IDLE_EVENTS    = (1<<5);  /* WAS 0x10 ???? */
 enum TCL_ALL_EVENTS     = (~TCL_DONT_WAIT);
 
-
 /// The type of the $(D timeMsec) field in an event.
 public alias TimeMsec = c_ulong;
 

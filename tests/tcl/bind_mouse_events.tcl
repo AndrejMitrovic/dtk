@@ -1,32 +1,35 @@
 package require Tk
 
-bind . <ButtonPress-1>           { puts "mouse press   press           button1 %s %W %t" }
-bind . <Double-ButtonPress-1>    { puts "mouse press   release         button1 %s %W %t" }
-bind . <Triple-ButtonPress-1>    { puts "mouse press   triple_click    button1 %s %W %t" }
-bind . <Quadruple-ButtonPress-1> { puts "mouse press   quadruple_click button1 %s %W %t" }
-bind . <ButtonRelease-1>         { puts "mouse release                 button1 %s %W %t" }
-bind . <ButtonPress-2>           { puts "mouse press   press           button2 %s %W %t" }
-bind . <Double-ButtonPress-2>    { puts "mouse press   release         button2 %s %W %t" }
-bind . <Triple-ButtonPress-2>    { puts "mouse press   triple_click    button2 %s %W %t" }
-bind . <Quadruple-ButtonPress-2> { puts "mouse press   quadruple_click button2 %s %W %t" }
-bind . <ButtonRelease-2>         { puts "mouse release                 button2 %s %W %t" }
-bind . <ButtonPress-3>           { puts "mouse press   press           button3 %s %W %t" }
-bind . <Double-ButtonPress-3>    { puts "mouse press   release         button3 %s %W %t" }
-bind . <Triple-ButtonPress-3>    { puts "mouse press   triple_click    button3 %s %W %t" }
-bind . <Quadruple-ButtonPress-3> { puts "mouse press   quadruple_click button3 %s %W %t" }
-bind . <ButtonRelease-3>         { puts "mouse release                 button3 %s %W %t" }
-bind . <ButtonPress-4>           { puts "mouse press   press           button4 %s %W %t" }
-bind . <Double-ButtonPress-4>    { puts "mouse press   release         button4 %s %W %t" }
-bind . <Triple-ButtonPress-4>    { puts "mouse press   triple_click    button4 %s %W %t" }
-bind . <Quadruple-ButtonPress-4> { puts "mouse press   quadruple_click button4 %s %W %t" }
-bind . <ButtonRelease-4>         { puts "mouse release                 button4 %s %W %t" }
-bind . <ButtonPress-5>           { puts "mouse press   press           button5 %s %W %t" }
-bind . <Double-ButtonPress-5>    { puts "mouse press   release         button5 %s %W %t" }
-bind . <Triple-ButtonPress-5>    { puts "mouse press   triple_click    button5 %s %W %t" }
-bind . <Quadruple-ButtonPress-5> { puts "mouse press   quadruple_click button5 %s %W %t" }
-bind . <ButtonRelease-5>         { puts "mouse release                 button5 %s %W %t" }
-bind . <Motion>                  { puts "mouse motion                  mouse_button %s %W %t" }
-bind . <MouseWheel>              { puts "mouse wheel                   mouse_wheel_delta %b %D %s %W %x %y %X %Y %t" }
+bind . <ButtonPress-1> { puts "Bind 1" }
+bind . <ButtonPress-1> {+ puts "bind2" }
+
+#~ bind . <ButtonPress-1>           { puts "mouse press   press           button1 %s %W %t" }
+#~ bind . <Double-ButtonPress-1>    { puts "mouse press   release         button1 %s %W %t" }
+#~ bind . <Triple-ButtonPress-1>    { puts "mouse press   triple_click    button1 %s %W %t" }
+#~ bind . <Quadruple-ButtonPress-1> { puts "mouse press   quadruple_click button1 %s %W %t" }
+#~ bind . <ButtonRelease-1>         { puts "mouse release                 button1 %s %W %t" }
+#~ bind . <ButtonPress-2>           { puts "mouse press   press           button2 %s %W %t" }
+#~ bind . <Double-ButtonPress-2>    { puts "mouse press   release         button2 %s %W %t" }
+#~ bind . <Triple-ButtonPress-2>    { puts "mouse press   triple_click    button2 %s %W %t" }
+#~ bind . <Quadruple-ButtonPress-2> { puts "mouse press   quadruple_click button2 %s %W %t" }
+#~ bind . <ButtonRelease-2>         { puts "mouse release                 button2 %s %W %t" }
+#~ bind . <ButtonPress-3>           { puts "mouse press   press           button3 %s %W %t" }
+#~ bind . <Double-ButtonPress-3>    { puts "mouse press   release         button3 %s %W %t" }
+#~ bind . <Triple-ButtonPress-3>    { puts "mouse press   triple_click    button3 %s %W %t" }
+#~ bind . <Quadruple-ButtonPress-3> { puts "mouse press   quadruple_click button3 %s %W %t" }
+#~ bind . <ButtonRelease-3>         { puts "mouse release                 button3 %s %W %t" }
+#~ bind . <ButtonPress-4>           { puts "mouse press   press           button4 %s %W %t" }
+#~ bind . <Double-ButtonPress-4>    { puts "mouse press   release         button4 %s %W %t" }
+#~ bind . <Triple-ButtonPress-4>    { puts "mouse press   triple_click    button4 %s %W %t" }
+#~ bind . <Quadruple-ButtonPress-4> { puts "mouse press   quadruple_click button4 %s %W %t" }
+#~ bind . <ButtonRelease-4>         { puts "mouse release                 button4 %s %W %t" }
+#~ bind . <ButtonPress-5>           { puts "mouse press   press           button5 %s %W %t" }
+#~ bind . <Double-ButtonPress-5>    { puts "mouse press   release         button5 %s %W %t" }
+#~ bind . <Triple-ButtonPress-5>    { puts "mouse press   triple_click    button5 %s %W %t" }
+#~ bind . <Quadruple-ButtonPress-5> { puts "mouse press   quadruple_click button5 %s %W %t" }
+#~ bind . <ButtonRelease-5>         { puts "mouse release                 button5 %s %W %t" }
+#~ bind . <Motion>                  { puts "mouse motion                  mouse_button %s %W %t" }
+#~ bind . <MouseWheel>              { puts "mouse wheel                   mouse_wheel_delta %b %D %s %W %x %y %X %Y %t" }
 
 #~ tcl_eval: bind dtk::intercept_tag <KeyPress> { dtk::callback_handler keyboard press %N %A %s %W %x %y %X %Y %t } -- result:
 #~ tcl_eval: bind dtk::intercept_tag <KeyRelease> { dtk::callback_handler keyboard release %N %A %s %W %x %y %X %Y %t } -- result:

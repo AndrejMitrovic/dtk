@@ -195,6 +195,11 @@ abstract class Widget
     public Signal!FocusEvent onFocusEvent;
 
     /**
+        The widget is a target of a drag and drop event.
+    */
+    public Signal!DragDropEvent onDragDropEvent;
+
+    /**
         Handle the event when a widget is destroyed.
 
         $(B Note:) You cannot stop a widget from being destroyed,
@@ -697,6 +702,12 @@ package:
         since any such call will fail.
     */
     private bool _isFakeWidget;
+
+    /** API-only: Is this widget registered for drag & drop operations. */
+    public bool _isDragDropRegistered;
+
+    /** API-only: Release resources for this widget, e.g. COM objects. */
+    public Signal!DestroyEvent _onAPIDestroyEvent;
 }
 
 /** The dynamic type of a built-in Widget object. */

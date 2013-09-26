@@ -11,6 +11,7 @@ public
     import dtk.app;
     import dtk.color;
     import dtk.command;
+    import dtk.dragdrop;
     import dtk.event;
     import dtk.font;
     import dtk.geometry;
