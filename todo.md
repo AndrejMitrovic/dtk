@@ -1,7 +1,8 @@
-Now working on:
-Improving API for first gui example.
-
 Todo:
+
+- Maybe add a rootMenu call to menus.
+
+- Add rootTree as well.
 
 - Drag and Drop:
 

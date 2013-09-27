@@ -6,6 +6,9 @@
  */
 module dtk.dragdrop;
 
+import core.atomic;
+import core.memory;
+
 import std.exception;
 import std.stdio;
 import std.string;
@@ -47,27 +50,39 @@ struct DragDrop
     /** Check whether this widget has been registered for the drag & drop operations. */
     bool isRegistered()
     {
-        return _widget._isDragDropRegistered;
+        return _widget._dropTarget !is null;
     }
 
     /** Register the widget to accept drag & drop operations. */
     void register()
     {
-        _dropTarget = new DropTarget(_widget);
-        _register(_hwnd, _dropTarget);
+        if (_widget._dropTarget !is null)
+            return;
 
-        // widget must be unregistered before HWND becomes invalid.
+        version (DTK_LOG_COM)
+            stderr.writefln("+ Registering   D&D: %X", _hwnd);
+
+        _widget._dropTarget = new DropTarget(_widget);
+        scope (failure)
+            _widget._dropTarget = null;
+
+        _register(_hwnd, _widget._dropTarget);
+
+        // widget must be unregistered before Tk's HWND becomes invalid.
         _widget._onAPIDestroyEvent ~= &unregister;
-        //~ _widget.onDestroyEvent ~= &unregister;
-        _widget._isDragDropRegistered = true;
     }
 
     /** Unregister the widget. */
     void unregister()
     {
-        // printf("Unregistering %d\n", _hwnd);
+        if (_widget._dropTarget is null)
+            return;
+
+        version (DTK_LOG_COM)
+            stderr.writefln("- Unregistering D&D: %X", _hwnd);
+
         _unregister(_hwnd);
-        _widget._isDragDropRegistered = false;
+        _widget._dropTarget = null;
     }
 
     private static void _register(HWND hwnd, DropTarget dropTarget)
@@ -84,48 +99,46 @@ struct DragDrop
             format("Could not unregister handle '%s'. Error code: %s", hwnd, res));
     }
 
-    static this()
-    {
-        OleInitialize(null);
-    }
-
-    static ~this()
-    {
-        OleUninitialize();
-    }
-
 private:
-    DropTarget _dropTarget;
     Widget _widget;
     HWND _hwnd;
 }
 
 class DropTarget : IDropTarget
 {
+    /**
+        Note: See Issue 4092, COM objects are allocated in the
+        C heap instead of the GC:
+        http://d.puremagic.com/issues/show_bug.cgi?id=4092
+
+        Workaround: Implement class allocator.
+    */
+    new(size_t size)
+    {
+        return GC.malloc(size, GC.BlkAttr.FINALIZE);
+    }
+
     this(Widget widget)
     {
         _widget = widget;
-        _refCount = 1;
     }
 
     ULONG AddRef()
     {
-        synchronized
-        {
-            ++_refCount;
-            return _refCount;
-        }
+        LONG lRef = atomicOp!"+="(_refCount, 1);
+        if (lRef == 1)
+            GC.addRoot(cast(void*)this);
+
+        return lRef;
     }
 
     ULONG Release()
     {
-        synchronized
-        {
-            if (_refCount)
-                --_refCount;
+        LONG lRef = atomicOp!"-="(_refCount, 1);
+        if (lRef == 0)
+            GC.removeRoot(cast(void*)this);
 
-            return _refCount;
-        }
+        return cast(ULONG)lRef;
     }
 
     HRESULT QueryInterface(IID* riid, void** ppv)
@@ -228,7 +241,9 @@ private:
         TimeMsec timeMsec = getTclTime();
 
         auto event = scoped!DragDropEvent(_widget, action, position, keyMod, timeMsec);
-        Dispatch._dispatchDragDropEvent(_widget, event);
+
+        // todo: Once SendEvent/PostEvent are implemented we should call those functions.
+        Dispatch._dispatchInternalEvent(_widget, event);
 
         if (event.dropAccepted)
             *pdwEffect = DROPEFFECT.DROPEFFECT_COPY;
@@ -245,7 +260,7 @@ private:
         TimeMsec timeMsec = getTclTime();
 
         auto event = scoped!DragDropEvent(_widget, DragDropAction.leave, Point.init, KeyMod.init, timeMsec);
-        Dispatch._dispatchDragDropEvent(_widget, event);
+        Dispatch._dispatchInternalEvent(_widget, event);
 
         return S_OK;
     }

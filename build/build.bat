@@ -16,11 +16,16 @@ rem DTK_UNITTEST
 rem     - Enable unittests.
 rem
 rem DTK_LOG_EVAL
-rem     - Logs all Tcl eval commands.
+rem     - Logs Tcl eval commands.
+rem
+rem DTK_LOG_EVENT_HANDLER
+rem     - Logs event handler calls.
+rem
+rem DTK_LOG_COM
+rem     - Logs COM calls.
 rem
 rem DTK_LOG_TESTS
-rem     - Logs all log/logf calls, for use with unittesting.
-rem
+rem     - Logs log/logf calls, for use with unittesting.
 
 set includes=-I%cd%
 rem set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_EVAL -version=DTK_LOG_TESTS

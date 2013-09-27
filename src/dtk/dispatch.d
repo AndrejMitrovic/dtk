@@ -723,7 +723,7 @@ static:
     }
 
     // note: special-case. todo: use the SendEvent or PostEvent API once implemented.
-    package static void _dispatchDragDropEvent(Widget widget, scope Event event)
+    package static void _dispatchInternalEvent(Widget widget, scope Event event)
     {
         _dispatchEvent(widget, event);
     }

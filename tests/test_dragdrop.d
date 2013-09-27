@@ -24,20 +24,24 @@ unittest
     button1.onDragDropEvent ~= (scope DragDropEvent event)
     {
         event.dropAccepted = true;
-        //~ stderr.writefln("- Control: %s", event.keyMod & KeyMod.control);
-        //~ stderr.writefln("- Alt: %s", event.keyMod & KeyMod.alt);
-        //~ stderr.writefln("- Shift: %s", event.keyMod & KeyMod.shift);
-        //~ stderr.writefln("- LButton: %s", event.keyMod & KeyMod.mouse_left);
-        //~ stderr.writefln("- MButton: %s", event.keyMod & KeyMod.mouse_middle);
-        //~ stderr.writefln("- RButton: %s", event.keyMod & KeyMod.mouse_right);
 
-        //~ stderr.writefln("Button 1 position: %s", button1.position);
+        // version = PRINT_MODS;
+        version (PRINT_MODS)
+        {
+            stderr.writefln("- Control: %s", event.keyMod & KeyMod.control);
+            stderr.writefln("- Alt: %s", event.keyMod & KeyMod.alt);
+            stderr.writefln("- Shift: %s", event.keyMod & KeyMod.shift);
+            stderr.writefln("- LButton: %s", event.keyMod & KeyMod.mouse_left);
+            stderr.writefln("- MButton: %s", event.keyMod & KeyMod.mouse_middle);
+            stderr.writefln("- RButton: %s", event.keyMod & KeyMod.mouse_right);
+        }
+
         stderr.writefln("Button 1 drag drop event: %s", event.action);
     };
 
     button2.onDragDropEvent ~= (scope DragDropEvent event)
     {
-        //~ button1.dragDrop.unregister();
+        // button1.dragDrop.unregister();
         stderr.writefln("Button 2 drag drop event: %s", event.action);
     };
 

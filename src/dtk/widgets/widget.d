@@ -23,6 +23,7 @@ alias splitter = std.algorithm.splitter;
 
 import dtk.app;
 import dtk.dispatch;
+import dtk.dragdrop;
 import dtk.event;
 import dtk.geometry;
 import dtk.keymap;
@@ -634,9 +635,9 @@ package:
 
 package:
 
-    // invoked per-thread: store a unique thread identifier.
     static this()
     {
+        // invoked per-thread: store a unique thread identifier.
         _threadID = cast(size_t)cast(void*)Thread.getThis;
         _dtkScratchArrVar = makeVar();
         _dtkDummyWidget = format("%s_%s", _fakeWidgetPrefix, getUniqueVarName());
@@ -703,8 +704,8 @@ package:
     */
     private bool _isFakeWidget;
 
-    /** API-only: Is this widget registered for drag & drop operations. */
-    public bool _isDragDropRegistered;
+    /** API-only: Set when the widget is registered for drag & drop operations. */
+    public DropTarget _dropTarget;
 
     /** API-only: Release resources for this widget, e.g. COM objects. */
     public Signal!DestroyEvent _onAPIDestroyEvent;
