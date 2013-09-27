@@ -6,10 +6,6 @@
  */
 module dtk.dragdrop;
 
-import core.atomic;
-import core.memory;
-import core.stdc.string;
-
 import std.exception;
 import std.stdio;
 import std.string;
@@ -21,17 +17,15 @@ import dtk.geometry;
 import dtk.interpreter;
 import dtk.types;
 
+import dtk.platform.win32.com;
+
 import dtk.widgets.widget;
 import dtk.widgets.window;
 
-import win32.commctrl;
 import win32.objidl;
 import win32.ole2;
-import win32.uuid;
 import win32.windef;
 import win32.winuser;
-import win32.wingdi;
-import win32.wingdi;
 
 auto dragDrop(Widget widget)
 {
@@ -61,7 +55,7 @@ struct DragDrop
             return;
 
         version (DTK_LOG_COM)
-            stderr.writefln("+ Registering   D&D: %X", _hwnd);
+            stderr.writefln("+ Registering d&d  : %X", _hwnd);
 
         _widget._dropTarget = newCom!DropTarget(_widget);
         scope (failure)
@@ -80,7 +74,7 @@ struct DragDrop
             return;
 
         version (DTK_LOG_COM)
-            stderr.writefln("- Unregistering D&D: %X", _hwnd);
+            stderr.writefln("- Unregistering d&d: %X", _hwnd);
 
         _unregister(_hwnd);
         _widget._dropTarget = null;
@@ -119,18 +113,6 @@ class DropTarget : ComObject, IDropTarget
             *ppv = cast(void*)this;
             AddRef();
             return S_OK;
-        }
-        else
-        if (*riid == IID_IUnknown)
-        {
-            *ppv = cast(void*)this;
-            AddRef();
-            return S_OK;
-        }
-        else
-        {
-            *ppv = null;
-            return E_NOINTERFACE;
         }
 
         return super.QueryInterface(riid, ppv);

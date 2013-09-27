@@ -6,20 +6,12 @@
  */
 module dtk.platform.win32.com;
 
+import core.atomic;
+import core.memory;
+import core.stdc.string;
 
-extern(C) void* gc_malloc(size_t sz, uint ba = 0, const TypeInfo ti=null);
-
-C _newCom(C, T...)(T arguments)
-{
-	// avoid special casing in _d_newclass, where COM objects are not garbage collected
-	size_t size = C.classinfo.init.length;
-	void* p = gc_malloc(size, 1, C.classinfo); // BlkAttr.FINALIZE
-	memcpy(p, C.classinfo.init.ptr, size);
-	C c = cast(C) p;
-	static if(arguments.length || __traits(compiles,c.__ctor(arguments)))
-		c.__ctor(arguments);
-	return c;
-}
+import win32.ole2;
+import win32.windef;
 
 C newCom(C, T...)(T arguments) if(is(C : ComObject) && T.length > 0)
 {
@@ -31,6 +23,21 @@ C newCom(C, T...)(T arguments) if(is(C : ComObject) && T.length > 0)
 	return _newCom!C();
 }
 
+private C _newCom(C, T...)(T arguments)
+{
+	// avoid special casing in _d_newclass, where COM objects are not garbage collected
+	size_t size = C.classinfo.init.length;
+    void* p = GC.malloc(size, GC.BlkAttr.FINALIZE);
+
+	memcpy(p, C.classinfo.init.ptr, size);
+	C c = cast(C)p;
+
+	static if(arguments.length || __traits(compiles,c.__ctor(arguments)))
+		c.__ctor(arguments);
+
+	return c;
+}
+
 class ComObject : IUnknown
 {
     /**
@@ -40,12 +47,12 @@ class ComObject : IUnknown
     */
 	@disable new(size_t size)
 	{
-		assert(false); // should not be called because we don't have enough type info
-		void* p = gc_malloc(size, 1, typeid(ComObject)); // BlkAttr.FINALIZE
-		return p;
+        // should not be called because we don't have enough type info
+		assert(false);
+        // GC.malloc(size, GC.BlkAttr.FINALIZE);
 	}
 
-    override HRESULT QueryInterface(in IID* riid, void** ppv)
+    HRESULT QueryInterface(IID* riid, void** ppv)
 	{
 		if (*riid == IID_IUnknown)
 		{
@@ -53,36 +60,31 @@ class ComObject : IUnknown
 			AddRef();
 			return S_OK;
 		}
-		*ppv = null;
-		return E_NOINTERFACE;
+
+        *ppv = null;
+        return E_NOINTERFACE;
 	}
 
-	override ULONG AddRef()
-	{
-		LONG lRef = InterlockedIncrement(&count);
-		if(lRef == 1)
-		{
-			void* vthis = cast(void*) this;
-			GC.addRoot(vthis);
-		}
-		return lRef;
-	}
+    ULONG AddRef()
+    {
+        LONG lRef = atomicOp!"+="(_refCount, 1);
+        if (lRef == 1)
+            GC.addRoot(cast(void*)this);
 
-	override ULONG Release()
-	{
-		LONG lRef = InterlockedDecrement(&count);
-		if (lRef == 0)
-		{
-			void* vthis = cast(void*) this;
-			GC.removeRoot(vthis);
-			return 0;
-		}
-		return cast(ULONG)lRef;
-	}
+        return lRef;
+    }
+
+    ULONG Release()
+    {
+        LONG lRef = atomicOp!"-="(_refCount, 1);
+        if (lRef == 0)
+            GC.removeRoot(cast(void*)this);
+
+        return cast(ULONG)lRef;
+    }
 
 	shared(LONG) _refCount;
 }
-
 
 /+ class ComToDdataObject : IDataObject
 {
