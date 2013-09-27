@@ -1,5 +1,8 @@
 Todo:
 
+- Move widget-specific events to the widget modules.
+This should avoid having a huge module and cyclic imports.
+
 - Maybe add a rootMenu call to menus.
 
 - Add rootTree as well.

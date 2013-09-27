@@ -4,6 +4,8 @@ setlocal EnableDelayedExpansion
 set thisPath=%~dp0
 set dtkRoot=%thisPath%\..\..
 set binPath=%thisPath%\..\bin
+set srcDir=%dtkRoot%\src
+set libDir=%dtkRoot%\lib
 cd %thisPath%\..
 
 set import_libs=comctl32.lib ole32.lib
@@ -11,7 +13,7 @@ set import_libs=comctl32.lib ole32.lib
 rem set versions=-version=DTK_LOG_EVAL
 rem set versions=-version=DTK_LOG_EVENTS
 rem set versions=-version=DTK_LOG_EVAL -version=DTK_LOG_EVENTS
-set versions=-version=DTK_LOG_COM
+rem set versions=-version=DTK_LOG_COM
 
 if [%1]==[] goto :error
 if [%2]==[] goto :error
@@ -26,4 +28,4 @@ goto :eof
 set FileName=%1
 set SourceFile=%2
 
-rdmd -w -g -L/SUBSYSTEM:WINDOWS:5.01 %versions% -unittest -I%dtkRoot%\src %import_libs% -of%binPath%\%FileName%.exe %SourceFile%
+rdmd -w -g -L/SUBSYSTEM:WINDOWS:5.01 %versions% -unittest -I%srcDir% -I%libDir% %import_libs% -of%binPath%\%FileName%.exe %SourceFile%
