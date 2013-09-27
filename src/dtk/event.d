@@ -130,31 +130,6 @@ enum EventTravel
     // direct,  // todo
 }
 
-// todo: implement later
-/+ // All standard event types are listed here, in the same order as EventType.
-private alias EventClassMap = TypeTuple!(Event, Event, MouseEvent, KeyboardEvent);
-
-// todo: add toEventType.
-/**
-    Return the Event class type that matches the EventType specified.
-    If the event type is a user event, the $(D Event) base class is returned.
-*/
-template toEventClass(EventType type)
-{
-    static assert(type != EventType.invalid,
-        "Cannot retrieve event class type from uninitialized event type.");
-
-    alias toEventClass = EventClassMap[cast(size_t)type];
-}
-
-///
-unittest
-{
-    static assert(is(toEventClass!(EventType.user) == Event));
-    static assert(is(toEventClass!(EventType.mouse) == MouseEvent));
-    static assert(is(toEventClass!(EventType.keyboard) == KeyboardEvent));
-} +/
-
 /** The root class of all event types. */
 class Event
 {

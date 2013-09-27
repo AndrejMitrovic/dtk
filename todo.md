@@ -1,5 +1,7 @@
 Todo:
 
+- visuald/visuald/dproject.d has Drop methods which accept drag and drop data.
+
 - Move widget-specific events to the widget modules.
 This should avoid having a huge module and cyclic imports.
 
