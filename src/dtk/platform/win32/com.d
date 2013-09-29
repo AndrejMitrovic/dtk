@@ -48,7 +48,7 @@ class ComObject : IUnknown
 	@disable new(size_t size)
 	{
         // should not be called because we don't have enough type info
-		assert(false);
+		assert(0);
         // GC.malloc(size, GC.BlkAttr.FINALIZE);
 	}
 
@@ -86,7 +86,9 @@ class ComObject : IUnknown
 	shared(LONG) _refCount;
 }
 
-/+ class ComToDdataObject : IDataObject
+enum todo = q{
+
+class ComToDdataObject : IDataObject
 {
 	this(dfl.internal.wincom.IDataObject dataObj)
 	{
@@ -311,4 +313,5 @@ class ComObject : IUnknown
 
 	private:
 	dfl.internal.wincom.IDataObject dataObj;
-} +/
+}
+};

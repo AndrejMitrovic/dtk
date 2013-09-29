@@ -703,6 +703,7 @@ enum DragDropAction
 }
 
 ///
+// todo: drag source, and drop target.
 class DragDropEvent : Event
 {
     this(Widget widget, DragDropAction action, Point position, KeyMod keyMod, TimeMsec timeMsec)

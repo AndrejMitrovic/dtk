@@ -110,7 +110,7 @@ class DropTarget : ComObject, IDropTarget
     {
         if (*riid == IID_IDropTarget)
         {
-            *ppv = cast(void*)this;
+            *ppv = cast(void*)cast(IUnknown)this;
             AddRef();
             return S_OK;
         }
@@ -118,6 +118,7 @@ class DropTarget : ComObject, IDropTarget
         return super.QueryInterface(riid, ppv);
     }
 
+    extern (Windows)
     HRESULT DragEnter(IDataObject pDataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
     {
         _lastPt = pt;
@@ -125,6 +126,7 @@ class DropTarget : ComObject, IDropTarget
         return dispatchEvent(DragDropAction.enter, grfKeyState, pt, pdwEffect);
     }
 
+    extern (Windows)
     HRESULT DragOver(DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
     {
         // Note: DragOver is repeatedly called even if the mouse is not moved,
@@ -146,48 +148,19 @@ class DropTarget : ComObject, IDropTarget
         return dispatchEvent(DragDropAction.move, grfKeyState, pt, pdwEffect);
     }
 
-    HRESULT DragLeave()
-    {
-        return dispatchLeaveEvent();
-    }
-
+    extern (Windows)
     HRESULT Drop(IDataObject pDataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
     {
         return dispatchEvent(DragDropAction.drop, grfKeyState, pt, pdwEffect);
     }
 
+    extern (Windows)
+    HRESULT DragLeave()
+    {
+        return dispatchLeaveEvent();
+    }
+
 private:
-
-    private static Point getRelativePoint(Widget targetWidget, POINTL pt)
-    {
-        auto point = targetWidget.absPosition();
-        return Point(pt.x - point.x, pt.y - point.y);
-    }
-
-    private static KeyMod getKeyMod(DWORD grfKeyState)
-    {
-        KeyMod keyMod;
-
-        if (grfKeyState & MK_CONTROL)
-            keyMod |= KeyMod.control;
-
-        if (grfKeyState & MK_ALT)
-            keyMod |= KeyMod.alt;
-
-        if (grfKeyState & MK_SHIFT)
-            keyMod |= KeyMod.shift;
-
-        if (grfKeyState & MK_LBUTTON)
-            keyMod |= KeyMod.mouse_left;
-
-        if (grfKeyState & MK_MBUTTON)
-            keyMod |= KeyMod.mouse_middle;
-
-        if (grfKeyState & MK_RBUTTON)
-            keyMod |= KeyMod.mouse_right;
-
-        return keyMod;
-    }
 
     private HRESULT dispatchEvent(DragDropAction action, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
     {
@@ -218,6 +191,37 @@ private:
         Dispatch._dispatchInternalEvent(_widget, event);
 
         return S_OK;
+    }
+
+    private static Point getRelativePoint(Widget targetWidget, POINTL pt)
+    {
+        auto point = targetWidget.absPosition();
+        return Point(pt.x - point.x, pt.y - point.y);
+    }
+
+    private static KeyMod getKeyMod(DWORD grfKeyState)
+    {
+        KeyMod keyMod;
+
+        if (grfKeyState & MK_CONTROL)
+            keyMod |= KeyMod.control;
+
+        if (grfKeyState & MK_ALT)
+            keyMod |= KeyMod.alt;
+
+        if (grfKeyState & MK_SHIFT)
+            keyMod |= KeyMod.shift;
+
+        if (grfKeyState & MK_LBUTTON)
+            keyMod |= KeyMod.mouse_left;
+
+        if (grfKeyState & MK_MBUTTON)
+            keyMod |= KeyMod.mouse_middle;
+
+        if (grfKeyState & MK_RBUTTON)
+            keyMod |= KeyMod.mouse_right;
+
+        return keyMod;
     }
 
 private:
