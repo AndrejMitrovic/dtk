@@ -23,6 +23,7 @@ alias splitter = std.algorithm.splitter;
 
 import dtk.app;
 import dtk.dispatch;
+import dtk.dragdrop;
 import dtk.event;
 import dtk.geometry;
 import dtk.keymap;
@@ -193,6 +194,11 @@ abstract class Widget
         The widget was either focused in or focused out.
     */
     public Signal!FocusEvent onFocusEvent;
+
+    /**
+        The widget is a target of a drag and drop event.
+    */
+    public Signal!DragDropEvent onDragDropEvent;
 
     /**
         Handle the event when a widget is destroyed.
@@ -629,9 +635,9 @@ package:
 
 package:
 
-    // invoked per-thread: store a unique thread identifier.
     static this()
     {
+        // invoked per-thread: store a unique thread identifier.
         _threadID = cast(size_t)cast(void*)Thread.getThis;
         _dtkScratchArrVar = makeVar();
         _dtkDummyWidget = format("%s_%s", _fakeWidgetPrefix, getUniqueVarName());
@@ -697,6 +703,12 @@ package:
         since any such call will fail.
     */
     private bool _isFakeWidget;
+
+    /** API-only: Set when the widget is registered for drag & drop operations. */
+    public DropTarget _dropTarget;
+
+    /** API-only: Release resources for this widget, e.g. COM objects. */
+    public Signal!DestroyEvent _onAPIDestroyEvent;
 }
 
 /** The dynamic type of a built-in Widget object. */

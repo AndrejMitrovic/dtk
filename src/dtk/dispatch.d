@@ -130,8 +130,7 @@ static:
                     _dtkInterceptTag,
                     _dtkCallbackIdent, EventType.focus, FocusAction.leave, cast(string)TkSubs.widget_path);
 
-        /** Hook destroy. */
-
+        //~ /** Hook user destroy event by appending. */
         tclEvalFmt("bind %s <Destroy> { %s %s %s }",
                     _dtkInterceptTag,
                     _dtkCallbackIdent, EventType.destroy, cast(string)TkSubs.widget_path);
@@ -723,6 +722,12 @@ static:
         _dispatchEvent(widget, event);
     }
 
+    // note: special-case. todo: use the SendEvent or PostEvent API once implemented.
+    package static void _dispatchInternalEvent(Widget widget, scope Event event)
+    {
+        _dispatchEvent(widget, event);
+    }
+
     /// main dispatch function
     private static TkEventFlag _dispatchEvent(Widget widget, scope Event event)
     {
@@ -858,7 +863,12 @@ static:
                 break;
 
             case destroy:
+                widget._onAPIDestroyEvent.emit(StaticCast!DestroyEvent(event));
                 widget.onDestroyEvent.emit(StaticCast!DestroyEvent(event));
+                break;
+
+            case drag_drop:
+                widget.onDragDropEvent.emit(StaticCast!DragDropEvent(event));
                 break;
 
             case button:

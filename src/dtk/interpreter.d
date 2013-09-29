@@ -178,7 +178,7 @@ package const(char)[] tclPeekString(const Tcl_Obj* tclObj)
     return tclObj.Tcl_GetString().peekCString();
 }
 
-version(Windows)
+version (Windows)
 {
     import core.sys.windows.windows;
 

@@ -64,6 +64,9 @@ enum EventType
     /** A widget is about to be destroyed. */
     destroy,
 
+    /** A drag and drop was initiated, either from a source widget or onto a hovered widget. */
+    drag_drop,
+
     /** A button widget event, e.g. a button widget was pressed. */
     button,
 
@@ -126,31 +129,6 @@ enum EventTravel
 
     // direct,  // todo
 }
-
-// todo: implement later
-/+ // All standard event types are listed here, in the same order as EventType.
-private alias EventClassMap = TypeTuple!(Event, Event, MouseEvent, KeyboardEvent);
-
-// todo: add toEventType.
-/**
-    Return the Event class type that matches the EventType specified.
-    If the event type is a user event, the $(D Event) base class is returned.
-*/
-template toEventClass(EventType type)
-{
-    static assert(type != EventType.invalid,
-        "Cannot retrieve event class type from uninitialized event type.");
-
-    alias toEventClass = EventClassMap[cast(size_t)type];
-}
-
-///
-unittest
-{
-    static assert(is(toEventClass!(EventType.user) == Event));
-    static assert(is(toEventClass!(EventType.mouse) == MouseEvent));
-    static assert(is(toEventClass!(EventType.keyboard) == KeyboardEvent));
-} +/
 
 /** The root class of all event types. */
 class Event
@@ -713,6 +691,79 @@ class DestroyEvent : Event
     {
         toStringImpl(sink, this.tupleof);
     }
+}
+
+/// These actions occur during a drag & drop mouse operation.
+enum DragDropAction
+{
+    enter,  /// The mouse entered a widget's area.
+    move,   /// The mouse moved within a widget's area.
+    drop,   /// The mouse button was released, finishing the drag & drop operation.
+    leave,  /// The mouse left a widget's area.
+}
+
+///
+// todo: drag source, and drop target.
+class DragDropEvent : Event
+{
+    this(Widget widget, DragDropAction action, Point position, KeyMod keyMod, TimeMsec timeMsec)
+    {
+        super(widget, EventType.drag_drop, timeMsec);
+        this.action = action;
+        this.position = position;
+        this.keyMod = keyMod;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /**
+        If the event handler accepts this drag & drop operation,
+        it should set this field to true.
+
+        During an $(D enter) or $(D move) $(D action), setting
+        this field to true will change the mouse cursor to signal
+        to the user that the target widget can accept the operation.
+    */
+    bool dropAccepted;
+
+    /** The action that triggered this drag and drop event. */
+    const(DragDropAction) action;
+
+    /**
+        The widget that this drag & drop operation is
+        currently targetting. This is equivalent to
+        calling $(D widget), but is conveniently named
+        to mirror $(D sourceWidget).
+    */
+    alias targetWidget = widget;
+
+    /**
+        Position of the mouse pointer relative to the target widget.
+    */
+    const(Point) position;
+
+    /**
+        A bit mask of all key modifiers that were
+        held when the drag & drop event was generated.
+
+        Examples:
+        -----
+        // test if control was held
+        if (keyMod & KeyMod.control) { }
+
+        // test if both control and alt were held at the same time
+        if (keyMod & (KeyMod.control | KeyMod.alt)) { }
+        -----
+
+        $(B Note:) The modifiers supported during a drag and drop
+        operation are:
+        - control, alt, shift, mouse_left, mouse_middle, mouse_right.
+    */
+    const(KeyMod) keyMod;
 }
 
 /** Widget-specific events. */

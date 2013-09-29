@@ -5,6 +5,7 @@ set thisPath=%~dp0
 set dtkRoot=%thisPath%\..
 set buildPath=%thisPath%
 set binPath=%dtkRoot%\bin
+set libDir=%dtkRoot%\lib
 cd %thisPath%\..\src
 
 set "files="
@@ -16,16 +17,23 @@ rem DTK_UNITTEST
 rem     - Enable unittests.
 rem
 rem DTK_LOG_EVAL
-rem     - Logs all Tcl eval commands.
+rem     - Logs Tcl eval commands.
+rem
+rem DTK_LOG_EVENT_HANDLER
+rem     - Logs event handler calls.
+rem
+rem DTK_LOG_COM
+rem     - Logs COM calls.
 rem
 rem DTK_LOG_TESTS
-rem     - Logs all log/logf calls, for use with unittesting.
-rem
+rem     - Logs log/logf calls, for use with unittesting.
 
-set includes=-I%cd%
+set includes=-I%cd% -I%libDir%
 rem set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_EVAL -version=DTK_LOG_TESTS
 set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_TESTS
-set flags=%includes% -g %debug_versions%
+set import_libs=comctl32.lib ole32.lib
+set flags=%includes% -g %debug_versions% %import_libs%
+
 
 rem Set this to enforce building with unittests even for the static library.
 rem Only use this during DTK development.

@@ -20,6 +20,7 @@ version (Windows)
 {
     import core.runtime;
     import std.c.windows.windows;
+    import win32.ole2;
 
     private void loadSymbol(alias field)(HANDLE handle)
     {
@@ -66,6 +67,16 @@ version (Windows)
     {
         /** Release DTK classes. */
         Interpreter.releaseClass();
+    }
+
+    static this()
+    {
+        OleInitialize(null);
+    }
+
+    static ~this()
+    {
+        OleUninitialize();
     }
 }
 else
