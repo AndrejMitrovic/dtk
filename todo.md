@@ -14,10 +14,6 @@ This should avoid having a huge module and cyclic imports.
 We can implement both target-drop (e.g. explorer or another window -> app),
 and source-drop (app -> explorer, or another window).
 
-If you are developing an application that can act as a data source for an OLE drag-and-drop operation, you must call DoDragDrop when you detect that the user has started an OLE drag-and-drop operation.
-
-The DoDragDrop function enters a loop in which it calls various methods in the IDropSource and IDropTarget interfaces. (For a successful drag-and-drop operation, the application acting as the data source must also implement IDropSource, while the target application must implement IDropTarget.)
-
 - Some info on using OpenGL in Tk:
 http://stackoverflow.com/questions/17367089/non-top-level-opengl-widget-in-tkinter
 
