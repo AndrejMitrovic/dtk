@@ -225,7 +225,7 @@ __gshared extern(C):
 
 version(Windows)
 {
-    import core.sys.windows.windows;
+    import dtk.platform.win32.defs;
 }
 
 /*

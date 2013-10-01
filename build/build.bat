@@ -5,7 +5,6 @@ set thisPath=%~dp0
 set dtkRoot=%thisPath%\..
 set buildPath=%thisPath%
 set binPath=%dtkRoot%\bin
-set libDir=%dtkRoot%\lib
 cd %thisPath%\..\src
 
 set "files="
@@ -28,10 +27,10 @@ rem
 rem DTK_LOG_TESTS
 rem     - Logs log/logf calls, for use with unittesting.
 
-set includes=-I%cd% -I%libDir%
+set includes=-I%cd%
 rem set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_EVAL -version=DTK_LOG_TESTS
 set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_TESTS
-set import_libs=comctl32.lib ole32.lib
+set import_libs=comctl32.lib ole32.lib uuid.lib
 set flags=%includes% -g %debug_versions% %import_libs%
 
 

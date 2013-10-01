@@ -5,10 +5,9 @@ set thisPath=%~dp0
 set dtkRoot=%thisPath%\..\..
 set binPath=%thisPath%\..\bin
 set srcDir=%dtkRoot%\src
-set libDir=%dtkRoot%\lib
 cd %thisPath%\..
 
-set import_libs=comctl32.lib ole32.lib
+set import_libs=comctl32.lib ole32.lib uuid.lib
 
 rem set versions=-version=DTK_LOG_EVAL
 rem set versions=-version=DTK_LOG_EVENTS
@@ -28,4 +27,4 @@ goto :eof
 set FileName=%1
 set SourceFile=%2
 
-rdmd -w -g -L/SUBSYSTEM:WINDOWS:5.01 %versions% -unittest -I%srcDir% -I%libDir% %import_libs% -of%binPath%\%FileName%.exe %SourceFile%
+rdmd -w -g -L/SUBSYSTEM:WINDOWS:5.01 %versions% -unittest -I%srcDir% %import_libs% -of%binPath%\%FileName%.exe %SourceFile%

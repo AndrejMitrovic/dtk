@@ -44,7 +44,7 @@ package void logf(Args...)(Args args)
 
 version (Windows)
 {
-    import core.sys.windows.windows;
+    import dtk.platform.win32.defs;
     extern(Windows) HWND GetConsoleWindow();
 }
 

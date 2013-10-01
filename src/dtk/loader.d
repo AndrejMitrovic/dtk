@@ -19,8 +19,7 @@ string[dchar] _tclTransTable;
 version (Windows)
 {
     import core.runtime;
-    import std.c.windows.windows;
-    import win32.ole2;
+    import dtk.platform.win32.defs;
 
     private void loadSymbol(alias field)(HANDLE handle)
     {
