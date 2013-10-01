@@ -23,7 +23,18 @@ unittest
 
     button1.onDragDropEvent ~= (scope DragDropEvent event)
     {
-        event.dropAccepted = true;
+        event.acceptDrop = true;
+
+        if (event.action == DropAction.drop)
+        {
+            string data;
+            if ((event.keyMod & KeyMod.control) != KeyMod.control && event.canMoveData)
+                data = event.moveData!string();
+            else
+                data = event.copyData!string();
+
+            stderr.writefln("Got text data: %s", data);
+        }
 
         // version = PRINT_MODS;
         version (PRINT_MODS)

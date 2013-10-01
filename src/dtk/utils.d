@@ -14,7 +14,9 @@ import std.stdio;
 static import std.string;
 import std.traits;
 
+import dtk.app;
 import dtk.loader;
+import dtk.types;
 
 package alias translate = std.string.translate;
 package alias chomp = std.string.chomp;
@@ -346,4 +348,61 @@ unittest
     static assert(is(ElementTypeOf!(int[][]) == int[]));
     static assert(is(ElementTypeOf!(int[1][2]) == int[1]));
     static assert(is(ElementTypeOf!(int**) == int*));
+}
+
+template ThrowWrapper(alias func)
+{
+    static extern(C) ReturnType!func ThrowWrapper(ParameterTypeTuple!func args)
+    {
+        try
+        {
+            return func(args);
+        }
+        catch (Exception exception)
+        {
+            stderr.writeln("Just thrown exception: %s", exception);
+            App.thrownException = exception;
+            return TCL_ERROR;
+        }
+        catch (Error error)
+        {
+            stderr.writeln("Just thrown error: %s", error);
+            App.thrownError = error;
+            return TCL_ERROR;
+        }
+        catch (Throwable throwable)
+        {
+            stderr.writeln("Just thrown throwable: %s", throwable);
+            App.thrownThrowable = throwable;
+            return TCL_ERROR;
+        }
+    }
+}
+
+mixin template ComThrowWrapper(alias func, string name)
+{
+    mixin(q{
+    extern(Windows) ReturnType!func %s(ParameterTypeTuple!func args)
+    {
+        try
+        {
+            return func(args);
+        }
+        catch (Exception exception)
+        {
+            App.thrownException = exception;
+            return E_UNEXPECTED;
+        }
+        catch (Error error)
+        {
+            App.thrownError = error;
+            return E_UNEXPECTED;
+        }
+        catch (Throwable throwable)
+        {
+            App.thrownThrowable = throwable;
+            return E_UNEXPECTED;
+        }
+    }
+    }.format(name));
 }

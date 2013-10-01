@@ -6,11 +6,15 @@
  */
 module dtk.app;
 
-import std.stdio;
+import core.thread;
+import core.time;
+
 import std.c.stdlib;
 
 import std.exception;
+import std.datetime;
 import std.path;
+import std.stdio;
 
 import dtk.event;
 import dtk.interpreter;
@@ -121,7 +125,7 @@ final class App
 
 
         static extern(C)
-        void callbackDeleter(ClientData clientData) { }
+        void callbackDeleter(ClientData clientData) nothrow { }
 
         static extern(C)
         int callbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
@@ -134,8 +138,31 @@ final class App
     void run()
     {
         _isAppRunning = true;
-        Tk_MainLoop();
-        _isAppRunning = false;
+        scope(exit) _isAppRunning = false;
+
+        bool hasEvents;
+        auto eventTimer = StopWatch(AutoStart.yes);
+
+        /**
+            Main event loop. This is equivalent to Tk_MainLoop(),
+            except we make sure any exceptions caught get re-thrown
+            here.
+
+            Docs:
+            Tcl_DoOneEvent: http://www.tcl.tk/man/tcl8.6/TclLib/DoOneEvent.htm
+            Tcl_DoWhenIdle: http://www.tcl.tk/man/tcl8.6/TclLib/DoWhenIdle.htm
+        */
+        while (Tk_GetNumMainWindows() > 0)
+        {
+            hasEvents = Tcl_DoOneEvent(TCL_DONT_WAIT) != 0;
+            if (hasEvents)
+                eventTimer.reset();
+
+            checkExceptions();
+
+            if (!hasEvents && eventTimer.peek > cast(TickDuration)(1.msecs))
+                Thread.sleep(1.msecs);
+        }
     }
 
     /** Return the main app window. */
@@ -144,8 +171,36 @@ final class App
         return _window;
     }
 
+    private void checkExceptions()
+    {
+        if (thrownThrowable !is null)
+        {
+            auto throwable = thrownThrowable;
+            thrownThrowable = null;
+            throw throwable;
+        }
+        else
+        if (thrownError !is null)
+        {
+            auto error = thrownError;
+            thrownError = null;
+            throw error;
+        }
+        else
+        if (thrownException !is null)
+        {
+            auto exception = thrownException;
+            thrownException = null;
+            throw exception;
+        }
+    }
+
 package:
     __gshared bool _isAppRunning;
+
+    static Throwable thrownThrowable;
+    static Error thrownError;
+    static Exception thrownException;
 
 private:
     long timestamp;

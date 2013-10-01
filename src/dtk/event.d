@@ -7,10 +7,12 @@
 module dtk.event;
 
 import std.array;
+import std.exception;
 import std.traits;
 import std.typecons;
 import std.typetuple;
 
+import dtk.dragdrop;
 import dtk.geometry;
 import dtk.keymap;
 import dtk.signals;
@@ -694,7 +696,7 @@ class DestroyEvent : Event
 }
 
 /// These actions occur during a drag & drop mouse operation.
-enum DragDropAction
+enum DropAction
 {
     enter,  /// The mouse entered a widget's area.
     move,   /// The mouse moved within a widget's area.
@@ -702,16 +704,32 @@ enum DragDropAction
     leave,  /// The mouse left a widget's area.
 }
 
-///
-// todo: drag source, and drop target.
+package enum DropEffect
+{
+	none = 0,
+	copy = 1,
+	move = 2,
+	link = 3,
+	scroll = 0x80000000,
+}
+
 class DragDropEvent : Event
 {
-    this(Widget widget, DragDropAction action, Point position, KeyMod keyMod, TimeMsec timeMsec)
+    this(Widget widget, DropAction action, DropData dropData, DropEffect dropEffect, Point position, KeyMod keyMod, TimeMsec timeMsec)
     {
         super(widget, EventType.drag_drop, timeMsec);
         this.action = action;
-        this.position = position;
-        this.keyMod = keyMod;
+        _dropData = dropData;
+        _dropEffect = dropEffect;
+        _position = position;
+        _keyMod = keyMod;
+    }
+
+    this(Widget widget, DropAction action, TimeMsec timeMsec)
+    {
+        super(widget, EventType.drag_drop, timeMsec);
+        this.action = action;
+        assert(action == DropAction.leave);
     }
 
     ///
@@ -720,31 +738,100 @@ class DragDropEvent : Event
         toStringImpl(sink, this.tupleof);
     }
 
-    /**
-        If the event handler accepts this drag & drop operation,
-        it should set this field to true.
-
-        During an $(D enter) or $(D move) $(D action), setting
-        this field to true will change the mouse cursor to signal
-        to the user that the target widget can accept the operation.
-    */
-    bool dropAccepted;
-
     /** The action that triggered this drag and drop event. */
-    const(DragDropAction) action;
+    const(DropAction) action;
 
     /**
-        The widget that this drag & drop operation is
-        currently targetting. This is equivalent to
-        calling $(D widget), but is conveniently named
-        to mirror $(D sourceWidget).
+        The event handler should set this to true when it wants
+        to accept the drag and drop event. The mouse cursor
+        typically changes based on the value of this field.
+
+        This value can be set in both the $(D enter) and $(D move)
+        actions, allowing a technique of accepting the $(D drop)
+        event based on the relative mouse position and the
+        current key modifiers.
+
+        Example:
+        -----
+        if (!event.hasData!string)
+            return;  // return early if string type not found
+
+        if (event.action == DropAction.enter
+            || event.action == DropAction.move)
+        {
+            // only accept the drop in a specific area and
+            // if the control key is held down
+            if (event.position < Point(50, 50)
+                && event.keyMod & KeyMod.control)
+                event.acceptDrop = true;
+        }
+        else
+        if (event.action == DropAction.drop)
+        {
+            assert(event.position < Point(50, 50));
+            // at this point the above predicate should hold true
+
+            auto text = event.getData!string;
+            writefln("Received: %s", text);
+        }
+        -----
     */
-    alias targetWidget = widget;
+    bool acceptDrop;
+
+    @property bool canCopyData()
+    {
+        return (_dropEffect & DropEffect.copy) == DropEffect.copy;
+    }
+
+    /** */
+    @property bool hasData(T)()
+    {
+        return _dropData.hasData!T();
+    }
+
+    T copyData(T)()
+    {
+        enforce(canCopyData, "Source does not allow data to be copied.");
+
+        scope(success)
+        {
+            _dropEffect = DropEffect.copy;
+            acceptDrop = true;
+        }
+
+        return _dropData.getData!T();
+    }
+
+    @property bool canMoveData()
+    {
+        return (_dropEffect & DropEffect.move) == DropEffect.move;
+    }
+
+    T moveData(T)()
+    {
+        enforce(canMoveData, "Source does not allow data to be moved.");
+
+        scope(success)
+        {
+            _dropEffect = DropEffect.move;
+            acceptDrop = true;
+        }
+
+        return _dropData.getData!T();
+    }
 
     /**
         Position of the mouse pointer relative to the target widget.
+
+        Note: If $(D action) equals $(D DropAction.leave) then this property
+        has no valid meaning and will throw an exception when accessed.
     */
-    const(Point) position;
+    @property Point position()
+    {
+        enforce(action != DropAction.leave,
+            format("Cannot access position property during a drop leave action."));
+        return _position;
+    }
 
     /**
         A bit mask of all key modifiers that were
@@ -762,8 +849,24 @@ class DragDropEvent : Event
         $(B Note:) The modifiers supported during a drag and drop
         operation are:
         - control, alt, shift, mouse_left, mouse_middle, mouse_right.
+
+        Note: If $(D action) equals $(D DropAction.leave) then this property
+        has no valid meaning and will throw an exception when accessed.
     */
-    const(KeyMod) keyMod;
+    @property KeyMod keyMod()
+    {
+        enforce(action != DropAction.leave,
+            format("Cannot access keyMod property during a drop leave action."));
+        return _keyMod;
+    }
+
+package:
+    DropEffect _dropEffect;
+
+private:
+    Point _position;
+    KeyMod _keyMod;
+    DropData _dropData;
 }
 
 /** Widget-specific events. */

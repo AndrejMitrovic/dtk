@@ -274,6 +274,7 @@ __gshared extern(C):
     Tk_Window function(Tcl_Interp* interp) Tk_MainWindow;
     void function() Tk_MainLoop;
     Tk_Window function(Tcl_Interp* interp, const(char)* pathName, Tk_Window tkwin) Tk_NameToWindow;
+    int function() Tk_GetNumMainWindows;
 
     version(Windows)
     {
