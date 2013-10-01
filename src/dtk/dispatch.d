@@ -140,8 +140,9 @@ static:
             _dtkInterceptTag, _dtkCallbackIdent, EventType.listbox, "%W", ListboxAction.select);
     }
 
-    static extern(C)
-    int dtkCallbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** argArr)
+    package alias dtkCallbackHandler = ThrowWrapper!dtkCallbackHandlerImpl;
+
+    package static int dtkCallbackHandlerImpl(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** argArr)
     {
         if (objc < 2)  // DTK event signals need at least 2 arguments
             return TCL_OK;

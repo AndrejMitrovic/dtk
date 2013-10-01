@@ -8,14 +8,16 @@ module dtk.dragdrop;
 
 import std.exception;
 import std.stdio;
-import std.string;
+import std.traits;
 import std.typecons;
 
+import dtk.app;
 import dtk.dispatch;
 import dtk.event;
 import dtk.geometry;
 import dtk.interpreter;
 import dtk.types;
+import dtk.utils;
 
 import dtk.platform.win32.com;
 
@@ -24,8 +26,10 @@ import dtk.widgets.window;
 
 import win32.objidl;
 import win32.ole2;
+import win32.winbase;
 import win32.windef;
 import win32.winuser;
+import win32.wtypes;
 
 auto dragDrop(Widget widget)
 {
@@ -99,6 +103,38 @@ private:
     HWND _hwnd;
 }
 
+struct DropData
+{
+    package bool hasData(T)() if (is(T == string))
+    {
+        static FORMATETC fmtetc = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
+        return _dataObject.QueryGetData(&fmtetc) == S_OK;
+    }
+
+    package T getData(T)() if (is(T == string))
+    {
+        // construct a FORMATETC object
+        FORMATETC fmtetc = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
+        STGMEDIUM stgmed;
+
+        enforce(_dataObject.QueryGetData(&fmtetc) == S_OK,
+                format("Drop data does not contain any data of type '%s'", T.stringof));
+
+        enforce(_dataObject.GetData(&fmtetc, &stgmed) == S_OK,
+                format("Could not read drop data of type '%s'", T.stringof));
+
+        // we asked for the data as a HGLOBAL, so access it appropriately
+        auto data = cast(char*)GlobalLock(stgmed.hGlobal);
+        string result = to!string(data);
+        GlobalUnlock(stgmed.hGlobal);
+        ReleaseStgMedium(&stgmed);
+        return result;
+    }
+
+private:
+    IDataObject _dataObject;
+}
+
 class DropTarget : ComObject, IDropTarget
 {
     this(Widget widget)
@@ -118,67 +154,75 @@ class DropTarget : ComObject, IDropTarget
         return super.QueryInterface(riid, ppv);
     }
 
-    extern (Windows)
-    HRESULT DragEnter(IDataObject pDataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
-    {
-        _lastPt = pt;
-        _pDataObject = pDataObject;
-        return dispatchEvent(DragDropAction.enter, grfKeyState, pt, pdwEffect);
-    }
+    mixin ComThrowWrapper!(DragEnterImpl, "DragEnter");
+    mixin ComThrowWrapper!(DragOverImpl, "DragOver");
+    mixin ComThrowWrapper!(DropImpl, "Drop");
+    mixin ComThrowWrapper!(DragLeaveImpl, "DragLeave");
 
-    extern (Windows)
-    HRESULT DragOver(DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
-    {
-        // Note: DragOver is repeatedly called even if the mouse is not moved,
-        // it's likely called using a timer. We only dispatch the event if
-        // the mouse has moved away from its previous position, but we still
-        // have to mark whether the drag & drop is accepted on each call.
+private:
 
-        if (pt == _lastPt)  // mouse hasn't moved, don't dispatch.
+    private HRESULT DragEnterImpl(IDataObject dataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
+    {
+        _dropData._dataObject = dataObject;
+        auto result = dispatchEvent(DropAction.enter, grfKeyState, pt, pdwEffect);
+
+        /**
+            Note: On entry pdwEffect will hold a bitmask of all allowed effects,
+            but on exit it must be set to just one value. On DragEnter the user-provided
+            event handler usually doesn't do any copy or read yet, so this will
+            leave pdwEffect in the original state (bitmask of all allowed effects).
+            We have to explicitly pick one of the possible result values here.
+        */
+        auto effect = *pdwEffect;
+        if (effect & DROPEFFECT.DROPEFFECT_NONE)
+        { }  // the event handler rejected this drop operation
+        else
         {
-            if (_lastDropAccepted)
-                *pdwEffect = DROPEFFECT.DROPEFFECT_COPY;
-            else
-                *pdwEffect = DROPEFFECT.DROPEFFECT_NONE;
-
-            return S_OK;
+            foreach (memb; EnumMembers!DROPEFFECT)
+            static if (memb != DROPEFFECT.DROPEFFECT_NONE)
+            {
+                if (effect & memb)
+                {
+                    *pdwEffect = memb;
+                    return result;
+                }
+            }
         }
 
-        _lastPt = pt;
-        return dispatchEvent(DragDropAction.move, grfKeyState, pt, pdwEffect);
+        return result;
     }
 
-    extern (Windows)
-    HRESULT Drop(IDataObject pDataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
+    private HRESULT DragOverImpl(DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
     {
-        return dispatchEvent(DragDropAction.drop, grfKeyState, pt, pdwEffect);
+        return dispatchEvent(DropAction.move, grfKeyState, pt, pdwEffect);
     }
 
-    extern (Windows)
-    HRESULT DragLeave()
+    private HRESULT DropImpl(IDataObject dataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
+    {
+        _dropData._dataObject = dataObject;
+        return dispatchEvent(DropAction.drop, grfKeyState, pt, pdwEffect);
+    }
+
+    private HRESULT DragLeaveImpl()
     {
         return dispatchLeaveEvent();
     }
 
-private:
-
-    private HRESULT dispatchEvent(DragDropAction action, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
+    private HRESULT dispatchEvent(DropAction action, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
     {
+        DropEffect dropEffect = cast(DropEffect)*pdwEffect;
         auto position = getRelativePoint(_widget, pt);
         auto keyMod = getKeyMod(grfKeyState);
         TimeMsec timeMsec = getTclTime();
 
-        auto event = scoped!DragDropEvent(_widget, action, position, keyMod, timeMsec);
-
-        // todo: Once SendEvent/PostEvent are implemented we should call those functions.
+        // todo: Once SendEvent/PostEvent are implemented we should use those functions.
+        auto event = scoped!DragDropEvent(_widget, action, _dropData, dropEffect, position, keyMod, timeMsec);
         Dispatch._dispatchInternalEvent(_widget, event);
 
-        if (event.dropAccepted)
-            *pdwEffect = DROPEFFECT.DROPEFFECT_COPY;
+        if (event.acceptDrop)
+            *pdwEffect = cast(DWORD)event._dropEffect;
         else
             *pdwEffect = DROPEFFECT.DROPEFFECT_NONE;
-
-        _lastDropAccepted = event.dropAccepted;
 
         return S_OK;
     }
@@ -187,7 +231,7 @@ private:
     {
         TimeMsec timeMsec = getTclTime();
 
-        auto event = scoped!DragDropEvent(_widget, DragDropAction.leave, Point.init, KeyMod.init, timeMsec);
+        auto event = scoped!DragDropEvent(_widget, DropAction.leave, timeMsec);
         Dispatch._dispatchInternalEvent(_widget, event);
 
         return S_OK;
@@ -225,10 +269,7 @@ private:
     }
 
 private:
-
-    POINTL _lastPt;
-    bool _lastDropAccepted;
-
     Widget _widget;
-    IDataObject _pDataObject;
+    DropData _dropData;
+    DWORD _dwEffect;
 }

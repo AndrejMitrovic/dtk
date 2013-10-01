@@ -1,5 +1,35 @@
 Todo:
 
+- Add proper checks for Tk and versions:
+    if (
+#ifdef USE_TK_STUBS
+        Tk_InitStubs(interp, "8.3", 0)
+#else
+        Tcl_PkgRequire(interp, "Tk", "8.3", 0)
+#endif /* USE_TK_STUBS */
+        == NULL)
+    {
+        return TCL_ERROR;
+    }
+
+    /*
+     * Get the version, because we really need 8.3.3+.
+     */
+    Tcl_GetVersion(&major, &minor, &patchlevel, NULL);
+
+    if ((major == 8) && (minor == 3) && (patchlevel < 3))
+    {
+        Tcl_SetResult(interp, "tkdnd requires Tk 8.3.3 or greater", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+
+- Add a clipboard module, and also add an onClipboardEvent signal via:
+http://msdn.microsoft.com/en-us/library/windows/desktop/ms649033%28v=vs.85%29.aspx
+
+- Standard clipboard formats:
+http://msdn.microsoft.com/en-us/library/windows/desktop/ff729168%28v=vs.85%29.aspx
+
 - visuald/visuald/dproject.d has Drop methods which accept drag and drop data.
 
 - Move widget-specific events to the widget modules.
