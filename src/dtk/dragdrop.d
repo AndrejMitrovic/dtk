@@ -19,17 +19,18 @@ import dtk.interpreter;
 import dtk.types;
 import dtk.utils;
 
+import dtk.platform.win32.defs;
 import dtk.platform.win32.com;
 
 import dtk.widgets.widget;
 import dtk.widgets.window;
 
-import win32.objidl;
-import win32.ole2;
-import win32.winbase;
-import win32.windef;
-import win32.winuser;
-import win32.wtypes;
+//~ import win32.objidl;
+//~ import win32.ole2;
+//~ import win32.winbase;
+//~ import win32.windef;
+//~ import win32.winuser;
+//~ import win32.wtypes;
 
 auto dragDrop(Widget widget)
 {
@@ -116,12 +117,7 @@ struct DropData
         // construct a FORMATETC object
         FORMATETC fmtetc = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
         STGMEDIUM stgmed;
-
-        enforce(_dataObject.QueryGetData(&fmtetc) == S_OK,
-                format("Drop data does not contain any data of type '%s'", T.stringof));
-
-        enforce(_dataObject.GetData(&fmtetc, &stgmed) == S_OK,
-                format("Could not read drop data of type '%s'", T.stringof));
+        readData!T(&fmtetc, &stgmed);
 
         // we asked for the data as a HGLOBAL, so access it appropriately
         auto data = cast(char*)GlobalLock(stgmed.hGlobal);
@@ -129,6 +125,16 @@ struct DropData
         GlobalUnlock(stgmed.hGlobal);
         ReleaseStgMedium(&stgmed);
         return result;
+    }
+
+private:
+    private void readData(T)(FORMATETC* fmtetc, STGMEDIUM* stgmed)
+    {
+        enforce(_dataObject.QueryGetData(fmtetc) == S_OK,
+                format("Drop data does not contain any data of type '%s'", T.stringof));
+
+        enforce(_dataObject.GetData(fmtetc, stgmed) == S_OK,
+                format("Could not read drop data of type '%s'", T.stringof));
     }
 
 private:
@@ -142,7 +148,7 @@ class DropTarget : ComObject, IDropTarget
         _widget = widget;
     }
 
-    override HRESULT QueryInterface(IID* riid, void** ppv)
+    override HRESULT QueryInterface(const(IID)* riid, void** ppv)
     {
         if (*riid == IID_IDropTarget)
         {
@@ -175,7 +181,7 @@ private:
         */
         auto effect = *pdwEffect;
         if (effect & DROPEFFECT.DROPEFFECT_NONE)
-        { }  // the event handler rejected this drop operation
+        { }  // the event handler rejected the drop operation
         else
         {
             foreach (memb; EnumMembers!DROPEFFECT)

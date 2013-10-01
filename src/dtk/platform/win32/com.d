@@ -10,8 +10,7 @@ import core.atomic;
 import core.memory;
 import core.stdc.string;
 
-import win32.ole2;
-import win32.windef;
+import dtk.platform.win32.defs;
 
 C newCom(C, T...)(T arguments) if(is(C : ComObject) && T.length > 0)
 {
@@ -52,7 +51,7 @@ class ComObject : IUnknown
         // GC.malloc(size, GC.BlkAttr.FINALIZE);
 	}
 
-    HRESULT QueryInterface(IID* riid, void** ppv)
+    HRESULT QueryInterface(const(IID)* riid, void** ppv)
 	{
 		if (*riid == IID_IUnknown)
 		{

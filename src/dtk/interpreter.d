@@ -180,7 +180,7 @@ package const(char)[] tclPeekString(const Tcl_Obj* tclObj)
 
 version (Windows)
 {
-    import core.sys.windows.windows;
+    import dtk.platform.win32.defs;
 
     HWND getHWND(Widget widget)
     {
