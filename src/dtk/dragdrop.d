@@ -25,13 +25,6 @@ import dtk.platform.win32.com;
 import dtk.widgets.widget;
 import dtk.widgets.window;
 
-//~ import win32.objidl;
-//~ import win32.ole2;
-//~ import win32.winbase;
-//~ import win32.windef;
-//~ import win32.winuser;
-//~ import win32.wtypes;
-
 auto dragDrop(Widget widget)
 {
     return DragDrop(widget);
@@ -104,7 +97,7 @@ private:
     HWND _hwnd;
 }
 
-struct DropData
+package struct DropData
 {
     package bool hasData(T)() if (is(T == string))
     {
@@ -131,10 +124,10 @@ private:
     private void readData(T)(FORMATETC* fmtetc, STGMEDIUM* stgmed)
     {
         enforce(_dataObject.QueryGetData(fmtetc) == S_OK,
-                format("Drop data does not contain any data of type '%s'", T.stringof));
+                format("Drop data does not contain any data of type '%s'.", T.stringof));
 
         enforce(_dataObject.GetData(fmtetc, stgmed) == S_OK,
-                format("Could not read drop data of type '%s'", T.stringof));
+                format("Could not read drop data of type '%s'.", T.stringof));
     }
 
 private:
