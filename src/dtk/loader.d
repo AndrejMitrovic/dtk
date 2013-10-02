@@ -13,6 +13,8 @@ import dtk.interpreter;
 import dtk.types;
 import dtk.utils;
 
+import dtk.widgets.widget;
+
 /** Used for Tcl string literal escape rules. */
 string[dchar] _tclTransTable;
 
@@ -57,25 +59,20 @@ version (Windows)
         _tclTransTable['{'] = r"\{";
         _tclTransTable['}'] = r"\}";
 
+        OleInitialize(null);
+
         /** Initialize DTK classes. */
         Interpreter.initClass();
         Dispatch.initClass();
+        Widget.initClass();
     }
 
     shared static ~this()
     {
+        OleUninitialize();
+
         /** Release DTK classes. */
         Interpreter.releaseClass();
-    }
-
-    static this()
-    {
-        OleInitialize(null);
-    }
-
-    static ~this()
-    {
-        OleUninitialize();
     }
 }
 else

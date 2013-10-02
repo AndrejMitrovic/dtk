@@ -238,7 +238,7 @@ abstract class Widget
     this(CreateFakeWidget, WidgetType widgetType)
     {
         this.widgetType = widgetType;
-        string name = format("%s%s%s", _fakeWidgetPrefix, _threadID, _lastWidgetID++);
+        string name = format("%s%s", _fakeWidgetPrefix, _lastWidgetID++);
         this.initialize(name);
         _isFakeWidget = true;
     }
@@ -561,14 +561,14 @@ package:
     package static string createCallbackName()
     {
         int newSlotID = _lastCallbackID++;
-        return format("%s%s_%s", _callbackPrefix, _threadID, newSlotID).replace(":", "_");
+        return format("%s_%s", _callbackPrefix, newSlotID).replace(":", "_");
     }
 
     /** Create a unique Tcl variable name. */
     package static string getUniqueVarName()
     {
         int newSlotID = _lastVariableID++;
-        return format("%s%s_%s", _variablePrefix, _threadID, newSlotID);
+        return format("%s_%s", _variablePrefix, newSlotID);
     }
 
     /*
@@ -616,7 +616,7 @@ package:
         if (parent._name != ".")
             prefix = parent._name;
 
-        string name = format("%s.%s%s%s", prefix, tkType.toString(), _threadID, _lastWidgetID++);
+        string name = format("%s.%s%s", prefix, tkType.toString(), _lastWidgetID++);
         tclEvalFmt("%s %s %s", tkType.toBaseType(), name, extraOpts);
 
         this.initialize(name);
@@ -635,16 +635,11 @@ package:
 
 package:
 
-    static this()
+    static public void initClass()
     {
-        // invoked per-thread: store a unique thread identifier.
-        _threadID = cast(size_t)cast(void*)Thread.getThis;
         _dtkScratchArrVar = makeVar();
         _dtkDummyWidget = format("%s_%s", _fakeWidgetPrefix, getUniqueVarName());
     }
-
-    /** Unique Thread ID. Needed to create thread-global unique identifiers for Tcl/Tk. */
-    package static size_t _threadID;
 
     /**
         For list retrieval of a Tk widget option (e.g. -values of a spinbox),
@@ -653,7 +648,7 @@ package:
     static string _dtkScratchArrVar;
 
     /** API-only: Used to unfocus widgets during a 'tk busy' command */
-    static public string _dtkDummyWidget;
+    public static string _dtkDummyWidget;
 
     /**
         API-only: public due to package disallowing access to super packages.
