@@ -44,7 +44,7 @@ package abstract final class Interpreter
     }
 
 package:
-    __gshared Tcl_Interp* _interp;
+    static Tcl_Interp* _interp;
 }
 
 /** Evaluate any Tcl command and return its result. */
