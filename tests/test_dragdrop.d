@@ -17,18 +17,28 @@ unittest
 
     auto button1 = new Button(testWindow, "Button1");
     auto button2 = new Button(testWindow, "Button2");
+    auto label = new Label(testWindow);
 
     button1.grid.setRow(1).setCol(0);
     button2.grid.setRow(0).setCol(1);
+    label.grid.setRow(2).setCol(0).setColSpan(2);
 
     button1.onDragDropEvent ~= (scope DragDropEvent event)
     {
+        label.text = to!string(event.action);
+
+        if (event.action == DropAction.leave)
+            return;
+
+        if (!event.hasData!string)  // only interested in text data
+            return;
+
         event.acceptDrop = true;
 
         if (event.action == DropAction.drop)
         {
             string data;
-            if ((event.keyMod & KeyMod.control) != KeyMod.control && event.canMoveData)
+            if (event.keyMod.isDown(KeyMod.control + KeyMod.alt) && event.canMoveData)
                 data = event.moveData!string();
             else
                 data = event.copyData!string();

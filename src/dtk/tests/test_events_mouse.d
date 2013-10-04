@@ -62,7 +62,7 @@ unittest
 
     static mouseButtons = [MouseButton.button1, MouseButton.button2, MouseButton.button3, MouseButton.button4, MouseButton.button5];
 
-    alias keyMods = NoDuplicates!(EnumMembers!KeyMod);
+    alias keyMods = KeyMod.allKeyMods;
 
     enum buttonCount = 5;
 
@@ -148,12 +148,12 @@ unittest
 
             action = MouseAction.press;
             tclEvalFmt("event generate %s <ButtonPress> -button %s -state %s",
-                       testWindow.getTclName(), idx + 1, cast(int)newKeyMod);
+                       testWindow.getTclName(), idx + 1, newKeyMod.toTclValue);
             ++expectedCallCount;
 
             action = MouseAction.release;
             tclEvalFmt("event generate %s <ButtonRelease> -button %s -state %s",
-                       testWindow.getTclName(), idx + 1, cast(int)newKeyMod);
+                       testWindow.getTclName(), idx + 1, newKeyMod.toTclValue);
             ++expectedCallCount;
 
             genIgnoredEvent(idx);
@@ -208,7 +208,7 @@ unittest
             keyMod = newKeyMod;
             wheel = sign * 120;
             tclEvalFmt("event generate %s <MouseWheel> -delta %s -state %s",
-                       testWindow.getTclName(), wheel, cast(int)newKeyMod);
+                       testWindow.getTclName(), wheel, newKeyMod.toTclValue);
             ++expectedCallCount;
         }
     }

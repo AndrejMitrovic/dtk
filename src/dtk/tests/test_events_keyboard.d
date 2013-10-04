@@ -78,7 +78,7 @@ unittest
         KeySym.V, KeySym.W, KeySym.X, KeySym.Y, KeySym.Z,
     ];
 
-    alias keyMods = NoDuplicates!(EnumMembers!KeyMod);
+    alias keyMods = KeyMod.allKeyMods;
 
     foreach (dchar newChar; 'a' .. 'z' + 1)
     {
@@ -114,17 +114,17 @@ unittest
         {
             keyMod = newKeyMod;
 
-            if (newKeyMod & (KeyMod.shift | KeyMod.capslock))
+            if (newKeyMod.isAnyDown(KeyMod.shift, KeyMod.capslock))
                 keySym = keySyms[(newChar - 'a') + (keySyms.length / 2)];  // uppercase it
             else
                 keySym = keySyms[newChar - 'a'];
 
             action = KeyboardAction.press;
-            tclEvalFmt("event generate %s <KeyPress> -keysym %s -state %s", testWindow.getTclName(), newChar, cast(int)newKeyMod);
+            tclEvalFmt("event generate %s <KeyPress> -keysym %s -state %s", testWindow.getTclName(), newChar, newKeyMod.toTclValue);
             ++expectedCallCount;
 
             action = KeyboardAction.release;
-            tclEvalFmt("event generate %s <KeyRelease> -keysym %s -state %s", testWindow.getTclName(), newChar, cast(int)newKeyMod);
+            tclEvalFmt("event generate %s <KeyRelease> -keysym %s -state %s", testWindow.getTclName(), newChar, newKeyMod.toTclValue);
             ++expectedCallCount;
         }
     }
