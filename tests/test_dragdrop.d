@@ -38,7 +38,7 @@ unittest
         if (event.action == DropAction.drop)
         {
             string data;
-            if (event.keyMod.isDown(KeyMod.control + KeyMod.alt) && event.canMoveData)
+            if (event.keyMod & (KeyMod.control + KeyMod.alt) && event.canMoveData)
                 data = event.moveData!string();
             else
                 data = event.copyData!string();
@@ -46,8 +46,10 @@ unittest
             stderr.writefln("Got text data: %s", data);
         }
 
-        // version = PRINT_MODS;
-        version (PRINT_MODS)
+        //~ enum PRINT_MODS = 1;
+        enum PRINT_MODS = 0;
+
+        static if (PRINT_MODS)
         {
             stderr.writefln("- Control: %s", event.keyMod & KeyMod.control);
             stderr.writefln("- Alt: %s", event.keyMod & KeyMod.alt);
