@@ -308,6 +308,7 @@ enum MouseButton
 
 private enum AnyModifier = 1 << 15;
 
+
 /**
     A set of keyboard modifiers or active mouse buttons
     while another event was generated.
@@ -316,32 +317,53 @@ private enum AnyModifier = 1 << 15;
         - When the 'a' key is pressed, the shift keyboard modifier might be present.
         - When the left mouse button is pressed, the right mouse button might already
           be held down, in that case the right mouse button is the button modifier.
+
+    Example:
+    -----
+    // test whether the control key was held
+    event.keyMod.isDown(KeyMod.ctrl)
+
+    // test whether both the control and alt key were held
+    event.keyMod.isDown(KeyMod.ctrl + KeyMod.alt)
+
+    KeyMod keys;
+    keys += KeyMod.ctrl;
+    keys += KeyMod.alt;
+    keys += KeyMod.mouse_left;
+
+    event.keyMod.isDown(keys);  // test ctrl + alt + left mouse button
+    event.keyMod.isDown(keys - KeyMod.mouse_left);  // test ctrl + alt
+    -----
 */
-enum KeyMod
+struct KeyMod
 {
-    none = 0,
+    /** No key modifier. */
+    enum KeyMod none = KeyMod(0);
 
     /** Control key. */
-    control = 1 << 2,
+    enum KeyMod control = KeyMod(1 << 2);
+
+    /** Convenience - equal to $(D control). */
+    enum KeyMod ctrl = control;
 
     /** Alt key. */
-    alt = AnyModifier << 2,
+    enum KeyMod alt = KeyMod(AnyModifier << 2);
 
     /** Convenience for OSX - equal to $(D alt). */
-    option = alt,
+    enum KeyMod option = alt;
 
     /** Shift key. */
-    shift = 1 << 0,
+    enum KeyMod shift = KeyMod(1 << 0);
 
     /** Capslock key. */
-    capslock = 1 << 1,
+    enum KeyMod capslock = KeyMod(1 << 1);
 
     /**
         The meta key is present on special keyboards,
         such as the MIT keyboard.
         See: http://en.wikipedia.org/wiki/Meta_key
     */
-    meta = AnyModifier << 1,
+    enum KeyMod meta = KeyMod(AnyModifier << 1);
 
     /**
         $(BLUE Windows-specific.)
@@ -355,7 +377,7 @@ enum KeyMod
         PrintScreen key, and the forward slash '/' and
         Enter keys in the numeric keypad.
     */
-    extended = 1 << 15,
+    enum KeyMod extended = KeyMod(1 << 15);
 
     /**
         The following are similarly named as the members of the
@@ -367,34 +389,130 @@ enum KeyMod
     */
 
     /** The left mouse button. */
-    mouse_button1 = 1 << 8,
+    enum KeyMod mouse_button1 = KeyMod(1 << 8);
 
     /** Convenience - equal to $(D mouse_button1). */
-    mouse_left = mouse_button1,
+    enum KeyMod mouse_left = mouse_button1;
 
     /** The middle mouse button. */
-    mouse_button2 = 1 << 9,
+    enum KeyMod mouse_button2 = KeyMod(1 << 9);
 
     /** Convenience - equal to $(D mouse_button2). */
-    mouse_middle = mouse_button2,
+    enum KeyMod mouse_middle = mouse_button2;
 
     /** The right mouse button. */
-    mouse_button3 = 1 << 10,
+    enum KeyMod mouse_button3 = KeyMod(1 << 10);
 
     /** Convenience - equal to $(D mouse_button3). */
-    mouse_right = mouse_button3,
+    enum KeyMod mouse_right = mouse_button3;
 
     /** First additional button - hardware-dependent. */
-    mouse_button4 = 1 << 11,
+    enum KeyMod mouse_button4 = KeyMod(1 << 11);
 
     /** Convenience - equal to $(D mouse_button4) */
-    mouse_x1 = mouse_button4,
+    enum KeyMod mouse_x1 = mouse_button4;
 
     /** Second additional button - hardware-dependent. */
-    mouse_button5 = 1 << 12,
+    enum KeyMod mouse_button5 = KeyMod(1 << 12);
 
     /** Convenience - equal to $(D mouse_button5) */
-    mouse_x2 = mouse_button5,
+    enum KeyMod mouse_x2 = mouse_button5;
+
+    __gshared string[long] _toName;
+
+    typeof(this) opBinary(string op : "+")(typeof(this) rhs) const
+    {
+        return typeof(this)(value | rhs.value);
+    }
+
+    void opOpAssign(string op : "+")(typeof(this) rhs)
+    {
+        value |= rhs.value;
+    }
+
+    void opOpAssign(string op : "-")(typeof(this) rhs)
+    {
+        value ^= rhs.value;
+    }
+
+    // workaround for pretty printing
+    string toString() const
+    {
+        string[] res;
+
+        alias strings = TypeTuple!("ctrl", "alt", "shift", "capslock", "meta", "extended", "mouse_button1", "mouse_button2", "mouse_button3", "mouse_button4", "mouse_button5");
+
+        foreach (idx, val; allKeyMods)
+        {
+            if (isDown(val))
+                res ~= strings[idx];
+        }
+
+        if (res.empty)
+            res ~= "none";
+
+        return "KeyMod(%s)".format(res.join(" + "));
+    }
+
+    /** Check whether keyMod equals this keyMod. */
+    bool isDown(typeof(this) keyMod) const
+    {
+        return (value & keyMod.value) == keyMod.value;
+    }
+
+    /** Check whether any of keyMods equals this keyMod. */
+    bool isAnyDown(typeof(this)[] keyMods...) const
+    {
+        foreach (keyMod; keyMods)
+        {
+            if (isDown(keyMod))
+                return true;
+        }
+
+        return false;
+    }
+
+    package long toTclValue()
+    {
+        return value;
+    }
+
+private:
+    long value;
+
+public:
+    /** All known key modifiers. */
+    alias allKeyMods = TypeTuple!(ctrl, alt, shift, capslock, meta, extended, mouse_button1, mouse_button2, mouse_button3, mouse_button4, mouse_button5);
+}
+
+unittest
+{
+    KeyMod mod;
+    mod += KeyMod.control;
+    mod -= KeyMod.control;
+    mod += KeyMod.control;
+
+    mod += KeyMod.alt;
+
+    assert(mod.isDown(KeyMod.control));
+    assert(mod.isDown(KeyMod.alt));
+    assert(mod.isDown(KeyMod.control + KeyMod.alt));
+
+    assert(mod.isDown(KeyMod.control));
+    assert(mod.isDown(KeyMod.alt));
+
+    KeyMod mod2 = KeyMod.ctrl + KeyMod.alt;
+    assert(mod.isDown(mod2));
+
+    assert(mod.isDown(KeyMod.control + KeyMod.alt));
+    const alt = KeyMod.alt;
+    assert(mod.isDown(KeyMod.control + alt));
+
+    foreach (type; KeyMod.allKeyMods)
+        mod += type;
+
+    foreach (type; KeyMod.allKeyMods)
+        mod -= type;
 }
 
 ///
@@ -449,17 +567,8 @@ class MouseEvent : Event
     const(int) wheel;
 
     /**
-        A bit mask of all key modifiers that were
-        held when the mouse event was generated.
-
-        Examples:
-        -----
-        // test if control was held
-        if (keyMod & KeyMod.control) { }
-
-        // test if both control and alt were held at the same time
-        if (keyMod & (KeyMod.control | KeyMod.alt)) { }
-        -----
+        The set of key modifiers that were held when
+        the mouse event was generated.
     */
     const(KeyMod) keyMod;
 
@@ -536,17 +645,8 @@ class KeyboardEvent : Event
     const(dchar) unichar;
 
     /**
-        A bit mask of all key modifiers that were
-        held while keySym was pressed or released.
-
-        Examples:
-        -----
-        // test if control was held
-        if (keyMod & KeyMod.control) { }
-
-        // test if both control and alt were held at the same time
-        if (keyMod & (KeyMod.control | KeyMod.alt)) { }
-        -----
+        The set of key modifiers that were held when
+        the mouse event was generated.
     */
     const(KeyMod) keyMod;
 
@@ -634,17 +734,8 @@ class HoverEvent : Event
     const(Point) position;
 
     /**
-        A bit mask of all key modifiers that were
-        held when the mouse enter/leave hover event was generated.
-
-        Examples:
-        -----
-        // test if control was held
-        if (keyMod & KeyMod.control) { }
-
-        // test if both control and alt were held at the same time
-        if (keyMod & (KeyMod.control | KeyMod.alt)) { }
-        -----
+        The set of key modifiers that were held when
+        the mouse event was generated.
     */
     const(KeyMod) keyMod;
 }
@@ -776,27 +867,41 @@ class DragDropEvent : Event
         }
         -----
     */
-    bool acceptDrop;
+    @property bool acceptDrop()
+    {
+        checkValidAction();
+        return _acceptDrop;
+    }
+
+    /// ditto
+    @property void acceptDrop(bool accept)
+    {
+        checkValidAction();
+        _acceptDrop = accept;
+    }
 
     @property bool canCopyData()
     {
+        checkValidAction();
         return (_dropEffect & DropEffect.copy) == DropEffect.copy;
     }
 
     /** */
     @property bool hasData(T)()
     {
+        checkValidAction();
         return _dropData.hasData!T();
     }
 
     T copyData(T)()
     {
+        checkValidAction();
         enforce(canCopyData, "Source does not allow data to be copied.");
 
         scope(success)
         {
             _dropEffect = DropEffect.copy;
-            acceptDrop = true;
+            _acceptDrop = true;
         }
 
         return _dropData.getData!T();
@@ -804,17 +909,19 @@ class DragDropEvent : Event
 
     @property bool canMoveData()
     {
+        checkValidAction();
         return (_dropEffect & DropEffect.move) == DropEffect.move;
     }
 
     T moveData(T)()
     {
+        checkValidAction();
         enforce(canMoveData, "Source does not allow data to be moved.");
 
         scope(success)
         {
             _dropEffect = DropEffect.move;
-            acceptDrop = true;
+            _acceptDrop = true;
         }
 
         return _dropData.getData!T();
@@ -828,8 +935,7 @@ class DragDropEvent : Event
     */
     @property Point position()
     {
-        enforce(action != DropAction.leave,
-            format("Cannot access position property during a drop leave action."));
+        checkValidAction();
         return _position;
     }
 
@@ -855,13 +961,25 @@ class DragDropEvent : Event
     */
     @property KeyMod keyMod()
     {
-        enforce(action != DropAction.leave,
-            format("Cannot access keyMod property during a drop leave action."));
+        checkValidAction();
         return _keyMod;
     }
 
 package:
     DropEffect _dropEffect;
+    bool _acceptDrop;
+
+private:
+    private void checkValidAction(string file = __FILE__, size_t line = __LINE__, string func = __FUNCTION__)
+    {
+        // strip off qualification
+        auto idx = func.lastIndexOf(".");
+        if (idx != -1)
+            func = func[idx + 1 .. $];
+
+        enforce(action != DropAction.leave,
+            format("Cannot access '%s' property during a drop leave action.", func), file, line);
+    }
 
 private:
     Point _position;

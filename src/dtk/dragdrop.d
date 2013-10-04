@@ -111,12 +111,13 @@ package struct DropData
         FORMATETC fmtetc = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
         STGMEDIUM stgmed;
         readData!T(&fmtetc, &stgmed);
+        scope(exit) ReleaseStgMedium(&stgmed);
 
         // we asked for the data as a HGLOBAL, so access it appropriately
         auto data = cast(char*)GlobalLock(stgmed.hGlobal);
+        scope(exit) GlobalUnlock(stgmed.hGlobal);
+
         string result = to!string(data);
-        GlobalUnlock(stgmed.hGlobal);
-        ReleaseStgMedium(&stgmed);
         return result;
     }
 
@@ -218,7 +219,7 @@ private:
         auto event = scoped!DragDropEvent(_widget, action, _dropData, dropEffect, position, keyMod, timeMsec);
         Dispatch._dispatchInternalEvent(_widget, event);
 
-        if (event.acceptDrop)
+        if (event._acceptDrop)
             *pdwEffect = cast(DWORD)event._dropEffect;
         else
             *pdwEffect = DROPEFFECT.DROPEFFECT_NONE;
@@ -230,6 +231,7 @@ private:
     {
         TimeMsec timeMsec = getTclTime();
 
+        assert(_dropData._dataObject !is null);
         auto event = scoped!DragDropEvent(_widget, DropAction.leave, timeMsec);
         Dispatch._dispatchInternalEvent(_widget, event);
 
@@ -247,22 +249,22 @@ private:
         KeyMod keyMod;
 
         if (grfKeyState & MK_CONTROL)
-            keyMod |= KeyMod.control;
+            keyMod += KeyMod.control;
 
         if (grfKeyState & MK_ALT)
-            keyMod |= KeyMod.alt;
+            keyMod += KeyMod.alt;
 
         if (grfKeyState & MK_SHIFT)
-            keyMod |= KeyMod.shift;
+            keyMod += KeyMod.shift;
 
         if (grfKeyState & MK_LBUTTON)
-            keyMod |= KeyMod.mouse_left;
+            keyMod += KeyMod.mouse_left;
 
         if (grfKeyState & MK_MBUTTON)
-            keyMod |= KeyMod.mouse_middle;
+            keyMod += KeyMod.mouse_middle;
 
         if (grfKeyState & MK_RBUTTON)
-            keyMod |= KeyMod.mouse_right;
+            keyMod += KeyMod.mouse_right;
 
         return keyMod;
     }
