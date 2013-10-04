@@ -326,6 +326,7 @@ private enum AnyModifier = 1 << 15;
     // test whether both the control and alt key were held
     event.keyMod.isDown(KeyMod.ctrl + KeyMod.alt)
 
+    // can use binary operators + and - to add or remove modifiers
     KeyMod keys;
     keys += KeyMod.ctrl;
     keys += KeyMod.alt;
@@ -333,6 +334,10 @@ private enum AnyModifier = 1 << 15;
 
     event.keyMod.isDown(keys);  // test ctrl + alt + left mouse button
     event.keyMod.isDown(keys - KeyMod.mouse_left);  // test ctrl + alt
+
+    // can test if any key modifier (or any specific combination) is present.
+    // check whether either ctrl or ctrl+alt is held down (but not a lone alt).
+    event.keyMod.isAnyDown(KeyMod.ctrl, KeyMod.ctrl + KeyMod.alt);
     -----
 */
 struct KeyMod
