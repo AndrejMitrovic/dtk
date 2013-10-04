@@ -318,13 +318,35 @@ private enum AnyModifier = 1 << 15;
         - When the left mouse button is pressed, the right mouse button might already
           be held down, in that case the right mouse button is the button modifier.
 
+    Use the equality operator ($(D ==)) to explicitly check for modifier keys.
+    It will return true only if the specified set of key modifiers is present
+    and no additional modifiers are present.
+
+    Use the $(D isDown) method to check for modifier keys without caring whether
+    there are any other additional modifiers present.
+
+    The binary $(D AND) operator ($(D &)) is a convenience that calls $(D isDown).
+
+    Use the $(D isAnyDown) method to check multiple modifier key combinations.
+    If any of them match, the method returns true.
+
     Example:
     -----
-    // test whether the control key was held
-    event.keyMod.isDown(KeyMod.ctrl)
+    // test if only the ctrl key is held down (other modifiers may not be present)
+    event.keyMod == KeyMod.ctrl;
+
+    // test whether the control key was held (other modifiers can be present)
+    event.keyMod.isDown(KeyMod.ctrl);
+
+    // ditto
+    event.keyMod & KeyMod.ctrl;
 
     // test whether both the control and alt key were held
-    event.keyMod.isDown(KeyMod.ctrl + KeyMod.alt)
+    // note: this will not return true if only the ctrl or alt key were held.
+    event.keyMod.isDown(KeyMod.ctrl + KeyMod.alt);
+
+    // ditto
+    event.keyMod & (KeyMod.ctrl + KeyMod.alt);
 
     // can use binary operators + and - to add or remove modifiers
     KeyMod keys;
@@ -332,12 +354,35 @@ private enum AnyModifier = 1 << 15;
     keys += KeyMod.alt;
     keys += KeyMod.mouse_left;
 
-    event.keyMod.isDown(keys);  // test ctrl + alt + left mouse button
-    event.keyMod.isDown(keys - KeyMod.mouse_left);  // test ctrl + alt
+    // test ctrl + alt + left mouse button
+    event.keyMod.isDown(keys);
 
-    // can test if any key modifier (or any specific combination) is present.
-    // check whether either ctrl or ctrl+alt is held down (but not a lone alt).
+    // ditto
+    event.keyMod & keys;
+
+    // test ctrl + alt
+    event.keyMod.isDown(keys - KeyMod.mouse_left);
+
+    // ditto
+    event.keyMod & (keys - KeyMod.mouse_left);
+
+    // test if any of a set of key modifiers is present:
+    // check whether ctrl or ctrl+alt is held down (other modifiers can be present)
     event.keyMod.isAnyDown(KeyMod.ctrl, KeyMod.ctrl + KeyMod.alt);
+
+    // Note: The above is different to the following check.
+    // The following will not return true if only ctrl or only alt is held down.
+    event.keyMod.isDown(KeyMod.ctrl + KeyMod.alt);
+
+    // ditto
+    event.keyMod.isDown(KeyMod.ctrl) || event.keyMod.isDown(KeyMod.ctrl + KeyMod.alt);
+
+    // ditto
+    event.keyMod & KeyMod.ctrl || event.keyMod & (KeyMod.ctrl + KeyMod.alt);
+
+    // explicitly check whether whether either ctrl or ctrl+alt is held down.
+    // (other modifiers may not be present)
+    event.keyMod == KeyMod.ctrl || event.keyMod == KeyMod.ctrl + KeyMod.alt;
     -----
 */
 struct KeyMod
@@ -430,6 +475,18 @@ struct KeyMod
         return typeof(this)(value | rhs.value);
     }
 
+    typeof(this) opBinary(string op : "-")(typeof(this) rhs) const
+    {
+        auto dup = cast(KeyMod)this;
+        dup -= rhs;
+        return cast(typeof(return))dup;
+    }
+
+    bool opBinary(string op : "&")(typeof(this) rhs) const
+    {
+        return isDown(rhs);
+    }
+
     void opOpAssign(string op : "+")(typeof(this) rhs)
     {
         value |= rhs.value;
@@ -518,6 +575,82 @@ unittest
 
     foreach (type; KeyMod.allKeyMods)
         mod -= type;
+}
+
+unittest
+{
+    KeyMod keyMod;
+
+    // test if only the ctrl key is held down (other modifiers may not be present)
+    keyMod = KeyMod.ctrl;
+    assert(keyMod == KeyMod.ctrl);
+
+    // test whether the control key was held (other modifiers can be present)
+    keyMod += KeyMod.alt;
+    assert(keyMod.isDown(KeyMod.ctrl));
+    assert(keyMod & KeyMod.ctrl);
+
+    // test whether both the control and alt key were held  (other modifiers can be present)
+    keyMod += KeyMod.shift;
+    assert(keyMod.isDown(KeyMod.ctrl + KeyMod.alt));
+    assert(keyMod & (KeyMod.ctrl + KeyMod.alt));
+
+    keyMod = KeyMod.ctrl;
+    assert(!keyMod.isDown(KeyMod.ctrl + KeyMod.alt));
+    assert(!(keyMod & (KeyMod.ctrl + KeyMod.alt)));
+
+    keyMod = KeyMod.alt;
+    assert(!keyMod.isDown(KeyMod.ctrl + KeyMod.alt));
+    assert(!(keyMod & (KeyMod.ctrl + KeyMod.alt)));
+
+    // can use binary operators + and - to add or remove modifiers
+    KeyMod keys;
+    keys += KeyMod.ctrl;
+    keys += KeyMod.alt;
+    keys += KeyMod.mouse_left;
+
+    // test ctrl + alt + left mouse button
+    keyMod = keys;
+    assert(keyMod.isDown(keys));
+    assert(keyMod & keys);
+
+    keyMod -= KeyMod.ctrl;
+    assert(!keyMod.isDown(keys));
+    assert(!(keyMod & keys));
+
+    // test ctrl + alt
+    keyMod += KeyMod.ctrl;
+    assert(keyMod.isDown(keys - KeyMod.mouse_left));
+    assert(keyMod & (keys - KeyMod.mouse_left));
+
+    // test if any of a set of key modifiers is present:
+    // check whether ctrl or ctrl+alt is held down (other modifiers can be present)
+    keyMod = KeyMod.ctrl;
+    assert(keyMod.isAnyDown(KeyMod.ctrl, KeyMod.ctrl + KeyMod.alt));
+
+    keyMod += KeyMod.shift;
+    assert(keyMod.isAnyDown(KeyMod.ctrl, KeyMod.ctrl + KeyMod.alt));
+
+    keyMod = KeyMod.ctrl + KeyMod.alt;
+    assert(keyMod.isAnyDown(KeyMod.ctrl, KeyMod.ctrl + KeyMod.alt));
+    assert(keyMod.isDown(KeyMod.ctrl) || keyMod.isDown(KeyMod.ctrl + KeyMod.alt));
+    assert(keyMod & KeyMod.ctrl || keyMod & (KeyMod.ctrl + KeyMod.alt));
+
+    keyMod = KeyMod.alt;
+    assert(!keyMod.isAnyDown(KeyMod.ctrl, KeyMod.ctrl + KeyMod.alt));
+    assert(!(keyMod.isDown(KeyMod.ctrl) || keyMod.isDown(KeyMod.ctrl + KeyMod.alt)));
+    assert(!(keyMod & KeyMod.ctrl || keyMod & (KeyMod.ctrl + KeyMod.alt)));
+
+    // explicitly check whether whether either ctrl or ctrl+alt is held down.
+    // (other modifiers may not be present)
+    keyMod = KeyMod.ctrl;
+    assert(keyMod == KeyMod.ctrl || keyMod == KeyMod.ctrl + KeyMod.alt);
+
+    keyMod = KeyMod.ctrl + KeyMod.alt;
+    assert(keyMod == KeyMod.ctrl || keyMod == KeyMod.ctrl + KeyMod.alt);
+
+    keyMod = KeyMod.ctrl + KeyMod.shift;
+    assert(!(keyMod == KeyMod.ctrl || keyMod == KeyMod.ctrl + KeyMod.alt));
 }
 
 ///
