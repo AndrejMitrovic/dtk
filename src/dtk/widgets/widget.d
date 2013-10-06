@@ -23,7 +23,6 @@ alias splitter = std.algorithm.splitter;
 
 import dtk.app;
 import dtk.dispatch;
-import dtk.dragdrop;
 import dtk.event;
 import dtk.geometry;
 import dtk.keymap;
@@ -31,6 +30,8 @@ import dtk.interpreter;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
+
+import dtk.platform.native;
 
 import dtk.widgets.button;
 import dtk.widgets.entry;
@@ -198,7 +199,7 @@ abstract class Widget
     /**
         The widget is a target of a drag and drop event.
     */
-    public Signal!DragDropEvent onDragDropEvent;
+    public Signal!DropEvent onDropEvent;
 
     /**
         Handle the event when a widget is destroyed.
@@ -499,6 +500,49 @@ abstract class Widget
         return cast(Window)Widget.lookupWidgetPath(widgetPath);
     }
 
+    /**
+        Get the configuration options for drag and drop operations for this widget.
+    */
+    public auto dragDrop()
+    {
+        return DragDrop(this);
+    }
+
+    /**
+        The configuration options for drag and drop operations for this widget.
+    */
+    static struct DragDrop
+    {
+        @disable this();
+
+        this(Widget widget)
+        {
+            _widget = widget;
+        }
+
+        /** Check whether this widget has been registered for drag & drop operations. */
+        bool isRegistered()
+        {
+            return _widget._isRegisteredDragDrop();
+        }
+
+        /** Register the widget to accept drag & drop operations. */
+        void register()
+        {
+            _widget._registerDragDrop();
+        }
+
+        /** Unregister the widget. */
+        void unregister()
+        {
+            _widget._unregisterDragDrop();
+        }
+
+    private:
+        Widget _widget;
+    }
+
+    /** Get the string representation of this widget. */
     override string toString() const
     {
         return format("%s(%s)", getClassName(this), _name);
@@ -572,13 +616,12 @@ package:
     }
 
     /*
-        Note: API-only function, public due to package disallowing
-        access to super packages.
+        $(B API-only): This is an internal function, $(B do not use in user-code).
 
         Find the binding of a Tcl widget path and return the
         mapped widget or null if there is no such path mapping.
     */
-    public static Widget lookupWidgetPath(in char[] path)
+    public static Widget lookupWidgetPath(in char[] path) /* package */
     {
         if (auto widget = path in _widgetPathMap)
             return *widget;
@@ -633,9 +676,52 @@ package:
         _isInitialized = true;
     }
 
-package:
+    /** Check whether this widget has been registered for drag & drop operations. */
+    private bool _isRegisteredDragDrop()
+    {
+        return _dropTarget !is null;
+    }
 
-    static public void initClass()
+    /** Register the widget to accept drag & drop operations. */
+    private void _registerDragDrop()
+    {
+        if (_dropTarget !is null)
+            return;
+
+        _winHandle = getWinHandle(this);
+
+        version (DTK_LOG_COM)
+            stderr.writefln("+ Registering d&d  : %X", _winHandle);
+
+        _dropTarget = createDropTarget(this);
+        scope (failure)
+        {
+            _dropTarget = null;
+            _winHandle = null;
+        }
+
+        registerDragDrop(_winHandle, _dropTarget);
+
+        // widget must be unregistered before Tk's WinHandle (HWND on win32) becomes invalid.
+        _onAPIDestroyEvent ~= &_unregisterDragDrop;
+    }
+
+    /** Unregister the widget from accepting drag & drop operations. */
+    private void _unregisterDragDrop()
+    {
+        if (_dropTarget is null)
+            return;
+
+        version (DTK_LOG_COM)
+            stderr.writefln("- Unregistering d&d: %X", _winHandle);
+
+        unregisterDragDrop(_winHandle);
+        _dropTarget = null;
+        _winHandle = null;
+        _onAPIDestroyEvent.disconnect(&_unregisterDragDrop);
+    }
+
+    public static void initClass()
     {
         _dtkScratchArrVar = makeVar();
         _dtkDummyWidget = format("%s_%s", _fakeWidgetPrefix, getUniqueVarName());
@@ -645,17 +731,21 @@ package:
         For list retrieval of a Tk widget option (e.g. -values of a spinbox),
         we first assign the values to a Tcl var and then read from it using tclGetVar.
     */
-    static string _dtkScratchArrVar;
-
-    /** API-only: Used to unfocus widgets during a 'tk busy' command */
-    public static string _dtkDummyWidget;
+    package static string _dtkScratchArrVar;
 
     /**
-        API-only: public due to package disallowing access to super packages.
+        $(B API-only): This is an internal symbol, $(B do not use in user-code).
+
+        Used to unfocus widgets during a 'tk busy' command
+    */
+    public static string _dtkDummyWidget;  /* package */
+
+    /**
+        $(B API-only): This is an internal symbol, $(B do not use in user-code).
 
         This widget's unique name.
     */
-    public string _name;
+    public string _name;  /* package */
 
     /** Counter to create a thread-global unique widget name (_threadID is used in mangling). */
     package static int _lastWidgetID = 0;
@@ -699,11 +789,18 @@ package:
     */
     private bool _isFakeWidget;
 
-    /** API-only: Set when the widget is registered for drag & drop operations. */
-    public DropTarget _dropTarget;
+    /** Set when the widget is registered for drag & drop operations. */
+    private DropTarget _dropTarget;
 
-    /** API-only: Release resources for this widget, e.g. COM objects. */
-    public Signal!DestroyEvent _onAPIDestroyEvent;
+    /** Ditto. */
+    private WinHandle _winHandle;
+
+    /**
+        $(B API-only): This is an internal symbol, $(B do not use in user-code).
+
+        Release resources for this widget, e.g. COM objects.
+    */
+    public Signal!DestroyEvent _onAPIDestroyEvent; /* package */
 }
 
 /** The dynamic type of a built-in Widget object. */

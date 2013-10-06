@@ -182,7 +182,7 @@ version (Windows)
 {
     import dtk.platform.win32.defs;
 
-    HWND getHWND(Widget widget)
+    HWND getWinHandle(Widget widget)
     {
         Tk_Window tkwin = Tk_NameToWindow(tclInterp, widget.getTclName().toStringz, Tk_MainWindow(tclInterp));
         return Tk_GetHWND(Tk_WindowId(tkwin));

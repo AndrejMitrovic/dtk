@@ -17,13 +17,25 @@ unittest
 
     auto button1 = new Button(testWindow, "Button1");
     auto button2 = new Button(testWindow, "Button2");
+
+    auto sourceLabel = new Label(testWindow);
+    sourceLabel.text = "Source text";
+
     auto label = new Label(testWindow);
 
-    button1.grid.setRow(1).setCol(0);
-    button2.grid.setRow(0).setCol(1);
-    label.grid.setRow(2).setCol(0).setColSpan(2);
+    sourceLabel.grid
+        .setRow(0).setCol(0).setColSpan(2);
 
-    button1.onDragDropEvent ~= (scope DragDropEvent event)
+    button1.grid
+        .setRow(1).setCol(0);
+
+    button2.grid
+        .setRow(1).setCol(1);
+
+    label.grid
+        .setRow(2).setCol(0).setColSpan(2);
+
+    button1.onDropEvent ~= (scope DropEvent event)
     {
         label.text = to!string(event.action);
 
@@ -62,10 +74,47 @@ unittest
         stderr.writefln("Button 1 drag drop event: %s", event.action);
     };
 
-    button2.onDragDropEvent ~= (scope DragDropEvent event)
+    button2.onDropEvent ~= (scope DropEvent event)
     {
         // button1.dragDrop.unregister();
         stderr.writefln("Button 2 drag drop event: %s", event.action);
+    };
+
+    //~ sourceLabel.onDragEvent ~= (scope DragEvent event)
+    //~ {
+        //~ if (event.keyMod & KeyMod.escape)
+        //~ {
+            //~ // if the <Escape> key has been pressed since the last call, cancel the drop
+            //~ event.dragState = DragState.stop;
+        //~ }
+
+        //~ if (!event.keyMod.isDown(KeyMod.mouse_left))
+        //~ {
+            //~ // if the <LeftMouse> button has been released, then do the drop!
+            //~ event.dragState = DragState.drop;
+        //~ }
+
+        //~ if (state.dropAccepted)
+        //~ {
+            //~ if (state.hasMovedData)
+                //~ sourceLabel.text = "";
+        //~ }
+    //~ };
+
+    sourceLabel.onMouseEvent ~= (scope MouseEvent event)
+    {
+        static MouseAction lastAction;
+        static MouseButton lastButton;
+
+        scope(exit) lastAction = event.action;
+        scope(exit) lastButton = event.button;
+
+        if (event.action == MouseAction.move && event.keyMod & KeyMod.mouse_left
+            && lastAction == MouseAction.press && lastButton == MouseButton.left)
+        {
+            DragData data = DragData(sourceLabel.text, CanMoveData.yes, CanCopyData.yes);
+            sourceLabel.startDragEvent(data);
+        }
     };
 
     assert(!button1.dragDrop.isRegistered());

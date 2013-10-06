@@ -725,3 +725,76 @@ extern(Windows) HMODULE LoadLibraryA(LPCSTR lpLibFileName);
 extern(Windows) HMODULE LoadLibraryW(LPCWSTR lpLibFileName);
 extern(Windows) FARPROC GetProcAddress(HMODULE hModule, LPCSTR lpProcName);
 extern(Windows) BOOL GlobalUnlock(HGLOBAL hMem);
+
+extern(Windows) UINT RegisterClipboardFormatW(LPCWSTR);
+extern(Windows) DWORD GetLastError();
+
+interface IDropSource : IUnknown
+{
+	HRESULT QueryContinueDrag(BOOL,DWORD);
+	HRESULT GiveFeedback(DWORD);
+}
+
+enum : BOOL
+{
+	FALSE = 0,
+	TRUE  = 1
+}
+
+enum DRAGDROP_S_CANCEL                      = 0x00040101;
+enum DRAGDROP_S_DROP                        = 0x00040100;
+enum DRAGDROP_S_USEDEFAULTCURSORS           = 0x00040102;
+
+extern(Windows) HRESULT DoDragDrop(LPDATAOBJECT, LPDROPSOURCE, DWORD, PDWORD);
+
+alias IDropSource LPDROPSOURCE;
+
+enum DV_E_FORMATETC                         = 0x80040064;
+enum DATA_E_FORMATETC = DV_E_FORMATETC;
+enum DATA_S_SAMEFORMATETC                   = 0x00040130;
+
+enum DATADIR
+{
+	DATADIR_GET = 1,
+	DATADIR_SET
+}
+
+enum OLE_E_ADVISENOTSUPPORTED               = 0x80040003;
+
+extern(Windows) HGLOBAL GlobalAlloc(UINT, DWORD);
+extern(Windows) HGLOBAL GlobalDiscard(HGLOBAL);
+extern(Windows) HGLOBAL GlobalFree(HGLOBAL);
+extern(Windows) HGLOBAL GlobalHandle(PCVOID);
+extern(Windows) VOID GlobalMemoryStatus(LPMEMORYSTATUS);
+extern(Windows) HGLOBAL GlobalReAlloc(HGLOBAL, DWORD, UINT);
+extern(Windows) DWORD GlobalSize(HGLOBAL);
+
+enum UINT
+	GMEM_FIXED       = 0,
+	GMEM_MOVEABLE    = 0x0002,
+	GMEM_ZEROINIT    = 0x0040,
+	GPTR             = 0x0040,
+	GHND             = 0x0042,
+	GMEM_MODIFY      = 0x0080,  // used only for GlobalRealloc
+	GMEM_VALID_FLAGS = 0x7F72;
+
+extern(Windows) PVOID CoTaskMemAlloc(ULONG);
+
+alias void* PCVOID;
+
+
+// MSDN documents this, possibly erroneously, as Win2000+.
+struct MEMORYSTATUS {
+	DWORD dwLength;
+	DWORD dwMemoryLoad;
+	DWORD dwTotalPhys;
+	DWORD dwAvailPhys;
+	DWORD dwTotalPageFile;
+	DWORD dwAvailPageFile;
+	DWORD dwTotalVirtual;
+	DWORD dwAvailVirtual;
+}
+
+alias MEMORYSTATUS* LPMEMORYSTATUS;
+
+extern(Windows) void CoTaskMemFree(PVOID);

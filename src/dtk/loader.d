@@ -22,6 +22,7 @@ version (Windows)
 {
     import core.runtime;
     import dtk.platform.win32.defs;
+    import dtk.platform.win32.dragdrop;
 
     private void loadSymbol(alias field)(HANDLE handle)
     {
@@ -59,7 +60,14 @@ version (Windows)
         _tclTransTable['{'] = r"\{";
         _tclTransTable['}'] = r"\}";
 
-        OleInitialize(null);
+        auto oleRes = OleInitialize(null);
+        if (oleRes != S_OK)
+        {
+            OleUninitialize();
+            enforce(0, format("OleInitialize failed with: %s", oleRes));
+        }
+
+        _initDragDropFormat();
 
         /** Initialize DTK classes. */
         Interpreter.initClass();

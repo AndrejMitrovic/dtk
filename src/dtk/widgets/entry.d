@@ -152,9 +152,8 @@ class Entry : Widget
 
     /**
         $(B API-only): This is an internal function, $(B do not use in user-code).
-        It is public due to a limitation of the package access attribute.
     */
-    /*package*/ void _setValidateState(bool state)
+    public void _setValidateState(bool state) /* package */
     {
         tclSetVar(_validateVar, state);
     }

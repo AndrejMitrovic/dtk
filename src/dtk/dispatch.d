@@ -868,8 +868,8 @@ static:
                 widget.onDestroyEvent.emit(StaticCast!DestroyEvent(event));
                 break;
 
-            case drag_drop:
-                widget.onDragDropEvent.emit(StaticCast!DragDropEvent(event));
+            case drop:
+                widget.onDropEvent.emit(StaticCast!DropEvent(event));
                 break;
 
             case button:

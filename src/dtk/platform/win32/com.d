@@ -85,232 +85,69 @@ class ComObject : IUnknown
 	shared(LONG) _refCount;
 }
 
-enum todo = q{
-
-class ComToDdataObject : IDataObject
+/**
+    Create a global memory buffer and store text contents to it.
+    Return the handle to the memory buffer.
+*/
+HGLOBAL toGlobalMem(string text)
 {
-	this(dfl.internal.wincom.IDataObject dataObj)
-	{
-		this.dataObj = dataObj;
-		dataObj.AddRef();
-	}
+    // allocate and lock a global memory buffer. Make it fixed
+    // data so we don't have to use GlobalLock
+    char* ptr = cast(char*)GlobalAlloc(GMEM_FIXED, text.memSizeOf);
 
+    // copy the string into the buffer
+    ptr[0 .. text.length] = text[];
 
-	~this()
-	{
-		dataObj.Release(); // Must get called...
-	}
-
-
-	private Data _getData(int id)
-	{
-		FORMATETC fmte;
-		STGMEDIUM stgm;
-		void[] mem;
-		void* plock;
-
-		fmte.cfFormat = cast(CLIPFORMAT)id;
-		fmte.ptd = null;
-		fmte.dwAspect = DVASPECT_CONTENT; // ?
-		fmte.lindex = -1;
-		fmte.tymed = TYMED_HGLOBAL; // ?
-
-		if(S_OK != dataObj.GetData(&fmte, &stgm))
-			throw new DflException("Unable to get data");
-
-
-		void release()
-		{
-			//ReleaseStgMedium(&stgm);
-			if(stgm.pUnkForRelease)
-				stgm.pUnkForRelease.Release();
-			else
-				GlobalFree(stgm.hGlobal);
-		}
-
-
-		plock = GlobalLock(stgm.hGlobal);
-		if(!plock)
-		{
-			release();
-			throw new DflException("Error obtaining data");
-		}
-
-		mem = new ubyte[GlobalSize(stgm.hGlobal)];
-		mem[] = plock[0 .. mem.length];
-		GlobalUnlock(stgm.hGlobal);
-		release();
-
-		return DataFormats.getDataFromFormat(id, mem);
-	}
-
-
-	Data getData(Dstring fmt)
-	{
-		return _getData(DataFormats.getFormat(fmt).id);
-	}
-
-
-	Data getData(TypeInfo type)
-	{
-		return _getData(DataFormats.getFormatFromType(type).id);
-	}
-
-
-	Data getData(Dstring fmt, bool doConvert)
-	{
-		return getData(fmt); // ?
-	}
-
-
-	private bool _getDataPresent(int id)
-	{
-		FORMATETC fmte;
-
-		fmte.cfFormat = cast(CLIPFORMAT)id;
-		fmte.ptd = null;
-		fmte.dwAspect = DVASPECT_CONTENT; // ?
-		fmte.lindex = -1;
-		fmte.tymed = TYMED_HGLOBAL; // ?
-
-		return S_OK == dataObj.QueryGetData(&fmte);
-	}
-
-
-	bool getDataPresent(Dstring fmt)
-	{
-		return _getDataPresent(DataFormats.getFormat(fmt).id);
-	}
-
-
-	bool getDataPresent(TypeInfo type)
-	{
-		return _getDataPresent(DataFormats.getFormatFromType(type).id);
-	}
-
-
-	bool getDataPresent(Dstring fmt, bool canConvert)
-	{
-		return getDataPresent(fmt); // ?
-	}
-
-
-	Dstring[] getFormats()
-	{
-		IEnumFORMATETC fenum;
-		FORMATETC fmte;
-		Dstring[] result;
-		ULONG nfetched = 1; // ?
-
-		if(S_OK != dataObj.EnumFormatEtc(1, &fenum))
-			throw new DflException("Unable to get formats");
-
-		fenum.AddRef(); // ?
-		for(;;)
-		{
-			if(S_OK != fenum.Next(1, &fmte, &nfetched))
-				break;
-			if(!nfetched)
-				break;
-			//cprintf("\t\t{getFormats:%d}\n", fmte.cfFormat);
-			result ~= DataFormats.getFormat(fmte.cfFormat).name;
-		}
-		fenum.Release(); // ?
-
-		return result;
-	}
-
-
-	// TO-DO: remove...
-	deprecated final Dstring[] getFormats(bool onlyNative)
-	{
-		return getFormats();
-	}
-
-
-	private void _setData(int id, Data obj)
-	{
-		/+
-		FORMATETC fmte;
-		STGMEDIUM stgm;
-		HANDLE hmem;
-		void[] mem;
-		void* pmem;
-
-		mem = DataFormats.getClipboardValueFromData(id, obj);
-
-		hmem = GlobalAlloc(GMEM_SHARE, mem.length);
-		if(!hmem)
-		{
-			//cprintf("Unable to GlobalAlloc().\n");
-			err_set:
-			throw new DflException("Unable to set data");
-		}
-		pmem = GlobalLock(hmem);
-		if(!pmem)
-		{
-			//cprintf("Unable to GlobalLock().\n");
-			GlobalFree(hmem);
-			goto err_set;
-		}
-		pmem[0 .. mem.length] = mem;
-		GlobalUnlock(hmem);
-
-		fmte.cfFormat = cast(CLIPFORMAT)id;
-		fmte.ptd = null;
-		fmte.dwAspect = DVASPECT_CONTENT; // ?
-		fmte.lindex = -1;
-		fmte.tymed = TYMED_HGLOBAL;
-
-		stgm.tymed = TYMED_HGLOBAL;
-		stgm.hGlobal = hmem;
-		stgm.pUnkForRelease = null;
-
-		// -dataObj- now owns the handle.
-		HRESULT hr = dataObj.SetData(&fmte, &stgm, true);
-		if(S_OK != hr)
-		{
-			//cprintf("Unable to IDataObject::SetData() = %d (0x%X).\n", hr, hr);
-			// Failed, need to free it..
-			GlobalFree(hmem);
-			goto err_set;
-		}
-		+/
-		// Don't set stuff in someone else's data object.
-	}
-
-
-	void setData(Data obj)
-	{
-		_setData(DataFormats.getFormatFromType(obj.info).id, obj);
-	}
-
-
-	void setData(Dstring fmt, Data obj)
-	{
-		_setData(DataFormats.getFormat(fmt).id, obj);
-	}
-
-
-	void setData(TypeInfo type, Data obj)
-	{
-		_setData(DataFormats.getFormatFromType(type).id, obj);
-	}
-
-
-	void setData(Dstring fmt, bool canConvert, Data obj)
-	{
-		setData(fmt, obj); // ?
-	}
-
-
-	final bool isSameDataObject(dfl.internal.wincom.IDataObject dataObj)
-	{
-		return dataObj is this.dataObj;
-	}
-
-
-	private:
-	dfl.internal.wincom.IDataObject dataObj;
+    return cast(HGLOBAL)ptr;
 }
-};
+
+/** Return the memory size needed to store the elements of the array. */
+size_t memSizeOf(E)(E[] arr)
+{
+    return E.sizeof * arr.length;
+}
+
+///
+unittest
+{
+    int[] arrInt = [1, 2, 3, 4];
+    assert(arrInt.memSizeOf == 4 * int.sizeof);
+
+    long[] arrLong = [1, 2, 3, 4];
+    assert(arrLong.memSizeOf == 4 * long.sizeof);
+}
+
+/**
+    Duplicate the memory helt at the global memory handle,
+    and return the handle to the duplicated memory.
+*/
+HGLOBAL dupGlobalMem(HGLOBAL hMem)
+{
+    // lock the source memory object
+    PVOID source = GlobalLock(hMem);
+    scope(exit) GlobalUnlock(hMem);
+
+    // create a fixed global block - just
+    // a regular lump of our process heap
+    DWORD len = GlobalSize(hMem);
+    PVOID dest = GlobalAlloc(GMEM_FIXED, len);
+    memcpy(dest, source, len);
+
+    return dest;
+}
+
+/** Perform a deep copy of a FORMATETC structure. */
+FORMATETC deepDupFormatEtc(FORMATETC source)
+{
+    FORMATETC res;
+    res = source;
+
+    // duplicate memory for the DVTARGETDEVICE if necessary
+    if (source.ptd)
+    {
+        res.ptd = cast(DVTARGETDEVICE*)CoTaskMemAlloc(DVTARGETDEVICE.sizeof);
+        *(res.ptd) = *(source.ptd);
+    }
+
+    return res;
+}

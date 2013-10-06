@@ -12,12 +12,13 @@ import std.traits;
 import std.typecons;
 import std.typetuple;
 
-import dtk.dragdrop;
 import dtk.geometry;
 import dtk.keymap;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
+
+import dtk.platform.native;
 
 import dtk.widgets;
 
@@ -66,8 +67,8 @@ enum EventType
     /** A widget is about to be destroyed. */
     destroy,
 
-    /** A drag and drop was initiated, either from a source widget or onto a hovered widget. */
-    drag_drop,
+    /** A drop action of a drag and drop operation was initiated. */
+    drop,
 
     /** A button widget event, e.g. a button widget was pressed. */
     button,
@@ -235,79 +236,7 @@ package:
     EventTravel _eventTravel;
 }
 
-/** A set of possible mouse actions. */
-enum MouseAction
-{
-    /** One of the mouse buttons was pressed. */
-    press = 0,
-
-    /** One of the mouse buttons was released. */
-    release = 1,
-
-    /** Convenience - equal to $(D press). */
-    click = press,
-
-    /** One of the mouse buttons was clicked twice in rapid succession. */
-    double_click = 2,
-
-    /** One of the mouse buttons was clicked three times in rapid succession. */
-    triple_click = 3,
-
-    /** One of the mouse buttons was clicked four times in rapid succession. */
-    quadruple_click = 4,
-
-    /**
-        The mouse wheel was moved. See the $(D wheel) field to determine
-        the direction the mouse wheel was moved in.
-
-        $(BLUE Note): When the wheel is pressed as a mouse button,
-        the action will equal $(D press), not $(D wheel).
-    */
-    wheel = 5,
-
-    /** The mouse was moved. */
-    motion = 6,
-}
-
-/** A set of possible mouse buttons. */
-enum MouseButton
-{
-    /** No button was pressed or released. */
-    none = 0,
-
-    /** The left mouse button. */
-    button1 = 1,
-
-    /** Convenience - equal to $(D button1). */
-    left = button1,
-
-    /** The middle mouse button. */
-    button2 = 2,
-
-    /** Convenience - equal to $(D button2). */
-    middle = button2,
-
-    /** The right mouse button. */
-    button3 = 3,
-
-    /** Convenience - equal to $(D button3). */
-    right = button3,
-
-    /** First additional button - hardware-dependent. */
-    button4 = 4,
-
-    /** Convenience - equal to $(D button4) */
-    x1 = button4,
-
-    /** Second additional button - hardware-dependent. */
-    button5 = 5,
-
-    /** Convenience - equal to $(D button5) */
-    x2 = button5,
-}
-
 private enum AnyModifier = 1 << 15;
-
 
 /**
     A set of keyboard modifiers or active mouse buttons
@@ -653,6 +582,83 @@ unittest
     assert(!(keyMod == KeyMod.ctrl || keyMod == KeyMod.ctrl + KeyMod.alt));
 }
 
+/** A set of possible mouse actions. */
+enum MouseAction
+{
+    /** Sentinel. */
+    none,
+
+    /** One of the mouse buttons was pressed. */
+    press = 1,
+
+    /** One of the mouse buttons was released. */
+    release = 2,
+
+    /** Convenience - equal to $(D press). */
+    click = press,
+
+    /** One of the mouse buttons was clicked twice in rapid succession. */
+    double_click = 3,
+
+    /** One of the mouse buttons was clicked three times in rapid succession. */
+    triple_click = 4,
+
+    /** One of the mouse buttons was clicked four times in rapid succession. */
+    quadruple_click = 5,
+
+    /**
+        The mouse wheel was moved. See the $(D wheel) field to determine
+        the direction the mouse wheel was moved in.
+
+        $(BLUE Note): When the wheel is pressed as a mouse button,
+        the action will equal $(D press), not $(D wheel).
+    */
+    wheel = 6,
+
+    /** The mouse was moved. */
+    motion = 7,
+
+    /** Convenience - equal to $(D motion) */
+    move = motion,
+}
+
+/** A set of possible mouse buttons. */
+enum MouseButton
+{
+    /** No button was pressed or released. */
+    none = 0,
+
+    /** The left mouse button. */
+    button1 = 1,
+
+    /** Convenience - equal to $(D button1). */
+    left = button1,
+
+    /** The middle mouse button. */
+    button2 = 2,
+
+    /** Convenience - equal to $(D button2). */
+    middle = button2,
+
+    /** The right mouse button. */
+    button3 = 3,
+
+    /** Convenience - equal to $(D button3). */
+    right = button3,
+
+    /** First additional button - hardware-dependent. */
+    button4 = 4,
+
+    /** Convenience - equal to $(D button4) */
+    x1 = button4,
+
+    /** Second additional button - hardware-dependent. */
+    button5 = 5,
+
+    /** Convenience - equal to $(D button5) */
+    x2 = button5,
+}
+
 ///
 class MouseEvent : Event
 {
@@ -728,6 +734,9 @@ class MouseEvent : Event
 */
 enum KeyboardAction
 {
+    /** Sentinel. */
+    none,
+
     /** One of the keys was pressed. */
     press,
 
@@ -837,6 +846,9 @@ class GeometryEvent : Event
 ///
 enum HoverAction
 {
+    /// Sentinel.
+    none,
+
     /// The pointer entered the area of the target widget
     enter,
 
@@ -881,6 +893,9 @@ class HoverEvent : Event
 ///
 enum FocusAction
 {
+    /// Sentinel
+    none,
+
     /// The widget was focused in (the focus has entered the widget)
     enter,
 
@@ -927,6 +942,7 @@ class DestroyEvent : Event
 /// These actions occur during a drag & drop mouse operation.
 enum DropAction
 {
+    none,   /// Sentinel
     enter,  /// The mouse entered a widget's area.
     move,   /// The mouse moved within a widget's area.
     drop,   /// The mouse button was released, finishing the drag & drop operation.
@@ -942,11 +958,11 @@ package enum DropEffect
 	scroll = 0x80000000,
 }
 
-class DragDropEvent : Event
+class DropEvent : Event
 {
     this(Widget widget, DropAction action, DropData dropData, DropEffect dropEffect, Point position, KeyMod keyMod, TimeMsec timeMsec)
     {
-        super(widget, EventType.drag_drop, timeMsec);
+        super(widget, EventType.drop, timeMsec);
         this.action = action;
         _dropData = dropData;
         _dropEffect = dropEffect;
@@ -956,7 +972,7 @@ class DragDropEvent : Event
 
     this(Widget widget, DropAction action, TimeMsec timeMsec)
     {
-        super(widget, EventType.drag_drop, timeMsec);
+        super(widget, EventType.drop, timeMsec);
         this.action = action;
         assert(action == DropAction.leave);
     }
@@ -1131,6 +1147,9 @@ private:
 enum ButtonAction
 {
     /// sentinel
+    none,
+
+    /// sentinel
     invalid,
 
     /// A button was pushed.
@@ -1166,7 +1185,7 @@ class ButtonEvent : Event
 enum CheckButtonAction
 {
     /// sentinel
-    invalid,
+    none,
 
     /// A checkbutton was toggled on.
     toggleOn,
@@ -1206,6 +1225,9 @@ class CheckButtonEvent : Event
 /// Menu widget event.
 enum MenuAction
 {
+    /// sentinel
+    none,
+
     /// A regular menu item was selected.
     command,
 
@@ -1330,6 +1352,9 @@ class EntryEvent : Event
 ///
 enum ValidateAction
 {
+    /// Sentinel
+    none,
+
     /// Requested when new text is being inputted.
     insert,
 
@@ -1429,6 +1454,9 @@ package:
 ///
 enum ListboxAction
 {
+    /// Sentinel.
+    none,
+
     /// The selection in the listbox was changed.
     select,
 

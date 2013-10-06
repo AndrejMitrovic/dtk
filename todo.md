@@ -1,5 +1,8 @@
 Todo:
 
+- Drag and Drop C# examples:
+http://blogs.msdn.com/b/adamroot/archive/2008/02/19/shell-style-drag-and-drop-in-net-wpf-and-winforms.aspx
+
 - Add proper checks for Tk and versions:
     if (
 #ifdef USE_TK_STUBS
