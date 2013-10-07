@@ -67,6 +67,9 @@ enum EventType
     /** A widget is about to be destroyed. */
     destroy,
 
+    /** A drag action of a drag and drop operation was initiated. */
+    drag,
+
     /** A drop action of a drag and drop operation was initiated. */
     drop,
 
@@ -940,6 +943,188 @@ class DestroyEvent : Event
 }
 
 /// These actions occur during a drag & drop mouse operation.
+enum DragAction
+{
+    none,      /// Sentinel
+    keyChange, /// A key modifier was pressed/released or the escape key was pressed
+    feedback,  /// The user has dragged in/over/out of a target widget.
+    drop,      /// The drag & drop operation is complete.
+    canceled,  /// The drag & drop operation was cancelled.
+}
+
+package enum DragState
+{
+    proceed  = 0,
+    cancel   = 0x00040101,
+    dropData = 0x00040100,
+}
+
+enum DropEffect
+{
+	none   = 0,
+	copy   = 1,
+	move   = 2,
+	link   = 3,
+	scroll = 0x80000000,
+}
+
+class DragEvent : Event
+{
+    this(Widget widget, DragAction action, bool escapePressed, KeyMod keyMod, TimeMsec timeMsec)
+    {
+        super(widget, EventType.drag, timeMsec);
+        this.action = action;
+        _escapePressed = escapePressed;
+        _keyMod = keyMod;
+    }
+
+    this(Widget widget, DragAction action, DropEffect dropEffect, TimeMsec timeMsec)
+    {
+        super(widget, EventType.drag, timeMsec);
+        assert(action == DragAction.drop, action.text);
+        this.action = action;
+        _dropEffect = dropEffect;
+    }
+
+    this(Widget widget, DragAction action, TimeMsec timeMsec)
+    {
+        super(widget, EventType.drag, timeMsec);
+        assert(action != DragAction.keyChange, action.text);
+        this.action = action;
+    }
+
+    ///
+    override void toString(scope void delegate(const(char)[]) sink)
+    {
+        toStringImpl(sink, this.tupleof);
+    }
+
+    /** The action that triggered this drag event. */
+    const(DragAction) action;
+
+    /**
+        A bit mask of key modifiers.
+
+        $(B Note:) The modifiers supported during a drag and drop operation are:
+        - control, alt, shift, mouse_left, mouse_middle, mouse_right.
+
+        $(B Note:) You may only access this property during a
+        $(D DragAction.keyChange) action.
+    */
+    @property KeyMod keyMod()
+    {
+        checkAction!(DragAction.keyChange);
+        return _keyMod;
+    }
+
+    /**
+        Check whether the escape key was pressed.
+
+        $(B Note:) You may only access this property during a
+        $(D DragAction.keyChange) action.
+    */
+    @property bool escapePressed()
+    {
+        checkAction!(DragAction.keyChange);
+        return _escapePressed;
+    }
+
+    /**
+        Cancel the drag & drop operation.
+
+        $(B Note:) You may only call this function during a
+        $(D DragAction.keyChange) action.
+    */
+    void cancel()
+    {
+        checkAction!(DragAction.keyChange);
+        _dragState = DragState.cancel;
+    }
+
+    /**
+        Attempt to drop the data to the current window the
+        mouse is hovered over.s
+
+        $(B Note:) You may only call this function during a
+        $(D DragAction.keyChange) action.
+    */
+    void dropData()
+    {
+        checkAction!(DragAction.keyChange);
+        _dragState = DragState.dropData;
+    }
+
+    /**
+        Check whether the data was moved after a drop action.
+
+        $(B Note:) You may only access this property during a
+        $(D DragAction.drop) action.
+    */
+    @property bool hasMovedData()
+    {
+        checkAction!(DragAction.drop);
+        return (_dropEffect & DropEffect.move) == DropEffect.move;
+    }
+
+    /**
+        Check whether the data was copied after a drop action.
+
+        $(B Note:) You may only access this property during a
+        $(D DragAction.drop) action.
+    */
+    @property bool hasCopiedData()
+    {
+        checkAction!(DragAction.drop);
+        return (_dropEffect & DropEffect.copy) == DropEffect.copy;
+    }
+
+private:
+    private void checkAction(DragAction expectAction, string func = __FUNCTION__)
+                            (string file = __FILE__, size_t line = __LINE__)
+    {
+        enum ident = func.unqualed();
+        alias symbol = typeof(&mixin(ident));
+        enum attrs = functionAttributes!symbol;
+
+        static if (attrs & FunctionAttribute.property)
+            enum fmt = "Cannot access the '" ~ ident ~ "' property during a '%s' action. Action must equal '" ~ expectAction.text ~ "'.";
+        else
+            enum fmt = "Cannot call the '" ~ ident ~ "' function during a '%s' action. Action must equal '" ~ expectAction.text ~ "'.";
+
+        enforce(action == expectAction, format(fmt, action), file, line);
+    }
+
+    private void checkFeedbackAction(string file = __FILE__, size_t line = __LINE__, string func = __FUNCTION__)
+    {
+        enforce(action == DragAction.feedback,
+            format("Cannot call the '%s' function during a '%s' action. Action must equal '%s'.",
+                func.unqualed(), action, DragAction.feedback), file, line);
+    }
+
+    private void checkKeyChangeAction(string file = __FILE__, size_t line = __LINE__, string func = __FUNCTION__)
+    {
+        enforce(action == DragAction.keyChange,
+            format("Cannot access the '%s' property during a '%s' action. Action must equal '%s'.",
+                func.unqualed(), action, DragAction.keyChange), file, line);
+    }
+
+    private void checkDropAction(string file = __FILE__, size_t line = __LINE__, string func = __FUNCTION__)
+    {
+        enforce(action == DragAction.drop,
+            format("Cannot access the '%s' property during a '%s' action. Action must equal '%s'.",
+                func.unqualed(), action, DragAction.drop), file, line);
+    }
+
+package:
+    DragState _dragState;
+
+private:
+    bool _escapePressed;
+    KeyMod _keyMod;
+    DropEffect _dropEffect;
+}
+
+/// These actions occur during a drag & drop mouse operation.
 enum DropAction
 {
     none,   /// Sentinel
@@ -947,15 +1132,6 @@ enum DropAction
     move,   /// The mouse moved within a widget's area.
     drop,   /// The mouse button was released, finishing the drag & drop operation.
     leave,  /// The mouse left a widget's area.
-}
-
-package enum DropEffect
-{
-	none = 0,
-	copy = 1,
-	move = 2,
-	link = 3,
-	scroll = 0x80000000,
 }
 
 class DropEvent : Event
@@ -973,8 +1149,8 @@ class DropEvent : Event
     this(Widget widget, DropAction action, TimeMsec timeMsec)
     {
         super(widget, EventType.drop, timeMsec);
+        assert(action == DropAction.leave, action.text);
         this.action = action;
-        assert(action == DropAction.leave);
     }
 
     ///
@@ -1020,6 +1196,9 @@ class DropEvent : Event
             writefln("Received: %s", text);
         }
         -----
+
+        $(B Note:) You may $(B not) access this property during a
+        $(D DropAction.leave) action.
     */
     @property bool acceptDrop()
     {
@@ -1034,40 +1213,56 @@ class DropEvent : Event
         _acceptDrop = accept;
     }
 
+    /**
+        Check whether the drag & drop data is copyable.
+
+        $(B Note:) You may $(B not) access this property during a
+        $(D DropAction.leave) action.
+    */
     @property bool canCopyData()
     {
         checkValidAction();
         return (_dropEffect & DropEffect.copy) == DropEffect.copy;
     }
 
-    /** */
-    @property bool hasData(T)()
-    {
-        checkValidAction();
-        return _dropData.hasData!T();
-    }
+    /**
+        Check whether the drag & drop data is movable.
+        Movable implies the data is copyable, moving the data
+        has the semantic meaning defined by the source of the
+        drag & drop operation.
 
-    T copyData(T)()
-    {
-        checkValidAction();
-        enforce(canCopyData, "Source does not allow data to be copied.");
+        Typically, when moving data the source will copy the data
+        and then delete the source of the data. This is typically
+        equivalent to a Cut & Paste operation in a text editor.
 
-        scope(success)
-        {
-            _dropEffect = DropEffect.copy;
-            _acceptDrop = true;
-        }
-
-        return _dropData.getData!T();
-    }
-
+        $(B Note:) You may $(B not) access this property during a
+        $(D DropAction.leave) action.
+    */
     @property bool canMoveData()
     {
         checkValidAction();
         return (_dropEffect & DropEffect.move) == DropEffect.move;
     }
 
-    T moveData(T)()
+    /**
+        Check whether the drop data contains data of type $(D DataType).
+
+        $(B Note:) You may $(B not) access this property during a
+        $(D DropAction.leave) action.
+    */
+    @property bool hasData(DataType)()
+    {
+        checkValidAction();
+        return _dropData.hasData!DataType();
+    }
+
+    /**
+        Move the data of type $(D DataType) from source and return it.
+
+        $(B Note:) You may $(B not) access this function during a
+        $(D DropAction.leave) action.
+    */
+    DataType moveData(DataType)()
     {
         checkValidAction();
         enforce(canMoveData, "Source does not allow data to be moved.");
@@ -1078,14 +1273,34 @@ class DropEvent : Event
             _acceptDrop = true;
         }
 
-        return _dropData.getData!T();
+        return _dropData.getData!DataType();
     }
 
     /**
-        Position of the mouse pointer relative to the target widget.
+        Copy the data of type $(D DataType) from source and return it.
 
-        Note: If $(D action) equals $(D DropAction.leave) then this property
-        has no valid meaning and will throw an exception when accessed.
+        $(B Note:) You may $(B not) access this function during a
+        $(D DropAction.leave) action.
+    */
+    DataType copyData(DataType)()
+    {
+        checkValidAction();
+        enforce(canCopyData, "Source does not allow data to be copied.");
+
+        scope(success)
+        {
+            _dropEffect = DropEffect.copy;
+            _acceptDrop = true;
+        }
+
+        return _dropData.getData!DataType();
+    }
+
+    /**
+        Get the position of the mouse pointer relative to the target widget.
+
+        $(B Note:) You may $(B not) access this property during a
+        $(D DropAction.leave) action.
     */
     @property Point position()
     {
@@ -1110,8 +1325,8 @@ class DropEvent : Event
         operation are:
         - control, alt, shift, mouse_left, mouse_middle, mouse_right.
 
-        Note: If $(D action) equals $(D DropAction.leave) then this property
-        has no valid meaning and will throw an exception when accessed.
+        $(B Note:) You may $(B not) access this property during a
+        $(D DropAction.leave) action.
     */
     @property KeyMod keyMod()
     {
@@ -1126,13 +1341,9 @@ package:
 private:
     private void checkValidAction(string file = __FILE__, size_t line = __LINE__, string func = __FUNCTION__)
     {
-        // strip off qualification
-        auto idx = func.lastIndexOf(".");
-        if (idx != -1)
-            func = func[idx + 1 .. $];
-
         enforce(action != DropAction.leave,
-            format("Cannot access '%s' property during a drop leave action.", func), file, line);
+            format("Cannot access the '%s' property during a '%s' action.",
+                func.unqualed(), action), file, line);
     }
 
 private:

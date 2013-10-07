@@ -868,6 +868,10 @@ static:
                 widget.onDestroyEvent.emit(StaticCast!DestroyEvent(event));
                 break;
 
+            case drag:
+                widget.onDragEvent.emit(StaticCast!DragEvent(event));
+                break;
+
             case drop:
                 widget.onDropEvent.emit(StaticCast!DropEvent(event));
                 break;

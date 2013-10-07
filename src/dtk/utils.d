@@ -360,19 +360,19 @@ template ThrowWrapper(alias func)
         }
         catch (Exception exception)
         {
-            stderr.writeln("Just thrown exception: %s", exception);
+            stderr.writefln("Just thrown exception: %s", exception);
             App.thrownException = exception;
             return TCL_ERROR;
         }
         catch (Error error)
         {
-            stderr.writeln("Just thrown error: %s", error);
+            stderr.writefln("Just thrown error: %s", error);
             App.thrownError = error;
             return TCL_ERROR;
         }
         catch (Throwable throwable)
         {
-            stderr.writeln("Just thrown throwable: %s", throwable);
+            stderr.writefln("Just thrown throwable: %s", throwable);
             App.thrownThrowable = throwable;
             return TCL_ERROR;
         }
@@ -438,4 +438,13 @@ string fromWStringz(const(wchar)* s)
     for (ptr = cast(wchar*)s; *ptr; ++ptr) { }
 
     return to!string(s[0..ptr-s]);
+}
+
+string unqualed(string input)
+{
+    auto idx = input.lastIndexOf(".");
+    if (idx != -1)
+        input = input[idx + 1 .. $];
+
+    return input;
 }
