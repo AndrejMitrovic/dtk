@@ -30,6 +30,22 @@ import dtk.platform.win32.com;
 import dtk.widgets.widget;
 import dtk.widgets.window;
 
+private static FORMATETC _dtkFormat;
+private static DWORD _processID;
+
+static void _initDragDrop()
+{
+    auto res = RegisterClipboardFormatW("dtk_drag_drop_format");
+    enforce(res != 0, format("RegisterClipboardFormat error: %s", to!string(GetLastError())));
+    _dtkFormat.cfFormat = cast(CLIPFORMAT)res;
+    _dtkFormat.ptd = null;
+    _dtkFormat.dwAspect = DVASPECT.DVASPECT_CONTENT;
+    _dtkFormat.lindex = -1;
+    _dtkFormat.tymed = TYMED.TYMED_HGLOBAL;  // note: must be hglobal
+
+    _processID = GetCurrentProcessId();
+}
+
 void registerDragDrop(HWND hwnd, DropTarget dropTarget)
 {
     auto res = RegisterDragDrop(hwnd, dropTarget);
@@ -42,89 +58,6 @@ void unregisterDragDrop(HWND hwnd)
     auto res = RevokeDragDrop(hwnd);
     enforce(res == S_OK || res == DRAGDROP_E_NOTREGISTERED,
         format("Could not unregister handle '%s'. Error code: %s", hwnd, res));
-}
-
-private static FORMATETC _dtkFormat;
-
-static void _initDragDropFormat()
-{
-    auto res = RegisterClipboardFormatW("dtk_drag_drop_format");
-    enforce(res != 0, format("RegisterClipboardFormat error: %s", to!string(GetLastError())));
-    _dtkFormat.cfFormat = cast(CLIPFORMAT)res;
-    _dtkFormat.ptd = null;
-    _dtkFormat.dwAspect = DVASPECT.DVASPECT_CONTENT;
-    _dtkFormat.lindex = -1;
-    _dtkFormat.tymed = TYMED.TYMED_HGLOBAL;  // note: must be hglobal
-}
-
-enum CanCopyData
-{
-    no,
-    yes,
-}
-
-enum CanMoveData
-{
-    no,
-    yes,
-}
-
-struct DragData
-{
-    this(T)(T data, CanMoveData canMove, CanCopyData canCopy)
-    {
-        _data = data;
-        _canMove = cast(bool)canMove;
-        _canCopy = cast(bool)canCopy;
-    }
-
-    @property bool canMove() { return _canMove; }
-    @property bool canCopy() { return _canCopy; }
-
-private:
-    Variant _data;
-    bool _canMove;
-    bool _canCopy;
-}
-
-class DropSource : ComObject, IDropSource
-{
-    extern (Windows)
-    override HRESULT QueryInterface(const(IID)* riid, void** ppv)
-    {
-        if (*riid == IID_IDropSource)
-        {
-            *ppv = cast(void*)cast(IUnknown)this;
-            AddRef();
-            return S_OK;
-        }
-
-        return super.QueryInterface(riid, ppv);
-    }
-
-    /** Called by OLE whenever Escape/Control/Shift/Mouse buttons have changed. */
-    extern (Windows)
-    HRESULT QueryContinueDrag(BOOL fEscapePressed, DWORD grfKeyState)
-    {
-        // if the <Escape> key has been pressed since the last call, cancel the drop
-        if (fEscapePressed == TRUE)
-            return DRAGDROP_S_CANCEL;
-
-        // if the <LeftMouse> button has been released, then do the drop!
-        if ((grfKeyState & MK_LBUTTON) == 0)
-            return DRAGDROP_S_DROP;
-
-        // continue with the drag-drop
-        return S_OK;
-    }
-
-    //	Return either S_OK or DRAGDROP_S_USEDEFAULTCURSORS to instruct OLE to use the
-    //  default mouse cursor images
-    extern (Windows)
-    HRESULT GiveFeedback(DWORD dwEffect)
-    {
-        return DRAGDROP_S_USEDEFAULTCURSORS;
-    }
 }
 
 void startDragEvent(Widget widget, DragData dragData)
@@ -164,6 +97,112 @@ void startDragEvent(Widget widget, DragData dragData)
     } +/
 }
 
+/**
+    A DTK widget uses this drop source object to change state
+    (e.g. mouse cursor, widget color, etc) based on entry/exit,
+    and to determine if the drag/drop operation should be
+    accepted or cancelled when some keyboard modifier
+    has been pressed/released or when the escape key is hit.
+*/
+class DropSource : ComObject, IDropSource
+{
+    extern (Windows)
+    override HRESULT QueryInterface(const(IID)* riid, void** ppv)
+    {
+        if (*riid == IID_IDropSource)
+        {
+            *ppv = cast(void*)cast(IUnknown)this;
+            AddRef();
+            return S_OK;
+        }
+
+        return super.QueryInterface(riid, ppv);
+    }
+
+    /** Called by OLE whenever Escape/Control/Shift/Mouse buttons have changed. */
+    extern (Windows)
+    HRESULT QueryContinueDrag(BOOL fEscapePressed, DWORD grfKeyState)
+    {
+        // if the <Escape> key has been pressed since the last call, cancel the drop
+        if (fEscapePressed == TRUE)
+            return DRAGDROP_S_CANCEL;
+
+        // if the <LeftMouse> button has been released, then do the drop!
+        if ((grfKeyState & MK_LBUTTON) == 0)
+            return DRAGDROP_S_DROP;
+
+        // continue with the drag-drop
+        return S_OK;
+    }
+
+    //	Return either S_OK or DRAGDROP_S_USEDEFAULTCURSORS to instruct OLE to use the
+    //  default mouse cursor images
+    extern (Windows)
+    HRESULT GiveFeedback(DWORD dwEffect)
+    {
+        // todo: this is our hookup point for a signal
+
+        // dwEffect describes the value returned by the
+        // most recent call to IDropTarget::DragEnter,
+        // IDropTarget::DragOver, or IDropTarget::DragLeave.
+
+        // For every call to either IDropTarget::DragEnter or
+        // IDropTarget::DragOver, DoDragDrop calls
+        // IDropSource::GiveFeedback, passing it the DROPEFFECT
+        // value returned from the drop target call.
+
+        // DoDragDrop calls IDropTarget::DragLeave when the
+        // mouse has left the target window. Then, DoDragDrop
+        // calls IDropSource::GiveFeedback and passes the
+        // DROPEFFECT_NONE value in the dwEffect parameter.
+
+        // The dwEffect parameter can include DROPEFFECT_SCROLL,
+        // indicating that the source should put up the
+        // drag-scrolling variation of the appropriate pointer.
+
+        // IDropSource::GiveFeedback is responsible for changing the
+        // cursor shape or for changing the highlighted source based
+        // on the value of the dwEffect parameter.
+
+        return DRAGDROP_S_USEDEFAULTCURSORS;
+    }
+}
+
+enum CanCopyData
+{
+    no,
+    yes,
+}
+
+enum CanMoveData
+{
+    no,
+    yes,
+}
+
+/**
+    Stored by a DTK widget drop source.
+*/
+struct DragData
+{
+    this(T)(T data, CanMoveData canMove, CanCopyData canCopy)
+    {
+        _data = data;
+        _canMove = cast(bool)canMove;
+        _canCopy = cast(bool)canCopy;
+        _processID = ._processID;
+    }
+
+    @property bool canMove() { return _canMove; }
+    @property bool canCopy() { return _canCopy; }
+
+private:
+    DWORD _processID;
+    Variant _data;
+    bool _canMove;
+    bool _canCopy;
+}
+
 private struct FormatStore
 {
     FORMATETC fmtetc;
@@ -171,8 +210,11 @@ private struct FormatStore
 }
 
 /**
-    This is explicitly a DTK data object.
+    This is a DTK data object.
 
+    It retrieves the data stored in a DragData struct.
+
+    Note:
     Dragging between DTK widgets is easy, however dragging outside
     to e.g. an explorer window or another application requires
     that we implement all COM methods properly.
@@ -346,8 +388,23 @@ private:
                 return getWideString();
 
             default:
-                return Range();
+                break;
         }
+
+        // note: cannot be in switch statement due to CT read requirement
+        if (fmtetc.cfFormat == _dtkFormat.cfFormat)
+            return getDragData();
+
+        return Range();
+    }
+
+    private Range getDragData()
+    {
+        STGMEDIUM stgmed = { TYMED.TYMED_HGLOBAL };
+        stgmed.hGlobal = copyDragData();
+
+        auto formatStore = FormatStore(_dtkFormat, stgmed);
+        return Range(formatStore);
     }
 
     private Range getAsciiString()
@@ -362,7 +419,6 @@ private:
         FORMATETC fmtetc = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
         STGMEDIUM stgmed = { TYMED.TYMED_HGLOBAL };
 
-        // format matches, copy text data to global memory
         stgmed.hGlobal = copyAsciiText(*ptr);
 
         auto formatStore = FormatStore(fmtetc, stgmed);
@@ -416,15 +472,66 @@ private:
         return hMem;
     }
 
+    private HGLOBAL copyDragData()
+    {
+        enum bytes = DragData.sizeof;
+
+        HGLOBAL hMem = GlobalAlloc(GHND, bytes);
+        auto ptr = cast(DragData*)GlobalLock(hMem);
+        scope(exit) GlobalUnlock(hMem);
+
+        memcpy(ptr, &_dragData, bytes);
+        return hMem;
+    }
+
 private:
     DragData _dragData;
 }
 
+/**
+    Retrieved by a DTK widget.
+*/
 struct DropData
 {
-    package bool hasData(T)() if (is(T == string))
+    // todo: could register a clipboard format by using "dtk_%s".format(typeid(T).toString).
+    // then generic data can be retrieved from a Variant without having to hardcode anything.
+
+    // todo: we'll have to check against the GetCurrentProcessId() type.
+
+    // todo: instead of registering various clipboard formats, we'll register just the DTK_DragData
+    // type, which stores the process ID and the Variant. For format types without indirection
+    // (see std.concurrency for the helper functions) we can simply copy, while for others we'll
+    // have to use some kind of deep-copy mechanism. Perhaps the user would provide this.
+
+    // check string
+    package bool hasData(T)()
     {
-        return hasAsciiString() || hasWideString();
+        static if (is(T == string))
+            return hasAsciiString() || hasWideString() || hasDtkDragData!T();
+        else
+            return hasDtkDragData!T();
+    }
+
+    // get string
+    package T getData(T)()
+    {
+        static if (is(T == string))
+        {
+            if (hasWideString())
+                return getWideString();
+            else
+            if (hasAsciiString())
+                return getAsciiString();
+            else
+            if (hasDtkDragData!T())
+                return getDtkDragData!T();
+            else
+                assert(0, format("Drop data does not contain any data of type '%s'.", T.stringof));
+        }
+        else
+        {
+            return getDtkDragData!T();
+        }
     }
 
     private bool hasAsciiString()
@@ -439,15 +546,23 @@ struct DropData
         return _dataObject.QueryGetData(&fmtetc) == S_OK;
     }
 
-    package T getData(T)() if (is(T == string))
+    private bool hasDtkDragData(T)()
     {
-        if (hasWideString())
-            return getWideString();
-        else
-        if (hasAsciiString())
-            return getAsciiString();
-        else
-            assert(0, format("Drop data does not contain any data of type '%s'.", T.stringof));
+        // if no dtk data, return early
+        if (_dataObject.QueryGetData(&_dtkFormat) != S_OK)
+            return false;
+
+        STGMEDIUM stgmed;
+        readData!DragData(&_dtkFormat, &stgmed);
+        scope(exit) ReleaseStgMedium(&stgmed);
+
+        // we asked for the data as a HGLOBAL, so access it appropriately
+        auto dragData = cast(DragData*)GlobalLock(stgmed.hGlobal);
+        scope(exit) GlobalUnlock(stgmed.hGlobal);
+
+        // peek!() would return null on base classes and other
+        // small mismatches such as int => long.
+        return dragData._data.convertsTo!T;
     }
 
 private:
@@ -482,6 +597,33 @@ private:
 
         string result = data.fromWStringz();
         return result;
+    }
+
+    // get the type that a dtk drag data supports
+    private T getDtkDragData(T)()
+    {
+        STGMEDIUM stgmed;
+        readData!DragData(&_dtkFormat, &stgmed);
+        scope(exit) ReleaseStgMedium(&stgmed);
+
+        // we asked for the data as a HGLOBAL, so access it appropriately
+        auto dragData = cast(DragData*)GlobalLock(stgmed.hGlobal);
+        scope(exit) GlobalUnlock(stgmed.hGlobal);
+
+        /**
+            We cannot transfer pointer data across process boundaries
+            since they're not in the same address space.
+
+            Todo: Provide a serialization method for objects to be able
+            to transfer them across processes.
+        */
+        static if (hasIndirections!T)
+        {
+            enforce(dragData._processID == _processID,
+                format("Cannot drag data of type '%s' with indirections across process boundaries.", T.stringof));
+        }
+
+        return dragData._data.get!T;
     }
 
     private void readData(T)(FORMATETC* fmtetc, STGMEDIUM* stgmed)

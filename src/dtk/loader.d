@@ -67,7 +67,7 @@ version (Windows)
             enforce(0, format("OleInitialize failed with: %s", oleRes));
         }
 
-        _initDragDropFormat();
+        _initDragDrop();
 
         /** Initialize DTK classes. */
         Interpreter.initClass();

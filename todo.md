@@ -1,5 +1,8 @@
 Todo:
 
+- Drag and Drop diagram:
+http://stackoverflow.com/a/1282783/279684
+
 - Drag and Drop C# examples:
 http://blogs.msdn.com/b/adamroot/archive/2008/02/19/shell-style-drag-and-drop-in-net-wpf-and-winforms.aspx
 
@@ -25,7 +28,6 @@ http://blogs.msdn.com/b/adamroot/archive/2008/02/19/shell-style-drag-and-drop-in
         Tcl_SetResult(interp, "tkdnd requires Tk 8.3.3 or greater", TCL_STATIC);
         return TCL_ERROR;
     }
-
 
 - Add a clipboard module, and also add an onClipboardEvent signal via:
 http://msdn.microsoft.com/en-us/library/windows/desktop/ms649033%28v=vs.85%29.aspx

@@ -13,7 +13,7 @@ unittest
     auto app = new App;
 
     auto testWindow = new Window(app.mainWindow, 200, 200);
-    testWindow.position = Point(500, 500);
+    testWindow.position = Point(400, 400);
 
     auto button1 = new Button(testWindow, "Button1");
     auto button2 = new Button(testWindow, "Button2");
@@ -42,20 +42,31 @@ unittest
         if (event.action == DropAction.leave)
             return;
 
-        if (!event.hasData!string)  // only interested in text data
+        //~ stderr.writefln("Has data: %s", event.hasData!Widget);
+
+        if (!event.hasData!string && !event.hasData!Widget)
             return;
 
         event.acceptDrop = true;
 
         if (event.action == DropAction.drop)
         {
-            string data;
-            if (event.keyMod & (KeyMod.control + KeyMod.alt) && event.canMoveData)
-                data = event.moveData!string();
-            else
-                data = event.copyData!string();
+            if (event.hasData!string)
+            {
+                string data;
+                if (event.keyMod & (KeyMod.control + KeyMod.alt) && event.canMoveData)
+                    data = event.moveData!string();
+                else
+                    data = event.copyData!string();
 
-            stderr.writefln("Got text data: %s", data);
+                stderr.writefln("Got text data: %s", data);
+            }
+            else
+            if (event.hasData!Widget)
+            {
+                Widget data = event.copyData!Widget();
+                stderr.writefln("Got widget: %s", data);
+            }
         }
 
         //~ enum PRINT_MODS = 1;
@@ -71,13 +82,13 @@ unittest
             stderr.writefln("- RButton: %s", event.keyMod & KeyMod.mouse_right);
         }
 
-        stderr.writefln("Button 1 drag drop event: %s", event.action);
+        //~ stderr.writefln("Button 1 drag drop event: %s", event.action);
     };
 
     button2.onDropEvent ~= (scope DropEvent event)
     {
         // button1.dragDrop.unregister();
-        stderr.writefln("Button 2 drag drop event: %s", event.action);
+        //~ stderr.writefln("Button 2 drag drop event: %s", event.action);
     };
 
     //~ sourceLabel.onDragEvent ~= (scope DragEvent event)
@@ -112,7 +123,11 @@ unittest
         if (event.action == MouseAction.move && event.keyMod & KeyMod.mouse_left
             && lastAction == MouseAction.press && lastButton == MouseButton.left)
         {
-            DragData data = DragData(sourceLabel.text, CanMoveData.yes, CanCopyData.yes);
+            // text
+            //~ DragData data = DragData(sourceLabel.text, CanMoveData.yes, CanCopyData.yes);
+
+            // widget
+            DragData data = DragData(sourceLabel, CanMoveData.yes, CanCopyData.yes);
             sourceLabel.startDragEvent(data);
         }
     };

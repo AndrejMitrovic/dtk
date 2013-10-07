@@ -799,3 +799,4 @@ alias MEMORYSTATUS* LPMEMORYSTATUS;
 
 extern(Windows) void CoTaskMemFree(PVOID);
 extern(Windows) int MultiByteToWideChar(UINT, DWORD, LPCSTR, int, LPWSTR, int);
+extern(Windows) DWORD GetCurrentProcessId();
