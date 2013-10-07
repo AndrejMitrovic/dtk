@@ -428,3 +428,14 @@ unittest
     long[] arrLong = [1, 2, 3, 4];
     assert(arrLong.memSizeOf == 4 * long.sizeof);
 }
+
+string fromWStringz(const(wchar)* s)
+{
+    if (s is null)
+        return null;
+
+    wchar* ptr;
+    for (ptr = cast(wchar*)s; *ptr; ++ptr) { }
+
+    return to!string(s[0..ptr-s]);
+}

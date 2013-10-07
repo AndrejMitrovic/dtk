@@ -424,16 +424,40 @@ struct DropData
 {
     package bool hasData(T)() if (is(T == string))
     {
+        return hasAsciiString() || hasWideString();
+    }
+
+    private bool hasAsciiString()
+    {
         static FORMATETC fmtetc = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
+        return _dataObject.QueryGetData(&fmtetc) == S_OK;
+    }
+
+    private bool hasWideString()
+    {
+        static FORMATETC fmtetc = { CF_UNICODETEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
         return _dataObject.QueryGetData(&fmtetc) == S_OK;
     }
 
     package T getData(T)() if (is(T == string))
     {
-        // construct a FORMATETC object
+        if (hasWideString())
+            return getWideString();
+        else
+        if (hasAsciiString())
+            return getAsciiString();
+        else
+            assert(0, format("Drop data does not contain any data of type '%s'.", T.stringof));
+    }
+
+private:
+
+    private string getAsciiString()
+    {
         FORMATETC fmtetc = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
         STGMEDIUM stgmed;
-        readData!T(&fmtetc, &stgmed);
+
+        readData!string(&fmtetc, &stgmed);
         scope(exit) ReleaseStgMedium(&stgmed);
 
         // we asked for the data as a HGLOBAL, so access it appropriately
@@ -444,7 +468,22 @@ struct DropData
         return result;
     }
 
-private:
+    private string getWideString()
+    {
+        FORMATETC fmtetc = { CF_UNICODETEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
+        STGMEDIUM stgmed;
+
+        readData!string(&fmtetc, &stgmed);
+        scope(exit) ReleaseStgMedium(&stgmed);
+
+        // we asked for the data as a HGLOBAL, so access it appropriately
+        auto data = cast(wchar*)GlobalLock(stgmed.hGlobal);
+        scope(exit) GlobalUnlock(stgmed.hGlobal);
+
+        string result = data.fromWStringz();
+        return result;
+    }
+
     private void readData(T)(FORMATETC* fmtetc, STGMEDIUM* stgmed)
     {
         enforce(_dataObject.QueryGetData(fmtetc) == S_OK,
