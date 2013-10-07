@@ -42,9 +42,8 @@ unittest
         if (event.action == DropAction.leave)
             return;
 
-        //~ stderr.writefln("Has data: %s", event.hasData!Widget);
-
-        if (!event.hasData!string && !event.hasData!Widget)
+        if (!event.hasData!string
+            && !event.hasData!Widget)
             return;
 
         event.acceptDrop = true;
@@ -64,7 +63,12 @@ unittest
             else
             if (event.hasData!Widget)
             {
-                Widget data = event.copyData!Widget();
+                Widget data;
+                if (event.keyMod & (KeyMod.control + KeyMod.alt) && event.canMoveData)
+                    data = event.moveData!Widget();
+                else
+                    data = event.copyData!Widget();
+
                 stderr.writefln("Got widget: %s", data);
             }
         }
@@ -91,26 +95,40 @@ unittest
         //~ stderr.writefln("Button 2 drag drop event: %s", event.action);
     };
 
-    //~ sourceLabel.onDragEvent ~= (scope DragEvent event)
-    //~ {
-        //~ if (event.keyMod & KeyMod.escape)
-        //~ {
-            //~ // if the <Escape> key has been pressed since the last call, cancel the drop
-            //~ event.dragState = DragState.stop;
-        //~ }
+    sourceLabel.onDragEvent ~= (scope DragEvent event)
+    {
+        if (event.action == DragAction.keyChange)
+        {
+            // if the escape key has been pressed, cancel the drop.
+            if (event.escapePressed)
+                event.cancel();
 
-        //~ if (!event.keyMod.isDown(KeyMod.mouse_left))
-        //~ {
-            //~ // if the <LeftMouse> button has been released, then do the drop!
-            //~ event.dragState = DragState.drop;
-        //~ }
-
-        //~ if (state.dropAccepted)
-        //~ {
-            //~ if (state.hasMovedData)
-                //~ sourceLabel.text = "";
-        //~ }
-    //~ };
+            // if the left mouse button has been released, do the drop.
+            if (!event.keyMod.isDown(KeyMod.mouse_left))
+                event.dropData();
+        }
+        else
+        if (event.action == DragAction.feedback)
+        {
+            // we've focused in/over/out of a widget
+        }
+        else
+        if (event.action == DragAction.drop)
+        {
+            if (event.hasMovedData)
+                sourceLabel.text = "Moved Data";
+            else
+            if (event.hasCopiedData)
+                sourceLabel.text = "Copied Data";
+            else
+                sourceLabel.text = "Data not moved/copied";
+        }
+        else
+        if (event.action == DragAction.canceled)
+        {
+            sourceLabel.text = "Drag & Drop canceled";
+        }
+    };
 
     sourceLabel.onMouseEvent ~= (scope MouseEvent event)
     {
@@ -128,7 +146,7 @@ unittest
 
             // widget
             DragData data = DragData(sourceLabel, CanMoveData.yes, CanCopyData.yes);
-            sourceLabel.startDragEvent(data);
+            sourceLabel.startDragDrop(data);
         }
     };
 

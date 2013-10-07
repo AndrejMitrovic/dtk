@@ -60,10 +60,10 @@ void unregisterDragDrop(HWND hwnd)
         format("Could not unregister handle '%s'. Error code: %s", hwnd, res));
 }
 
-void startDragEvent(Widget widget, DragData dragData)
+void startDragDrop(Widget widget, DragData dragData)
 {
     // todo: we can optimize and allocate on the stack
-    IDropSource dropSource = newCom!DropSource();
+    IDropSource dropSource = newCom!DropSource(widget);
     dropSource.AddRef();
     scope(exit) dropSource.Release();
 
@@ -82,19 +82,21 @@ void startDragEvent(Widget widget, DragData dragData)
         allowedEffects |= DROPEFFECT.DROPEFFECT_COPY;
 
     DWORD dwResult = DoDragDrop(dataObject, dropSource, allowedEffects, &dwEffect);
+    TimeMsec timeMsec = getTclTime();
 
-    // todo: here we invoke the onDragEvent
-    /+ if (dwResult == DRAGDROP_S_DROP)
+    if (dwResult == DRAGDROP_S_DROP)
     {
-        if (dwEffect & DROPEFFECT.DROPEFFECT_MOVE)
-        {
-            MessageBox(null, "Moving", "Info", MB_OK);
-            // todo: remove selection from edit control
-        }
+        DropEffect dropEffect = cast(DropEffect)dwEffect;
+        auto event = scoped!DragEvent(widget, DragAction.drop, dropEffect, timeMsec);
+        Dispatch._dispatchInternalEvent(widget, event);
     }
-    else if (dwResult == DRAGDROP_S_CANCEL)  // cancelled
+    else
+    if (dwResult == DRAGDROP_S_CANCEL)
     {
-    } +/
+        // todo: Once SendEvent/PostEvent are implemented we should use those functions.
+        auto event = scoped!DragEvent(widget, DragAction.canceled, timeMsec);
+        Dispatch._dispatchInternalEvent(widget, event);
+    }
 }
 
 /**
@@ -106,6 +108,11 @@ void startDragEvent(Widget widget, DragData dragData)
 */
 class DropSource : ComObject, IDropSource
 {
+    this(Widget widget)
+    {
+        _widget = widget;
+    }
+
     extern (Windows)
     override HRESULT QueryInterface(const(IID)* riid, void** ppv)
     {
@@ -123,25 +130,22 @@ class DropSource : ComObject, IDropSource
     extern (Windows)
     HRESULT QueryContinueDrag(BOOL fEscapePressed, DWORD grfKeyState)
     {
-        // if the <Escape> key has been pressed since the last call, cancel the drop
-        if (fEscapePressed == TRUE)
-            return DRAGDROP_S_CANCEL;
+        bool escapePressed = cast(bool)fEscapePressed;
+        auto keyMod = getKeyMod(grfKeyState);
+        TimeMsec timeMsec = getTclTime();
 
-        // if the <LeftMouse> button has been released, then do the drop!
-        if ((grfKeyState & MK_LBUTTON) == 0)
-            return DRAGDROP_S_DROP;
+        // todo: Once SendEvent/PostEvent are implemented we should use those functions.
+        auto event = scoped!DragEvent(_widget, DragAction.keyChange, escapePressed, keyMod, timeMsec);
+        Dispatch._dispatchInternalEvent(_widget, event);
 
-        // continue with the drag-drop
-        return S_OK;
+        return event._dragState;
     }
 
-    //	Return either S_OK or DRAGDROP_S_USEDEFAULTCURSORS to instruct OLE to use the
-    //  default mouse cursor images
+    // Return either S_OK or DRAGDROP_S_USEDEFAULTCURSORS to instruct OLE to use the
+    // default mouse cursor images
     extern (Windows)
     HRESULT GiveFeedback(DWORD dwEffect)
     {
-        // todo: this is our hookup point for a signal
-
         // dwEffect describes the value returned by the
         // most recent call to IDropTarget::DragEnter,
         // IDropTarget::DragOver, or IDropTarget::DragLeave.
@@ -164,8 +168,19 @@ class DropSource : ComObject, IDropSource
         // cursor shape or for changing the highlighted source based
         // on the value of the dwEffect parameter.
 
+        DropEffect dropEffect = cast(DropEffect)dwEffect;
+        TimeMsec timeMsec = getTclTime();
+
+        // todo: Once SendEvent/PostEvent are implemented we should use those functions.
+        auto event = scoped!DragEvent(_widget, DragAction.feedback, dropEffect, timeMsec);
+        Dispatch._dispatchInternalEvent(_widget, event);
+
+        // todo: if a new cursor isn't set, then we'll return this.
         return DRAGDROP_S_USEDEFAULTCURSORS;
     }
+
+private:
+    Widget _widget;
 }
 
 enum CanCopyData
@@ -748,31 +763,6 @@ private:
         return Point(pt.x - point.x, pt.y - point.y);
     }
 
-    private static KeyMod getKeyMod(DWORD grfKeyState)
-    {
-        KeyMod keyMod;
-
-        if (grfKeyState & MK_CONTROL)
-            keyMod += KeyMod.control;
-
-        if (grfKeyState & MK_ALT)
-            keyMod += KeyMod.alt;
-
-        if (grfKeyState & MK_SHIFT)
-            keyMod += KeyMod.shift;
-
-        if (grfKeyState & MK_LBUTTON)
-            keyMod += KeyMod.mouse_left;
-
-        if (grfKeyState & MK_MBUTTON)
-            keyMod += KeyMod.mouse_middle;
-
-        if (grfKeyState & MK_RBUTTON)
-            keyMod += KeyMod.mouse_right;
-
-        return keyMod;
-    }
-
 private:
     Widget _widget;
     DropData _dropData;
@@ -802,4 +792,29 @@ wchar[] toWideString(string input)
         return null;
 
     return buf;
+}
+
+private KeyMod getKeyMod(DWORD grfKeyState)
+{
+    KeyMod keyMod;
+
+    if (grfKeyState & MK_CONTROL)
+        keyMod += KeyMod.control;
+
+    if (grfKeyState & MK_ALT)
+        keyMod += KeyMod.alt;
+
+    if (grfKeyState & MK_SHIFT)
+        keyMod += KeyMod.shift;
+
+    if (grfKeyState & MK_LBUTTON)
+        keyMod += KeyMod.mouse_left;
+
+    if (grfKeyState & MK_MBUTTON)
+        keyMod += KeyMod.mouse_middle;
+
+    if (grfKeyState & MK_RBUTTON)
+        keyMod += KeyMod.mouse_right;
+
+    return keyMod;
 }

@@ -13,7 +13,7 @@ version (Windows)
     import dtk.platform.win32.dragdrop;
 
     alias WinHandle = HWND;
-    alias startDragEvent = dtk.platform.win32.dragdrop.startDragEvent;
+    alias startDragDrop = dtk.platform.win32.dragdrop.startDragDrop;
     alias CanMoveData = dtk.platform.win32.dragdrop.CanMoveData;
     alias CanCopyData = dtk.platform.win32.dragdrop.CanCopyData;
     alias DragData = dtk.platform.win32.dragdrop.DragData;

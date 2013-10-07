@@ -197,6 +197,11 @@ abstract class Widget
     public Signal!FocusEvent onFocusEvent;
 
     /**
+        The widget is a source of a drag and drop event.
+    */
+    public Signal!DragEvent onDragEvent;
+
+    /**
         The widget is a target of a drag and drop event.
     */
     public Signal!DropEvent onDropEvent;
