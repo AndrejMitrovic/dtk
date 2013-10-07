@@ -10,6 +10,8 @@ import core.atomic;
 import core.memory;
 import core.stdc.string;
 
+import dtk.utils;
+
 import dtk.platform.win32.defs;
 
 C newCom(C, T...)(T arguments) if(is(C : ComObject) && T.length > 0)
@@ -99,22 +101,6 @@ HGLOBAL toGlobalMem(string text)
     ptr[0 .. text.length] = text[];
 
     return cast(HGLOBAL)ptr;
-}
-
-/** Return the memory size needed to store the elements of the array. */
-size_t memSizeOf(E)(E[] arr)
-{
-    return E.sizeof * arr.length;
-}
-
-///
-unittest
-{
-    int[] arrInt = [1, 2, 3, 4];
-    assert(arrInt.memSizeOf == 4 * int.sizeof);
-
-    long[] arrLong = [1, 2, 3, 4];
-    assert(arrLong.memSizeOf == 4 * long.sizeof);
 }
 
 /**

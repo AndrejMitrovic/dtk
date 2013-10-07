@@ -406,3 +406,25 @@ mixin template ComThrowWrapper(alias func, string name)
     }
     }.format(name));
 }
+
+bool isAsciiString(string input)
+{
+    auto data = cast(const(ubyte)[])input;
+    return data.all!(a => a <= 0x7F);
+}
+
+/** Return the memory size needed to store the elements of the array. */
+size_t memSizeOf(E)(E[] arr)
+{
+    return E.sizeof * arr.length;
+}
+
+///
+unittest
+{
+    int[] arrInt = [1, 2, 3, 4];
+    assert(arrInt.memSizeOf == 4 * int.sizeof);
+
+    long[] arrLong = [1, 2, 3, 4];
+    assert(arrLong.memSizeOf == 4 * long.sizeof);
+}

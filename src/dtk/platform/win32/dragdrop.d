@@ -9,7 +9,6 @@ module dtk.platform.win32.dragdrop;
 import core.atomic;
 import core.memory;
 
-import std.algorithm;
 import std.exception;
 import std.stdio;
 import std.range;
@@ -128,12 +127,14 @@ class DropSource : ComObject, IDropSource
     }
 }
 
-void startDragEvent(Widget widget, DragData dragData, /* canMove/canCopy */)
+void startDragEvent(Widget widget, DragData dragData)
 {
+    // todo: we can optimize and allocate on the stack
     IDropSource dropSource = newCom!DropSource();
     dropSource.AddRef();
     scope(exit) dropSource.Release();
 
+    // todo: we can optimize and allocate on the stack
     IDataObject dataObject = newCom!DataObject(dragData);
     dataObject.AddRef();
     scope(exit) dataObject.Release();
@@ -163,10 +164,10 @@ void startDragEvent(Widget widget, DragData dragData, /* canMove/canCopy */)
     } +/
 }
 
-struct FormatStore
+private struct FormatStore
 {
-    FORMATETC formatetc;
-    STGMEDIUM stgmedium;
+    FORMATETC fmtetc;
+    STGMEDIUM stgmed;
 }
 
 /**
@@ -219,20 +220,19 @@ class DataObject : ComObject, IDataObject
         auto formatStore = fsRange.front;
 
         // store the type of the format, and the release callback (null).
-        pMedium.tymed = formatStore.formatetc.tymed;
+        pMedium.tymed = formatStore.fmtetc.tymed;
         pMedium.pUnkForRelease = null;
 
         // duplicate the memory
-        switch (formatStore.formatetc.tymed)
+        switch (formatStore.fmtetc.tymed)
         {
             case TYMED.TYMED_HGLOBAL:
-                pMedium.hGlobal = dupGlobalMem(formatStore.stgmedium.hGlobal);
+                // note: we don't need to duplicate here, since we've already allocated
+                // pMedium.hGlobal = dupGlobalMem(formatStore.stgmed.hGlobal);
+                pMedium.hGlobal = formatStore.stgmed.hGlobal;
                 return S_OK;
 
             default:
-                // todo: we should really assert here since we need to handle
-                // all the data types in our formatStores if we accept them
-                // in the constructor.
                 return DV_E_FORMATETC;
         }
     }
@@ -241,12 +241,12 @@ class DataObject : ComObject, IDataObject
     HRESULT GetDataHere(FORMATETC* pFormatEtc, STGMEDIUM* pMedium)
     {
         // GetDataHere is only required for IStream and IStorage mediums
-        // It is an error to call GetDataHere for things like HGLOBAL and other clipboard formats
-        // OleFlushClipboard
+        // It's an error to call GetDataHere for things like HGLOBAL and
+        // other clipboard formats
         return DATA_E_FORMATETC;
     }
 
-    //	Called to see if the IDataObject supports the specified format of data
+    // Called to see if the IDataObject supports the specified format of data
     extern (Windows)
     HRESULT QueryGetData(FORMATETC* pFormatEtc)
     {
@@ -255,7 +255,7 @@ class DataObject : ComObject, IDataObject
 
     /**
         MSDN: Provides a potentially different but logically equivalent
-        FORMATETC structure. You use this method to determine whether two
+        FORMATETC structure. Use this method to determine whether two
         different FORMATETC structures would return the same data,
         removing the need for duplicate rendering.
     */
@@ -286,6 +286,7 @@ class DataObject : ComObject, IDataObject
     extern (Windows)
     HRESULT EnumFormatEtc(DWORD dwDirection, IEnumFORMATETC* ppEnumFormatEtc)
     {
+        // todo: implement later, even though most apps don't seem to use this.
         return E_NOTIMPL;
     }
 
@@ -329,45 +330,89 @@ private:
         Find the format store in our list of supported formats,
         or return an empty range if not found.
     */
-    private auto findFormatStore(FORMATETC formatEtc)
+    private Range findFormatStore(FORMATETC fmtetc)
     {
-        if (auto ptr = _dragData._data.peek!string)
-        {
-            FORMATETC fmtetc = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
-            STGMEDIUM stgmed = { TYMED.TYMED_HGLOBAL };
-
-            // formats must match
-            if (formatEtc.tymed != fmtetc.tymed ||
-                formatEtc.cfFormat != fmtetc.cfFormat ||
-                formatEtc.dwAspect != fmtetc.dwAspect)
-            {
-                return Range();
-            }
-
-            // format matches, copy text data to global memory
-            stgmed.hGlobal = copyText(*ptr);
-
-            auto formatStore = FormatStore(fmtetc, stgmed);
-            return Range(formatStore);
-        }
-        else
-        {
+        /* Only support content type in global memory. */
+        if (fmtetc.dwAspect != DVASPECT.DVASPECT_CONTENT
+            || fmtetc.tymed != TYMED.TYMED_HGLOBAL)
             return Range();
+
+        switch (fmtetc.cfFormat)
+        {
+            case CF_TEXT:
+                return getAsciiString();
+
+            case CF_UNICODETEXT:
+                return getWideString();
+
+            default:
+                return Range();
         }
     }
 
-    // Copy selected text to an HGLOBAL and return it
-    private static HGLOBAL copyText(string text)
+    private Range getAsciiString()
     {
-        HGLOBAL hMem = GlobalAlloc(GHND, text.length + 1);
+        auto ptr = _dragData._data.peek!string;
+        if (ptr is null)
+            return Range();
 
+        if (!(*ptr).isAsciiString)
+            return Range();
+
+        FORMATETC fmtetc = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
+        STGMEDIUM stgmed = { TYMED.TYMED_HGLOBAL };
+
+        // format matches, copy text data to global memory
+        stgmed.hGlobal = copyAsciiText(*ptr);
+
+        auto formatStore = FormatStore(fmtetc, stgmed);
+        return Range(formatStore);
+    }
+
+    private Range getWideString()
+    {
+        auto ptr = _dragData._data.peek!string;
+        if (ptr is null)
+            return Range();
+
+        FORMATETC fmtetc = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
+        STGMEDIUM stgmed = { TYMED.TYMED_HGLOBAL };
+
+        // format matches, copy text data to global memory
+        stgmed.hGlobal = copyWideText(*ptr);
+
+        auto formatStore = FormatStore(fmtetc, stgmed);
+        return Range(formatStore);
+    }
+
+    // Copy text to an HGLOBAL and return it
+    private static HGLOBAL copyAsciiText(string text)
+    {
+        immutable bytes = text.memSizeOf;
+
+        HGLOBAL hMem = GlobalAlloc(GHND, bytes + char.sizeof);  // null terminator
         auto ptr = cast(char*)GlobalLock(hMem);
         scope(exit) GlobalUnlock(hMem);
 
-        // copy the text and null-terminate
-        memcpy(ptr, text.ptr, text.length);
+        // copy the text and null-terminate it
+        memcpy(ptr, text.ptr, bytes);
         ptr[text.length] = '\0';
+        return hMem;
+    }
 
+    // ditto
+    private static HGLOBAL copyWideText(string text)
+    {
+        auto data = text.toWideString();
+        immutable bytes = data.memSizeOf;
+
+        HGLOBAL hMem = GlobalAlloc(GHND, bytes + wchar.sizeof);  // null terminator
+        auto ptr = cast(wchar*)GlobalLock(hMem);
+        scope(exit) GlobalUnlock(hMem);
+
+        // copy the text and null-terminate it
+        memcpy(ptr, data.ptr, bytes);
+        ptr[data.length] = '\0';
         return hMem;
     }
 
@@ -557,4 +602,23 @@ private:
 DropTarget createDropTarget(Widget widget)
 {
     return newCom!DropTarget(widget);
+}
+
+wchar[] toWideString(string input)
+{
+    if (input.length == 0)
+        return null;
+
+    enum CP_UTF8 = 65001;
+    enum convType = 0;
+    auto len = MultiByteToWideChar(CP_UTF8, convType, input.ptr, cast(int)input.length, null, 0);
+    if (len == 0)
+        return null;
+
+    auto buf = new wchar[](len);
+    len = MultiByteToWideChar(CP_UTF8, convType, input.ptr, cast(int)input.length, buf.ptr, len);
+    if (len == 0)
+        return null;
+
+    return buf;
 }
