@@ -947,7 +947,19 @@ enum DragAction
 {
     none,      /// Sentinel
     keyChange, /// A key modifier was pressed/released or the escape key was pressed
-    feedback,  /// The user has dragged in/over/out of a target widget.
+
+    /**
+        The user has dragged in/over/out of a target widget.
+
+        $(B Note): During this event changing widget properties will not
+        be immediately reflected in the GUI because the drag & drop
+        is a modal operation.
+
+        The only GUI operations that are immediately reflected are
+        cursor changes.
+    */
+    feedback,
+
     drop,      /// The drag & drop operation is complete.
     canceled,  /// The drag & drop operation was cancelled.
 }
@@ -981,7 +993,7 @@ class DragEvent : Event
     this(Widget widget, DragAction action, DropEffect dropEffect, TimeMsec timeMsec)
     {
         super(widget, EventType.drag, timeMsec);
-        assert(action == DragAction.drop, action.text);
+        assert(action == DragAction.drop || action == DragAction.feedback, action.text);
         this.action = action;
         _dropEffect = dropEffect;
     }

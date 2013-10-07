@@ -141,8 +141,8 @@ class DropSource : ComObject, IDropSource
         return event._dragState;
     }
 
-    //	Return either S_OK or DRAGDROP_S_USEDEFAULTCURSORS to instruct OLE to use the
-    //  default mouse cursor images
+    // Return either S_OK or DRAGDROP_S_USEDEFAULTCURSORS to instruct OLE to use the
+    // default mouse cursor images
     extern (Windows)
     HRESULT GiveFeedback(DWORD dwEffect)
     {
@@ -168,10 +168,11 @@ class DropSource : ComObject, IDropSource
         // cursor shape or for changing the highlighted source based
         // on the value of the dwEffect parameter.
 
+        DropEffect dropEffect = cast(DropEffect)dwEffect;
         TimeMsec timeMsec = getTclTime();
 
         // todo: Once SendEvent/PostEvent are implemented we should use those functions.
-        auto event = scoped!DragEvent(_widget, DragAction.feedback, timeMsec);
+        auto event = scoped!DragEvent(_widget, DragAction.feedback, dropEffect, timeMsec);
         Dispatch._dispatchInternalEvent(_widget, event);
 
         // todo: if a new cursor isn't set, then we'll return this.
