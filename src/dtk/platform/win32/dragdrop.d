@@ -30,7 +30,10 @@ import dtk.platform.win32.com;
 import dtk.widgets.widget;
 import dtk.widgets.window;
 
+private static FORMATETC _fmtText = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
+private static FORMATETC _fmtUniText = { CF_UNICODETEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
 private static FORMATETC _dtkFormat;
+
 private static DWORD _processID;
 
 static void _initDragDrop()
@@ -431,12 +434,10 @@ private:
         if (!(*ptr).isAsciiString)
             return Range();
 
-        FORMATETC fmtetc = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
         STGMEDIUM stgmed = { TYMED.TYMED_HGLOBAL };
-
         stgmed.hGlobal = copyAsciiText(*ptr);
 
-        auto formatStore = FormatStore(fmtetc, stgmed);
+        auto formatStore = FormatStore(_fmtText, stgmed);
         return Range(formatStore);
     }
 
@@ -446,13 +447,10 @@ private:
         if (ptr is null)
             return Range();
 
-        FORMATETC fmtetc = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
         STGMEDIUM stgmed = { TYMED.TYMED_HGLOBAL };
-
-        // format matches, copy text data to global memory
         stgmed.hGlobal = copyWideText(*ptr);
 
-        auto formatStore = FormatStore(fmtetc, stgmed);
+        auto formatStore = FormatStore(_fmtText, stgmed);
         return Range(formatStore);
     }
 
@@ -551,14 +549,12 @@ struct DropData
 
     private bool hasAsciiString()
     {
-        static FORMATETC fmtetc = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
-        return _dataObject.QueryGetData(&fmtetc) == S_OK;
+        return _dataObject.QueryGetData(&_fmtText) == S_OK;
     }
 
     private bool hasWideString()
     {
-        static FORMATETC fmtetc = { CF_UNICODETEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
-        return _dataObject.QueryGetData(&fmtetc) == S_OK;
+        return _dataObject.QueryGetData(&_fmtUniText) == S_OK;
     }
 
     private bool hasDtkDragData(T)()
@@ -584,7 +580,7 @@ private:
 
     private string getAsciiString()
     {
-        FORMATETC fmtetc = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
+        FORMATETC fmtetc = _fmtText;
         STGMEDIUM stgmed;
 
         readData!string(&fmtetc, &stgmed);
@@ -600,7 +596,7 @@ private:
 
     private string getWideString()
     {
-        FORMATETC fmtetc = { CF_UNICODETEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
+        FORMATETC fmtetc = _fmtUniText;
         STGMEDIUM stgmed;
 
         readData!string(&fmtetc, &stgmed);
