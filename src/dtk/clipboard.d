@@ -6,22 +6,15 @@
  */
 module dtk.clipboard;
 
-//~ import std.algorithm;
-//~ import std.exception;
-//~ import std.range;
-//~ import std.stdio;
-
-//~ import dtk.utils;
-
-@property Clipboard clipboard()
+/+ @property Clipboard clipboard()
 {
     return Clipboard.get();
-}
+} +/
 
 // todo: add clipboard listener
 struct Clipboard
 {
-    @disable this();
+    /+ @disable this();
 
     static Clipboard get()
     {
@@ -116,5 +109,5 @@ struct Clipboard
     }
 
 private:
-    DropData _dropData;
+    DropData _dropData; +/
 }

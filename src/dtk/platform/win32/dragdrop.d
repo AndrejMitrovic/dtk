@@ -18,6 +18,7 @@ import std.variant;
 
 import dtk.app;
 import dtk.dispatch;
+import dtk.dragdrop;
 import dtk.event;
 import dtk.geometry;
 import dtk.interpreter;
@@ -63,14 +64,32 @@ void unregisterDragDrop(HWND hwnd)
         format("Could not unregister handle '%s'. Error code: %s", hwnd, res));
 }
 
-void startDragDrop(Widget widget, DragData dragData)
+/**
+    The native drag data store the initial drag data
+    and additionally the processID. This is required for
+    safety checks when transfering data from one process
+    to another.
+
+    If the process ID of the source and target do not
+    match then only data without indirections (PODs) can
+    be transfered (POD == plain old datatype).
+*/
+private struct NativeDragData
 {
-    // todo: we can optimize and allocate on the stack
+    DWORD _processID;
+    DragData _dragData;
+    alias _dragData this;
+}
+
+void nativeStartDragDrop(Widget widget, DragData inDragData)
+{
+    // todo: we can optimize and allocate COM classes on the stack
     IDropSource dropSource = newCom!DropSource(widget);
     dropSource.AddRef();
     scope(exit) dropSource.Release();
 
-    // todo: we can optimize and allocate on the stack
+    // todo: we can optimize and allocate COM classes on the stack
+    auto dragData = NativeDragData(_processID, inDragData);
     IDataObject dataObject = newCom!DataObject(dragData);
     dataObject.AddRef();
     scope(exit) dataObject.Release();
@@ -186,41 +205,6 @@ private:
     Widget _widget;
 }
 
-enum CanCopyData
-{
-    no,
-    yes,
-}
-
-enum CanMoveData
-{
-    no,
-    yes,
-}
-
-/**
-    Stored by a DTK widget drop source.
-*/
-struct DragData
-{
-    this(T)(T data, CanMoveData canMove, CanCopyData canCopy)
-    {
-        _data = data;
-        _canMove = cast(bool)canMove;
-        _canCopy = cast(bool)canCopy;
-        _processID = ._processID;
-    }
-
-    @property bool canMove() { return _canMove; }
-    @property bool canCopy() { return _canCopy; }
-
-private:
-    DWORD _processID;
-    Variant _data;
-    bool _canMove;
-    bool _canCopy;
-}
-
 private struct FormatStore
 {
     FORMATETC fmtetc;
@@ -230,7 +214,7 @@ private struct FormatStore
 /**
     This is a DTK data object.
 
-    It retrieves the data stored in a DragData struct.
+    It retrieves the data stored in a NativeDragData struct.
 
     Note:
     Dragging between DTK widgets is easy, however dragging outside
@@ -246,7 +230,7 @@ private struct FormatStore
 */
 class DataObject : ComObject, IDataObject
 {
-    this(DragData dragData)
+    this(NativeDragData dragData)
     {
         _dragData = dragData;
     }
@@ -487,10 +471,10 @@ private:
 
     private HGLOBAL copyDragData()
     {
-        enum bytes = DragData.sizeof;
+        enum bytes = NativeDragData.sizeof;
 
         HGLOBAL hMem = GlobalAlloc(GHND, bytes);
-        auto ptr = cast(DragData*)GlobalLock(hMem);
+        auto ptr = cast(NativeDragData*)GlobalLock(hMem);
         scope(exit) GlobalUnlock(hMem);
 
         memcpy(ptr, &_dragData, bytes);
@@ -498,7 +482,7 @@ private:
     }
 
 private:
-    DragData _dragData;
+    NativeDragData _dragData;
 }
 
 /**
@@ -552,11 +536,11 @@ struct DropData
             return false;
 
         STGMEDIUM stgmed;
-        readData!DragData(&_dtkFormat, &stgmed);
+        readData!NativeDragData(&_dtkFormat, &stgmed);
         scope(exit) ReleaseStgMedium(&stgmed);
 
         // we asked for the data as a HGLOBAL, so access it appropriately
-        auto dragData = cast(DragData*)GlobalLock(stgmed.hGlobal);
+        auto dragData = cast(NativeDragData*)GlobalLock(stgmed.hGlobal);
         scope(exit) GlobalUnlock(stgmed.hGlobal);
 
         // peek!() would return null on base classes and other
@@ -602,11 +586,11 @@ private:
     private T getDtkDragData(T)()
     {
         STGMEDIUM stgmed;
-        readData!DragData(&_dtkFormat, &stgmed);
+        readData!NativeDragData(&_dtkFormat, &stgmed);
         scope(exit) ReleaseStgMedium(&stgmed);
 
         // we asked for the data as a HGLOBAL, so access it appropriately
-        auto dragData = cast(DragData*)GlobalLock(stgmed.hGlobal);
+        auto dragData = cast(NativeDragData*)GlobalLock(stgmed.hGlobal);
         scope(exit) GlobalUnlock(stgmed.hGlobal);
 
         /**

@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.platform.native;
+module dtk.platform;
 
 version (Windows)
 {
@@ -13,10 +13,7 @@ version (Windows)
     import dtk.platform.win32.dragdrop;
 
     alias WinHandle = HWND;
-    alias startDragDrop = dtk.platform.win32.dragdrop.startDragDrop;
-    alias CanMoveData = dtk.platform.win32.dragdrop.CanMoveData;
-    alias CanCopyData = dtk.platform.win32.dragdrop.CanCopyData;
-    alias DragData = dtk.platform.win32.dragdrop.DragData;
+    alias nativeStartDragDrop = dtk.platform.win32.dragdrop.nativeStartDragDrop;
     alias DropData = dtk.platform.win32.dragdrop.DropData;
     alias DropTarget = dtk.platform.win32.dragdrop.DropTarget;
     alias registerDragDrop = dtk.platform.win32.dragdrop.registerDragDrop;

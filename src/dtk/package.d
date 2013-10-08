@@ -11,6 +11,8 @@ public
     import dtk.app;
     import dtk.busy;
     import dtk.color;
+    import dtk.clipboard;
+    import dtk.dragdrop;
     import dtk.event;
     import dtk.font;
     import dtk.geometry;
@@ -21,7 +23,6 @@ public
     import dtk.loader;
     import dtk.types;
     import dtk.widgets;
-    import dtk.platform.native;
 }
 
 version(unittest)

@@ -18,7 +18,7 @@ import dtk.signals;
 import dtk.types;
 import dtk.utils;
 
-import dtk.platform.native;
+import dtk.platform;
 
 import dtk.widgets;
 
