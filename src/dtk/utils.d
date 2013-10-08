@@ -26,8 +26,6 @@ package alias chomp = std.string.chomp;
 package alias chompPrefix = std.string.chompPrefix;
 package alias lastIndexOf = std.string.lastIndexOf;
 
- //~ to!int(value);
-
 private template isRawStaticArray(T, A...)
 {
     enum isRawStaticArray =
