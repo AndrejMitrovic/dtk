@@ -66,16 +66,18 @@ version (Windows)
             OleUninitialize();
             enforce(0, format("OleInitialize failed with: %s", oleRes));
         }
+        scope (failure) OleUninitialize();
 
         _initDragDrop();
 
         /** Initialize DTK classes. */
         Interpreter.initClass();
+        scope (failure) Interpreter.releaseClass();
 
-        /** Require Tk 8.6+ (but major version must match) */
-        enum int mustMatchVersion = 0;
+        /** Require Tk 8.6+ (allow minor version mismatch). */
+        enum int matchMinorVersion = 0;
         enum string requiredVersion = "8.6";
-        enforce(Tcl_PkgRequire(tclInterp, "Tk", requiredVersion, mustMatchVersion) !is null,
+        enforce(Tcl_PkgRequire(tclInterp, "Tk", requiredVersion, matchMinorVersion) !is null,
             format("DTK requires Tk package version %s. %s",
                 requiredVersion, to!string(tclInterp.result)));
 
