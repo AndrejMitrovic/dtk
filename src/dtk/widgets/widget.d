@@ -42,6 +42,52 @@ import dtk.widgets.window;
 /** The main class of all Dtk widgets. */
 abstract class Widget
 {
+    /** Ctor for widgets which know their parent during construction. */
+    this(Widget parent, TkType tkType, WidgetType widgetType, string extraOpts = null)
+    {
+        this.widgetType = widgetType;
+        this.initialize(parent, tkType, extraOpts);
+    }
+
+    /**
+        Delayed initialization. Some widgets in Tk must be parented (e.g. menus),
+        but only receive their parent information once they're assigned to another
+        widget (e.g. when a menubar is assigned to a window, or submenu to a menu).
+
+        Once the parent is set the child should call the initialize method.
+    */
+    this(InitLater, WidgetType widgetType)
+    {
+        this.widgetType = widgetType;
+    }
+
+    /**
+        Fake widgets which have event handlers but no actual Tk path name.
+        Since each event handler uses a name mapping, this object must
+        have a valid _name field.
+
+        E.g. a widget such as a check menu is implicitly created through a
+        parent menu object and doesn't have a widget path.
+    */
+    this(CreateFakeWidget, WidgetType widgetType)
+    {
+        this.widgetType = widgetType;
+        string name = format("%s%s", _fakeWidgetPrefix, _lastWidgetID++);
+        this.initialize(name);
+        _isFakeWidget = true;
+    }
+
+    /**
+        Ctor for widgets which are implicitly created by Tk,
+        such as the toplevel "." window.
+    */
+    this(CreateToplevel, WidgetType widgetType)
+    {
+        this.widgetType = widgetType;
+        this.initialize(".");
+        this.bindTags(TkClass.toplevel);
+    }
+
     /**
         A list of event handlers which will be called in sequence
         before any other event handlers.
@@ -213,52 +259,6 @@ abstract class Widget
         the destroy event is generated after the widget is destroyed.
     */
     public Signal!DestroyEvent onDestroyEvent;
-
-    /** Ctor for widgets which know their parent during construction. */
-    this(Widget parent, TkType tkType, WidgetType widgetType, string extraOpts = null)
-    {
-        this.widgetType = widgetType;
-        this.initialize(parent, tkType, extraOpts);
-    }
-
-    /**
-        Delayed initialization. Some widgets in Tk must be parented (e.g. menus),
-        but only receive their parent information once they're assigned to another
-        widget (e.g. when a menubar is assigned to a window, or submenu to a menu).
-
-        Once the parent is set the child should call the initialize method.
-    */
-    this(InitLater, WidgetType widgetType)
-    {
-        this.widgetType = widgetType;
-    }
-
-    /**
-        Fake widgets which have event handlers but no actual Tk path name.
-        Since each event handler uses a name mapping, this object must
-        have a valid _name field.
-
-        E.g. a widget such as a check menu is implicitly created through a
-        parent menu object and doesn't have a widget path.
-    */
-    this(CreateFakeWidget, WidgetType widgetType)
-    {
-        this.widgetType = widgetType;
-        string name = format("%s%s", _fakeWidgetPrefix, _lastWidgetID++);
-        this.initialize(name);
-        _isFakeWidget = true;
-    }
-
-    /**
-        Ctor for widgets which are implicitly created by Tk,
-        such as the toplevel "." window.
-    */
-    this(CreateToplevel, WidgetType widgetType)
-    {
-        this.widgetType = widgetType;
-        this.initialize(".");
-        this.bindTags(TkClass.toplevel);
-    }
 
     /**
         The built-in dynamic type of this object.

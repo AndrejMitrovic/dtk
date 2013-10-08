@@ -2,34 +2,17 @@ Todo:
 
 - Add clipboard support.
 
-- Standard clipboard formats:
-http://msdn.microsoft.com/en-us/library/windows/desktop/ff729168%28v=vs.85%29.aspx
-
-- Drag and Drop asynchronous reads (this is only for data-copy transfers):
-http://msdn.microsoft.com/en-us/library/windows/desktop/bb776904%28v=vs.85%29.aspx
-
-- Drag and Drop diagram:
-http://stackoverflow.com/a/1282783/279684
-
-- Drag and Drop C# examples:
-http://blogs.msdn.com/b/adamroot/archive/2008/02/19/shell-style-drag-and-drop-in-net-wpf-and-winforms.aspx
-
 - Add a clipboard module, and also add an onClipboardEvent signal via:
 http://msdn.microsoft.com/en-us/library/windows/desktop/ms649033%28v=vs.85%29.aspx
 
-- visuald/visuald/dproject.d has Drop methods which accept drag and drop data.
-
-- Move widget-specific events to the widget modules.
-This should avoid having a huge module and cyclic imports.
+- Standard clipboard formats:
+http://msdn.microsoft.com/en-us/library/windows/desktop/ff729168%28v=vs.85%29.aspx
 
 - Maybe add a rootMenu call to menus.
 
 - Add rootTree as well.
 
 - Drag and Drop:
-
-We can implement both target-drop (e.g. explorer or another window -> app),
-and source-drop (app -> explorer, or another window).
 
 - Some info on using OpenGL in Tk:
 http://stackoverflow.com/questions/17367089/non-top-level-opengl-widget-in-tkinter
@@ -42,25 +25,21 @@ override void toString(scope void delegate(const(char)[]) sink)
 With a template that does this:
 callFunc((cast(DynamicType)object).tupleof);
 
-- Implement assertEqual to utils or somewhere.
+- Replace these sort of calls with assertOp in the test-suite:
+    assert(e.action == action, text(e.action, " != ", action));
+    Implement assertEqual to utils or somewhere.
 
 - toString for widget events should print more data rather than just use .tupleof. It should take @property
 functions into account.
-
-- Remove the private _varName variables where we don't need to keep a reference to them. They only waste memory.
-
-- Hide format and other code from dtk.utils from user.
 
 - Work on menus again. Menus and their items can also be configured in many ways, we have to export this.
 
 - Make library const-correct.
 
-- Replace these sort of calls with assertOp in the test-suite:
-    assert(e.action == action, text(e.action, " != ", action));
-
 - Add a status bar option to a Window.
 
 - Implement a Maya-style spinbox, which increases-decreases when you click and hold the up/down buttons.
+    -> Implemented one in tests as a tcl script. Port it to D.
 
 - Scale widget doesn't respond to up/down properly when it has an opposite orientation.
 Bugfix patch:
