@@ -110,23 +110,24 @@ unittest
         else
         if (event.action == DragAction.feedback)
         {
+            sourceLabel.text = "Feedback";
             // we've focused in/over/out of a widget
         }
         else
         if (event.action == DragAction.drop)
         {
-            if (event.hasMovedData)
-                sourceLabel.text = "Moved Data";
-            else
-            if (event.hasCopiedData)
-                sourceLabel.text = "Copied Data";
-            else
-                sourceLabel.text = "Data not moved/copied";
+            //~ if (event.hasMovedData)
+                //~ sourceLabel.text = "Moved Data";
+            //~ else
+            //~ if (event.hasCopiedData)
+                //~ sourceLabel.text = "Copied Data";
+            //~ else
+                //~ sourceLabel.text = "Data not moved/copied";
         }
         else
         if (event.action == DragAction.canceled)
         {
-            sourceLabel.text = "Drag & Drop canceled";
+            //~ sourceLabel.text = "Drag & Drop canceled";
         }
     };
 

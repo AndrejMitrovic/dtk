@@ -8,6 +8,7 @@ module dtk.platform.win32.dragdrop;
 
 import core.atomic;
 import core.memory;
+import core.time;
 
 import std.exception;
 import std.stdio;

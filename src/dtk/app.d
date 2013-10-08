@@ -137,6 +137,8 @@ final class App
     /** Start the App event loop. */
     void run()
     {
+        assert(!_isAppRunning, "Cannot call App.run() more than once.");
+
         _isAppRunning = true;
         scope(exit) _isAppRunning = false;
 
@@ -171,7 +173,7 @@ final class App
         return _window;
     }
 
-    private void checkExceptions()
+    private static void checkExceptions()
     {
         if (thrownThrowable !is null)
         {
