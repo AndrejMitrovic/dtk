@@ -1,5 +1,8 @@
 Todo:
 
+- Drag and Drop asynchronous reads:
+http://msdn.microsoft.com/en-us/library/windows/desktop/bb776904%28v=vs.85%29.aspx
+
 - Drag and Drop diagram:
 http://stackoverflow.com/a/1282783/279684
 

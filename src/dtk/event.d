@@ -1106,27 +1106,6 @@ private:
         enforce(action == expectAction, format(fmt, action), file, line);
     }
 
-    private void checkFeedbackAction(string file = __FILE__, size_t line = __LINE__, string func = __FUNCTION__)
-    {
-        enforce(action == DragAction.feedback,
-            format("Cannot call the '%s' function during a '%s' action. Action must equal '%s'.",
-                func.unqualed(), action, DragAction.feedback), file, line);
-    }
-
-    private void checkKeyChangeAction(string file = __FILE__, size_t line = __LINE__, string func = __FUNCTION__)
-    {
-        enforce(action == DragAction.keyChange,
-            format("Cannot access the '%s' property during a '%s' action. Action must equal '%s'.",
-                func.unqualed(), action, DragAction.keyChange), file, line);
-    }
-
-    private void checkDropAction(string file = __FILE__, size_t line = __LINE__, string func = __FUNCTION__)
-    {
-        enforce(action == DragAction.drop,
-            format("Cannot access the '%s' property during a '%s' action. Action must equal '%s'.",
-                func.unqualed(), action, DragAction.drop), file, line);
-    }
-
 package:
     DragState _dragState;
 

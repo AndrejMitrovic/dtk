@@ -19,7 +19,7 @@ unittest
     auto button2 = new Button(testWindow, "Button2");
 
     auto sourceLabel = new Label(testWindow);
-    sourceLabel.text = "Source Ă text Ć";
+    sourceLabel.text = "Source Ă text";
 
     auto label = new Label(testWindow);
 
