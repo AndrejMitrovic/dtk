@@ -22,6 +22,7 @@ import std.c.stdlib;
 alias splitter = std.algorithm.splitter;
 
 import dtk.app;
+import dtk.cursor;
 import dtk.dispatch;
 import dtk.event;
 import dtk.geometry;
@@ -332,6 +333,21 @@ abstract class Widget
     @property Rect geometry()
     {
         return tclEvalFmt("wm geometry %s", _name).toGeometry();
+    }
+
+    /**
+        Get or set the current cursor used when
+        the widget is hovered over with the mouse.
+    */
+    @property Cursor cursor()
+    {
+        return this.getOption!string("cursor").toCursor();
+    }
+
+    /** ditto */
+    @property void cursor(Cursor newCursor)
+    {
+        this.setOption("cursor", newCursor.toTclString());
     }
 
     /** Commands: */

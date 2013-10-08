@@ -24,6 +24,7 @@ private
     import dtk.tests.test_button;
     import dtk.tests.test_checkbutton;
     import dtk.tests.test_combobox;
+    import dtk.tests.test_cursor;
     import dtk.tests.test_dialog;
     import dtk.tests.test_entry;
     import dtk.tests.test_frame;
@@ -51,6 +52,7 @@ private
 
     // todo: Need to add more features to menus, like dynamic configuration of menu items.
     // import dtk.tests.test_menu;
+    // import dtk.tests.test_contextmenu;
 
     // todo: Need to implement context menus
     // import dtk.tests.test_contextmenu;

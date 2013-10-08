@@ -1,4 +1,13 @@
-module test_cursors;
+/*
+ *             Copyright Andrej Mitrovic 2013.
+ *  Distributed under the Boost Software License, Version 1.0.
+ *     (See accompanying file LICENSE_1_0.txt or copy at
+ *           http://www.boost.org/LICENSE_1_0.txt)
+ */
+module dtk.tests.test_cursor;
+
+version(unittest):
+version(DTK_UNITTEST):
 
 import core.thread;
 
@@ -9,10 +18,10 @@ import std.string;
 
 import dtk;
 
+import dtk.tests.globals;
+
 unittest
 {
-    auto app = new App;
-
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
@@ -29,9 +38,5 @@ unittest
     label.cursor = Cursor.inherited;
     assert(label.cursor == Cursor.inherited);
 
-    app.run();
-}
-
-void main()
-{
+    app.testRun();
 }
