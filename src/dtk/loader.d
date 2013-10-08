@@ -74,12 +74,21 @@ version (Windows)
         Interpreter.initClass();
         scope (failure) Interpreter.releaseClass();
 
+        enum tclReqMajor = 8;
+        enum tclReqMinor = 6;
+        int tclMajor, tclMinor, tclPatchLevel;
+
+        Tcl_GetVersion(&tclMajor, &tclMinor, &tclPatchLevel, null);
+        enforce(tclMajor == tclReqMajor && tclMinor == tclReqMinor,
+            format("DTK requires Tcl version %s.%s.+. Found Tcl version %s.%s.%s",
+                tclReqMajor,tclReqMinor, tclMajor, tclMinor, tclPatchLevel));
+
         /** Require Tk 8.6+ (allow minor version mismatch). */
         enum int matchMinorVersion = 0;
-        enum string requiredVersion = "8.6";
-        enforce(Tcl_PkgRequire(tclInterp, "Tk", requiredVersion, matchMinorVersion) !is null,
+        enum string tkReqVersion = "8.6";
+        enforce(Tcl_PkgRequire(tclInterp, "Tk", tkReqVersion, matchMinorVersion) !is null,
             format("DTK requires Tk package version %s. %s",
-                requiredVersion, to!string(tclInterp.result)));
+                tkReqVersion, to!string(tclInterp.result)));
 
         Dispatch.initClass();
         Widget.initClass();

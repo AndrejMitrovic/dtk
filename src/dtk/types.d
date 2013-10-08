@@ -231,6 +231,8 @@ __gshared extern(C):
                              * version given is acceptable. Zero means use
                              * the latest compatible version. */
     Tcl_PkgRequire;
+
+    void function(int *majorV, int *minorV, int *patchLevelV, int *type) Tcl_GetVersion;
 }
 
 version(Windows)
