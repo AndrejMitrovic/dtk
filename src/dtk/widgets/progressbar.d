@@ -31,6 +31,7 @@ class Progressbar : Widget
     ///
     this(Widget parent, Orientation orientation, int length, ProgressMode progressMode, float maxValue = 100)
     {
+        maxValue.checkFinite();
         _maxValue = maxValue;
         super(parent, TkType.progressbar, WidgetType.progressbar);
 
@@ -70,6 +71,7 @@ class Progressbar : Widget
     */
     @property void value(float newValue)
     {
+        newValue.checkFinite();
         tclSetVar(_varName, newValue);
     }
 

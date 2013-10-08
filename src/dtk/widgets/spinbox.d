@@ -60,6 +60,8 @@ class ScalarSpinbox : SpinboxBase
     ///
     this(Widget parent, float minValue = 0.0, float maxValue = 100.0)
     {
+        minValue.checkFinite();
+        maxValue.checkFinite();
         _minValue = minValue;
         _maxValue = maxValue;
         super(parent, WidgetType.scalar_spinbox, EventType.scalar_spinbox);
@@ -91,6 +93,7 @@ class ScalarSpinbox : SpinboxBase
     */
     @property void value(float newValue)
     {
+        newValue.checkFinite();
         tclSetVar(_varName, newValue);
     }
 

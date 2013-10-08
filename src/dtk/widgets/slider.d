@@ -27,6 +27,8 @@ class Slider : Widget
     ///
     this(Widget parent, Orientation orientation, int length, float minValue = 0.0, float maxValue = 100.0)
     {
+        minValue.checkFinite();
+        maxValue.checkFinite();
         _minValue = minValue;
         _maxValue = maxValue;
         super(parent, TkType.scale, WidgetType.slider);
@@ -64,6 +66,7 @@ class Slider : Widget
     */
     @property void value(float newValue)
     {
+        newValue.checkFinite();
         newValue = min(newValue, _maxValue).max(newValue, _minValue);
         tclSetVar(_varName, newValue);
     }

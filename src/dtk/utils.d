@@ -6,12 +6,15 @@
  */
 module dtk.utils;
 
-import std.array;
 static import std.conv;
-import std.algorithm;
-import std.functional;
-import std.stdio;
 static import std.string;
+
+import std.array;
+import std.algorithm;
+import std.exception;
+import std.functional;
+import std.math;
+import std.stdio;
 import std.traits;
 
 import dtk.app;
@@ -447,4 +450,11 @@ string unqualed(string input)
         input = input[idx + 1 .. $];
 
     return input;
+}
+
+void checkFinite(real value, string file = __FILE__, size_t line = __LINE__)
+{
+    version(assert)
+        enforce(value.isFinite,
+            format("Cannot pass a non-finite floating-point number: '%s'", value), file, line);
 }

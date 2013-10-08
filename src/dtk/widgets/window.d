@@ -191,6 +191,7 @@ class Window : Widget
     */
     void setAlpha(float alpha = 1.0)
     {
+        alpha.checkFinite();
         tclEvalFmt("wm attributes %s -alpha %s", _name, alpha);
     }
 
