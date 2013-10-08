@@ -506,17 +506,6 @@ private:
 */
 struct DropData
 {
-    // todo: could register a clipboard format by using "dtk_%s".format(typeid(T).toString).
-    // then generic data can be retrieved from a Variant without having to hardcode anything.
-
-    // todo: we'll have to check against the GetCurrentProcessId() type.
-
-    // todo: instead of registering various clipboard formats, we'll register just the DTK_DragData
-    // type, which stores the process ID and the Variant. For format types without indirection
-    // (see std.concurrency for the helper functions) we can simply copy, while for others we'll
-    // have to use some kind of deep-copy mechanism. Perhaps the user would provide this.
-
-    // check string
     package bool hasData(T)()
     {
         static if (is(T == string))
@@ -525,7 +514,6 @@ struct DropData
             return hasDtkDragData!T();
     }
 
-    // get string
     package T getData(T)()
     {
         static if (is(T == string))
