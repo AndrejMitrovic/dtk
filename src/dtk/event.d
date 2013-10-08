@@ -1205,15 +1205,15 @@ class DropEvent : Event
     }
 
     /**
-        Check whether the drag & drop data is copyable.
+        Check whether the drop data contains data of type $(D DataType).
 
         $(B Note:) You may $(B not) access this property during a
         $(D DropAction.leave) action.
     */
-    @property bool canCopyData()
+    @property bool hasData(DataType)()
     {
         checkValidAction();
-        return (_dropEffect & DropEffect.copy) == DropEffect.copy;
+        return _dropData.hasData!DataType();
     }
 
     /**
@@ -1236,15 +1236,15 @@ class DropEvent : Event
     }
 
     /**
-        Check whether the drop data contains data of type $(D DataType).
+        Check whether the drag & drop data is copyable.
 
         $(B Note:) You may $(B not) access this property during a
         $(D DropAction.leave) action.
     */
-    @property bool hasData(DataType)()
+    @property bool canCopyData()
     {
         checkValidAction();
-        return _dropData.hasData!DataType();
+        return (_dropEffect & DropEffect.copy) == DropEffect.copy;
     }
 
     /**

@@ -1,5 +1,10 @@
 Todo:
 
+- Add clipboard support.
+
+- Standard clipboard formats:
+http://msdn.microsoft.com/en-us/library/windows/desktop/ff729168%28v=vs.85%29.aspx
+
 - Drag and Drop asynchronous reads (this is only for data-copy transfers):
 http://msdn.microsoft.com/en-us/library/windows/desktop/bb776904%28v=vs.85%29.aspx
 
@@ -9,31 +14,8 @@ http://stackoverflow.com/a/1282783/279684
 - Drag and Drop C# examples:
 http://blogs.msdn.com/b/adamroot/archive/2008/02/19/shell-style-drag-and-drop-in-net-wpf-and-winforms.aspx
 
-- Add proper checks for Tk and versions:
-    if (
-        Tcl_PkgRequire(interp, "Tk", "8.6", 0)
-#endif /* USE_TK_STUBS */
-        == NULL)
-    {
-        return TCL_ERROR;
-    }
-
-    /*
-     * Get the version, because we really need 8.3.3+.
-     */
-    Tcl_GetVersion(&major, &minor, &patchlevel, NULL);
-
-    if ((major == 8) && (minor == 3) && (patchlevel < 3))
-    {
-        Tcl_SetResult(interp, "tkdnd requires Tk 8.3.3 or greater", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
 - Add a clipboard module, and also add an onClipboardEvent signal via:
 http://msdn.microsoft.com/en-us/library/windows/desktop/ms649033%28v=vs.85%29.aspx
-
-- Standard clipboard formats:
-http://msdn.microsoft.com/en-us/library/windows/desktop/ff729168%28v=vs.85%29.aspx
 
 - visuald/visuald/dproject.d has Drop methods which accept drag and drop data.
 
@@ -59,8 +41,6 @@ override void toString(scope void delegate(const(char)[]) sink)
 
 With a template that does this:
 callFunc((cast(DynamicType)object).tupleof);
-
-- Todo: catch exceptions: http://www.gamedev.net/page/resources/_/technical/general-programming/d-exceptions-and-c-callbacks-r3323
 
 - Implement assertEqual to utils or somewhere.
 
