@@ -221,6 +221,16 @@ __gshared extern(C):
     void function(Tcl_Interp* interp) Tcl_DeleteInterp;
     int function(int flags) Tcl_DoOneEvent;
     void function(Tcl_Time* timeBuf) Tcl_GetTime;
+
+    const(char)* function(
+        Tcl_Interp* interp,		/* Interpreter in which package is now * available. */
+        const(char)* name,		/* Name of desired package. */
+        const(char)* version_,	/* Version string for desired version; NULL
+                                 * means use the latest version available. */
+        int exact)			/* Non-zero means that only the particular
+                             * version given is acceptable. Zero means use
+                             * the latest compatible version. */
+    Tcl_PkgRequire;
 }
 
 version(Windows)

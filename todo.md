@@ -1,6 +1,6 @@
 Todo:
 
-- Drag and Drop asynchronous reads:
+- Drag and Drop asynchronous reads (this is only for data-copy transfers):
 http://msdn.microsoft.com/en-us/library/windows/desktop/bb776904%28v=vs.85%29.aspx
 
 - Drag and Drop diagram:
@@ -11,10 +11,7 @@ http://blogs.msdn.com/b/adamroot/archive/2008/02/19/shell-style-drag-and-drop-in
 
 - Add proper checks for Tk and versions:
     if (
-#ifdef USE_TK_STUBS
-        Tk_InitStubs(interp, "8.3", 0)
-#else
-        Tcl_PkgRequire(interp, "Tk", "8.3", 0)
+        Tcl_PkgRequire(interp, "Tk", "8.6", 0)
 #endif /* USE_TK_STUBS */
         == NULL)
     {

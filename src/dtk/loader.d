@@ -71,6 +71,14 @@ version (Windows)
 
         /** Initialize DTK classes. */
         Interpreter.initClass();
+
+        /** Require Tk 8.6+ (but major version must match) */
+        enum int mustMatchVersion = 0;
+        enum string requiredVersion = "8.6";
+        enforce(Tcl_PkgRequire(tclInterp, "Tk", requiredVersion, mustMatchVersion) !is null,
+            format("DTK requires Tk package version %s. %s",
+                requiredVersion, to!string(tclInterp.result)));
+
         Dispatch.initClass();
         Widget.initClass();
     }
