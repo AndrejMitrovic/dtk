@@ -72,10 +72,10 @@ abstract class Widget
     */
     this(CreateFakeWidget, WidgetType widgetType)
     {
+        _isFakeWidget = true;
         this.widgetType = widgetType;
         string name = format("%s%s", _fakeWidgetPrefix, _lastWidgetID++);
         this.initialize(name);
-        _isFakeWidget = true;
     }
 
     /**
@@ -809,10 +809,10 @@ package:
     */
     public string _name;  /* package */
 
-    /** Counter to create a thread-global unique widget name (_threadID is used in mangling). */
+    /** Counter to create a unique widget name. */
     package static int _lastWidgetID = 0;
 
-    /** Counter to create a unique thread-local callback ID. */
+    /** Counter to create a unique callback ID. */
     package static int _lastCallbackID;
 
     package enum _fakeWidgetPrefix = "dtk_fake_widget";

@@ -372,19 +372,19 @@ template ThrowWrapper(alias func)
         }
         catch (Exception exception)
         {
-            stderr.writefln("Just thrown exception: %s", exception);
+            //~ stderr.writefln("Just thrown exception: %s", exception);
             App.thrownException = exception;
             return TCL_ERROR;
         }
         catch (Error error)
         {
-            stderr.writefln("Just thrown error: %s", error);
+            //~ stderr.writefln("Just thrown error: %s", error);
             App.thrownError = error;
             return TCL_ERROR;
         }
         catch (Throwable throwable)
         {
-            stderr.writefln("Just thrown throwable: %s", throwable);
+            //~ stderr.writefln("Just thrown throwable: %s", throwable);
             App.thrownThrowable = throwable;
             return TCL_ERROR;
         }

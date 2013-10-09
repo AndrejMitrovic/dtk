@@ -9,52 +9,120 @@ module dtk.tests.test_events_focus;
 version(unittest):
 version(DTK_UNITTEST):
 
-import core.thread;
-
-import std.algorithm;
 import std.conv;
-import std.range;
-import std.stdio;
-import std.traits;
-import std.typetuple;
+import std.string;
 
 import dtk;
 
 import dtk.tests.globals;
 
+/**
+    Windows-only for now, since we need to use WinAPI to send Tab keys.
+    Tk can't generate proper tab key events which we need to cause focus
+    changes. However since the focus code in DTK is not platform-specific
+    then running the test-suite on Windows only is fine.
+*/
+version(Windows):
+
+import dtk.platform.win32.defs;
+
+extern (Windows) LRESULT SendMessageW(HWND, UINT, WPARAM, LPARAM);
+const WM_KEYDOWN=256;
+const VK_TAB = 0x09;
+const WM_KEYUP=257;
+
 unittest
 {
     auto testWindow = new Window(app.mainWindow, 200, 200);
 
-    auto frame = new Frame(testWindow);
+    Button[] buttons;
 
-    auto button1 = new Button(frame, "Flash");
-    frame.pack();
-    button1.pack();
+    size_t idx;
+    foreach (row; 0 .. 2)
+    foreach (col; 0 .. 2)
+    {
+        auto button = new Button(testWindow, format("Button %s", idx++));
+        button.grid.setRow(row).setCol(col);
+        buttons ~= button;
+    }
 
-    FocusAction action;
+    testWindow.focus();
+
+    auto hwnd = getWinHandle(testWindow);
+
+    void pressTab()
+    {
+        SendMessageW(hwnd, WM_KEYDOWN, VK_TAB, 0);
+        SendMessageW(hwnd, WM_KEYUP, VK_TAB, 0);
+    }
 
     size_t callCount;
     size_t expectedCallCount;
 
-    auto handler = (scope FocusEvent e)
+    testWindow.onKeyboardEvent ~= (scope KeyboardEvent ev)
     {
-        assert(e.widget is button1);
-        assert(e.action == action);
-        ++callCount;
+        if (ev.keySym != KeySym.Tab)
+        {
+            pressTab();
+            pressTab();
+            pressTab();
+            pressTab();
+            pressTab();
+        }
     };
 
-    button1.onFocusEvent ~= handler;
+    size_t reqCount;
+    size_t focusCount;
 
-    action = FocusAction.enter;
-    tclEvalFmt("event generate %s <FocusIn>", button1.getTclName());
-    ++expectedCallCount;
+    testWindow.onSinkEvent ~= (scope Event ev)
+    {
+        callCount++;
 
-    action = FocusAction.leave;
-    tclEvalFmt("event generate %s <FocusOut>", button1.getTclName());
-    ++expectedCallCount;
+        if (ev.type != EventType.focus)
+            return;
 
-    assert(callCount == expectedCallCount, text(callCount, " != ", expectedCallCount));
+        auto event = cast(FocusEvent)ev;
+        //~ stderr.writefln("Focus event %s", event);
+
+        if (event.action == FocusAction.request)
+        {
+            switch (reqCount)
+            {
+                case 0: event.allowFocus = true; break;
+                case 1: event.allowFocus = false; break;
+                case 2: event.widget.allowFocus = false; break;
+                default:
+            }
+
+            reqCount++;
+        }
+
+        if (event.action == FocusAction.focus)
+        {
+            Widget widget;
+
+            switch (focusCount)
+            {
+                case 0: widget = buttons[0]; break;
+                case 1: widget = buttons[3]; break;
+                case 2: widget = buttons[0]; break;
+                case 3: widget = buttons[1]; break;
+                case 4: widget = buttons[3]; break;
+                default:
+            }
+
+            //~ stderr.writefln("Focused: %s %s", focusCount, event.widget);
+            assert(event.widget is widget, text(event.widget, " != ", widget));
+            focusCount++;
+        }
+    };
+
+    // set up a timer so it's fired up only after the event loop is running
+    tclEvalFmt("after 1 { event generate %s <KeyPress> -keysym %s }", testWindow.getTclName(), 'a');
 
     app.testRun();
+
+    // this is just an approximation, what's important is that the asserts are actually invoked.
+    expectedCallCount = 30;
+    assert(callCount >= expectedCallCount, text(callCount, " ! >= ", expectedCallCount));
 }
