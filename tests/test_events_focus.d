@@ -1,6 +1,7 @@
 module test_events_focus;
 
 import std.algorithm;
+import std.conv;
 import std.range;
 import std.stdio;
 import std.traits;
@@ -15,31 +16,50 @@ unittest
     auto testWindow = new Window(app.mainWindow, 200, 200);
 
     auto frame = new Frame(testWindow);
-
-    auto button1 = new Button(frame, "Flash");
     frame.pack();
-    button1.pack();
+
+    auto button1 = new Button(frame, "Button 1");
+    button1.grid.setRow(0).setCol(0);
+
+    auto button2 = new Button(frame, "Button 2");
+    button2.grid.setRow(0).setCol(1);
 
     FocusAction action;
+    Widget widget;
 
     size_t callCount;
     size_t expectedCallCount;
 
-    auto handler = (scope FocusEvent e)
+    testWindow.onSinkEvent ~= (scope Event ev)
     {
-        assert(e.widget is button1);
-        assert(e.action == action);
-        ++callCount;
+        if (ev.type != EventType.focus)
+            return;
+
+        auto event = cast(FocusEvent)ev;
+        assert(event.action == action, text(event.action, " != ", action));
+        assert(event.widget == widget, text(event.widget, " != ", widget));
+        callCount++;
     };
 
-    button1.onFocusEvent ~= handler;
-
-    action = FocusAction.enter;
+    action = FocusAction.focus;
+    widget = button1;
     tclEvalFmt("event generate %s <FocusIn>", button1.getTclName());
     ++expectedCallCount;
 
-    action = FocusAction.leave;
+    action = FocusAction.unfocus;
+    widget = button1;
     tclEvalFmt("event generate %s <FocusOut>", button1.getTclName());
+    ++expectedCallCount;
+
+    action = FocusAction.focus;
+    widget = button1;
+    tclEvalFmt("event generate %s <FocusIn>", button1.getTclName());
+    ++expectedCallCount;
+
+    action = FocusAction.focus;
+    widget = button1;
+    tclEvalFmt("event generate %s <KeyPress> -keysym %s", button1.getTclName(), cast(int)KeySym.Tab);
+    tclEvalFmt("event generate %s <KeyRelease> -keysym %s", button1.getTclName(), cast(int)KeySym.Tab);
     ++expectedCallCount;
 
     assert(callCount == expectedCallCount, text(callCount, " != ", expectedCallCount));

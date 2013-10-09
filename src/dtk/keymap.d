@@ -43,6 +43,8 @@ struct KeySym
         return keySymToName[value];
     }
 
+    /** Todo: these should all be lowercase. */
+
     enum KeySym VoidSymbol               = 0xFFFFFF;        /* void symbol */
 
         // #ifdef MISCELLANY

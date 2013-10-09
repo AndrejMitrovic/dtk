@@ -899,11 +899,14 @@ enum FocusAction
     /// Sentinel
     none,
 
-    /// The widget was focused in (the focus has entered the widget)
-    enter,
+    /// A focus is requested for a widget.
+    request,
 
-    /// The widget was focused out (the focus has left the widget)
-    leave,
+    /// The widget was focused in (the focus has entered the widget).
+    focus,
+
+    /// The widget was focused out (the focus has left the widget).
+    unfocus,
 }
 
 ///
@@ -922,9 +925,51 @@ class FocusEvent : Event
     }
 
     /**
+        During a focus request, check or set whether we allow
+        the target widget to be focused.
+
+        Initially this property returns $(D true).
+
+        $(B Note:) If the target widget has its $(D canFocus)
+        property set to false, it overrides the value of the
+        $(D allowFocus) property.
+
+        This means focusing is a co-operative operation.
+        Both the event handler (if any) and the target widget
+        must allow the focus request for the the widget to be
+        focused.
+
+        $(B Note:) You may only access this property during a
+        $(D FocusAction.request) action.
+    */
+    @property bool allowFocus()
+    {
+        checkAction();
+        return _allowFocus;
+    }
+
+    /** ditto */
+    @property void allowFocus(bool doAllow)
+    {
+        checkAction();
+        _allowFocus = doAllow;
+    }
+
+    /**
         Whether the target widget was focused in or focused out.
     */
     const(FocusAction) action;
+
+private:
+    private void checkAction(string file = __FILE__, size_t line = __LINE__)
+    {
+        enforce(action == FocusAction.request,
+            format("Cannot access the 'allowFocus' property during a '%s' action. Action must equal '%s'",
+                action, FocusAction.request), file, line);
+    }
+
+package:
+    bool _allowFocus = true;
 }
 
 ///

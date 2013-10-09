@@ -355,6 +355,17 @@ template ThrowWrapper(alias func)
 {
     static extern(C) ReturnType!func ThrowWrapper(ParameterTypeTuple!func args)
     {
+        /**
+            No event loop. This is typically done during unittesting.
+            Because we only check exceptions when the event loop is running,
+            we have to allow them to propagate here instead.
+        */
+        version(unittest)
+        {
+            if (!App._isAppRunning)
+                return func(args);
+        }
+
         try
         {
             return func(args);
@@ -455,4 +466,16 @@ void checkFinite(real value, string file = __FILE__, size_t line = __LINE__)
     version(assert)
         enforce(value.isFinite,
             format("Cannot pass a non-finite floating-point number: '%s'", value), file, line);
+}
+
+/** Some tcl values can be empty or equal 0 or 1. */
+bool getTclBool(string input)
+{
+    if (input.empty || input == "0")
+        return false;
+    else
+    if (input == "1")
+        return true;
+
+    assert(0, format("Unhandled bool case: '%s'", input));
 }

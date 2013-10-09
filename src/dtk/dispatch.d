@@ -20,11 +20,16 @@ import dtk.utils;
 
 import dtk.widgets;
 
-/** The Tcl identifier for the D event callback. */
+/** Name of the D event callback. */
 package enum _dtkCallbackIdent = "dtk::callback_handler";
+
+/** Name of the procedure for focus requests. */
+package enum _dtkFocusCallbackIdent = "dtk::focus_request";
 
 /** Used for Tcl bindtags. */
 package enum _dtkInterceptTag = "dtk::intercept_tag";
+
+package enum _dtkFocusTempVar = "dtk::focus_state_var";
 
 /**
     The event dispatch mechanism.
@@ -124,13 +129,28 @@ static:
 
         tclEvalFmt("bind %s <FocusIn> { %s %s %s %s }",
                     _dtkInterceptTag,
-                    _dtkCallbackIdent, EventType.focus, FocusAction.enter, cast(string)TkSubs.widget_path);
+                    _dtkCallbackIdent, EventType.focus, FocusAction.focus, cast(string)TkSubs.widget_path);
 
         tclEvalFmt("bind %s <FocusOut> { %s %s %s %s }",
                     _dtkInterceptTag,
-                    _dtkCallbackIdent, EventType.focus, FocusAction.leave, cast(string)TkSubs.widget_path);
+                    _dtkCallbackIdent, EventType.focus, FocusAction.unfocus, cast(string)TkSubs.widget_path);
 
-        //~ /** Hook user destroy event by appending. */
+        //~ /** Inject procedure for focus requests. */
+        tclEvalFmt("
+        proc %s {w} {
+            %s %s %s $w
+
+            if {$dtk::focus_state_var eq 1} {
+                return 1
+            } else {
+                return 0
+            }
+        }", _dtkFocusCallbackIdent, _dtkCallbackIdent, EventType.focus, FocusAction.request);
+
+        /** Store the result to this var in ttk::takefocus calls. */
+        tclMakeVar(_dtkFocusTempVar);
+
+        /** Hook user destroy event by appending. */
         tclEvalFmt("bind %s <Destroy> { %s %s %s }",
                     _dtkInterceptTag,
                     _dtkCallbackIdent, EventType.destroy, cast(string)TkSubs.widget_path);
@@ -379,26 +399,40 @@ static:
     }
 
     /// create and populate a focus event and dispatch it.
-    private static TkEventFlag _handleFocusEvent(const Tcl_Obj*[] tclArr)
+    private static int _handleFocusEvent(const Tcl_Obj*[] tclArr)
     {
         assert(tclArr.length == 2, tclArr.length.text);
 
         /**
             Indices:
-                0  => HoverAction
+                0  => FocusAction
                 1  => Widget path
         */
 
         FocusAction focusAction = to!FocusAction(tclArr[0].tclPeekString());
 
         Widget widget = getTclWidget(tclArr[1]);
-        assert(widget !is null);
+        assert(widget !is null, tclArr[1].tclPeekString());
 
         // note: timestamp missing since <FocusIn/FocusOut> event doesn't support timestamps
         TimeMsec timeMsec = getTclTime();
 
         auto event = scoped!FocusEvent(widget, focusAction, timeMsec);
-        return _dispatchEvent(widget, event);
+        auto result = _dispatchEvent(widget, event);
+
+        if (focusAction == FocusAction.request)
+        {
+            int res = event._allowFocus ? widget.allowFocus : 0;
+            //~ stderr.writefln("Focus event request result: %s", event._allowFocus);
+            //~ stderr.writefln("Focus widget request result: %s", widget._allowFocus);
+            //~ tclEvalFmt("set %s %s", _dtkFocusTempVar, res);
+            tclSetVar(_dtkFocusTempVar, res);
+            return TCL_OK;
+        }
+        else
+        {
+            return result;
+        }
     }
 
     /// create and populate a destroy event and dispatch it.

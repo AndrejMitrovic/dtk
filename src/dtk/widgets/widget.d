@@ -239,7 +239,8 @@ abstract class Widget
     public Signal!HoverEvent onHoverEvent;
 
     /**
-        The widget was either focused in or focused out.
+        The widget was focused in or focused out,
+        or there was a focus request.
     */
     public Signal!FocusEvent onFocusEvent;
 
@@ -350,6 +351,44 @@ abstract class Widget
         this.setOption("cursor", newCursor.toTclString());
     }
 
+    /**
+        Check if this widget can take focus during keyboard tab traversal.
+    */
+    @property bool allowFocus()
+    {
+        // if we've explicitly disallow focus or the event loop isn't running
+        if (!App._isAppRunning)
+            return false;
+
+        if (_useDefaultFocus)
+        {
+            // ask Tk whether it makes sense to allow focus (e.g. Frame widgets shouldn't take focus)
+            tclEvalFmt("set %s [ttk::GuessTakeFocus %s]", _dtkFocusTempVar, _name);
+            return tclGetVar!string(_dtkFocusTempVar).to!int == 1;
+        }
+        else
+        {
+            return _allowFocus;
+        }
+    }
+
+    /**
+        Explicitly set whether this widget can take focus during keyboard tab traversal.
+        To restore the default focus behavior based on e.g. the widget's enabled state,
+        call $(D useDefaultFocus).
+    */
+    @property void allowFocus(bool doAllowFocus)
+    {
+        _allowFocus = doAllowFocus;
+        _useDefaultFocus = false;
+    }
+
+    /** Revert the $(D allowFocus) setting back to its default. */
+    void useDefaultFocus()
+    {
+        _useDefaultFocus = true;
+    }
+
     /** Commands: */
 
     /// Note: These properties are implemented in specific subclasses.
@@ -403,11 +442,6 @@ abstract class Widget
 
     /**
         Make this widget have the keyboard focus.
-
-        Todo note: this could be used to iterate
-        automatically through a set of widgets,
-        e.g. on key Release we set focus to another
-        widget.
     */
     public final void focus()
     {
@@ -695,6 +729,13 @@ package:
         _name = name;
         _widgetPathMap[_name] = this;
         _isInitialized = true;
+
+        // only real widgets can be focused
+        if (!_isFakeWidget)
+        {
+            /** Hook the procedure for focus requests. */
+            this.setOption("takefocus", _dtkFocusCallbackIdent);
+        }
     }
 
     /** Check whether this widget has been registered for drag & drop operations. */
@@ -809,6 +850,12 @@ package:
         since any such call will fail.
     */
     private bool _isFakeWidget;
+
+    /** Used to allow/disallow focusing of the widget. */
+    private bool _allowFocus = true;
+
+    /** Ditto. */
+    private bool _useDefaultFocus = true;
 
     /** Set when the widget is registered for drag & drop operations. */
     private DropTarget _dropTarget;
