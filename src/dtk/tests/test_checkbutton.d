@@ -28,6 +28,12 @@ unittest
     CheckButton button1;
     button1 = new CheckButton(testWindow, "Flash");
 
+    auto button2 = new CheckButton(testWindow);
+    assert(button2.text.empty);
+
+    button2.text = "foo";
+    assert(button2.text == "foo");
+
     CheckButtonAction action;
     size_t expectedCallCount;
     size_t callCount;

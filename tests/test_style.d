@@ -15,14 +15,9 @@ unittest
     testWindow.position = Point(500, 500);
 
     auto button = new Button(testWindow, "button");
-
     assert(button.style == GenericStyle.button);
 
-    button.style = GenericStyle.toolButton;
-    assert(button.style == GenericStyle.toolButton);
-
-    button.style = GenericStyle.none;
-    assert(button.style == GenericStyle.button);
+    auto
 
     app.run();
 }

@@ -24,10 +24,12 @@ import dtk.widgets.widget;
 class CheckButton : Widget
 {
     ///
-    this(Widget parent, string text)
+    this(Widget parent, string text = null)
     {
         super(parent, TkType.checkbutton, WidgetType.checkbutton);
-        this.setOption("text", text);
+
+        if (!text.empty)
+            this.setOption("text", text);
 
         _toggleVarName = makeVar();
         this.setOption("variable", _toggleVarName);
