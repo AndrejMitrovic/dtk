@@ -7,6 +7,13 @@ set buildPath=%thisPath%
 set binPath=%dtkRoot%\bin
 cd %thisPath%\..\src
 
+rem Build options
+rem -------------
+set build_tests=1
+set run_tests=1
+rem set build_lib=1
+rem -------------
+
 set "files="
 for /r %%i in (*.d) do set files=!files! %%i
 
@@ -53,12 +60,6 @@ set stderr_log=%buildPath%\dtktest_stderr.log
 
 echo. > %stdout_log%
 echo. > %stderr_log%
-
-rem Uncomment these as necessary
-rem
-set build_tests=1
-set run_tests=1
-rem set build_lib=1
 
 if [%build_tests%]==[] goto :BUILD
 

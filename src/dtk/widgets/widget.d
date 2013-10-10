@@ -29,6 +29,7 @@ import dtk.geometry;
 import dtk.keymap;
 import dtk.interpreter;
 import dtk.signals;
+import dtk.style;
 import dtk.types;
 import dtk.utils;
 
@@ -387,6 +388,23 @@ abstract class Widget
     void useDefaultFocus()
     {
         _useDefaultFocus = true;
+    }
+
+    /** Get the style currently used for this widget. */
+    @property Style style()
+    {
+        string res = getOption!string("style");
+        if (!res.empty)
+            return Style(res);
+
+        string className = tclEvalFmt("winfo class %s", _name);
+        return Style(className);
+    }
+
+    /** Set a new style to be used for this widget. */
+    @property void style(Style newStyle)
+    {
+        this.setOption!string("style", newStyle.name);
     }
 
     /** Commands: */

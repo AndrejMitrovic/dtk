@@ -108,18 +108,6 @@ class CheckButton : Widget
         this.setOption("offvalue", newOffValue);
     }
 
-    /** Get the current button style. */
-    @property ButtonStyle style()
-    {
-        return this.getOption!string("style").toButtonStyle;
-    }
-
-    /** Set a new button style. */
-    @property void style(ButtonStyle newStyle)
-    {
-        this.setOption("style", newStyle.toString);
-    }
-
     /**
         Get the image associated with this check button,
         or null if no image was set.

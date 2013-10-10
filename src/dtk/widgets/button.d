@@ -19,14 +19,6 @@ import dtk.utils;
 
 import dtk.widgets.widget;
 
-/// Various button styles
-enum ButtonStyle
-{
-    none,  /// generic style
-
-    toolButton,  /// useful for creating widgets for toolbars.
-}
-
 /**
     The default mode setting for a button.
     In a dialog box one button may be designated the default button,
@@ -82,18 +74,6 @@ class Button : Widget
     void push()
     {
         tclEvalFmt("ttk::button::activate %s", _name);
-    }
-
-    /** Get the current button style. */
-    @property ButtonStyle style()
-    {
-        return this.getOption!string("style").toButtonStyle;
-    }
-
-    /** Set a new button style. */
-    @property void style(ButtonStyle newStyle)
-    {
-        this.setOption("style", newStyle.toString);
     }
 
     /** Get the default mode for this button. */
@@ -173,24 +153,5 @@ class Button : Widget
     @property void textWidth(int newWidth)
     {
         this.setOption("width", newWidth);
-    }
-}
-
-package ButtonStyle toButtonStyle(string style)
-{
-    switch (style) with (ButtonStyle)
-    {
-        case "":           return none;
-        case "Toolbutton": return toolButton;
-        default: assert(0, format("Unhandled style: '%s'", style));
-    }
-}
-
-package string toString(ButtonStyle style)
-{
-    final switch (style) with (ButtonStyle)
-    {
-        case none:       return "";
-        case toolButton: return "Toolbutton";
     }
 }

@@ -6,7 +6,7 @@ grid .button1 -row 0 -column 0
 grid .button2 -row 0 -column 1
 
 # If empty it uses the default style
-#~ puts [.button1 cget -style]
+puts [.button1 cget -style]
 
 # Print the class of the button
 #~ puts [winfo class .button1]

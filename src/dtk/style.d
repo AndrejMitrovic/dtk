@@ -7,3 +7,28 @@
 module dtk.style;
 
 import dtk.interpreter;
+
+struct Style
+{
+    package this(string name)
+    {
+        _name = name;
+    }
+
+    @property string name()
+    {
+        return _name;
+    }
+
+private:
+    string _name;
+}
+
+// todo: populate these with all widget types, and add these to the test_styles test-suite
+enum GenericStyle : Style
+{
+    none = Style(""),
+    button = Style("TButton"),
+    toolButton = Style("Toolbutton"),
+    checkButton = Style("TCheckbutton"),
+}
