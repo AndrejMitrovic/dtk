@@ -60,7 +60,7 @@ unittest
     genEvent();
     expectedCallCount += 3;
 
-    button.onMouseEvent.connectFront((scope MouseEvent e) { e.handled = true; });
+    button.onMouseEvent.connectFront((scope MouseEvent e) { assert(e.travel == EventTravel.target); e.handled = true; });
     genEvent();  // event blocked
 
     button.onMouseEvent.disconnectFront();
@@ -111,7 +111,7 @@ unittest
 
     /* Test event filtering. */
 
-    button.onFilterEvent ~= (scope Event e) { e.handled = true; };
+    button.onFilterEvent ~= (scope Event e) { assert(e.travel == EventTravel.filter); e.handled = true; };
     genEvent();  // event handled
     checkCallCount();
 
@@ -121,7 +121,7 @@ unittest
     checkCallCount();
 
     /* Test event sinking. */
-    button.parentWidget.onSinkEvent ~= (scope Event e) { e.handled = true; };
+    button.parentWidget.onSinkEvent ~= (scope Event e) { assert(e.travel == EventTravel.sink); e.handled = true; };
     genEvent();  // event handled
     checkCallCount();
 
@@ -132,7 +132,7 @@ unittest
 
     /* Test event notification. */
 
-    button.onNotifyEvent ~= () { ++callCount; };
+    button.onNotifyEvent ~= (scope Event e) { assert(e.travel == EventTravel.notify); ++callCount; };
     button.onNotifyEvent ~= () { ++callCount; };
 
     button.onFilterEvent ~= (scope Event e) { e.handled = true; };
@@ -151,7 +151,7 @@ unittest
     button.onNotifyEvent.clear();
 
     /* Test event bubbling. */
-    button.parentWidget.onBubbleEvent ~= () { ++callCount; };
+    button.parentWidget.onBubbleEvent ~= (scope Event e) { assert(e.travel == EventTravel.bubble); ++callCount; };
     genEvent();
     expectedCallCount += 3 + 1;  // 3 handlers and 1 bubble event
     checkCallCount();
