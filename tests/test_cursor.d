@@ -1,4 +1,4 @@
-module test_cursors;
+module test_cursor;
 
 import core.thread;
 
