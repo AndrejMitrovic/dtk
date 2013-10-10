@@ -44,7 +44,7 @@ enum DefaultMode
 class Button : Widget
 {
     ///
-    this(Widget parent, string text)
+    this(Widget parent, string text = null)
     {
         super(parent, TkType.button, WidgetType.button);
 
@@ -58,7 +58,8 @@ class Button : Widget
                 ButtonAction.push,
                 _name));
 
-        this.setOption("text", text);
+        if (!text.empty)
+            this.setOption("text", text);
     }
 
     /**

@@ -25,6 +25,12 @@ unittest
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
+    auto button2 = new Button(testWindow);
+    assert(button2.text.empty);
+
+    button2.text = "foo";
+    assert(button2.text == "foo");
+
     auto button1 = new Button(testWindow, "Flash");
 
     button1.focus();

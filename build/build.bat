@@ -1,18 +1,17 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-set thisPath=%~dp0
-set dtkRoot=%thisPath%\..
-set buildPath=%thisPath%
-set binPath=%dtkRoot%\bin
-cd %thisPath%\..\src
-
 rem Build options
 rem -------------
 set build_tests=1
 set run_tests=1
 rem set build_lib=1
-rem -------------
+
+set thisPath=%~dp0
+set dtkRoot=%thisPath%\..
+set buildPath=%thisPath%
+set binPath=%dtkRoot%\bin
+cd %thisPath%\..\src
 
 set "files="
 for /r %%i in (*.d) do set files=!files! %%i
