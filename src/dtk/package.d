@@ -22,6 +22,7 @@ public
     import dtk.keymap;
     import dtk.layout;
     import dtk.loader;
+    import dtk.style;
     import dtk.types;
     import dtk.widgets;
 }

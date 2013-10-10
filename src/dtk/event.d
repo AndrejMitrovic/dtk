@@ -197,7 +197,7 @@ class Event
     }
 
     /** Return the current travel direction of this event. */
-    @property EventTravel eventTravel()
+    @property EventTravel travel()
     {
         return _eventTravel;
     }
