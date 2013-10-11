@@ -390,6 +390,8 @@ struct Tcl_Obj
     internalRep_ internalRep;
 }
 
+package static immutable tkNonThemedTypes = [TkType.menu, TkType.text, TkType.toplevel];
+
 /// Tk and Ttk widget types
 package enum TkType : string
 {

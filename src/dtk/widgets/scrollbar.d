@@ -6,8 +6,9 @@
  */
 module dtk.widgets.scrollbar;
 
+import std.algorithm;
+import std.exception;
 import std.range;
-import std.string;
 
 import dtk.event;
 import dtk.geometry;
@@ -16,12 +17,24 @@ import dtk.utils;
 
 import dtk.widgets.widget;
 
-///
+/**
+    $(B Note): The list of supported target widget types for which a scrollbar can be set:
+
+    - Canvas
+    - Entry
+    - Listbox
+    - Text
+    - Tree
+*/
 class Scrollbar : Widget
 {
     ///
     this(Widget parent, Widget target, Orientation orientation)
     {
+        enforce(_scrollbarWidgetTypes.canFind(target.widgetType),
+            format("Cannot set a scrollbar on a %s widget. The supported widget types are: %s.",
+                target.widgetType, (cast(TkType[])_scrollbarWidgetTypes).join(", ")));
+
         super(parent, TkType.scrollbar, WidgetType.scrollbar);
 
         this.setOption("orient", to!string(orientation));

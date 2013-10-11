@@ -24,11 +24,28 @@ private:
     string _name;
 }
 
-// todo: populate these with all widget types, and add these to the test_styles test-suite
 enum GenericStyle : Style
 {
-    none = Style(""),
-    button = Style("TButton"),
-    toolButton = Style("Toolbutton"),
-    checkButton = Style("TCheckbutton"),
+    none         = Style(""),
+    button       = Style("TButton"),
+    toolButton   = Style("Toolbutton"),
+    checkButton  = Style("TCheckbutton"),
+    combobox     = Style("TCombobox"),
+    entry        = Style("TEntry"),
+    frame        = Style("TFrame"),
+    label        = Style("TLabel"),
+    labelFrame   = Style("TLabelframe"),
+    menu         = Style(""),             // todo: test when menu API is stabilized
+    menuButton   = Style("TMenubutton"),  // todo: test when menuButton is ported
+    notebook     = Style("TNotebook"),
+    panedWindow  = Style("TPanedwindow"),
+    progressbar  = Style("TProgressbar"),
+    radioButton  = Style("TRadiobutton"),
+    slider       = Style("TScale"),
+    scrollbar    = Style("TScrollbar"),
+    separator    = Style("TSeparator"),
+    spinbox      = Style("TSpinbox"),
+    text         = Style(""),
+    window       = Style(""),
+    tree         = Style("Treeview"),
 }

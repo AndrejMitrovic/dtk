@@ -393,6 +393,9 @@ abstract class Widget
     /** Get the style currently used for this widget. */
     @property Style style()
     {
+        if (!_isThemedWidget)
+            return GenericStyle.none;
+
         string res = getOption!string("style");
         if (!res.empty)
             return Style(res);
@@ -627,7 +630,7 @@ package:
     package final void setScrollbar(Scrollbar scrollbar)
     {
         assert(!scrollbar._name.empty);
-        string scrollCommand = format("%sscrollcommand", (scrollbar.orientation == Orientation.horizontal) ? "h" : "y");
+        string scrollCommand = format("%sscrollcommand", (scrollbar.orientation == Orientation.horizontal) ? "x" : "y");
         this.setOption(scrollCommand, format("%s set", scrollbar._name));
 
         string viewTarget = (scrollbar.orientation == Orientation.horizontal) ? "hview" : "yview";
@@ -723,6 +726,8 @@ package:
     package final void initialize(Widget parent, TkType tkType, string extraOpts = null)
     {
         enforce(parent !is null, "Parent cannot be null");
+
+        _isThemedWidget = !tkNonThemedTypes.canFind(tkType);
 
         /**
             If parent is the root window '.', '.widget' is the widget path.
@@ -869,6 +874,9 @@ package:
     */
     private bool _isFakeWidget;
 
+    /** Only themed Ttk widgets have a -style setting. */
+    private bool _isThemedWidget;
+
     /** Used to allow/disallow focusing of the widget. */
     private bool _allowFocus = true;
 
@@ -888,6 +896,10 @@ package:
     */
     public Signal!DestroyEvent _onAPIDestroyEvent; /* package */
 }
+
+// todo: canvas support later
+package static immutable _scrollbarWidgetTypes =
+    [/*WidgetType.canvas, */ WidgetType.entry, WidgetType.listbox, WidgetType.text, WidgetType.tree];
 
 /** The dynamic type of a built-in Widget object. */
 enum WidgetType
