@@ -26,7 +26,7 @@ unittest
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
-    auto pane = new PanedWindow(testWindow, Orientation.vertical);
+    auto pane = new PanedWindow(testWindow, Angle.vertical);
 
     auto badButton = new Button(testWindow, "Flash");
     assertThrown(pane.add(badButton));  // cannot add a widget which isn't parented to the pane

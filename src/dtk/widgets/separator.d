@@ -21,20 +21,20 @@ import dtk.widgets.widget;
 class Separator : Widget
 {
     ///
-    this(Widget parent, Orientation orientation)
+    this(Widget parent, Angle angle)
     {
         super(parent, TkType.separator, WidgetType.separator);
-        this.setOption("orient", to!string(orientation));
+        this.setOption("orient", to!string(angle));
     }
 
-    /** Get the orientation of this scrollbar. */
-    @property Orientation orientation()
+    /** Get the angle of this scrollbar. */
+    @property Angle angle()
     {
-        return this.getOption!Orientation("orient");
+        return this.getOption!Angle("orient");
     }
 
-    /** Set the orientation of this scrollbar. */
-    @property void orientation(Orientation newOrient)
+    /** Set the angle of this scrollbar. */
+    @property void angle(Angle newOrient)
     {
         this.setOption("orient", newOrient);
     }

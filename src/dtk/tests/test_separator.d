@@ -28,8 +28,8 @@ unittest
     auto button1 = new Button(testWindow, "button 1");
     auto button2 = new Button(testWindow, "button 2");
 
-    auto separator1 = new Separator(testWindow, Orientation.horizontal);
-    assert(separator1.orientation == Orientation.horizontal);
+    auto separator1 = new Separator(testWindow, Angle.horizontal);
+    assert(separator1.angle == Angle.horizontal);
 
     button1.grid
         .setCol(0)
@@ -53,8 +53,8 @@ unittest
     auto button3 = new Button(testWindow, "button 3");
     auto button4 = new Button(testWindow, "button 4");
 
-    auto separator2 = new Separator(testWindow, Orientation.vertical);
-    assert(separator2.orientation == Orientation.vertical);
+    auto separator2 = new Separator(testWindow, Angle.vertical);
+    assert(separator2.angle == Angle.vertical);
 
     button3.grid
         .setCol(0)

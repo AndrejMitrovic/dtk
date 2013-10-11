@@ -26,7 +26,7 @@ unittest
 
     auto listbox = new Listbox(testWindow);
 
-    auto sbar = new Scrollbar(testWindow, listbox, Orientation.vertical);
+    auto sbar = new Scrollbar(testWindow, listbox, Angle.vertical);
 
     listbox.grid
         .setCol(0)
@@ -49,12 +49,12 @@ unittest
     foreach (i; 0 .. 100)
         listbox.add(format("Line %s of 100", i));
 
-    assert(sbar.orientation == Orientation.vertical);
+    assert(sbar.angle == Angle.vertical);
 
-    sbar.orientation = Orientation.horizontal;
-    assert(sbar.orientation == Orientation.horizontal);
+    sbar.angle = Angle.horizontal;
+    assert(sbar.angle == Angle.horizontal);
 
-    sbar.orientation = Orientation.vertical;
+    sbar.angle = Angle.vertical;
 
     app.testRun();
 }

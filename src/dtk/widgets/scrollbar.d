@@ -29,7 +29,7 @@ import dtk.widgets.widget;
 class Scrollbar : Widget
 {
     ///
-    this(Widget parent, Widget target, Orientation orientation)
+    this(Widget parent, Widget target, Angle angle)
     {
         enforce(_scrollbarWidgetTypes.canFind(target.widgetType),
             format("Cannot set a scrollbar on a %s widget. The supported widget types are: %s.",
@@ -37,20 +37,20 @@ class Scrollbar : Widget
 
         super(parent, TkType.scrollbar, WidgetType.scrollbar);
 
-        this.setOption("orient", to!string(orientation));
+        this.setOption("orient", to!string(angle));
 
         // note: super ctor must be called first to get the _name field
         target.setScrollbar(this);
     }
 
-    /** Get the orientation of this scrollbar. */
-    @property Orientation orientation()
+    /** Get the angle of this scrollbar. */
+    @property Angle angle()
     {
-        return this.getOption!Orientation("orient");
+        return this.getOption!Angle("orient");
     }
 
-    /** Set the orientation of this scrollbar. */
-    @property void orientation(Orientation newOrient)
+    /** Set the angle of this scrollbar. */
+    @property void angle(Angle newOrient)
     {
         this.setOption("orient", newOrient);
     }

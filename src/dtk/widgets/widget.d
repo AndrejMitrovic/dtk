@@ -630,10 +630,10 @@ package:
     package final void setScrollbar(Scrollbar scrollbar)
     {
         assert(!scrollbar._name.empty);
-        string scrollCommand = format("%sscrollcommand", (scrollbar.orientation == Orientation.horizontal) ? "x" : "y");
+        string scrollCommand = format("%sscrollcommand", (scrollbar.angle == Angle.horizontal) ? "x" : "y");
         this.setOption(scrollCommand, format("%s set", scrollbar._name));
 
-        string viewTarget = (scrollbar.orientation == Orientation.horizontal) ? "hview" : "yview";
+        string viewTarget = (scrollbar.angle == Angle.horizontal) ? "hview" : "yview";
         scrollbar.setOption("command", format("%s %s", this._name, viewTarget));
     }
 

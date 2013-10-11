@@ -302,7 +302,7 @@ string toString(Justification justification)
 }
 
 ///
-enum Orientation
+enum Angle
 {
     horizontal,  ///
     vertical     ///

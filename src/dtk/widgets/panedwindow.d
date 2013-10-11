@@ -21,19 +21,19 @@ import dtk.widgets.widget;
 class PanedWindow : Widget
 {
     ///
-    this(Widget parent, Orientation orientation)
+    this(Widget parent, Angle angle)
     {
-        string extraOpts = format("-orient %s", to!string(orientation));
+        string extraOpts = format("-orient %s", to!string(angle));
         super(parent, TkType.panedwindow, WidgetType.panedwindow, extraOpts);
     }
 
     /**
-        Get the orientation of this scrollbar.
-        The orientation cannot be changed once initially set.
+        Get the angle of this scrollbar.
+        The angle cannot be changed once initially set.
     */
-    @property Orientation orientation()
+    @property Angle angle()
     {
-        return this.getOption!Orientation("orient");
+        return this.getOption!Angle("orient");
     }
 
     /** Add a widget to this paned window. */

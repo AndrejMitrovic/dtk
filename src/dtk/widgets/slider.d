@@ -25,7 +25,7 @@ import dtk.widgets.widget;
 class Slider : Widget
 {
     ///
-    this(Widget parent, Orientation orientation, int length, float minValue = 0.0, float maxValue = 100.0)
+    this(Widget parent, Angle angle, int length, float minValue = 0.0, float maxValue = 100.0)
     {
         minValue.checkFinite();
         maxValue.checkFinite();
@@ -33,7 +33,7 @@ class Slider : Widget
         _maxValue = maxValue;
         super(parent, TkType.scale, WidgetType.slider);
 
-        this.setOption("orient", to!string(orientation));
+        this.setOption("orient", to!string(angle));
         this.setOption("length", to!string(length));
         this.setOption("from", to!string(minValue));
         this.setOption("to", to!string(maxValue));

@@ -25,7 +25,7 @@ unittest
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
-    auto slider = new Slider(app.mainWindow, Orientation.horizontal, 200);
+    auto slider = new Slider(app.mainWindow, Angle.horizontal, 200);
     slider.pack();
 
     assert(slider.minValue > -1.0 && slider.minValue < 1.0);
