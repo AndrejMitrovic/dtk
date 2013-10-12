@@ -393,15 +393,14 @@ abstract class Widget
     /** Get the style currently used for this widget. */
     @property Style style()
     {
-        if (!_isThemedWidget)
-            return GenericStyle.none;
+        if (!_isThemedWidget)  // only ttk widgets have the -style option
+            return DefaultStyle.none;
 
         string res = getOption!string("style");
         if (!res.empty)
             return Style(res);
 
-        string className = tclEvalFmt("winfo class %s", _name);
-        return Style(className);
+        return _getDefaultStyle();
     }
 
     /** Set a new style to be used for this widget. */
@@ -806,6 +805,24 @@ package:
         _onAPIDestroyEvent.disconnect(&_unregisterDragDrop);
     }
 
+    private Style _getDefaultStyle()
+    {
+        switch (widgetType) with (WidgetType)
+        {
+            case progressbar:
+                return StaticCast!Progressbar(this).angle == Angle.vertical ?
+                    GenericStyle.vProgressbar : GenericStyle.hProgressbar;
+
+            case progressbar:
+                return StaticCast!Progressbar(this).angle == Angle.vertical ?
+                    GenericStyle.vProgressbar : GenericStyle.hProgressbar;
+
+            default:
+                string className = tclEvalFmt("winfo class %s", _name);
+                return Style(res);
+        }
+    }
+
     public static void initClass()
     {
         _dtkScratchArrVar = makeVar();
@@ -899,7 +916,7 @@ package:
 
 // todo: canvas support later
 package static immutable _scrollbarWidgetTypes =
-    [/*WidgetType.canvas, */ WidgetType.entry, WidgetType.listbox, WidgetType.text, WidgetType.tree];
+    [/*WidgetType.canvas, */ WidgetType.listbox, WidgetType.text, WidgetType.tree];
 
 /** The dynamic type of a built-in Widget object. */
 enum WidgetType

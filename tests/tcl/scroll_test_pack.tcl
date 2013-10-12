@@ -2,6 +2,8 @@ package require Tk
 
 wm geometry . 300x200+50+50
 
+ttk::entry .e -yscrollcommand { }
+
 tk::listbox .listbox -yscrollcommand ".scrollbar set" -height 5
 tk::scrollbar .scrollbar -command ".listbox yview" -orient vertical
 

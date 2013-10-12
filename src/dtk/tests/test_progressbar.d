@@ -25,19 +25,31 @@ unittest
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
-    auto bar1 = new Progressbar(testWindow, Angle.horizontal, 200, ProgressMode.determinate);
+    auto bar = new Progressbar(testWindow, Angle.horizontal, 200, ProgressMode.determinate);
+    bar.pack();
 
-    assert(bar1.maxValue > 99.0 && bar1.maxValue < 101.0);
+    assert(bar.angle == Angle.horizontal);
+    assert(bar.length == 200);
+    assert(bar.progressMode == ProgressMode.determinate);
+    assert(bar.maxValue > 99.0 && bar.maxValue < 101.0);
+    assert(bar.value == 0.0);
 
-    assert(bar1.value == 0.0);
-    bar1.value = 50.0;
+    bar.angle = Angle.vertical;
+    assert(bar.angle == Angle.vertical);
 
-    auto bar2 = new Progressbar(testWindow, Angle.horizontal, 200, ProgressMode.indeterminate);
+    bar.length = 100;
+    assert(bar.length == 100);
 
-    bar2.start(20);
+    bar.progressMode = ProgressMode.indeterminate;
+    assert(bar.progressMode == ProgressMode.indeterminate);
 
-    bar1.pack();
-    bar2.pack();
+    bar.maxValue = 50;
+    assert(bar.maxValue > 49.0 && bar.maxValue < 51.0);
+
+    bar.value = 25.0;
+    assert(bar.maxValue > 24.0 && bar.maxValue < 26.0);
+
+    bar.start(20);
 
     app.testRun();  // avoid infinite running time
 }

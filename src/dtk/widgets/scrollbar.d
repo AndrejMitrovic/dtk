@@ -9,6 +9,7 @@ module dtk.widgets.scrollbar;
 import std.algorithm;
 import std.exception;
 import std.range;
+import std.stdio;
 
 import dtk.event;
 import dtk.geometry;
@@ -21,7 +22,6 @@ import dtk.widgets.widget;
     $(B Note): The list of supported target widget types for which a scrollbar can be set:
 
     - Canvas
-    - Entry
     - Listbox
     - Text
     - Tree

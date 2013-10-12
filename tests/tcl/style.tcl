@@ -29,7 +29,7 @@ puts [ttk::style theme use]
 # take on the appearance described by the new theme.
 ttk::style theme use clam
 
-# Each style represents a single widget
+# Each style represents a single widget type
 
 # A style can set which elements are part of a widget,
 # but also defines how those elements are arranged within
@@ -84,9 +84,30 @@ ttk::style configure Emergency.TButton -font "helvetica 10" -foreground black -p
 # Set the style for a single widget
 .button1 configure -style "Emergency.TButton"
 
+proc IfTrue {} {
+    return 1
+}
+
 # Map how the various configuration options are configured based on widget states
+# There are user1/user2/user3 states as well.
+.button1 state user3
+#~ .button1 state !user3
+
 ttk::style map Emergency.TButton \
-	-background [list disabled #d9d9d9  active #ececec] \
+	-background [list user3 #0000FF] \
 	-foreground [list disabled #a3a3a3] \
 	-relief [list {pressed !disabled} sunken] \
 	;
+
+# Note: -background which is a font
+puts [ttk::style lookup Emergency.TButton -background]
+
+#~ puts [ttk::style lookup Emergency.TButton -relief pressed]
+
+# But this one is a state value
+puts [ttk::style lookup Emergency.TButton -background user3]
+
+#
+ttk::style theme create my_theme -parent default
+
+#~ puts [ttk::style theme names]

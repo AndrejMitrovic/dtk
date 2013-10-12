@@ -1,5 +1,27 @@
 Todo:
 
+- tk style map states:
+static const char *const stateNames[] =
+{
+    "active",		/* Mouse cursor is over widget or element */
+    "disabled",		/* Widget is disabled */
+    "focus",		/* Widget has keyboard focus */
+    "pressed",		/* Pressed or "armed" */
+    "selected",		/* "on", "true", "current", etc. */
+    "background",	/* Top-level window lost focus (Mac,Win "inactive") */
+    "alternate",	/* Widget-specific alternate display style */
+    "invalid",		/* Bad value */
+    "readonly",		/* Editing/modification disabled */
+    "hover",		/* Mouse cursor is over widget */
+    "reserved1",	/* Reserved for future extension */
+    "reserved2",	/* Reserved for future extension */
+    "reserved3",	/* Reserved for future extension */
+    "user3",		/* User-definable state */
+    "user2",		/* User-definable state */
+    "user1",		/* User-definable state */
+    NULL
+};
+
 - scrollbars should be more configurable since the xview/yview command
 is possible to implement, and -xscrollcommand/-yscrollcommand for widgets.
 

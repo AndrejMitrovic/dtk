@@ -32,16 +32,67 @@ class Progressbar : Widget
     this(Widget parent, Angle angle, int length, ProgressMode progressMode, float maxValue = 100)
     {
         maxValue.checkFinite();
-        _maxValue = maxValue;
         super(parent, TkType.progressbar, WidgetType.progressbar);
 
         this.setOption("orient", to!string(angle));
-        this.setOption("mode", to!string(progressMode));
         this.setOption("length", to!string(length));
+        this.setOption("mode", to!string(progressMode));
         this.setOption("maximum", to!string(maxValue));
 
         _varName = makeVar();
         this.setOption("variable", _varName);
+    }
+
+    /** Get or set the angle of this progressbar. */
+    @property Angle angle()
+    {
+        return this.getOption!Angle("orient");
+    }
+
+    /** Ditto. */
+    @property void angle(Angle newOrient)
+    {
+        this.setOption("orient", newOrient);
+    }
+
+    /**
+        Get or set the length of the long axis of the progress bar.
+        This is its width if angle is horizontal,
+        or height if angle is vertical.
+    */
+    @property int length()
+    {
+        return this.getOption!int("length");
+    }
+
+    /** Ditto. */
+    @property void length(int newLength)
+    {
+        this.setOption("length", newLength);
+    }
+
+    /** Get or set the progress mode of this progressbar. */
+    @property ProgressMode progressMode()
+    {
+        return this.getOption!ProgressMode("mode");
+    }
+
+    /** Ditto. */
+    @property void progressMode(ProgressMode newProgressMode)
+    {
+        this.setOption("mode", newProgressMode);
+    }
+
+    /** Get or set the maximum value for this progresbar. */
+    @property float maxValue()
+    {
+        return this.getOption!float("maximum");
+    }
+
+    /** Ditto. */
+    @property void maxValue(float newMaxValue)
+    {
+        this.setOption("maximum", newMaxValue);
     }
 
     /**
@@ -73,12 +124,6 @@ class Progressbar : Widget
     {
         newValue.checkFinite();
         tclSetVar(_varName, newValue);
-    }
-
-    /** Get the maximum value that was set in the constructor. */
-    @property float maxValue()
-    {
-        return _maxValue;
     }
 
     /**
@@ -129,7 +174,6 @@ class Progressbar : Widget
     }
 
 private:
-    float _maxValue;
     string _varName;
     bool _started = false;
 }
