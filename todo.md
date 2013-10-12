@@ -1,7 +1,5 @@
 Todo:
 
-- rename Orientation to Angle
-
 - scrollbars should be more configurable since the xview/yview command
 is possible to implement, and -xscrollcommand/-yscrollcommand for widgets.
 
