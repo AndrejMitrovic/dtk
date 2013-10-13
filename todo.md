@@ -1,5 +1,11 @@
 Todo:
 
+- Removing main window:
+    TkCreateMainWindow
+    Tk_Init
+
+    We need to implement our own Tk_Init function which does not call TkCreateFrame.
+
 - tk style map states:
 static const char *const stateNames[] =
 {

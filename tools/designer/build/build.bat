@@ -26,7 +26,7 @@ rem set compiler=ldmd2.exe
 set main_file=designer\main.d
 set exe_file=%binPath%\designer.exe
 
-set cmd_build=rdmd -of%exe_file% -L/SUBSYSTEM:WINDOWS:5.01 --compiler=%compiler% %flags% %main_file%
+set cmd_build=rdmd --build-only -of%exe_file% -L/SUBSYSTEM:WINDOWS:5.01 --compiler=%compiler% %flags% %main_file%
 
 set stdout_log=%buildPath%\designer_stdout.log
 set stderr_log=%buildPath%\designer_stderr.log

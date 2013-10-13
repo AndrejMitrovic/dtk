@@ -66,6 +66,8 @@ final class App
 
             bool hasEvents = false;
 
+            tclEvalFmt("tkwait visibility %s", _window._name);
+
             do
             {
                 hasEvents = Tcl_DoOneEvent(TCL_DONT_WAIT) != 0;
@@ -144,6 +146,8 @@ final class App
 
         bool hasEvents;
         auto eventTimer = StopWatch(AutoStart.yes);
+
+        tclEvalFmt("tkwait visibility %s", _window._name);
 
         /**
             Main event loop. This is equivalent to Tk_MainLoop(),

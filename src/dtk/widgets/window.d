@@ -57,7 +57,6 @@ class Window : Widget
     this(Tk_Window window)
     {
         super(CreateToplevel.init, WidgetType.window);
-        tclEvalFmt("tkwait visibility %s", _name);
     }
 
     /** Return the current window title. */
