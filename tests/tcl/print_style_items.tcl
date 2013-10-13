@@ -15,7 +15,8 @@ proc print_it {name style} {
     # Vertical.Scrollbar
     # Horizontal.Scrollbar
 
-    puts [ttk::style layout [winfo class .$name]]
+    #~ puts [ttk::style layout [winfo class .$name]]
+    puts [ttk::style layout Vertical.TProgressbar]
 }
 
 print_it "a" "ttk::button"
