@@ -1,8 +1,6 @@
-/build/*.log
 /bin/*
 /examples/bin/*
 /data
-/tools
 /todo/*
 *.a
 *.c
@@ -12,6 +10,7 @@
 *.di
 *.cpp
 *.dat
+*.log
 *.lib
 *.dll
 *.exe
