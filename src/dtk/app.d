@@ -26,7 +26,7 @@ import dtk.widgets.widget;
 import dtk.widgets.window;
 
 /** The main dtk application. Once instantiated a main window will be created. */
-final class App
+class App
 {
     /** Create the app and a main window. */
     this()
