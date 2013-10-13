@@ -29,14 +29,14 @@ enum ProgressMode
 class Progressbar : Widget
 {
     ///
-    this(Widget parent, Angle angle, int length, ProgressMode progressMode, float maxValue = 100)
+    this(Widget parent, ProgressMode progressMode, Angle angle, int length, float maxValue = 100)
     {
         maxValue.checkFinite();
         super(parent, TkType.progressbar, WidgetType.progressbar);
 
+        this.setOption("mode", to!string(progressMode));
         this.setOption("orient", to!string(angle));
         this.setOption("length", to!string(length));
-        this.setOption("mode", to!string(progressMode));
         this.setOption("maximum", to!string(maxValue));
 
         _varName = makeVar();
@@ -136,7 +136,7 @@ class Progressbar : Widget
     void start(int msecs = 50)
     {
         tclEvalFmt("%s start %s", _name, msecs);
-        _started = true;
+        _isRunning = true;
     }
 
     /**
@@ -160,7 +160,7 @@ class Progressbar : Widget
     {
         tclEvalFmt("%s stop", _name);
         tclEval("update idletasks");
-        _started = false;
+        _isRunning = false;
     }
 
     /**
@@ -170,10 +170,10 @@ class Progressbar : Widget
     */
     @property bool isRunning()
     {
-        return _started;
+        return _isRunning;
     }
 
 private:
     string _varName;
-    bool _started = false;
+    bool _isRunning = false;
 }

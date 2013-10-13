@@ -20,11 +20,16 @@ struct Style
         return _name;
     }
 
+    string toString()
+    {
+        return name;
+    }
+
 private:
     string _name;
 }
 
-enum GenericStyle : Style
+enum DefaultStyle : Style
 {
     none         = Style(""),
     button       = Style("TButton"),

@@ -38,7 +38,9 @@ import dtk.platform;
 import dtk.widgets.button;
 import dtk.widgets.entry;
 import dtk.widgets.options;
+import dtk.widgets.progressbar;
 import dtk.widgets.scrollbar;
+import dtk.widgets.slider;
 import dtk.widgets.window;
 
 /** The main class of all Dtk widgets. */
@@ -811,15 +813,19 @@ package:
         {
             case progressbar:
                 return StaticCast!Progressbar(this).angle == Angle.vertical ?
-                    GenericStyle.vProgressbar : GenericStyle.hProgressbar;
+                    DefaultStyle.vProgressbar : DefaultStyle.hProgressbar;
 
-            case progressbar:
-                return StaticCast!Progressbar(this).angle == Angle.vertical ?
-                    GenericStyle.vProgressbar : GenericStyle.hProgressbar;
+            case scrollbar:
+                return StaticCast!Scrollbar(this).angle == Angle.vertical ?
+                    DefaultStyle.vScrollbar : DefaultStyle.hScrollbar;
+
+            case slider:
+                return StaticCast!Slider(this).angle == Angle.vertical ?
+                    DefaultStyle.vSlider : DefaultStyle.hSlider;
 
             default:
                 string className = tclEvalFmt("winfo class %s", _name);
-                return Style(res);
+                return Style(className);
         }
     }
 

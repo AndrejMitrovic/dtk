@@ -29,8 +29,6 @@ class Slider : Widget
     {
         minValue.checkFinite();
         maxValue.checkFinite();
-        _minValue = minValue;
-        _maxValue = maxValue;
         super(parent, TkType.scale, WidgetType.slider);
 
         this.setOption("orient", to!string(angle));
@@ -48,6 +46,60 @@ class Slider : Widget
     */
     public Signal!SliderEvent onSliderEvent;
 
+    /** Get or set the angle of this slider. */
+    @property Angle angle()
+    {
+        return this.getOption!Angle("orient");
+    }
+
+    /** Ditto. */
+    @property void angle(Angle newOrient)
+    {
+        this.setOption("orient", newOrient);
+    }
+
+    /**
+        Get or set the length of the long axis of the slider bar.
+        This is its width if angle is horizontal,
+        or height if angle is vertical.
+    */
+    @property int length()
+    {
+        return this.getOption!int("length");
+    }
+
+    /** Ditto. */
+    @property void length(int newLength)
+    {
+        this.setOption("length", newLength);
+    }
+
+    /** Get or set the minimum value of this slider. */
+    @property float minValue()
+    {
+        return this.getOption!float("from");
+    }
+
+    /** Ditto. */
+    @property void minValue(float newMinValue)
+    {
+        newMinValue.checkFinite();
+        this.setOption("from", newMinValue);
+    }
+
+    /** Get or set the maximum value of this slider. */
+    @property float maxValue()
+    {
+        return this.getOption!float("to");
+    }
+
+    /** Ditto. */
+    @property void maxValue(float newMaxValue)
+    {
+        newMaxValue.checkFinite();
+        this.setOption("to", newMaxValue);
+    }
+
     /** Get the current value of the slider. */
     @property float value()
     {
@@ -61,30 +113,15 @@ class Slider : Widget
 
     /**
         Set the current value of the slider.
-        The value will be clipped between minValue and maxValue set
-        in the constructor.
+        The value will be clipped between minValue and maxValue.
     */
     @property void value(float newValue)
     {
         newValue.checkFinite();
-        newValue = min(newValue, _maxValue).max(newValue, _minValue);
+        newValue = min(newValue, maxValue).max(newValue, minValue);
         tclSetVar(_varName, newValue);
     }
 
-    /** Get the minimum value that was set in the constructor. */
-    @property float minValue()
-    {
-        return _minValue;
-    }
-
-    /** Get the maximum value that was set in the constructor. */
-    @property float maxValue()
-    {
-        return _maxValue;
-    }
-
 private:
-    float _minValue;
-    float _maxValue;
     string _varName;
 }

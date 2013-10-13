@@ -28,11 +28,26 @@ unittest
     auto slider = new Slider(app.mainWindow, Angle.horizontal, 200);
     slider.pack();
 
+    assert(slider.angle == Angle.horizontal);
+    assert(slider.length == 200);
     assert(slider.minValue > -1.0 && slider.minValue < 1.0);
     assert(slider.maxValue > 99.0 && slider.maxValue < 101.0);
-
     assert(slider.value == 0.0);
-    slider.value = 50.0;
+
+    slider.angle == Angle.vertical;
+    assert(slider.angle == Angle.vertical);
+
+    slider.length = 100;
+    assert(slider.length == 100);
+
+    slider.minValue = 20.0;
+    assert(slider.minValue > 19.0 && slider.minValue < 21.0);
+
+    slider.maxValue > 50.0;
+    assert(slider.maxValue > 49.0 && slider.maxValue < 51.0);
+
+    slider.value = 35;
+    assert(slider.value > 34.0 && slider.value < 36.0);
 
     size_t callCount;
     size_t expectedCallCount;
@@ -46,8 +61,8 @@ unittest
         ++callCount;
     };
 
-    value = 10;
-    slider.value = 10;
+    value = 40;
+    slider.value = 40;
     ++expectedCallCount;
 
     assert(callCount == expectedCallCount, format("%s != %s", callCount, expectedCallCount));

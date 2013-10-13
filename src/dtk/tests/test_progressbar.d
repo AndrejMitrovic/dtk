@@ -25,7 +25,7 @@ unittest
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
-    auto bar = new Progressbar(testWindow, Angle.horizontal, 200, ProgressMode.determinate);
+    auto bar = new Progressbar(testWindow, ProgressMode.determinate, Angle.horizontal, 200);
     bar.pack();
 
     assert(bar.angle == Angle.horizontal);

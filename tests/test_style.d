@@ -43,22 +43,25 @@ unittest
     auto panedWindow = new PanedWindow(testWindow, Angle.vertical);
     assert(panedWindow.style == DefaultStyle.panedWindow);
 
-    auto vProg = new Progressbar(testWindow, Angle.vertical, 100, ProgressMode.init);
+    auto vProg = new Progressbar(testWindow, ProgressMode.init, Angle.vertical, 100);
     assert(vProg.style == DefaultStyle.vProgressbar);
 
-    auto hProg = new Progressbar(testWindow, Angle.horizontal, 100, ProgressMode.init);
-    assert(hProg.style == DefaultStyle.vProgressbar);
+    auto hProg = new Progressbar(testWindow, ProgressMode.init, Angle.horizontal, 100);
+    assert(hProg.style == DefaultStyle.hProgressbar);
 
-    auto vScroll = new Scrollbar(testWindow, entry, Angle.vertical);
+    auto text = new Text(testWindow);
+    assert(text.style == DefaultStyle.text);
+
+    auto vScroll = new Scrollbar(testWindow, text, Angle.vertical);
     assert(vScroll.style == DefaultStyle.vScrollbar);
 
-    auto hScroll = new Scrollbar(testWindow, entry, Angle.horizontal);
+    auto hScroll = new Scrollbar(testWindow, text, Angle.horizontal);
     assert(hScroll.style == DefaultStyle.hScrollbar);
 
     auto vSlider = new Slider(testWindow, Angle.vertical, 100);
-    assert(vSlider.style == DefaultStyle.vSlider);
+    assert(vSlider.style == DefaultStyle.vSlider, vSlider.style.text);
 
-    auto hSlider = new Slider(testWindow, Angle.vertical, 100);
+    auto hSlider = new Slider(testWindow, Angle.horizontal, 100);
     assert(hSlider.style == DefaultStyle.hSlider);
 
     auto radioGroup = new RadioGroup(testWindow);
@@ -70,9 +73,6 @@ unittest
 
     auto spinbox = new ScalarSpinbox(testWindow);
     assert(spinbox.style == DefaultStyle.spinbox);
-
-    auto text = new Text(testWindow);
-    assert(text.style == DefaultStyle.text);
 
     auto tree = new Tree(testWindow);
     assert(tree.style == DefaultStyle.tree);

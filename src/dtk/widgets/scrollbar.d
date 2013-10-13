@@ -32,8 +32,8 @@ class Scrollbar : Widget
     this(Widget parent, Widget target, Angle angle)
     {
         enforce(_scrollbarWidgetTypes.canFind(target.widgetType),
-            format("Cannot set a scrollbar on a %s widget. The supported widget types are: %s.",
-                target.widgetType, (cast(TkType[])_scrollbarWidgetTypes).join(", ")));
+            format("Cannot set a scrollbar on a widget of type '%s'. The supported widget types are: %s.",
+                target.widgetType, _scrollbarWidgetTypes[].map!(to!string).join(", ")));
 
         super(parent, TkType.scrollbar, WidgetType.scrollbar);
 
