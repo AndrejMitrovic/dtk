@@ -47,7 +47,7 @@ unittest
     assert(bar.maxValue > 49.0 && bar.maxValue < 51.0);
 
     bar.value = 25.0;
-    assert(bar.maxValue > 24.0 && bar.maxValue < 26.0);
+    assert(bar.value > 24.0 && bar.value < 26.0);
 
     bar.start(20);
 

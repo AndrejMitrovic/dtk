@@ -66,13 +66,13 @@ void testButton(Button button)
     button.underline = 2;
     assert(button.underline == 2);
 
-    assert(button.style == GenericStyle.button);
+    assert(button.style == DefaultStyle.button);
 
-    button.style = GenericStyle.toolButton;
-    assert(button.style == GenericStyle.toolButton);
+    button.style = DefaultStyle.toolButton;
+    assert(button.style == DefaultStyle.toolButton);
 
-    button.style = GenericStyle.none;
-    assert(button.style == GenericStyle.button);
+    button.style = DefaultStyle.none;
+    assert(button.style == DefaultStyle.button);
 
     assert(button.defaultMode == DefaultMode.normal);
     button.defaultMode = DefaultMode.active;

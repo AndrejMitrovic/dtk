@@ -34,7 +34,7 @@ unittest
     assert(slider.maxValue > 99.0 && slider.maxValue < 101.0);
     assert(slider.value == 0.0);
 
-    slider.angle == Angle.vertical;
+    slider.angle = Angle.vertical;
     assert(slider.angle == Angle.vertical);
 
     slider.length = 100;
@@ -43,7 +43,7 @@ unittest
     slider.minValue = 20.0;
     assert(slider.minValue > 19.0 && slider.minValue < 21.0);
 
-    slider.maxValue > 50.0;
+    slider.maxValue = 50.0;
     assert(slider.maxValue > 49.0 && slider.maxValue < 51.0);
 
     slider.value = 35;

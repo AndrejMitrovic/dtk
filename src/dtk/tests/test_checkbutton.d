@@ -89,13 +89,13 @@ void testButton(CheckButton button)
     button.underline = 2;
     assert(button.underline == 2);
 
-    assert(button.style == GenericStyle.checkButton);
+    assert(button.style == DefaultStyle.checkButton);
 
-    button.style = GenericStyle.toolButton;
-    assert(button.style == GenericStyle.toolButton);
+    button.style = DefaultStyle.toolButton;
+    assert(button.style == DefaultStyle.toolButton);
 
-    button.style = GenericStyle.none;
-    assert(button.style == GenericStyle.checkButton);
+    button.style = DefaultStyle.none;
+    assert(button.style == DefaultStyle.checkButton);
 
     assert(button.text == "Flash");
     button.text = "this is some long text";
