@@ -6,14 +6,9 @@
  */
 module dtk.signals;
 
-import std.algorithm;
-import std.container;
-import std.exception;
-import std.range;
-import std.traits;
-import std.typecons;
 
 import dtk.event;
+import dtk.imports;
 import dtk.utils;
 
 /**
@@ -185,9 +180,6 @@ private:
 ///
 unittest
 {
-    import core.exception;
-    import std.exception;
-
     static class MyEvent
     {
         this(int x, int y)

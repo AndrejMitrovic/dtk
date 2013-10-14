@@ -13,10 +13,13 @@ public import core.thread
     : Thread;
 
 public import std.algorithm
-    : all, startsWith, canFind, count, countUntil, map, splitter;
+    : all, startsWith, canFind, count, countUntil, find, map, splitter;
 
 public import std.array
     : Appender, array, empty;
+
+public import std.container
+    : SList;
 
 public import std.datetime
     : Duration, TickDuration, StopWatch, AutoStart, seconds, msecs;
@@ -31,7 +34,7 @@ public import std.path
     : absolutePath;
 
 public import std.range
-    : front, popFront, popFrontN, join, zip;
+    : front, take, popFront, popFrontN, join, zip;
 
 public import std.stdio
     : stderr;
@@ -40,7 +43,9 @@ public import std.string
     : toStringz;
 
 public import std.traits
-    : isArray, isSomeString, FieldTypeTuple, functionAttributes, FunctionAttribute;
+    : isArray, isSomeString, FieldTypeTuple, functionAttributes, FunctionAttribute,
+      ParameterStorageClass, ParameterStorageClassTuple, ReturnType, pointerTarget,
+      isPointer, isSomeFunction, isDelegate, isFunctionPointer, ParameterTypeTuple;
 
 public import std.typecons
     : scoped;
