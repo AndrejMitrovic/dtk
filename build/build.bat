@@ -6,7 +6,6 @@ rem -------------
 set build_tests=1
 rem set run_tests=1
 rem set build_lib=1
-set use_phobos=1
 
 set this_path=%~dp0
 set dtk_root=%this_path%\..
@@ -34,15 +33,9 @@ rem     - Logs COM calls.
 rem
 rem DTK_LOG_TESTS
 rem     - Logs log/logf calls, for use with unittesting.
-rem
-rem DTK_USE_PHOBOS
-rem     - Use Phobos functions rather than inline functions.
 
 set includes=-I%cd%
 set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_TESTS
-
-if [%use_phobos%]==[1] set debug_versions=%debug_versions% -version=DTK_USE_PHOBOS
-
 set import_libs=comctl32.lib ole32.lib uuid.lib
 set flags=%includes% -g %debug_versions% %import_libs%
 

@@ -8,12 +8,5 @@ module dtk.imports;
 
 public
 {
-    version (DTK_USE_PHOBOS)
-    {
-        import dtk.imports.phobos;
-    }
-    else
-    {
-        import dtk.imports.inline;
-    }
+    import dtk.imports.phobos;
 }
