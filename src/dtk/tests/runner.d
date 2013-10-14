@@ -108,20 +108,6 @@ static:
     */
     public void setTester()
     {
-        string[] args = Runtime.args;
-        string[] testModsRunArr;
-        string[] testModsSkipArr;
-
-        getopt(
-            args,
-            getoptConfig.passThrough,
-            "run_tests",      &runTests,
-            "test_mods_run",  &testModsRunArr,
-            "test_mods_skip", &testModsSkipArr,
-        );
-
-        testModsRun = TestMods(testModsRunArr);
-        testModsSkip = TestMods(testModsSkipArr);
         Runtime.moduleUnitTester = &testRunner;
     }
 

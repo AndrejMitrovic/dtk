@@ -982,9 +982,6 @@ private T cenforce(T)(T condition, lazy const(char)[] name, string file = __FILE
     return condition;
 }
 
-public import std.getopt
-    : getoptConfig = config, getopt;
-
 /*********************************
  * Returns !=0 if e is a NaN.
  */
