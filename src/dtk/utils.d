@@ -6,25 +6,10 @@
  */
 module dtk.utils;
 
-static import std.conv;
-static import std.string;
-
-import std.array;
-import std.algorithm;
-import std.exception;
-import std.functional;
-import std.math;
-import std.stdio;
-import std.traits;
-
 import dtk.app;
+import dtk.imports;
 import dtk.loader;
 import dtk.types;
-
-package alias translate = std.string.translate;
-package alias chomp = std.string.chomp;
-package alias chompPrefix = std.string.chompPrefix;
-package alias lastIndexOf = std.string.lastIndexOf;
 
 private template isRawStaticArray(T, A...)
 {
@@ -37,9 +22,6 @@ private template isRawStaticArray(T, A...)
         !is(T == union);
 }
 
-public alias text = std.conv.text;
-public alias ConvException = std.conv.ConvException;
-
 /** Workaround for bad exception file and line info. */
 template to(T)
 {
@@ -48,9 +30,9 @@ template to(T)
     {
         try
         {
-            return std.conv.to!T(input);
+            return phobosTo!T(input);
         }
-        catch (std.conv.ConvException ex)
+        catch (dtk.imports.ConvException ex)
         {
             ex.file = file;
             ex.line = line;
@@ -64,9 +46,9 @@ template to(T)
     {
         try
         {
-            return std.conv.to!T(input);
+            return phobosTo!T(input);
         }
-        catch (std.conv.ConvException ex)
+        catch (dtk.imports.ConvException ex)
         {
             ex.file = file;
             ex.line = line;

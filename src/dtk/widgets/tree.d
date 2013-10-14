@@ -10,6 +10,8 @@ import std.algorithm;
 import std.array;
 import std.exception;
 import std.range;
+import std.conv : text;
+import std.string : chomp, chompPrefix;
 
 import dtk.geometry;
 import dtk.image;

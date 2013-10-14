@@ -8,6 +8,7 @@ module dtk.widgets.window;
 
 import dtk.geometry;
 
+import std.conv : text;
 import std.range;
 import std.stdio;
 import std.algorithm;

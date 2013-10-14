@@ -6,7 +6,6 @@
  */
 module dtk.signals;
 
-
 import dtk.event;
 import dtk.imports;
 import dtk.utils;
