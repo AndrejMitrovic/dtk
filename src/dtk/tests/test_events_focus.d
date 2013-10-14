@@ -9,11 +9,9 @@ module dtk.tests.test_events_focus;
 version(unittest):
 version(DTK_UNITTEST):
 
-import std.conv;
-import std.string;
-
 import dtk;
-
+import dtk.imports;
+import dtk.utils;
 import dtk.tests.globals;
 
 /**

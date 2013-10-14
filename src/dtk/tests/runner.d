@@ -9,21 +9,11 @@ module dtk.tests.runner;
 version(unittest):
 version(DTK_UNITTEST):
 
-import core.exception;
-import core.runtime;
-import std.algorithm;
-import std.getopt;
+import dtk.imports;
 
-import std.path;
-alias absolutePath absPath;
-alias dirSeparator dirSep;
-alias buildNormalizedPath normPath;
-
-import std.range;
-import std.stdio;
-import std.string;
-import std.traits;
-import std.typetuple;
+alias absPath = absolutePath;
+alias dirSep = dirSeparator;
+alias normPath = buildNormalizedPath;
 
 enum RunMain  { no, yes }
 enum RunTests { no, yes }
@@ -124,7 +114,7 @@ static:
 
         getopt(
             args,
-            std.getopt.config.passThrough,
+            getoptConfig.passThrough,
             "run_tests",      &runTests,
             "test_mods_run",  &testModsRunArr,
             "test_mods_skip", &testModsSkipArr,

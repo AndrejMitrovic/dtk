@@ -9,12 +9,8 @@ module dtk.tests.test_window;
 version(unittest):
 version(DTK_UNITTEST):
 
-import std.algorithm;
-import std.range;
-import std.traits;
-
 import dtk;
-
+import dtk.imports;
 import dtk.tests.globals;
 
 /**

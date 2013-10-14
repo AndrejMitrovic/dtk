@@ -12,11 +12,10 @@ version(DTK_UNITTEST):
 // Symbol conflict, issue: http://d.puremagic.com/issues/show_bug.cgi?id=11065
 /* package: */  // should only be used in the test-suite
 
-import std.stdio;
-
 /** One app and one main window for testing. */
 import dtk.app;
 import dtk.geometry;
+import dtk.imports;
 
 import dtk.widgets.window;
 

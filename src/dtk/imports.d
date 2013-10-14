@@ -33,11 +33,14 @@ public import core.stdc.string
 
 /** Phobos imports. */
 public import std.algorithm
-    : all, startsWith, canFind, count, countUntil, find, map, splitter, lastIndexOf,
-      joiner;
+    : all, startsWith, endsWith, canFind, count, countUntil, find, map, splitter,
+      lastIndexOf, joiner, findSplitBefore, sort, min, walkLength;
 
 public import std.array
     : Appender, array, replace, empty;
+
+public import std.ascii
+    : isDigit;
 
 public import std.container
     : SList;
@@ -54,17 +57,21 @@ public import std.exception
 public import std.file
     : exists, isFile;
 
+public import std.getopt
+    : getoptConfig = config, getopt;
+
 public import std.math
-    : isFinite;
+    : isFinite, isNaN;
 
 public import std.path
-    : absolutePath;
+    : absolutePath, dirSeparator, buildNormalizedPath;
 
 public import std.range
-    : front, take, popFront, popFrontN, join, zip, isInputRange, ElementEncodingType;
+    : front, take, popFront, popFrontN, join, zip, isInputRange, ElementType,
+      ElementEncodingType;
 
 public import std.stdio
-    : stderr;
+    : stdout, stderr, writeln, writefln;
 
 public import std.string
     : phobosFormat = format, toStringz, translate;
@@ -73,7 +80,7 @@ public import std.traits
     : isArray, isSomeString, FieldTypeTuple, functionAttributes, FunctionAttribute,
       ParameterStorageClass, ParameterStorageClassTuple, ReturnType, pointerTarget,
       isPointer, isSomeFunction, isDelegate, isFunctionPointer, ParameterTypeTuple,
-      Unqual, isSomeChar, isStaticArray, EnumMembers;
+      Unqual, isSomeChar, isStaticArray, EnumMembers, isDynamicArray;
 
 public import std.typecons
     : scoped;

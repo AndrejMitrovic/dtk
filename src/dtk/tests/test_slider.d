@@ -9,15 +9,9 @@ module dtk.tests.test_slider;
 version(unittest):
 version(DTK_UNITTEST):
 
-import core.thread;
-
-import std.conv;
-import std.range;
-import std.stdio;
-import std.string;
-
 import dtk;
-
+import dtk.imports;
+import dtk.utils;
 import dtk.tests.globals;
 
 unittest

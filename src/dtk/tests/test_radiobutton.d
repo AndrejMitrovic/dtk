@@ -9,14 +9,9 @@ module dtk.tests.test_radiobutton;
 version(unittest):
 version(DTK_UNITTEST):
 
-import core.thread;
-
-import std.range;
-import std.stdio;
-import std.string;
-
 import dtk;
-
+import dtk.imports;
+import dtk.utils;
 import dtk.tests.globals;
 
 unittest

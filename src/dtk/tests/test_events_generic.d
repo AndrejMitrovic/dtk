@@ -9,18 +9,9 @@ module dtk.tests.test_events_generic;
 version(unittest):
 version(DTK_UNITTEST):
 
-import core.thread;
-
-import std.algorithm;
-import std.conv;
-import std.range;
-import std.stdio;
-import std.string;
-import std.traits;
-import std.typetuple;
-
 import dtk;
-
+import dtk.imports;
+import dtk.utils;
 import dtk.tests.globals;
 
 unittest
