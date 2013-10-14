@@ -8,14 +8,12 @@ module dtk.imports;
 
 public
 {
-    version = DTK_USE_TANGO;
-
-    version (DTK_USE_TANGO)
+    version (DTK_USE_PHOBOS)
     {
-        import dtk.imports.tango;
+        import dtk.imports.phobos;
     }
     else
     {
-        import dtk.imports.phobos;
+        import dtk.imports.inline;
     }
 }
