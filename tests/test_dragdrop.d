@@ -37,9 +37,6 @@ unittest
 
     button1.onDropEvent ~= (scope DropEvent event)
     {
-        int x;
-        assert(x);
-
         label.text = to!string(event.action);
 
         if (event.action == DropAction.leave)
@@ -119,18 +116,18 @@ unittest
         else
         if (event.action == DragAction.drop)
         {
-            //~ if (event.hasMovedData)
-                //~ sourceLabel.text = "Moved Data";
-            //~ else
-            //~ if (event.hasCopiedData)
-                //~ sourceLabel.text = "Copied Data";
-            //~ else
-                //~ sourceLabel.text = "Data not moved/copied";
+            if (event.hasMovedData)
+                sourceLabel.text = "Moved Data";
+            else
+            if (event.hasCopiedData)
+                sourceLabel.text = "Copied Data";
+            else
+                sourceLabel.text = "Data not moved/copied";
         }
         else
         if (event.action == DragAction.canceled)
         {
-            //~ sourceLabel.text = "Drag & Drop canceled";
+            sourceLabel.text = "Drag & Drop canceled";
         }
     };
 

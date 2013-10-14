@@ -1134,11 +1134,1071 @@ public import std.stdio
 public import std.string
     : phobosFormat = format, toStringz, translate;
 
-public import std.traits
-    : isArray, isSomeString, FieldTypeTuple, functionAttributes, FunctionAttribute,
-      ParameterStorageClass, ParameterStorageClassTuple, ReturnType, pointerTarget,
-      isPointer, isSomeFunction, isDelegate, isFunctionPointer, ParameterTypeTuple,
-      Unqual, isSomeChar, isStaticArray, EnumMembers, isDynamicArray, hasIndirections;
+/**
+ * Detect whether type $(D T) is an array.
+ */
+template isArray(T)
+{
+    enum bool isArray = isStaticArray!T || isDynamicArray!T;
+}
+
+/**
+ * Detect whether type $(D T) is a static array.
+ */
+template isStaticArray(T)
+{
+    enum isStaticArray = is(StaticArrayTypeOf!T) && !isAggregateType!T;
+}
+
+/*
+ */
+template StaticArrayTypeOf(T)
+{
+    inout(U[n]) idx(U, size_t n)( inout(U[n]) );
+
+    static if (is(T == enum))
+        alias .StaticArrayTypeOf!(OriginalType!T) StaticArrayTypeOf;
+    else static if (is(typeof(idx(defaultInit!T)) X))
+        alias X StaticArrayTypeOf;
+    else
+        static assert(0, T.stringof~" is not a static array type");
+}
+
+/**
+Strips off all $(D typedef)s (including $(D enum) ones) from type $(D T).
+
+Example:
+--------------------
+enum E : int { a }
+typedef E F;
+typedef const F G;
+static assert(is(OriginalType!G == const int));
+--------------------
+ */
+template OriginalType(T)
+{
+    template Impl(T)
+    {
+             static if (is(T U == typedef)) alias OriginalType!U Impl;
+        else static if (is(T U ==    enum)) alias OriginalType!U Impl;
+        else                                alias              T Impl;
+    }
+
+    alias ModifyTypePreservingSTC!(Impl, T) OriginalType;
+}
+
+// [For internal use]
+private template ModifyTypePreservingSTC(alias Modifier, T)
+{
+         static if (is(T U == shared(inout U))) alias shared(inout Modifier!U) ModifyTypePreservingSTC;
+    else static if (is(T U == shared(const U))) alias shared(const Modifier!U) ModifyTypePreservingSTC;
+    else static if (is(T U ==        inout U )) alias        inout(Modifier!U) ModifyTypePreservingSTC;
+    else static if (is(T U ==        const U )) alias        const(Modifier!U) ModifyTypePreservingSTC;
+    else static if (is(T U ==    immutable U )) alias    immutable(Modifier!U) ModifyTypePreservingSTC;
+    else static if (is(T U ==       shared U )) alias       shared(Modifier!U) ModifyTypePreservingSTC;
+    else                                        alias              Modifier!T  ModifyTypePreservingSTC;
+}
+
+/**
+ * Detect whether type $(D T) is an aggregate type.
+ */
+template isAggregateType(T)
+{
+    enum isAggregateType = is(T == struct) || is(T == union) ||
+                           is(T == class) || is(T == interface);
+}
+
+/**
+ * Detect whether type $(D T) is a dynamic array.
+ */
+template isDynamicArray(T)
+{
+    enum isDynamicArray = is(DynamicArrayTypeOf!T) && !isAggregateType!T;
+}
+
+/*
+ */
+template DynamicArrayTypeOf(T)
+{
+    inout(U[]) idx(U)( inout(U[]) );
+
+    static if (is(T == enum))
+        alias .DynamicArrayTypeOf!(OriginalType!T) DynamicArrayTypeOf;
+    else static if (!is(StaticArrayTypeOf!T) &&
+                     is(typeof(idx(defaultInit!T)) X))
+    {
+        alias typeof(defaultInit!T[0]) E;
+
+                     E[]  idy(              E[]  );
+               const(E[]) idy(        const(E[]) );
+               inout(E[]) idy(        inout(E[]) );
+        shared(      E[]) idy( shared(      E[]) );
+        shared(const E[]) idy( shared(const E[]) );
+        shared(inout E[]) idy( shared(inout E[]) );
+           immutable(E[]) idy(    immutable(E[]) );
+
+        alias typeof(idy(defaultInit!T)) DynamicArrayTypeOf;
+    }
+    else
+        static assert(0, T.stringof~" is not a dynamic array");
+}
+
+/* Get an expression typed as T, like T.init */
+template defaultInit(T)
+{
+    static if (!is(typeof({ T v = void; })))    // inout(U)
+        @property T defaultInit(T v = T.init);
+    else
+        @property T defaultInit();
+}
+
+/***
+ * Get the type of the return value from a function,
+ * a pointer to function, a delegate, a struct
+ * with an opCall, a pointer to a struct with an opCall,
+ * or a class with an $(D opCall). Please note that $(D_KEYWORD ref)
+ * is not part of a type, but the attribute of the function
+ * (see template $(LREF functionAttributes)).
+ * Example:
+ * ---
+ * int foo();
+ * ReturnType!foo x;   // x is declared as int
+ * ---
+ */
+template ReturnType(func...)
+    if (func.length == 1 && isCallable!func)
+{
+    static if (is(FunctionTypeOf!func R == return))
+        alias R ReturnType;
+    else
+        static assert(0, "argument has no return type");
+}
+
+/**
+Get the function type from a callable object $(D func).
+
+Using builtin $(D typeof) on a property function yields the types of the
+property value, not of the property function itself.  Still,
+$(D FunctionTypeOf) is able to obtain function types of properties.
+--------------------
+class C
+{
+    int value() @property;
+}
+static assert(is( typeof(C.value) == int ));
+static assert(is( FunctionTypeOf!(C.value) == function ));
+--------------------
+
+Note:
+Do not confuse function types with function pointer types; function types are
+usually used for compile-time reflection purposes.
+ */
+template FunctionTypeOf(func...)
+    if (func.length == 1 && isCallable!func)
+{
+    static if (is(typeof(& func[0]) Fsym : Fsym*) && is(Fsym == function) || is(typeof(& func[0]) Fsym == delegate))
+    {
+        alias Fsym FunctionTypeOf; // HIT: (nested) function symbol
+    }
+    else static if (is(typeof(& func[0].opCall) Fobj == delegate))
+    {
+        alias Fobj FunctionTypeOf; // HIT: callable object
+    }
+    else static if (is(typeof(& func[0].opCall) Ftyp : Ftyp*) && is(Ftyp == function))
+    {
+        alias Ftyp FunctionTypeOf; // HIT: callable type
+    }
+    else static if (is(func[0] T) || is(typeof(func[0]) T))
+    {
+        static if (is(T == function))
+            alias T    FunctionTypeOf; // HIT: function
+        else static if (is(T Fptr : Fptr*) && is(Fptr == function))
+            alias Fptr FunctionTypeOf; // HIT: function pointer
+        else static if (is(T Fdlg == delegate))
+            alias Fdlg FunctionTypeOf; // HIT: delegate
+        else static assert(0);
+    }
+    else static assert(0);
+}
+
+/**
+Detect whether $(D T) is a callable object, which can be called with the
+function call operator $(D $(LPAREN)...$(RPAREN)).
+ */
+template isCallable(T...)
+    if (T.length == 1)
+{
+    static if (is(typeof(& T[0].opCall) == delegate))
+        // T is a object which has a member function opCall().
+        enum bool isCallable = true;
+    else static if (is(typeof(& T[0].opCall) V : V*) && is(V == function))
+        // T is a type which has a static member function opCall().
+        enum bool isCallable = true;
+    else
+        enum bool isCallable = isSomeFunction!T;
+}
+
+/**
+Detect whether $(D T) is one of the built-in string types.
+ */
+template isSomeString(T)
+{
+    enum isSomeString = is(StringTypeOf!T) && !isAggregateType!T;
+}
+
+/*
+ */
+template StringTypeOf(T)
+{
+    static if (is(T == typeof(null)))
+    {
+        // It is impossible to determine exact string type from typeof(null) -
+        // it means that StringTypeOf!(typeof(null)) is undefined.
+        // Then this behavior is convenient for template constraint.
+        static assert(0, T.stringof~" is not a string type");
+    }
+    else static if (is(T : const char[]) || is(T : const wchar[]) || is(T : const dchar[]))
+    {
+        alias ArrayTypeOf!T StringTypeOf;
+    }
+    else
+        static assert(0, T.stringof~" is not a string type");
+}
+
+/*
+ */
+template ArrayTypeOf(T)
+{
+    static if (is(StaticArrayTypeOf!T X))
+        alias X ArrayTypeOf;
+    else static if (is(DynamicArrayTypeOf!T X))
+        alias X ArrayTypeOf;
+    else
+        static assert(0, T.stringof~" is not an array type");
+}
+
+/***
+ * Get as a typetuple the types of the fields of a struct, class, or union.
+ * This consists of the fields that take up memory space,
+ * excluding the hidden fields like the virtual function
+ * table pointer or a context pointer for nested types.
+ * If $(D T) isn't a struct, class, or union returns typetuple
+ * with one element $(D T).
+ */
+template FieldTypeTuple(T)
+{
+    static if (is(T == struct) || is(T == union))
+        alias typeof(T.tupleof[0 .. $ - isNested!T]) FieldTypeTuple;
+    else static if (is(T == class))
+        alias typeof(T.tupleof) FieldTypeTuple;
+    else
+        alias TypeTuple!T FieldTypeTuple;
+}
+
+/**
+Determines whether $(D T) has its own context pointer.
+$(D T) must be either $(D class), $(D struct), or $(D union).
+*/
+template isNested(T)
+    if(is(T == class) || is(T == struct) || is(T == union))
+{
+    enum isNested = __traits(isNested, T);
+}
+
+/**
+ * Detect whether type $(D T) is a pointer.
+ */
+template isPointer(T)
+{
+    static if (is(T P == U*, U) && !isAggregateType!T)
+        enum isPointer = true;
+    else
+        enum isPointer = false;
+}
+
+/**
+Detect whether symbol or type $(D T) is a delegate.
+*/
+template isDelegate(T...)
+    if (T.length == 1)
+{
+    static if (is(typeof(& T[0]) U : U*) && is(typeof(& T[0]) U == delegate))
+    {
+        // T is a (nested) function symbol.
+        enum bool isDelegate = true;
+    }
+    else static if (is(T[0] W) || is(typeof(T[0]) W))
+    {
+        // T is an expression or a type.  Take the type of it and examine.
+        enum bool isDelegate = is(W == delegate);
+    }
+    else
+        enum bool isDelegate = false;
+}
+
+/**
+Detect whether symbol or type $(D T) is a function pointer.
+ */
+template isFunctionPointer(T...)
+    if (T.length == 1)
+{
+    static if (is(T[0] U) || is(typeof(T[0]) U))
+    {
+        static if (is(U F : F*) && is(F == function))
+            enum bool isFunctionPointer = true;
+        else
+            enum bool isFunctionPointer = false;
+    }
+    else
+        enum bool isFunctionPointer = false;
+}
+
+/**
+Detect whether $(D T) is one of the built-in character types.
+ */
+template isSomeChar(T)
+{
+    enum isSomeChar = is(CharTypeOf!T) && !isAggregateType!T;
+}
+
+/*
+ */
+template CharTypeOf(T)
+{
+           inout( char) idx(        inout( char) );
+           inout(wchar) idx(        inout(wchar) );
+           inout(dchar) idx(        inout(dchar) );
+    shared(inout  char) idx( shared(inout  char) );
+    shared(inout wchar) idx( shared(inout wchar) );
+    shared(inout dchar) idx( shared(inout dchar) );
+
+      immutable(  char) idy(   immutable(  char) );
+      immutable( wchar) idy(   immutable( wchar) );
+      immutable( dchar) idy(   immutable( dchar) );
+    // Integrals and characers are implicitly convertible with each other for value copy.
+    // Then adding exact overloads to detect it.
+      immutable(  byte) idy(   immutable(  byte) );
+      immutable( ubyte) idy(   immutable( ubyte) );
+      immutable( short) idy(   immutable( short) );
+      immutable(ushort) idy(   immutable(ushort) );
+      immutable(   int) idy(   immutable(   int) );
+      immutable(  uint) idy(   immutable(  uint) );
+
+    static if (is(T == enum))
+        alias .CharTypeOf!(OriginalType!T) CharTypeOf;
+    else static if (is(typeof(idx(T.init)) X))
+        alias X CharTypeOf;
+    else static if (is(typeof(idy(T.init)) X) && staticIndexOf!(Unqual!X, CharTypeList) >= 0)
+        alias X CharTypeOf;
+    else
+        static assert(0, T.stringof~" is not a character type");
+}
+
+/**
+ * Returns the index of the first occurrence of type T in the
+ * sequence of zero or more types TList.
+ * If not found, -1 is returned.
+ */
+template staticIndexOf(T, TList...)
+{
+    enum staticIndexOf = genericIndexOf!(T, TList).index;
+}
+
+/// Ditto
+template staticIndexOf(alias T, TList...)
+{
+    enum staticIndexOf = genericIndexOf!(T, TList).index;
+}
+
+/**
+Removes all qualifiers, if any, from type $(D T).
+
+Example:
+----
+static assert(is(Unqual!int == int));
+static assert(is(Unqual!(const int) == int));
+static assert(is(Unqual!(immutable int) == int));
+static assert(is(Unqual!(shared int) == int));
+static assert(is(Unqual!(shared(const int)) == int));
+----
+ */
+template Unqual(T)
+{
+    version (none) // Error: recursive alias declaration @@@BUG1308@@@
+    {
+             static if (is(T U ==     const U)) alias Unqual!U Unqual;
+        else static if (is(T U == immutable U)) alias Unqual!U Unqual;
+        else static if (is(T U ==     inout U)) alias Unqual!U Unqual;
+        else static if (is(T U ==    shared U)) alias Unqual!U Unqual;
+        else                                    alias        T Unqual;
+    }
+    else // workaround
+    {
+             static if (is(T U == shared(inout U))) alias U Unqual;
+        else static if (is(T U == shared(const U))) alias U Unqual;
+        else static if (is(T U ==        inout U )) alias U Unqual;
+        else static if (is(T U ==        const U )) alias U Unqual;
+        else static if (is(T U ==    immutable U )) alias U Unqual;
+        else static if (is(T U ==       shared U )) alias U Unqual;
+        else                                        alias T Unqual;
+    }
+}
+
+/***
+Get, as a tuple, the types of the parameters to a function, a pointer
+to function, a delegate, a struct with an $(D opCall), a pointer to a
+struct with an $(D opCall), or a class with an $(D opCall).
+
+Example:
+---
+int foo(int, long);
+void bar(ParameterTypeTuple!foo);      // declares void bar(int, long);
+void abc(ParameterTypeTuple!foo[1]);   // declares void abc(long);
+---
+*/
+template ParameterTypeTuple(func...)
+    if (func.length == 1 && isCallable!func)
+{
+    static if (is(FunctionTypeOf!func P == function))
+        alias P ParameterTypeTuple;
+    else
+        static assert(0, "argument has no parameters");
+}
+
+/**
+Returns the target type of a pointer.
+*/
+template PointerTarget(T : T*)
+{
+    alias T PointerTarget;
+}
+
+/// $(RED Scheduled for deprecation. Please use $(LREF PointerTarget) instead.)
+alias PointerTarget pointerTarget;
+
+/**
+Detect whether symbol or type $(D T) is a function, a function pointer or a delegate.
+ */
+template isSomeFunction(T...)
+    if (T.length == 1)
+{
+    static if (is(typeof(& T[0]) U : U*) && is(U == function) || is(typeof(& T[0]) U == delegate))
+    {
+        // T is a (nested) function symbol.
+        enum bool isSomeFunction = true;
+    }
+    else static if (is(T[0] W) || is(typeof(T[0]) W))
+    {
+        // T is an expression or a type.  Take the type of it and examine.
+        static if (is(W F : F*) && is(F == function))
+            enum bool isSomeFunction = true; // function pointer
+        else
+            enum bool isSomeFunction = is(W == function) || is(W == delegate);
+    }
+    else
+        enum bool isSomeFunction = false;
+}
+
+/**
+Retrieves the members of an enumerated type $(D enum E).
+
+Params:
+ E = An enumerated type. $(D E) may have duplicated values.
+
+Returns:
+ Static tuple composed of the members of the enumerated type $(D E).
+ The members are arranged in the same order as declared in $(D E).
+
+Note:
+ An enum can have multiple members which have the same value. If you want
+ to use EnumMembers to e.g. generate switch cases at compile-time,
+ you should use the $(XREF typetuple, NoDuplicates) template to avoid
+ generating duplicate switch cases.
+
+Note:
+ Returned values are strictly typed with $(D E). Thus, the following code
+ does not work without the explicit cast:
+--------------------
+enum E : int { a, b, c }
+int[] abc = cast(int[]) [ EnumMembers!E ];
+--------------------
+ Cast is not necessary if the type of the variable is inferred. See the
+ example below.
+
+Examples:
+ Creating an array of enumerated values:
+--------------------
+enum Sqrts : real
+{
+    one   = 1,
+    two   = 1.41421,
+    three = 1.73205,
+}
+auto sqrts = [ EnumMembers!Sqrts ];
+assert(sqrts == [ Sqrts.one, Sqrts.two, Sqrts.three ]);
+--------------------
+
+ A generic function $(D rank(v)) in the following example uses this
+ template for finding a member $(D e) in an enumerated type $(D E).
+--------------------
+// Returns i if e is the i-th enumerator of E.
+size_t rank(E)(E e)
+    if (is(E == enum))
+{
+    foreach (i, member; EnumMembers!E)
+    {
+        if (e == member)
+            return i;
+    }
+    assert(0, "Not an enum member");
+}
+
+enum Mode
+{
+    read  = 1,
+    write = 2,
+    map   = 4,
+}
+assert(rank(Mode.read ) == 0);
+assert(rank(Mode.write) == 1);
+assert(rank(Mode.map  ) == 2);
+--------------------
+ */
+template EnumMembers(E)
+    if (is(E == enum))
+{
+    // Supply the specified identifier to an constant value.
+    template WithIdentifier(string ident)
+    {
+        static if (ident == "Symbolize")
+        {
+            template Symbolize(alias value)
+            {
+                enum Symbolize = value;
+            }
+        }
+        else
+        {
+            mixin("template Symbolize(alias "~ ident ~")"
+                 ~"{"
+                     ~"alias "~ ident ~" Symbolize;"
+                 ~"}");
+        }
+    }
+
+    template EnumSpecificMembers(names...)
+    {
+        static if (names.length > 0)
+        {
+            alias TypeTuple!(
+                    WithIdentifier!(names[0])
+                        .Symbolize!(__traits(getMember, E, names[0])),
+                    EnumSpecificMembers!(names[1 .. $])
+                ) EnumSpecificMembers;
+        }
+        else
+        {
+            alias TypeTuple!() EnumSpecificMembers;
+        }
+    }
+
+    alias EnumSpecificMembers!(__traits(allMembers, E)) EnumMembers;
+}
+
+/**
+Returns the attributes attached to a function $(D func).
+
+Example:
+--------------------
+alias FunctionAttribute FA; // shorten the enum name
+
+real func(real x) pure nothrow @safe
+{
+    return x;
+}
+static assert(functionAttributes!func & FA.pure_);
+static assert(functionAttributes!func & FA.safe);
+static assert(!(functionAttributes!func & FA.trusted)); // not @trusted
+--------------------
+ */
+enum FunctionAttribute : uint
+{
+    /**
+     * These flags can be bitwise OR-ed together to represent complex attribute.
+     */
+    none     = 0,
+    pure_    = 0b00000001, /// ditto
+    nothrow_ = 0b00000010, /// ditto
+    ref_     = 0b00000100, /// ditto
+    property = 0b00001000, /// ditto
+    trusted  = 0b00010000, /// ditto
+    safe     = 0b00100000, /// ditto
+}
+
+/**
+Returns a tuple consisting of the storage classes of the parameters of a
+function $(D func).
+
+Example:
+--------------------
+alias ParameterStorageClass STC; // shorten the enum name
+
+void func(ref int ctx, out real result, real param)
+{
+}
+alias ParameterStorageClassTuple!func pstc;
+static assert(pstc.length == 3); // three parameters
+static assert(pstc[0] == STC.ref_);
+static assert(pstc[1] == STC.out_);
+static assert(pstc[2] == STC.none);
+--------------------
+ */
+enum ParameterStorageClass : uint
+{
+    /**
+     * These flags can be bitwise OR-ed together to represent complex storage
+     * class.
+     */
+    none   = 0,
+    scope_ = 0b000_1,  /// ditto
+    out_   = 0b001_0,  /// ditto
+    ref_   = 0b010_0,  /// ditto
+    lazy_  = 0b100_0,  /// ditto
+}
+
+/// ditto
+template ParameterStorageClassTuple(func...)
+    if (func.length == 1 && isCallable!func)
+{
+    alias Unqual!(FunctionTypeOf!func) Func;
+
+    /*
+     * TypeFuncion:
+     *     CallConvention FuncAttrs Arguments ArgClose Type
+     */
+    alias ParameterTypeTuple!Func Params;
+
+    // chop off CallConvention and FuncAttrs
+    enum margs = demangleFunctionAttributes(mangledName!Func[1 .. $]).rest;
+
+    // demangle Arguments and store parameter storage classes in a tuple
+    template demangleNextParameter(string margs, size_t i = 0)
+    {
+        static if (i < Params.length)
+        {
+            enum demang = demangleParameterStorageClass(margs);
+            enum skip = mangledName!(Params[i]).length; // for bypassing Type
+            enum rest = demang.rest;
+
+            alias TypeTuple!(
+                    demang.value + 0, // workaround: "not evaluatable at ..."
+                    demangleNextParameter!(rest[skip .. $], i + 1)
+                ) demangleNextParameter;
+        }
+        else // went thru all the parameters
+        {
+            alias TypeTuple!() demangleNextParameter;
+        }
+    }
+
+    alias demangleNextParameter!margs ParameterStorageClassTuple;
+}
+
+/**
+Returns the mangled name of symbol or type $(D sth).
+
+$(D mangledName) is the same as builtin $(D .mangleof) property, except that
+the correct names of property functions are obtained.
+--------------------
+module test;
+
+class C
+{
+    int value() @property;
+}
+pragma(msg, C.value.mangleof);      // prints "i"
+pragma(msg, mangledName!(C.value)); // prints "_D4test1C5valueMFNdZi"
+--------------------
+ */
+template mangledName(sth...)
+    if (sth.length == 1)
+{
+    static if (is(typeof(sth[0]) X) && is(X == void))
+    {
+        // sth[0] is a template symbol
+        enum string mangledName = removeDummyEnvelope(Dummy!sth.Hook.mangleof);
+    }
+    else
+    {
+        enum string mangledName = sth[0].mangleof;
+    }
+}
+
+private template Dummy(T...) { struct Hook {} }
+
+private string removeDummyEnvelope(string s)
+{
+    // remove --> S3std6traits ... Z4Hook
+    s = s[12 .. $ - 6];
+
+    // remove --> DIGIT+ __T5Dummy
+    foreach (i, c; s)
+    {
+        if (c < '0' || '9' < c)
+        {
+            s = s[i .. $];
+            break;
+        }
+    }
+    s = s[9 .. $]; // __T5Dummy
+
+    // remove --> T | V | S
+    immutable kind = s[0];
+    s = s[1 .. $];
+
+    if (kind == 'S') // it's a symbol
+    {
+        /*
+         * The mangled symbol name is packed in LName --> Number Name.  Here
+         * we are chopping off the useless preceding Number, which is the
+         * length of Name in decimal notation.
+         *
+         * NOTE: n = m + Log(m) + 1;  n = LName.length, m = Name.length.
+         */
+        immutable n = s.length;
+        size_t m_upb = 10;
+
+        foreach (k; 1 .. 5) // k = Log(m_upb)
+        {
+            if (n < m_upb + k + 1)
+            {
+                // Now m_upb/10 <= m < m_upb; hence k = Log(m) + 1.
+                s = s[k .. $];
+                break;
+            }
+            m_upb *= 10;
+        }
+    }
+
+    return s;
+}
+
+struct Demangle(T)
+{
+    T       value;  // extracted information
+    string  rest;
+}
+
+/* Demangles mstr as the storage class part of Argument. */
+Demangle!uint demangleParameterStorageClass(string mstr)
+{
+    uint pstc = 0; // parameter storage class
+
+    // Argument --> Argument2 | M Argument2
+    if (mstr.length > 0 && mstr[0] == 'M')
+    {
+        pstc |= ParameterStorageClass.scope_;
+        mstr  = mstr[1 .. $];
+    }
+
+    // Argument2 --> Type | J Type | K Type | L Type
+    ParameterStorageClass stc2;
+
+    switch (mstr.length ? mstr[0] : char.init)
+    {
+        case 'J': stc2 = ParameterStorageClass.out_;  break;
+        case 'K': stc2 = ParameterStorageClass.ref_;  break;
+        case 'L': stc2 = ParameterStorageClass.lazy_; break;
+        default : break;
+    }
+    if (stc2 != ParameterStorageClass.init)
+    {
+        pstc |= stc2;
+        mstr  = mstr[1 .. $];
+    }
+
+    return Demangle!uint(pstc, mstr);
+}
+
+/* Demangles mstr as FuncAttrs. */
+Demangle!uint demangleFunctionAttributes(string mstr)
+{
+    enum LOOKUP_ATTRIBUTE =
+    [
+        'a': FunctionAttribute.pure_,
+        'b': FunctionAttribute.nothrow_,
+        'c': FunctionAttribute.ref_,
+        'd': FunctionAttribute.property,
+        'e': FunctionAttribute.trusted,
+        'f': FunctionAttribute.safe
+    ];
+    uint atts = 0;
+
+    // FuncAttrs --> FuncAttr | FuncAttr FuncAttrs
+    // FuncAttr  --> empty | Na | Nb | Nc | Nd | Ne | Nf
+    // except 'Ng' == inout, because it is a qualifier of function type
+    while (mstr.length >= 2 && mstr[0] == 'N' && mstr[1] != 'g')
+    {
+        if (FunctionAttribute att = LOOKUP_ATTRIBUTE[ mstr[1] ])
+        {
+            atts |= att;
+            mstr  = mstr[2 .. $];
+        }
+        else assert(0);
+    }
+    return Demangle!uint(atts, mstr);
+}
+
+alias TypeTuple!(byte, ubyte, short, ushort, int, uint, long, ulong) IntegralTypeList;
+alias TypeTuple!(byte, short, int, long) SignedIntTypeList;
+alias TypeTuple!(ubyte, ushort, uint, ulong) UnsignedIntTypeList;
+alias TypeTuple!(float, double, real) FloatingPointTypeList;
+alias TypeTuple!(ifloat, idouble, ireal) ImaginaryTypeList;
+alias TypeTuple!(cfloat, cdouble, creal) ComplexTypeList;
+alias TypeTuple!(IntegralTypeList, FloatingPointTypeList) NumericTypeList;
+alias TypeTuple!(char, wchar, dchar) CharTypeList;
+
+/// ditto
+template functionAttributes(func...)
+    if (func.length == 1 && isCallable!func)
+{
+    alias Unqual!(FunctionTypeOf!func) Func;
+
+    enum uint functionAttributes =
+            demangleFunctionAttributes(mangledName!Func[1 .. $]).value;
+}
+
+/**
+Returns $(D true) if and only if $(D T)'s representation includes at
+least one of the following: $(OL $(LI a raw pointer $(D U*);) $(LI an
+array $(D U[]);) $(LI a reference to a class type $(D C).)
+$(LI an associative array.) $(LI a delegate.))
+ */
+template hasIndirections(T)
+{
+    template Impl(T...)
+    {
+        static if (!T.length)
+        {
+            enum Impl = false;
+        }
+        else static if(isFunctionPointer!(T[0]))
+        {
+            enum Impl = Impl!(T[1 .. $]);
+        }
+        else static if(isStaticArray!(T[0]))
+        {
+            static if (is(T[0] _ : void[N], size_t N))
+                enum Impl = true;
+            else
+                enum Impl = Impl!(T[1 .. $]) ||
+                    Impl!(RepresentationTypeTuple!(typeof(T[0].init[0])));
+        }
+        else
+        {
+            enum Impl = isPointer!(T[0]) || isDynamicArray!(T[0]) ||
+                is (T[0] : const(Object)) || isAssociativeArray!(T[0]) ||
+                isDelegate!(T[0]) || is(T[0] == interface)
+                || Impl!(T[1 .. $]);
+        }
+    }
+
+    enum hasIndirections = Impl!(T, RepresentationTypeTuple!T);
+}
+
+/***
+Get the primitive types of the fields of a struct or class, in
+topological order.
+
+Example:
+----
+struct S1 { int a; float b; }
+struct S2 { char[] a; union { S1 b; S1 * c; } }
+alias RepresentationTypeTuple!S2 R;
+assert(R.length == 4
+    && is(R[0] == char[]) && is(R[1] == int)
+    && is(R[2] == float) && is(R[3] == S1*));
+----
+*/
+template RepresentationTypeTuple(T)
+{
+    template Impl(T...)
+    {
+        static if (T.length == 0)
+        {
+            alias TypeTuple!() Impl;
+        }
+        else
+        {
+            static if (is(T[0] R: Rebindable!R))
+            {
+                alias Impl!(Impl!R, T[1 .. $]) Impl;
+            }
+            else  static if (is(T[0] == struct) || is(T[0] == union))
+            {
+    // @@@BUG@@@ this should work
+    //             alias .RepresentationTypes!(T[0].tupleof)
+    //                 RepresentationTypes;
+                alias Impl!(FieldTypeTuple!(T[0]), T[1 .. $]) Impl;
+            }
+            else static if (is(T[0] U == typedef))
+            {
+                alias Impl!(FieldTypeTuple!U, T[1 .. $]) Impl;
+            }
+            else
+            {
+                alias TypeTuple!(T[0], Impl!(T[1 .. $])) Impl;
+            }
+        }
+    }
+
+    static if (is(T == struct) || is(T == union) || is(T == class))
+    {
+        alias Impl!(FieldTypeTuple!T) RepresentationTypeTuple;
+    }
+    else static if (is(T U == typedef))
+    {
+        alias RepresentationTypeTuple!U RepresentationTypeTuple;
+    }
+    else
+    {
+        alias Impl!T RepresentationTypeTuple;
+    }
+}
+
+/*
+ */
+template AssocArrayTypeOf(T)
+{
+       immutable(V [K]) idx(K, V)(    immutable(V [K]) );
+
+           inout(V)[K]  idy(K, V)(        inout(V)[K]  );
+    shared(      V [K]) idy(K, V)( shared(      V [K]) );
+
+           inout(V [K]) idz(K, V)(        inout(V [K]) );
+    shared(inout V [K]) idz(K, V)( shared(inout V [K]) );
+
+           inout(immutable(V)[K])  idw(K, V)(        inout(immutable(V)[K])  );
+    shared(inout(immutable(V)[K])) idw(K, V)( shared(inout(immutable(V)[K])) );
+
+    static if (is(typeof(idx(defaultInit!T)) X))
+    {
+        alias X AssocArrayTypeOf;
+    }
+    else static if (is(typeof(idy(defaultInit!T)) X))
+    {
+        alias X AssocArrayTypeOf;
+    }
+    else static if (is(typeof(idz(defaultInit!T)) X))
+    {
+               inout(             V  [K]) idzp(K, V)(        inout(             V  [K]) );
+               inout(       const(V) [K]) idzp(K, V)(        inout(       const(V) [K]) );
+               inout(shared(const V) [K]) idzp(K, V)(        inout(shared(const V) [K]) );
+               inout(   immutable(V) [K]) idzp(K, V)(        inout(   immutable(V) [K]) );
+        shared(inout              V  [K]) idzp(K, V)( shared(inout              V  [K]) );
+        shared(inout        const(V) [K]) idzp(K, V)( shared(inout        const(V) [K]) );
+        shared(inout    immutable(V) [K]) idzp(K, V)( shared(inout    immutable(V) [K]) );
+
+        alias typeof(idzp(defaultInit!T)) AssocArrayTypeOf;
+    }
+    else static if (is(typeof(idw(defaultInit!T)) X))
+        alias X AssocArrayTypeOf;
+    else
+        static assert(0, T.stringof~" is not an associative array type");
+}
+
+/**
+$(D Rebindable!(T)) is a simple, efficient wrapper that behaves just
+like an object of type $(D T), except that you can reassign it to
+refer to another object. For completeness, $(D Rebindable!(T)) aliases
+itself away to $(D T) if $(D T) is a non-const object type. However,
+$(D Rebindable!(T)) does not compile if $(D T) is a non-class type.
+
+Regular $(D const) object references cannot be reassigned:
+
+----
+class Widget { int x; int y() const { return x; } }
+const a = new Widget;
+a.y();          // fine
+a.x = 5;        // error! can't modify const a
+a = new Widget; // error! can't modify const a
+----
+
+However, $(D Rebindable!(Widget)) does allow reassignment, while
+otherwise behaving exactly like a $(D const Widget):
+
+----
+auto a = Rebindable!(const Widget)(new Widget);
+a.y();          // fine
+a.x = 5;        // error! can't modify const a
+a = new Widget; // fine
+----
+
+You may want to use $(D Rebindable) when you want to have mutable
+storage referring to $(D const) objects, for example an array of
+references that must be sorted in place. $(D Rebindable) does not
+break the soundness of D's type system and does not incur any of the
+risks usually associated with $(D cast).
+
+ */
+template Rebindable(T) if (is(T == class) || is(T == interface) || isArray!T)
+{
+    static if (!is(T X == const U, U) && !is(T X == immutable U, U))
+    {
+        alias T Rebindable;
+    }
+    else static if (isArray!T)
+    {
+        alias const(ElementType!T)[] Rebindable;
+    }
+    else
+    {
+        struct Rebindable
+        {
+            private union
+            {
+                T original;
+                U stripped;
+            }
+            void opAssign(T another) pure nothrow
+            {
+                stripped = cast(U) another;
+            }
+            void opAssign(Rebindable another) pure nothrow
+            {
+                stripped = another.stripped;
+            }
+            static if (is(T == const U))
+            {
+                // safely assign immutable to const
+                void opAssign(Rebindable!(immutable U) another) pure nothrow
+                {
+                    stripped = another.stripped;
+                }
+            }
+
+            this(T initializer) pure nothrow
+            {
+                opAssign(initializer);
+            }
+
+            @property ref inout(T) get() inout pure nothrow
+            {
+                return original;
+            }
+
+            alias get this;
+        }
+    }
+}
+
+/**
+ * Detect whether $(D T) is an associative array type
+ */
+template isAssociativeArray(T)
+{
+    enum bool isAssociativeArray = is(AssocArrayTypeOf!T) && !isAggregateType!T;
+}
 
 private import std.conv
     : emplace;
