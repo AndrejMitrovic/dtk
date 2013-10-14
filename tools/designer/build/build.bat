@@ -10,14 +10,17 @@ set thisPath=%~dp0
 set designerRoot=%thisPath%\..
 set buildPath=%thisPath%
 set binPath=%designerRoot%\bin
+set libPath=%designerRoot%\lib
 cd %thisPath%\..\src
 
 set dtkImport=%designerRoot%\..\..\src
 
-set includes=-I%cd% -I%dtkImport%
+set includes=-I%cd% -I%dtkImport% -I%libPath%\msgpack-d\src
 set versions=
 set import_libs=comctl32.lib ole32.lib uuid.lib
-set flags=%includes% %versions% %import_libs% -g -unittest -w
+
+rem Note: -w removed due to msgpack warnings, see https://github.com/msgpack/msgpack-d/issues/15
+set flags=%includes% %versions% %import_libs% -g -unittest
 
 set compiler=dmd.exe
 rem set compiler=dmd_msc.exe
