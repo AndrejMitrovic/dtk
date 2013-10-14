@@ -1,5 +1,9 @@
 Todo:
 
+- Speedup builds:
+    DMD:     12611 msecs
+    DMD_MSC:  7482 msecs
+
 - Removing main window:
     TkCreateMainWindow
     Tk_Init

@@ -4,90 +4,90 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.imports;
+module dtk.imports.tango;
 
 /** Druntime imports. */
-public import core.atomic
+public import dtk.imports.phobos
     : atomicOp;
 
-public import core.exception
+public import dtk.imports.phobos
     : AssertError;
 
-public import core.memory
+public import dtk.imports.phobos
     : GC;
 
-public import core.runtime
+public import dtk.imports.phobos
     : Runtime;
 
-public import core.time
+public import dtk.imports.phobos
     : dur, Duration, TickDuration;
 
-public import core.thread
+public import dtk.imports.phobos
     : Thread;
 
-public import core.stdc.config
+public import dtk.imports.phobos
     : c_long, c_ulong;
 
-public import core.stdc.string
+public import dtk.imports.phobos
     : memcpy;
 
 /** Phobos imports. */
-public import std.algorithm
+public import dtk.imports.phobos
     : all, startsWith, endsWith, canFind, count, countUntil, find, map, splitter,
       lastIndexOf, joiner, findSplitBefore, sort, min, walkLength, chomp, max,
       chompPrefix;
 
-public import std.array
+public import dtk.imports.phobos
     : Appender, array, replace, empty, split;
 
-public import std.ascii
+public import dtk.imports.phobos
     : isDigit;
 
-public import std.container
+public import dtk.imports.phobos
     : SList;
 
-public import std.conv
-    : phobosTo = to, ConvException, text;
+public import dtk.imports.phobos
+    : phobosTo, ConvException, text;
 
-public import std.datetime
+public import dtk.imports.phobos
     : StopWatch, AutoStart, seconds, msecs;
 
-public import std.exception
+public import dtk.imports.phobos
     : assertThrown, enforce;
 
-public import std.file
+public import dtk.imports.phobos
     : exists, isFile;
 
-public import std.getopt
-    : getoptConfig = config, getopt;
+public import dtk.imports.phobos
+    : getoptConfig, getopt;
 
-public import std.math
+public import dtk.imports.phobos
     : isFinite, isNaN;
 
-public import std.path
+public import dtk.imports.phobos
     : absolutePath, dirSeparator, buildNormalizedPath;
 
-public import std.range
+public import dtk.imports.phobos
     : front, take, popFront, popFrontN, join, zip, isInputRange, ElementType,
       ElementEncodingType, iota;
 
-public import std.stdio
+public import dtk.imports.phobos
     : stdout, stderr, writeln, writefln;
 
-public import std.string
-    : phobosFormat = format, toStringz, translate;
+public import dtk.imports.phobos
+    : phobosFormat, toStringz, translate;
 
-public import std.traits
+public import dtk.imports.phobos
     : isArray, isSomeString, FieldTypeTuple, functionAttributes, FunctionAttribute,
       ParameterStorageClass, ParameterStorageClassTuple, ReturnType, pointerTarget,
       isPointer, isSomeFunction, isDelegate, isFunctionPointer, ParameterTypeTuple,
       Unqual, isSomeChar, isStaticArray, EnumMembers, isDynamicArray, hasIndirections;
 
-public import std.typecons
+public import dtk.imports.phobos
     : scoped;
 
-public import std.typetuple
+public import dtk.imports.phobos
     : TypeTuple;
 
-public import std.variant
+public import dtk.imports.phobos
     : Variant;
