@@ -1250,8 +1250,13 @@ private size_t _alignUp(size_t alignment)(size_t n)
     return (n + badEnd) & ~badEnd;
 }
 
-public import std.typetuple
-    : TypeTuple;
+/**
+ * Creates a typetuple out of a sequence of zero or more types.
+ */
+template TypeTuple(TList...)
+{
+    alias TList TypeTuple;
+}
 
 public import std.variant
     : Variant;
