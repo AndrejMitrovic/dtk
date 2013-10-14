@@ -4,12 +4,19 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module designer.main;
+module designer.app;
 
-import designer.app;
+import dtk.app;
 
-void main()
+import designer.window;
+
+class DesignerApp : App
 {
-    auto app = new DesignerApp();
-    app.run();
+    this()
+    {
+        _window = new DesignerWindow(mainWindow);
+    }
+
+private:
+    DesignerWindow _window;
 }

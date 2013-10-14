@@ -209,8 +209,6 @@ package:
     static Exception thrownException;
 
 private:
-    long timestamp;
-
     Window _window;
     __gshared bool _isAppInited;
 }
