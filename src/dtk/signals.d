@@ -77,7 +77,6 @@ struct EventHandler(EventClass)
     {
         version(DTK_LOG_EVENT_HANDLER)
         {
-            import std.stdio;
             if (_callback.deleg)
             {
                 if (_callback.hasParams)

@@ -6,6 +6,8 @@
  */
 module dtk.keymap;
 
+import dtk.imports;
+
 /**
     All possible key codes recognized by DTK.
 
@@ -1191,7 +1193,6 @@ struct KeySym
 
 unittest
 {
-    import std.conv;
     auto keySym = KeySym.BackSpace;
     assert(keySym.text == "BackSpace");
 }

@@ -46,13 +46,13 @@ public import std.path
     : absolutePath;
 
 public import std.range
-    : front, take, popFront, popFrontN, join, zip;
+    : front, take, popFront, popFrontN, join, zip, isInputRange, ElementEncodingType;
 
 public import std.stdio
     : stderr;
 
 public import std.string
-    : toStringz, translate;
+    : phobosFormat = format, toStringz, translate;
 
 public import std.traits
     : isArray, isSomeString, FieldTypeTuple, functionAttributes, FunctionAttribute,

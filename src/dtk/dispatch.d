@@ -173,7 +173,6 @@ static:
 
         version (DTK_LOG_EVENTS)
         {
-            import std.stdio;
             stderr.writeln("--                --");
             foreach (idx; 0 .. objc)
             {

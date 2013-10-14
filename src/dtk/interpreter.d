@@ -136,9 +136,6 @@ T tclGetVar(T)(string varName)
 /** Set a new value for the variable $(D varName) of type $(D T) to the value $(D value). */
 void tclSetVar(T)(string varName, T value)
 {
-    import std.array;
-    import std.traits;
-
     static if (isArray!T && !isSomeString!T)
     {
         tclEvalFmt("set %s %s", varName, value._tclEscape);

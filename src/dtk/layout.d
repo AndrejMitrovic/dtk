@@ -307,7 +307,6 @@ struct ColRowOptions
     // @bug: Issue 11120 workaround: Have to use explicit Params type
     template _chainerFunc(alias symbol, Params)
     {
-        // import std.traits;
         // alias Params = ParameterTypeTuple!symbol;
         auto ref _chainerFunc(Params args)
         {
@@ -357,7 +356,6 @@ private mixin template _mixinChainerFunc()
 {
     template _chainerFunc(alias symbol)
     {
-        import std.traits;
         alias Params = ParameterTypeTuple!symbol;
 
         auto ref _chainerFunc(Params args)

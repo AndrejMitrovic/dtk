@@ -60,11 +60,9 @@ template to(T)
 /** Wrapper around format which sets the file and line of any exception to the call site. */
 string format(string file = __FILE__, size_t line = __LINE__, Args...)(string fmtStr, Args args)
 {
-    static import std.string;
-
     try
     {
-        return std.string.format(fmtStr, args);
+        return phobosFormat(fmtStr, args);
     }
     catch (Exception exc)
     {
@@ -221,8 +219,6 @@ unittest
     B b = StaticCast!B(a);
     assert(b.y == 1);
 
-    import std.typecons;
-
     auto sb = scoped!B(2);
     A as = sb;
     B bs = StaticCast!B(as);
@@ -270,8 +266,6 @@ string getClassName(inout(Object) object)
 */
 string enquote(T)(T arg)
 {
-    import std.range : isInputRange, ElementEncodingType;
-
     static if (isSomeString!T)
         return format(`"%s"`, arg);
     else
