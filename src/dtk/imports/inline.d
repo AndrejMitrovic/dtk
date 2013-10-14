@@ -40,7 +40,7 @@ public import std.algorithm
       chompPrefix;
 
 public import std.array
-    : Appender, array, replace, empty, split;
+    : join, popFront, front, Appender, array, replace, empty, split;
 
 immutable digits         = "0123456789";                 /// 0..9
 immutable letters        = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" ~
@@ -91,9 +91,6 @@ enum
 
 private import std.algorithm
     : move;
-
-private import std.range
-    : Take, isForwardRange;
 
 /**
    Implements a simple and fast singly-linked list.
@@ -475,9 +472,9 @@ Examples:
 --------------------
 auto sl = SList!string(["a", "b", "d"]);
 sl.insertAfter(sl[], "e"); // insert at the end (slowest)
-assert(std.algorithm.equal(sl[], ["a", "b", "d", "e"]));
-sl.insertAfter(std.range.take(sl[], 2), "c"); // insert after "b"
-assert(std.algorithm.equal(sl[], ["a", "b", "c", "d", "e"]));
+assert(equal(sl[], ["a", "b", "d", "e"]));
+sl.insertAfter(take(sl[], 2), "c"); // insert after "b"
+assert(equal(sl[], ["a", "b", "c", "d", "e"]));
 --------------------
      */
 
@@ -636,8 +633,33 @@ template isImplicitlyConvertible(From, To)
     }));
 }
 
+/***************************************************************
+ * Convenience functions for converting any number and types of
+ * arguments into _text (the three character widths).
+ */
+string text(T...)(T args) { return textImpl!string(args); }
+///ditto
+wstring wtext(T...)(T args) { return textImpl!wstring(args); }
+///ditto
+dstring dtext(T...)(T args) { return textImpl!dstring(args); }
+
+private S textImpl(S, U...)(U args)
+{
+    static if (U.length == 0)
+    {
+        return null;
+    }
+    else
+    {
+        auto result = phobosTo!S(args[0]);
+        foreach (arg; args[1 .. $])
+            result ~= phobosTo!S(arg);
+        return result;
+    }
+}
+
 public import std.conv
-    : phobosTo = to, ConvException, text;
+    : phobosTo = to, ConvException;
 
 public import std.datetime
     : StopWatch, AutoStart, seconds, msecs;
@@ -1124,9 +1146,1080 @@ else
 public import std.path
     : absolutePath, dirSeparator, buildNormalizedPath;
 
+
+/**
+Lazily takes only up to $(D n) elements of a range. This is
+particularly useful when using with infinite ranges. If the range
+offers random access and $(D length), $(D Take) offers them as well.
+
+Example:
+----
+int[] arr1 = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ];
+auto s = take(arr1, 5);
+assert(s.length == 5);
+assert(s[4] == 5);
+assert(equal(s, [ 1, 2, 3, 4, 5 ][]));
+----
+ */
+struct Take(Range)
+if (isInputRange!(Unqual!Range) &&
+    //take _cannot_ test hasSlicing on infinite ranges, because hasSlicing uses
+    //take for slicing infinite ranges.
+    !((!isInfinite!(Unqual!Range) && hasSlicing!(Unqual!Range)) || is(Range T == Take!T)))
+{
+    private alias Unqual!Range R;
+
+    // User accessible in read and write
+    public R source;
+
+    private size_t _maxAvailable;
+
+    alias R Source;
+
+    @property bool empty()
+    {
+        return _maxAvailable == 0 || source.empty;
+    }
+
+    @property auto ref front()
+    {
+        assert(!empty,
+            "Attempting to fetch the front of an empty "
+            ~ Take.stringof);
+        return source.front;
+    }
+
+    void popFront()
+    {
+        assert(!empty,
+            "Attempting to popFront() past the end of a "
+            ~ Take.stringof);
+        source.popFront();
+        --_maxAvailable;
+    }
+
+    static if (isForwardRange!R)
+        @property Take save()
+        {
+            return Take(source.save, _maxAvailable);
+        }
+
+    static if (hasAssignableElements!R)
+        @property auto front(ElementType!R v)
+        {
+            assert(!empty,
+                "Attempting to assign to the front of an empty "
+                ~ Take.stringof);
+            // This has to return auto instead of void because of Bug 4706.
+            source.front = v;
+        }
+
+    static if (hasMobileElements!R)
+    {
+        auto moveFront()
+        {
+            assert(!empty,
+                "Attempting to move the front of an empty "
+                ~ Take.stringof);
+            return .moveFront(source);
+        }
+    }
+
+    static if (isInfinite!R)
+    {
+        @property size_t length() const
+        {
+            return _maxAvailable;
+        }
+
+        alias length opDollar;
+    }
+    else static if (hasLength!R)
+    {
+        @property size_t length()
+        {
+            return min(_maxAvailable, source.length);
+        }
+
+        alias length opDollar;
+    }
+
+    static if (isRandomAccessRange!R)
+    {
+        void popBack()
+        {
+            assert(!empty,
+                "Attempting to popBack() past the beginning of a "
+                ~ Take.stringof);
+            --_maxAvailable;
+        }
+
+        @property auto ref back()
+        {
+            assert(!empty,
+                "Attempting to fetch the back of an empty "
+                ~ Take.stringof);
+            return source[this.length - 1];
+        }
+
+        auto ref opIndex(size_t index)
+        {
+            assert(index < length,
+                "Attempting to index out of the bounds of a "
+                ~ Take.stringof);
+            return source[index];
+        }
+
+        static if (hasAssignableElements!R)
+        {
+            auto back(ElementType!R v)
+            {
+                // This has to return auto instead of void because of Bug 4706.
+                assert(!empty,
+                    "Attempting to assign to the back of an empty "
+                    ~ Take.stringof);
+                source[this.length - 1] = v;
+            }
+
+            void opIndexAssign(ElementType!R v, size_t index)
+            {
+                assert(index < length,
+                    "Attempting to index out of the bounds of a "
+                    ~ Take.stringof);
+                source[index] = v;
+            }
+        }
+
+        static if (hasMobileElements!R)
+        {
+            auto moveBack()
+            {
+                assert(!empty,
+                    "Attempting to move the back of an empty "
+                    ~ Take.stringof);
+                return .moveAt(source, this.length - 1);
+            }
+
+            auto moveAt(size_t index)
+            {
+                assert(index < length,
+                    "Attempting to index out of the bounds of a "
+                    ~ Take.stringof);
+                return .moveAt(source, index);
+            }
+        }
+    }
+
+    // Nonstandard
+    @property size_t maxLength() const
+    {
+        return _maxAvailable;
+    }
+}
+
+// This template simply aliases itself to R and is useful for consistency in
+// generic code.
+template Take(R)
+if (isInputRange!(Unqual!R) &&
+    ((!isInfinite!(Unqual!R) && hasSlicing!(Unqual!R)) || is(R T == Take!T)))
+{
+    alias R Take;
+}
+
+// take for finite ranges with slicing
+/// ditto
+Take!R take(R)(R input, size_t n)
+if (isInputRange!(Unqual!R) && !isInfinite!(Unqual!R) && hasSlicing!(Unqual!R))
+{
+    // @@@BUG@@@
+    //return input[0 .. min(n, $)];
+    return input[0 .. min(n, input.length)];
+}
+
+// take(take(r, n1), n2)
+Take!R take(R)(R input, size_t n)
+if (is(R T == Take!T))
+{
+    return R(input.source, min(n, input._maxAvailable));
+}
+
+// Regular take for input ranges
+Take!(R) take(R)(R input, size_t n)
+if (isInputRange!(Unqual!R) && (isInfinite!(Unqual!R) || !hasSlicing!(Unqual!R) && !is(R T == Take!T)))
+{
+    return Take!R(input, n);
+}
+
+/**
+Returns $(D true) if $(D R) offers a slicing operator with integral boundaries
+that returns a forward range type.
+
+For finite ranges, the result of $(D opSlice) must be of the same type as the
+original range type. If the range defines $(D opDollar), then it must support
+subtraction.
+
+For infinite ranges, when $(I not) using $(D opDollar), the result of
+$(D opSlice) must be the result of $(LREF take) or $(LREF takeExactly) on the
+original range (they both return the same type for infinite ranges). However,
+when using $(D opDollar), the result of $(D opSlice) must be that of the
+original range type.
+
+The following code must compile for $(D hasSlicing) to be $(D true):
+
+----
+R r = void;
+
+static if(isInfinite!R)
+    typeof(take(r, 1)) s = r[1 .. 2];
+else
+{
+    static assert(is(typeof(r[1 .. 2]) == R));
+    R s = r[1 .. 2];
+}
+
+s = r[1 .. 2];
+
+static if(is(typeof(r[0 .. $])))
+{
+    static assert(is(typeof(r[0 .. $]) == R));
+    R t = r[0 .. $];
+    t = r[0 .. $];
+
+    static if(!isInfinite!R)
+    {
+        static assert(is(typeof(r[0 .. $ - 1]) == R));
+        R u = r[0 .. $ - 1];
+        u = r[0 .. $ - 1];
+    }
+}
+
+static assert(isForwardRange!(typeof(r[1 .. 2])));
+static assert(hasLength!(typeof(r[1 .. 2])));
+----
+ */
+template hasSlicing(R)
+{
+    enum bool hasSlicing = isForwardRange!R && !isNarrowString!R && is(typeof(
+    (inout int = 0)
+    {
+        R r = void;
+
+        static if(isInfinite!R)
+            typeof(take(r, 1)) s = r[1 .. 2];
+        else
+        {
+            static assert(is(typeof(r[1 .. 2]) == R));
+            R s = r[1 .. 2];
+        }
+
+        s = r[1 .. 2];
+
+        static if(is(typeof(r[0 .. $])))
+        {
+            static assert(is(typeof(r[0 .. $]) == R));
+            R t = r[0 .. $];
+            t = r[0 .. $];
+
+            static if(!isInfinite!R)
+            {
+                static assert(is(typeof(r[0 .. $ - 1]) == R));
+                R u = r[0 .. $ - 1];
+                u = r[0 .. $ - 1];
+            }
+        }
+
+        static assert(isForwardRange!(typeof(r[1 .. 2])));
+        static assert(hasLength!(typeof(r[1 .. 2])));
+    }));
+}
+
+template isNarrowString(T)
+{
+    enum isNarrowString = (is(T : const char[]) || is(T : const wchar[])) && !isAggregateType!T;
+}
+
+template isInfinite(R)
+{
+    static if (isInputRange!R && __traits(compiles, { enum e = R.empty; }))
+        enum bool isInfinite = !R.empty;
+    else
+        enum bool isInfinite = false;
+}
+
+/**
+Returns $(D true) if $(D R) is an output range for elements of type
+$(D E). An output range is defined functionally as a range that
+supports the operation $(D put(r, e)) as defined above.
+ */
+template isOutputRange(R, E)
+{
+    enum bool isOutputRange = is(typeof(
+    (inout int = 0)
+    {
+        R r = void;
+        E e;
+        put(r, e);
+    }));
+}
+
+/**
+Returns $(D true) if $(D R) is a forward range. A forward range is an
+input range $(D r) that can save "checkpoints" by saving $(D r.save)
+to another value of type $(D R). Notable examples of input ranges that
+are $(I not) forward ranges are file/socket ranges; copying such a
+range will not save the position in the stream, and they most likely
+reuse an internal buffer as the entire stream does not sit in
+memory. Subsequently, advancing either the original or the copy will
+advance the stream, so the copies are not independent.
+
+The following code should compile for any forward range.
+
+----
+static assert(isInputRange!R);
+R r1;
+static assert (is(typeof(r1.save) == R));
+----
+
+Saving a range is not duplicating it; in the example above, $(D r1)
+and $(D r2) still refer to the same underlying data. They just
+navigate that data independently.
+
+The semantics of a forward range (not checkable during compilation)
+are the same as for an input range, with the additional requirement
+that backtracking must be possible by saving a copy of the range
+object with $(D save) and using it later.
+ */
+template isForwardRange(R)
+{
+    enum bool isForwardRange = isInputRange!R && is(typeof(
+    (inout int = 0)
+    {
+        R r1 = void;
+        static assert (is(typeof(r1.save) == R));
+    }));
+}
+
+/**
+Returns $(D true) if $(D R) is a bidirectional range. A bidirectional
+range is a forward range that also offers the primitives $(D back) and
+$(D popBack). The following code should compile for any bidirectional
+range.
+
+----
+R r;
+static assert(isForwardRange!R);           // is forward range
+r.popBack();                               // can invoke popBack
+auto t = r.back;                           // can get the back of the range
+auto w = r.front;
+static assert(is(typeof(t) == typeof(w))); // same type for front and back
+----
+
+The semantics of a bidirectional range (not checkable during
+compilation) are assumed to be the following ($(D r) is an object of
+type $(D R)):
+
+$(UL $(LI $(D r.back) returns (possibly a reference to) the last
+element in the range. Calling $(D r.back) is allowed only if calling
+$(D r.empty) has, or would have, returned $(D false).))
+ */
+template isBidirectionalRange(R)
+{
+    enum bool isBidirectionalRange = isForwardRange!R && is(typeof(
+    (inout int = 0)
+    {
+        R r = void;
+        r.popBack();
+        auto t = r.back;
+        auto w = r.front;
+        static assert(is(typeof(t) == typeof(w)));
+    }));
+}
+
+/**
+Returns $(D true) if $(D R) is a random-access range. A random-access
+range is a bidirectional range that also offers the primitive $(D
+opIndex), OR an infinite forward range that offers $(D opIndex). In
+either case, the range must either offer $(D length) or be
+infinite. The following code should compile for any random-access
+range.
+
+----
+// range is finite and bidirectional or infinite and forward.
+static assert(isBidirectionalRange!R ||
+              isForwardRange!R && isInfinite!R);
+
+R r = void;
+auto e = r[1]; // can index
+static assert(is(typeof(e) == typeof(r.front))); // same type for indexed and front
+static assert(!isNarrowString!R); // narrow strings cannot be indexed as ranges
+static assert(hasLength!R || isInfinite!R); // must have length or be infinite
+
+// $ must work as it does with arrays if opIndex works with $
+static if(is(typeof(r[$])))
+{
+    static assert(is(typeof(r.front) == typeof(r[$])));
+
+    // $ - 1 doesn't make sense with infinite ranges but needs to work
+    // with finite ones.
+    static if(!isInfinite!R)
+        static assert(is(typeof(r.front) == typeof(r[$ - 1])));
+}
+----
+
+The semantics of a random-access range (not checkable during
+compilation) are assumed to be the following ($(D r) is an object of
+type $(D R)): $(UL $(LI $(D r.opIndex(n)) returns a reference to the
+$(D n)th element in the range.))
+
+Although $(D char[]) and $(D wchar[]) (as well as their qualified
+versions including $(D string) and $(D wstring)) are arrays, $(D
+isRandomAccessRange) yields $(D false) for them because they use
+variable-length encodings (UTF-8 and UTF-16 respectively). These types
+are bidirectional ranges only.
+ */
+template isRandomAccessRange(R)
+{
+    enum bool isRandomAccessRange = is(typeof(
+    (inout int = 0)
+    {
+        static assert(isBidirectionalRange!R ||
+                      isForwardRange!R && isInfinite!R);
+        R r = void;
+        auto e = r[1];
+        static assert(is(typeof(e) == typeof(r.front)));
+        static assert(!isNarrowString!R);
+        static assert(hasLength!R || isInfinite!R);
+
+        static if(is(typeof(r[$])))
+        {
+            static assert(is(typeof(r.front) == typeof(r[$])));
+
+            static if(!isInfinite!R)
+                static assert(is(typeof(r.front) == typeof(r[$ - 1])));
+        }
+    }));
+}
+
+/**
+Returns $(D true) iff $(D R) supports the $(D moveFront) primitive,
+as well as $(D moveBack) and $(D moveAt) if it's a bidirectional or
+random access range.  These may be explicitly implemented, or may work
+via the default behavior of the module level functions $(D moveFront)
+and friends.
+ */
+template hasMobileElements(R)
+{
+    enum bool hasMobileElements = is(typeof(
+    (inout int = 0)
+    {
+        R r = void;
+        return moveFront(r);
+    }))
+    && (!isBidirectionalRange!R || is(typeof(
+    (inout int = 0)
+    {
+        R r = void;
+        return moveBack(r);
+    })))
+    && (!isRandomAccessRange!R || is(typeof(
+    (inout int = 0)
+    {
+        R r = void;
+        return moveAt(r, 0);
+    })));
+}
+
+/**
+The element type of $(D R). $(D R) does not have to be a range. The
+element type is determined as the type yielded by $(D r.front) for an
+object $(D r) of type $(D R). For example, $(D ElementType!(T[])) is
+$(D T) if $(D T[]) isn't a narrow string; if it is, the element type is
+$(D dchar). If $(D R) doesn't have $(D front), $(D ElementType!R) is
+$(D void).
+ */
+template ElementType(R)
+{
+    static if (is(typeof((inout int = 0){ R r = void; return r.front; }()) T))
+        alias T ElementType;
+    else
+        alias void ElementType;
+}
+
+/**
+The encoding element type of $(D R). For narrow strings ($(D char[]),
+$(D wchar[]) and their qualified variants including $(D string) and
+$(D wstring)), $(D ElementEncodingType) is the character type of the
+string. For all other types, $(D ElementEncodingType) is the same as
+$(D ElementType).
+ */
+template ElementEncodingType(R)
+{
+    static if (isNarrowString!R)
+        alias typeof((inout int = 0){ R r = void; return r[0]; }()) ElementEncodingType;
+    else
+        alias ElementType!R ElementEncodingType;
+}
+
+/**
+Returns $(D true) if $(D R) is a forward range and has swappable
+elements. The following code should compile for any range
+with swappable elements.
+
+----
+R r;
+static assert(isForwardRange!(R));   // range is forward
+swap(r.front, r.front);              // can swap elements of the range
+----
+ */
+template hasSwappableElements(R)
+{
+    enum bool hasSwappableElements = isForwardRange!R && is(typeof(
+    (inout int = 0)
+    {
+        R r = void;
+        swap(r.front, r.front);             // can swap elements of the range
+    }));
+}
+
+/**
+Returns $(D true) if $(D R) is a forward range and has mutable
+elements. The following code should compile for any range
+with assignable elements.
+
+----
+R r;
+static assert(isForwardRange!R);  // range is forward
+auto e = r.front;
+r.front = e;                      // can assign elements of the range
+----
+ */
+template hasAssignableElements(R)
+{
+    enum bool hasAssignableElements = isForwardRange!R && is(typeof(
+    (inout int = 0)
+    {
+        R r = void;
+        static assert(isForwardRange!(R)); // range is forward
+        auto e = r.front;
+        r.front = e;                       // can assign elements of the range
+    }));
+}
+
+/**
+Tests whether $(D R) has lvalue elements.  These are defined as elements that
+can be passed by reference and have their address taken.
+*/
+template hasLvalueElements(R)
+{
+    enum bool hasLvalueElements = is(typeof(
+    (inout int = 0)
+    {
+        void checkRef(ref ElementType!R stuff) {}
+        R r = void;
+        static assert(is(typeof(checkRef(r.front))));
+    }));
+}
+
+/**
+Returns $(D true) if $(D R) has a $(D length) member that returns an
+integral type. $(D R) does not have to be a range. Note that $(D
+length) is an optional primitive as no range must implement it. Some
+ranges do not store their length explicitly, some cannot compute it
+without actually exhausting the range (e.g. socket streams), and some
+other ranges may be infinite.
+
+Although narrow string types ($(D char[]), $(D wchar[]), and their
+qualified derivatives) do define a $(D length) property, $(D
+hasLength) yields $(D false) for them. This is because a narrow
+string's length does not reflect the number of characters, but instead
+the number of encoding units, and as such is not useful with
+range-oriented algorithms.
+ */
+template hasLength(R)
+{
+    enum bool hasLength = !isNarrowString!R && is(typeof(
+    (inout int = 0)
+    {
+        R r = void;
+        static assert(is(typeof(r.length) : ulong));
+    }));
+}
+
+
+/**
+    Eagerly advances $(D r) itself (not a copy) up to $(D n) times (by
+    calling $(D r.popFront)). $(D popFrontN) takes $(D r) by $(D ref),
+    so it mutates the original range. Completes in $(BIGOH 1) steps for ranges
+    that support slicing and have length.
+    Completes in $(BIGOH n) time for all other ranges.
+
+    Returns:
+    How much $(D r) was actually advanced, which may be less than $(D n) if
+    $(D r) did not have at least $(D n) elements.
+
+    $(D popBackN) will behave the same but instead removes elements from
+    the back of the (bidirectional) range instead of the front.
+
+    Example:
+----
+int[] a = [ 1, 2, 3, 4, 5 ];
+a.popFrontN(2);
+assert(a == [ 3, 4, 5 ]);
+a.popFrontN(7);
+assert(a == [ ]);
+----
+
+----
+int[] a = [ 1, 2, 3, 4, 5 ];
+a.popBackN(2);
+assert(a == [ 1, 2, 3 ]);
+a.popBackN(7);
+assert(a == [ ]);
+----
+*/
+size_t popFrontN(Range)(ref Range r, size_t n)
+    if (isInputRange!Range)
+{
+    static if (hasLength!Range)
+        n = min(n, r.length);
+
+    static if (hasSlicing!Range && is(typeof(r = r[n .. $])))
+    {
+        r = r[n .. $];
+    }
+    else static if (hasSlicing!Range && hasLength!Range) //TODO: Remove once hasSlicing forces opDollar.
+    {
+        r = r[n .. r.length];
+    }
+    else
+    {
+        static if (hasLength!Range)
+        {
+            foreach (i; 0 .. n)
+                r.popFront();
+        }
+        else
+        {
+            foreach (i; 0 .. n)
+            {
+                if (r.empty) return i;
+                r.popFront();
+            }
+        }
+    }
+    return n;
+}
+
+/// ditto
+size_t popBackN(Range)(ref Range r, size_t n)
+    if (isBidirectionalRange!Range)
+{
+    static if (hasLength!Range)
+        n = min(n, r.length);
+
+    static if (hasSlicing!Range && is(typeof(r = r[0 .. $ - n])))
+    {
+        r = r[0 .. $ - n];
+    }
+    else static if (hasSlicing!Range && hasLength!Range) //TODO: Remove once hasSlicing forces opDollar.
+    {
+        r = r[0 .. r.length - n];
+    }
+    else
+    {
+        static if (hasLength!Range)
+        {
+            foreach (i; 0 .. n)
+                r.popBack();
+        }
+        else
+        {
+            foreach (i; 0 .. n)
+            {
+                if (r.empty) return i;
+                r.popBack();
+            }
+        }
+    }
+    return n;
+}
+
+/**
+Returns $(D true) if $(D R) is an input range. An input range must
+define the primitives $(D empty), $(D popFront), and $(D front). The
+following code should compile for any input range.
+
+----
+R r;              // can define a range object
+if (r.empty) {}   // can test for empty
+r.popFront();     // can invoke popFront()
+auto h = r.front; // can get the front of the range of non-void type
+----
+
+The semantics of an input range (not checkable during compilation) are
+assumed to be the following ($(D r) is an object of type $(D R)):
+
+$(UL $(LI $(D r.empty) returns $(D false) iff there is more data
+available in the range.)  $(LI $(D r.front) returns the current
+element in the range. It may return by value or by reference. Calling
+$(D r.front) is allowed only if calling $(D r.empty) has, or would
+have, returned $(D false).) $(LI $(D r.popFront) advances to the next
+element in the range. Calling $(D r.popFront) is allowed only if
+calling $(D r.empty) has, or would have, returned $(D false).))
+ */
+template isInputRange(R)
+{
+    enum bool isInputRange = is(typeof(
+    (inout int = 0)
+    {
+        R r = void;       // can define a range object
+        if (r.empty) {}   // can test for empty
+        r.popFront();     // can invoke popFront()
+        auto h = r.front; // can get the front of the range
+    }));
+}
+
+/**
+   Returns a range that goes through the numbers $(D begin), $(D begin +
+   step), $(D begin + 2 * step), $(D ...), up to and excluding $(D
+   end). The range offered is a random access range. The two-arguments
+   version has $(D step = 1). If $(D begin < end && step < 0) or $(D
+   begin > end && step > 0) or $(D begin == end), then an empty range is
+   returned.
+
+   Throws:
+   $(D Exception) if $(D begin != end && step == 0), an exception is
+   thrown.
+
+   Example:
+   ----
+   auto r = iota(0, 10, 1);
+   assert(equal(r, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9][]));
+   r = iota(0, 11, 3);
+   assert(equal(r, [0, 3, 6, 9][]));
+   assert(r[2] == 6);
+   auto rf = iota(0.0, 0.5, 0.1);
+   assert(approxEqual(rf, [0.0, 0.1, 0.2, 0.3, 0.4]));
+   ----
+*/
+
+/// Ditto
+auto iota(B, E)(B begin, E end)
+//~ if (isIntegral!(CommonType!(B, E)) || isPointer!(CommonType!(B, E)))
+{
+    alias CommonType!(Unqual!B, Unqual!E) Value;
+    alias typeof(unsigned(end - begin)) IndexType;
+
+    static struct Result
+    {
+        private Value current, pastLast;
+
+        this(Value current, Value pastLast)
+        {
+            if (current < pastLast)
+            {
+                this.current = current;
+                this.pastLast = pastLast;
+            }
+            else
+            {
+                // Initialize an empty range
+                this.current = this.pastLast = current;
+            }
+        }
+
+        @property bool empty() const { return current == pastLast; }
+        @property inout(Value) front() inout { assert(!empty); return current; }
+        void popFront() { assert(!empty); ++current; }
+
+        @property inout(Value) back() inout { assert(!empty); return cast(inout(Value))(pastLast - 1); }
+        void popBack() { assert(!empty); --pastLast; }
+
+        @property auto save() { return this; }
+
+        inout(Value) opIndex(ulong n) inout
+        {
+            assert(n < this.length);
+
+            // Just cast to Value here because doing so gives overflow behavior
+            // consistent with calling popFront() n times.
+            return cast(inout Value) (current + n);
+        }
+        inout(Result) opSlice() inout { return this; }
+        inout(Result) opSlice(ulong lower, ulong upper) inout
+        {
+            assert(upper >= lower && upper <= this.length);
+
+            return cast(inout Result)Result(cast(Value)(current + lower),
+                                            cast(Value)(pastLast - (length - upper)));
+        }
+        @property IndexType length() const
+        {
+            return unsigned(pastLast - current);
+        }
+
+        alias length opDollar;
+    }
+
+    return Result(begin, end);
+}
+
+
+/**
+    Returns the corresponding unsigned value for $(D x) (e.g. if $(D x) has type
+    $(D int), it returns $(D cast(uint) x)). The advantage compared to the cast
+    is that you do not need to rewrite the cast if $(D x) later changes type
+    (e.g from $(D int) to $(D long)).
+
+    Note that the result is always mutable even if the original type was const
+    or immutable. In order to retain the constness, use $(XREF traits, Unsigned).
+ */
+auto unsigned(T)(T x)
+{
+    return cast(Unqual!(Unsigned!T))x;
+}
+
+/**
+Detect whether $(D T) is a built-in unsigned numeric type.
+ */
+template isUnsigned(T)
+{
+    enum bool isUnsigned = is(UnsignedTypeOf!T) && !isAggregateType!T;
+}
+
+/**
+Detect whether $(D T) is a built-in signed numeric type.
+ */
+template isSigned(T)
+{
+    enum bool isSigned = is(SignedTypeOf!T) && !isAggregateType!T;
+}
+
+/*
+ */
+template UnsignedTypeOf(T)
+{
+    static if (is(IntegralTypeOf!T X) &&
+               staticIndexOf!(Unqual!X, UnsignedIntTypeList) >= 0)
+        alias X UnsignedTypeOf;
+    else
+        static assert(0, T.stringof~" is not an unsigned type.");
+}
+
+/*
+ */
+template SignedTypeOf(T)
+{
+    static if (is(IntegralTypeOf!T X) &&
+               staticIndexOf!(Unqual!X, SignedIntTypeList) >= 0)
+        alias X SignedTypeOf;
+    else static if (is(FloatingPointTypeOf!T X))
+        alias X SignedTypeOf;
+    else
+        static assert(0, T.stringof~" is not an signed type.");
+}
+
+/*
+ */
+template IntegralTypeOf(T)
+{
+           inout(  byte) idx(        inout(  byte) );
+           inout( ubyte) idx(        inout( ubyte) );
+           inout( short) idx(        inout( short) );
+           inout(ushort) idx(        inout(ushort) );
+           inout(   int) idx(        inout(   int) );
+           inout(  uint) idx(        inout(  uint) );
+           inout(  long) idx(        inout(  long) );
+           inout( ulong) idx(        inout( ulong) );
+    shared(inout   byte) idx( shared(inout   byte) );
+    shared(inout  ubyte) idx( shared(inout  ubyte) );
+    shared(inout  short) idx( shared(inout  short) );
+    shared(inout ushort) idx( shared(inout ushort) );
+    shared(inout    int) idx( shared(inout    int) );
+    shared(inout   uint) idx( shared(inout   uint) );
+    shared(inout   long) idx( shared(inout   long) );
+    shared(inout  ulong) idx( shared(inout  ulong) );
+
+       immutable(  char) idy(    immutable(  char) );
+       immutable( wchar) idy(    immutable( wchar) );
+       immutable( dchar) idy(    immutable( dchar) );
+    // Integrals and characers are implicitly convertible with each other for value copy.
+    // Then adding exact overloads to detect it.
+       immutable(  byte) idy(    immutable(  byte) );
+       immutable( ubyte) idy(    immutable( ubyte) );
+       immutable( short) idy(    immutable( short) );
+       immutable(ushort) idy(    immutable(ushort) );
+       immutable(   int) idy(    immutable(   int) );
+       immutable(  uint) idy(    immutable(  uint) );
+       immutable(  long) idy(    immutable(  long) );
+       immutable( ulong) idy(    immutable( ulong) );
+
+    static if (is(T == enum))
+        alias .IntegralTypeOf!(OriginalType!T) IntegralTypeOf;
+    else static if (is(typeof(idx(T.init)) X))
+        alias X IntegralTypeOf;
+    else static if (is(typeof(idy(T.init)) X) && staticIndexOf!(Unqual!X, IntegralTypeList) >= 0)
+        alias X IntegralTypeOf;
+    else
+        static assert(0, T.stringof~" is not an integral type");
+}
+
+/**
+ * Returns the corresponding unsigned type for T. T must be a numeric
+ * integral type, otherwise a compile-time error occurs.
+ */
+template Unsigned(T)
+{
+    template Impl(T)
+    {
+        static if (isUnsigned!T)
+            alias Impl = T;
+        else static if (isSigned!T)
+        {
+            static if (is(T == byte )) alias Impl = ubyte;
+            static if (is(T == short)) alias Impl = ushort;
+            static if (is(T == int  )) alias Impl = uint;
+            static if (is(T == long )) alias Impl = ulong;
+        }
+        else
+            static assert(false, "Type " ~ T.stringof ~
+                                 " does not have an Unsigned counterpart");
+    }
+
+    alias ModifyTypePreservingSTC!(Impl, OriginalType!T) Unsigned;
+}
+
+
+/**
+ * Detect whether $(D T) is a built-in floating point type.
+ */
+template isFloatingPoint(T)
+{
+    enum bool isFloatingPoint = is(FloatingPointTypeOf!T) && !isAggregateType!T;
+}
+
+/*
+ */
+template FloatingPointTypeOf(T)
+{
+           inout( float) idx(        inout( float) );
+           inout(double) idx(        inout(double) );
+           inout(  real) idx(        inout(  real) );
+    shared(inout  float) idx( shared(inout  float) );
+    shared(inout double) idx( shared(inout double) );
+    shared(inout   real) idx( shared(inout   real) );
+
+       immutable( float) idy(   immutable( float) );
+       immutable(double) idy(   immutable(double) );
+       immutable(  real) idy(   immutable(  real) );
+
+    static if (is(T == enum))
+        alias .FloatingPointTypeOf!(OriginalType!T) FloatingPointTypeOf;
+    else static if (is(typeof(idx(T.init)) X))
+        alias X FloatingPointTypeOf;
+    else static if (is(typeof(idy(T.init)) X))
+        alias X FloatingPointTypeOf;
+    else
+        static assert(0, T.stringof~" is not a floating point type");
+}
+
+/**
+Get the type that all types can be implicitly converted to. Useful
+e.g. in figuring out an array type from a bunch of initializing
+values. Returns $(D_PARAM void) if passed an empty list, or if the
+types have no common type.
+
+Example:
+
+----
+alias CommonType!(int, long, short) X;
+assert(is(X == long));
+alias CommonType!(int, char[], short) Y;
+assert(is(Y == void));
+----
+*/
+template CommonType(T...)
+{
+    static if (!T.length)
+    {
+        alias void CommonType;
+    }
+    else static if (T.length == 1)
+    {
+        static if(is(typeof(T[0])))
+        {
+            alias typeof(T[0]) CommonType;
+        }
+        else
+        {
+            alias T[0] CommonType;
+        }
+    }
+    else static if (is(typeof(true ? T[0].init : T[1].init) U))
+    {
+        alias CommonType!(U, T[2 .. $]) CommonType;
+    }
+    else
+        alias void CommonType;
+}
+
+/**
+ * Detect whether $(D T) is a built-in integral type. Types $(D bool),
+ * $(D char), $(D wchar), and $(D dchar) are not considered integral.
+ */
+template isIntegral(T)
+{
+    enum bool isIntegral = is(IntegralTypeOf!T) && !isAggregateType!T;
+}
+
+/*
+ */
+template IntegralTypeOf(T)
+{
+           inout(  byte) idx(        inout(  byte) );
+           inout( ubyte) idx(        inout( ubyte) );
+           inout( short) idx(        inout( short) );
+           inout(ushort) idx(        inout(ushort) );
+           inout(   int) idx(        inout(   int) );
+           inout(  uint) idx(        inout(  uint) );
+           inout(  long) idx(        inout(  long) );
+           inout( ulong) idx(        inout( ulong) );
+    shared(inout   byte) idx( shared(inout   byte) );
+    shared(inout  ubyte) idx( shared(inout  ubyte) );
+    shared(inout  short) idx( shared(inout  short) );
+    shared(inout ushort) idx( shared(inout ushort) );
+    shared(inout    int) idx( shared(inout    int) );
+    shared(inout   uint) idx( shared(inout   uint) );
+    shared(inout   long) idx( shared(inout   long) );
+    shared(inout  ulong) idx( shared(inout  ulong) );
+
+       immutable(  char) idy(    immutable(  char) );
+       immutable( wchar) idy(    immutable( wchar) );
+       immutable( dchar) idy(    immutable( dchar) );
+    // Integrals and characers are implicitly convertible with each other for value copy.
+    // Then adding exact overloads to detect it.
+       immutable(  byte) idy(    immutable(  byte) );
+       immutable( ubyte) idy(    immutable( ubyte) );
+       immutable( short) idy(    immutable( short) );
+       immutable(ushort) idy(    immutable(ushort) );
+       immutable(   int) idy(    immutable(   int) );
+       immutable(  uint) idy(    immutable(  uint) );
+       immutable(  long) idy(    immutable(  long) );
+       immutable( ulong) idy(    immutable( ulong) );
+
+    static if (is(T == enum))
+        alias .IntegralTypeOf!(OriginalType!T) IntegralTypeOf;
+    else static if (is(typeof(idx(T.init)) X))
+        alias X IntegralTypeOf;
+    else static if (is(typeof(idy(T.init)) X) && staticIndexOf!(Unqual!X, IntegralTypeList) >= 0)
+        alias X IntegralTypeOf;
+    else
+        static assert(0, T.stringof~" is not an integral type");
+}
+
+// drey
 public import std.range
-    : front, take, popFront, popFrontN, join, zip, isInputRange, ElementType,
-      ElementEncodingType, iota;
+    : zip;
 
 public import std.stdio
     : stdout, stderr, writeln, writefln;
@@ -2200,8 +3293,259 @@ template isAssociativeArray(T)
     enum bool isAssociativeArray = is(AssocArrayTypeOf!T) && !isAggregateType!T;
 }
 
-private import std.conv
-    : emplace;
+// emplace
+/**
+Given a pointer $(D chunk) to uninitialized memory (but already typed
+as $(D T)), constructs an object of non-$(D class) type $(D T) at that
+address.
+
+Returns: A pointer to the newly constructed object (which is the same
+as $(D chunk)).
+ */
+T* emplace(T)(T* chunk) @safe nothrow pure
+{
+    static assert(is(T* : void*), "Cannot emplace type " ~ T.stringof ~ " because it is qualified.");
+
+    static if (is(T == class))
+    {
+        *chunk = null;
+    }
+    else static if (isStaticArray!T)
+    {
+        //TODO: This can probably be optimized.
+        foreach(ref e; (*chunk)[])
+            emplace(()@trusted{return &e;}());
+    }
+    else
+    {
+        static assert(!is(T == struct) || is(typeof({static T i;})),
+            text("Cannot emplace because ", T.stringof, ".this() is annotated with @disable."));
+
+        static if (isAssignable!T && !hasElaborateAssign!T)
+            *chunk = T.init;
+        else
+        {
+            static immutable T i;
+            ()@trusted{memcpy(chunk, &i, T.sizeof);}();
+        }
+    }
+
+    return chunk;
+}
+
+/**
+Given a pointer $(D chunk) to uninitialized memory (but already typed
+as a non-class type $(D T)), constructs an object of type $(D T) at
+that address from arguments $(D args).
+
+This function can be $(D @trusted) if the corresponding constructor of
+$(D T) is $(D @safe).
+
+Returns: A pointer to the newly constructed object (which is the same
+as $(D chunk)).
+ */
+T* emplace(T, Args...)(T* chunk, Args args)
+    if (!is(T == struct) && Args.length == 1)
+{
+    static assert(is(typeof(*chunk = args[0])),
+        text("Don't know how to emplace a ", T.stringof, " with a ", Args[0].stringof, "."));
+    //TODO FIXME: For static arrays, this uses the "postblit-then-destroy" sequence.
+    //This means it will destroy unitialized data.
+    //It needs to be fixed.
+    *chunk = args[0];
+    return chunk;
+}
+
+// Specialization for struct
+T* emplace(T, Args...)(T* chunk, auto ref Args args)
+    if (is(T == struct))
+{
+    static assert(is(T* : void*), "Cannot emplace type " ~ T.stringof ~ " because it is qualified.");
+
+    static if (Args.length == 1 && is(Args[0] : T) &&
+        is (typeof({T t = args[0];})) //Check for legal postblit
+        )
+    {
+        static if (is(T == Unqual!(Args[0])))
+            //Types match exactly: we postblit
+            emplacePostblitter(*chunk, args[0]);
+        else
+            //Types don't actually match, this means args[0] is convertible
+            //to T via an alias this.
+            //We Coerce to type T via an explicit cast.
+            //May or may not create a temporary.
+            emplacePostblitter(*chunk, cast(T)args[0]);
+    }
+    else static if (is(typeof(chunk.__ctor(args))))
+    {
+        // T defines a genuine constructor accepting args
+        // Go the classic route: write .init first, then call ctor
+        emplaceInitializer(chunk);
+        chunk.__ctor(args);
+    }
+    else static if (is(typeof(T.opCall(args))))
+    {
+        //Can be built calling opCall
+        emplaceOpCaller(chunk, args); //emplaceOpCaller is deprecated
+    }
+    else static if (is(typeof(T(args))))
+    {
+        // Struct without constructor that has one matching field for
+        // each argument. Individually emplace each field
+        emplaceInitializer(chunk);
+        foreach (i, ref field; chunk.tupleof[0 .. Args.length])
+            emplacePostblitter(field, args[i]);
+    }
+    else
+    {
+        //We can't emplace. Try to diagnose a disabled postblit.
+        static assert(!(Args.length == 1 && is(Args[0] : T)),
+            "struct " ~ T.stringof ~ " is not emplaceable because its copy is annotated with @disable");
+
+        //We can't emplace.
+        static assert(false,
+            "Don't know how to emplace a " ~ T.stringof ~ " with " ~ Args[].stringof);
+    }
+
+    return chunk;
+}
+
+//emplace helper functions
+private void emplaceInitializer(T)(T* chunk)
+{
+    static if (isAssignable!T && !hasElaborateAssign!T)
+        *chunk = T.init;
+    else
+    {
+        if (auto p = typeid(T).init().ptr)
+            memcpy(chunk, p, T.sizeof);
+        else
+            memset(chunk, 0, T.sizeof);
+    }
+}
+private void emplacePostblitter(T, Arg)(ref T chunk, auto ref Arg arg)
+{
+    static assert(is(Arg : T), "emplace internal error: " ~ T.stringof ~ " " ~ Arg.stringof);
+
+    static assert(is(typeof({T t = arg;})),
+        "struct " ~ T.stringof ~ " is not emplaceable because its copy is annotated with @disable");
+
+    static if (isAssignable!T && !hasElaborateAssign!T)
+        chunk = arg;
+    else
+    {
+        memcpy(&chunk, &arg, T.sizeof);
+        typeid(T).postblit(&chunk);
+    }
+}
+private deprecated("Using static opCall for emplace is deprecated. Plase use emplace(chunk, T(args)) instead.")
+void emplaceOpCaller(T, Args...)(T* chunk, auto ref Args args)
+{
+    static assert (is(typeof({T t = T.opCall(args);})),
+        T.stringof ~ ".opCall does not return adequate data for construction.");
+    emplace(chunk, chunk.opCall(args));
+}
+
+private void testEmplaceChunk(void[] chunk, size_t typeSize, size_t typeAlignment, string typeName)
+{
+    enforceEx!ConvException(chunk.length >= typeSize,
+        phobosFormat("emplace: Chunk size too small: %s < %s size = %s",
+        chunk.length, typeName, typeSize));
+    enforceEx!ConvException((cast(size_t) chunk.ptr) % typeAlignment == 0,
+        phobosFormat("emplace: Misaligned memory block (0x%X): it must be %s-byte aligned for type %s",
+        chunk.ptr, typeAlignment, typeName));
+}
+
+/++
+    If $(D !!value) is $(D true), $(D value) is returned. Otherwise,
+    $(D new E(msg, file, line)) is thrown. Or if $(D E) doesn't take a message
+    and can be constructed with $(D new E(file, line)), then
+    $(D new E(file, line)) will be thrown.
+
+    Example:
+    --------------------
+    auto f = enforceEx!FileMissingException(fopen("data.txt"));
+    auto line = readln(f);
+    enforceEx!DataCorruptionException(line.length);
+    --------------------
+ +/
+template enforceEx(E)
+    if (is(typeof(new E("", __FILE__, __LINE__))))
+{
+    T enforceEx(T)(T value, lazy string msg = "", string file = __FILE__, size_t line = __LINE__)
+    {
+        if (!value) throw new E(msg, file, line);
+        return value;
+    }
+}
+
+template enforceEx(E)
+    if (is(typeof(new E(__FILE__, __LINE__))) && !is(typeof(new E("", __FILE__, __LINE__))))
+{
+    T enforceEx(T)(T value, string file = __FILE__, size_t line = __LINE__)
+    {
+        if (!value) throw new E(file, line);
+        return value;
+    }
+}
+
+/**
+Given a raw memory area $(D chunk), constructs an object of $(D class)
+type $(D T) at that address. The constructor is passed the arguments
+$(D Args). The $(D chunk) must be as least as large as $(D T) needs
+and should have an alignment multiple of $(D T)'s alignment. (The size
+of a $(D class) instance is obtained by using $(D
+__traits(classInstanceSize, T))).
+
+This function can be $(D @trusted) if the corresponding constructor of
+$(D T) is $(D @safe).
+
+Returns: A pointer to the newly constructed object.
+ */
+T emplace(T, Args...)(void[] chunk, auto ref Args args)
+    if (is(T == class))
+{
+    enum classSize = __traits(classInstanceSize, T);
+    testEmplaceChunk(chunk, classSize, classInstanceAlignment!T, T.stringof);
+    auto result = cast(T) chunk.ptr;
+
+    // Initialize the object in its pre-ctor state
+    (cast(byte[]) chunk)[0 .. classSize] = typeid(T).init[];
+
+    // Call the ctor if any
+    static if (is(typeof(result.__ctor(args))))
+    {
+        // T defines a genuine constructor accepting args
+        // Go the classic route: write .init first, then call ctor
+        result.__ctor(args);
+    }
+    else
+    {
+        static assert(args.length == 0 && !is(typeof(&T.__ctor)),
+                "Don't know how to initialize an object of type "
+                ~ T.stringof ~ " with arguments " ~ Args.stringof);
+    }
+    return result;
+}
+
+/**
+Given a raw memory area $(D chunk), constructs an object of non-$(D
+class) type $(D T) at that address. The constructor is passed the
+arguments $(D args), if any. The $(D chunk) must be as least as large
+as $(D T) needs and should have an alignment multiple of $(D T)'s
+alignment.
+
+This function can be $(D @trusted) if the corresponding constructor of
+$(D T) is $(D @safe).
+
+Returns: A pointer to the newly constructed object.
+ */
+T* emplace(T, Args...)(void[] chunk, auto ref Args args)
+    if (!is(T == class))
+{
+    testEmplaceChunk(chunk, T.sizeof, T.alignof, T.stringof);
+    return emplace(cast(T*) chunk.ptr, args);
+}
 
 /**
 Allocates a $(D class) object right inside the current scope,
