@@ -6,7 +6,7 @@ rem -------------
 set build_tests=1
 rem set run_tests=1
 rem set build_lib=1
-rem set use_phobos=1
+set use_phobos=1
 
 set this_path=%~dp0
 set dtk_root=%this_path%\..
