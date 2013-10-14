@@ -12,48 +12,48 @@ version(DTK_UNITTEST):
 private
 {
     /* Test generic events and event propagation. */
-    import dtk.tests.test_events_generic;
-    import dtk.tests.test_events_destroy;
-    import dtk.tests.test_events_focus;
-    import dtk.tests.test_events_geometry;
-    import dtk.tests.test_events_hover;
-    import dtk.tests.test_events_keyboard;
-    import dtk.tests.test_events_mouse;
+    import dtk.tests.events_generic;
+    import dtk.tests.events_destroy;
+    import dtk.tests.events_focus;
+    import dtk.tests.events_geometry;
+    import dtk.tests.events_hover;
+    import dtk.tests.events_keyboard;
+    import dtk.tests.events_mouse;
 
     /* Widget behavior and widget-specific events. */
-    import dtk.tests.test_button;
-    import dtk.tests.test_checkbutton;
-    import dtk.tests.test_combobox;
-    import dtk.tests.test_cursor;
-    import dtk.tests.test_dialog;
-    import dtk.tests.test_entry;
-    import dtk.tests.test_frame;
-    import dtk.tests.test_label;
-    import dtk.tests.test_labelframe;
-    import dtk.tests.test_listbox;
-    import dtk.tests.test_notebook;
-    import dtk.tests.test_panedwindow;
-    import dtk.tests.test_progressbar;
-    import dtk.tests.test_radiobutton;
-    import dtk.tests.test_separator;
-    import dtk.tests.test_slider;
-    import dtk.tests.test_spinbox;
-    import dtk.tests.test_sizegrip;
-    import dtk.tests.test_scrollbar;
-    import dtk.tests.test_text;
-    import dtk.tests.test_tree;
-    import dtk.tests.test_window;
+    import dtk.tests.button;
+    import dtk.tests.checkbutton;
+    import dtk.tests.combobox;
+    import dtk.tests.cursor;
+    import dtk.tests.dialog;
+    import dtk.tests.entry;
+    import dtk.tests.frame;
+    import dtk.tests.label;
+    import dtk.tests.labelframe;
+    import dtk.tests.listbox;
+    import dtk.tests.notebook;
+    import dtk.tests.panedwindow;
+    import dtk.tests.progressbar;
+    import dtk.tests.radiobutton;
+    import dtk.tests.separator;
+    import dtk.tests.slider;
+    import dtk.tests.spinbox;
+    import dtk.tests.sizegrip;
+    import dtk.tests.scrollbar;
+    import dtk.tests.text;
+    import dtk.tests.tree;
+    import dtk.tests.window;
 
     /* Test geometry layout. */
-    import dtk.tests.test_layout;
+    import dtk.tests.layout;
 
     /* Image. */
-    import dtk.tests.test_image;
+    import dtk.tests.image;
 
     // todo: Need to add more features to menus, like dynamic configuration of menu items.
-    // import dtk.tests.test_menu;
-    // import dtk.tests.test_contextmenu;
+    // import dtk.tests.menu;
+    // import dtk.tests.contextmenu;
 
     // todo: Need to implement context menus
-    // import dtk.tests.test_contextmenu;
+    // import dtk.tests.contextmenu;
 }
