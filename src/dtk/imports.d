@@ -34,10 +34,11 @@ public import core.stdc.string
 /** Phobos imports. */
 public import std.algorithm
     : all, startsWith, endsWith, canFind, count, countUntil, find, map, splitter,
-      lastIndexOf, joiner, findSplitBefore, sort, min, walkLength;
+      lastIndexOf, joiner, findSplitBefore, sort, min, walkLength, chomp, max,
+      chompPrefix;
 
 public import std.array
-    : Appender, array, replace, empty;
+    : Appender, array, replace, empty, split;
 
 public import std.ascii
     : isDigit;
@@ -68,7 +69,7 @@ public import std.path
 
 public import std.range
     : front, take, popFront, popFrontN, join, zip, isInputRange, ElementType,
-      ElementEncodingType;
+      ElementEncodingType, iota;
 
 public import std.stdio
     : stdout, stderr, writeln, writefln;

@@ -6,15 +6,11 @@
  */
 module dtk.widgets.radiobutton;
 
-import std.algorithm;
-import std.container;
-import std.exception;
-import std.range;
-
 import dtk.app;
 import dtk.dispatch;
 import dtk.event;
 import dtk.image;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.types;

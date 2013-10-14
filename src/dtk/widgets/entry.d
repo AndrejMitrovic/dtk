@@ -6,15 +6,11 @@
  */
 module dtk.widgets.entry;
 
-import std.exception;
-import std.range;
-import std.traits;
-import std.typetuple;
-
 import dtk.app;
 import dtk.dispatch;
 import dtk.event;
 import dtk.geometry;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.types;

@@ -6,12 +6,11 @@
  */
 module dtk.widgets.button;
 
-import std.range;
-
 import dtk.dispatch;
 import dtk.event;
 import dtk.geometry;
 import dtk.image;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.types;

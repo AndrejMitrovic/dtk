@@ -6,13 +6,9 @@
  */
 module dtk.widgets.notebook;
 
-import std.algorithm;
-import std.array;
-import std.exception;
-import std.range;
-
 import dtk.geometry;
 import dtk.image;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;

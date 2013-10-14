@@ -6,10 +6,7 @@
  */
 module dtk.widgets.labelframe;
 
-import std.conv : text;
-import std.range;
-import std.string;
-
+import dtk.imports;
 import dtk.geometry;
 import dtk.types;
 import dtk.utils;

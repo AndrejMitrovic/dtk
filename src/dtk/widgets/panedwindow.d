@@ -6,11 +6,8 @@
  */
 module dtk.widgets.panedwindow;
 
-import std.array;
-import std.exception;
-import std.range;
-
 import dtk.geometry;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;

@@ -8,25 +8,13 @@ module dtk.widgets.widget;
 
 debug = DTK_LOG_EVENTS;
 
-import core.thread;
-
-import std.algorithm;
-import std.exception;
-import std.range;
-import std.stdio;
-import std.traits;
-import std.typecons;
-
-import std.c.stdlib;
-
-alias splitter = std.algorithm.splitter;
-
 import dtk.app;
 import dtk.cursor;
 import dtk.dispatch;
 import dtk.event;
 import dtk.geometry;
 import dtk.keymap;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.style;
@@ -968,9 +956,6 @@ enum WidgetType
 /** Return the widget type based on the class type. */
 /+ template toWidgetType(Class : Widget)
 {
-    import std.traits;
-    import std.typetuple;
-
     import dtk.image;
     import dtk.widgets;
 

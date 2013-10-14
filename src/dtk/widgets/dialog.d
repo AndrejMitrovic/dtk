@@ -6,14 +6,10 @@
  */
 module dtk.widgets.dialog;
 
-import std.array;
-import std.exception;
-import std.path;
-import std.range;
-
 import dtk.app;
 import dtk.color;
 import dtk.event;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.types;

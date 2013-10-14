@@ -6,12 +6,11 @@
  */
 module dtk.widgets.checkbutton;
 
-import std.range;
-
 import dtk.app;
 import dtk.dispatch;
 import dtk.event;
 import dtk.image;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.utils;

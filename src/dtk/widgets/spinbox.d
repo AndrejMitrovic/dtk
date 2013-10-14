@@ -6,14 +6,11 @@
  */
 module dtk.widgets.spinbox;
 
-import std.algorithm;
-import std.string;
-import std.range;
-
 import dtk.app;
 import dtk.dispatch;
 import dtk.event;
 import dtk.geometry;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.types;

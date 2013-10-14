@@ -9,6 +9,7 @@ module dtk.widgets.text;
 import dtk.app;
 import dtk.event;
 import dtk.geometry;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;

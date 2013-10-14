@@ -6,12 +6,8 @@
  */
 module dtk.widgets.scrollbar;
 
-import std.algorithm;
-import std.exception;
-import std.range;
-import std.stdio;
-
 import dtk.event;
+import dtk.imports;
 import dtk.geometry;
 import dtk.types;
 import dtk.utils;

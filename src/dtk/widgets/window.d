@@ -6,17 +6,9 @@
  */
 module dtk.widgets.window;
 
-import dtk.geometry;
-
-import std.conv : text;
-import std.range;
-import std.stdio;
-import std.algorithm;
-import std.range;
-
-alias splitter = std.algorithm.splitter;
-
 import dtk.event;
+import dtk.geometry;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;

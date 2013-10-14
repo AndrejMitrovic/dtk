@@ -6,12 +6,10 @@
  */
 module dtk.widgets.separator;
 
-import std.string;
-import std.range;
-
 import dtk.app;
 import dtk.event;
 import dtk.geometry;
+import dtk.imports;
 import dtk.types;
 import dtk.utils;
 
