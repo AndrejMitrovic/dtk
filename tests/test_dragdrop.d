@@ -37,6 +37,9 @@ unittest
 
     button1.onDropEvent ~= (scope DropEvent event)
     {
+        int x;
+        assert(x);
+
         label.text = to!string(event.action);
 
         if (event.action == DropAction.leave)

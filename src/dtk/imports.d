@@ -81,7 +81,7 @@ public import std.traits
     : isArray, isSomeString, FieldTypeTuple, functionAttributes, FunctionAttribute,
       ParameterStorageClass, ParameterStorageClassTuple, ReturnType, pointerTarget,
       isPointer, isSomeFunction, isDelegate, isFunctionPointer, ParameterTypeTuple,
-      Unqual, isSomeChar, isStaticArray, EnumMembers, isDynamicArray;
+      Unqual, isSomeChar, isStaticArray, EnumMembers, isDynamicArray, hasIndirections;
 
 public import std.typecons
     : scoped;
