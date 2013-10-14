@@ -441,8 +441,144 @@ private T cenforce(T)(T condition, lazy const(char)[] name, string file = __FILE
 public import std.getopt
     : getoptConfig = config, getopt;
 
-public import std.math
-    : isFinite, isNaN;
+/*********************************
+ * Returns !=0 if e is a NaN.
+ */
+
+bool isNaN(real x) @trusted pure nothrow
+{
+    alias floatTraits!(real) F;
+    static if (real.mant_dig == 53) // double
+    {
+        ulong*  p = cast(ulong *)&x;
+        return ((*p & 0x7FF0_0000_0000_0000) == 0x7FF0_0000_0000_0000)
+        && *p & 0x000F_FFFF_FFFF_FFFF;
+    }
+    else static if (real.mant_dig == 64)  // real80
+    {
+        ushort e = F.EXPMASK & (cast(ushort *)&x)[F.EXPPOS_SHORT];
+        ulong*  ps = cast(ulong *)&x;
+        return e == F.EXPMASK &&
+        *ps & 0x7FFF_FFFF_FFFF_FFFF; // not infinity
+    }
+    else static if (real.mant_dig == 113) // quadruple
+    {
+        ushort e = F.EXPMASK & (cast(ushort *)&x)[F.EXPPOS_SHORT];
+        ulong*  ps = cast(ulong *)&x;
+        return e == F.EXPMASK &&
+        (ps[MANTISSA_LSB] | (ps[MANTISSA_MSB]& 0x0000_FFFF_FFFF_FFFF))!=0;
+    }
+    else
+    {
+        return x!=x;
+    }
+}
+
+int isFinite(real e) @trusted pure nothrow
+{
+    alias floatTraits!(real) F;
+    ushort* pe = cast(ushort *)&e;
+    return (pe[F.EXPPOS_SHORT] & F.EXPMASK) != F.EXPMASK;
+}
+
+// Constants used for extracting the components of the representation.
+// They supplement the built-in floating point properties.
+template floatTraits(T)
+{
+    // EXPMASK is a ushort mask to select the exponent portion (without sign)
+    // EXPPOS_SHORT is the index of the exponent when represented as a ushort array.
+    // SIGNPOS_BYTE is the index of the sign when represented as a ubyte array.
+    // RECIP_EPSILON is the value such that (smallest_subnormal) * RECIP_EPSILON == T.min_normal
+    enum T RECIP_EPSILON = (1/T.epsilon);
+    static if (T.mant_dig == 24)
+    { // float
+        enum ushort EXPMASK = 0x7F80;
+        enum ushort EXPBIAS = 0x3F00;
+        enum uint EXPMASK_INT = 0x7F80_0000;
+        enum uint MANTISSAMASK_INT = 0x007F_FFFF;
+        version(LittleEndian)
+        {
+            enum EXPPOS_SHORT = 1;
+        }
+        else
+        {
+            enum EXPPOS_SHORT = 0;
+        }
+    }
+    else static if (T.mant_dig == 53) // double, or real==double
+    {
+        enum ushort EXPMASK = 0x7FF0;
+        enum ushort EXPBIAS = 0x3FE0;
+        enum uint EXPMASK_INT = 0x7FF0_0000;
+        enum uint MANTISSAMASK_INT = 0x000F_FFFF; // for the MSB only
+        version(LittleEndian)
+        {
+            enum EXPPOS_SHORT = 3;
+            enum SIGNPOS_BYTE = 7;
+        }
+        else
+        {
+            enum EXPPOS_SHORT = 0;
+            enum SIGNPOS_BYTE = 0;
+        }
+    }
+    else static if (T.mant_dig == 64) // real80
+    {
+        enum ushort EXPMASK = 0x7FFF;
+        enum ushort EXPBIAS = 0x3FFE;
+        version(LittleEndian)
+        {
+            enum EXPPOS_SHORT = 4;
+            enum SIGNPOS_BYTE = 9;
+        }
+        else
+        {
+            enum EXPPOS_SHORT = 0;
+            enum SIGNPOS_BYTE = 0;
+        }
+    }
+    else static if (T.mant_dig == 113) // quadruple
+    {
+        enum ushort EXPMASK = 0x7FFF;
+        version(LittleEndian)
+        {
+            enum EXPPOS_SHORT = 7;
+            enum SIGNPOS_BYTE = 15;
+        }
+        else
+        {
+            enum EXPPOS_SHORT = 0;
+            enum SIGNPOS_BYTE = 0;
+        }
+    }
+    else static if (T.mant_dig == 106) // doubledouble
+    {
+        enum ushort EXPMASK = 0x7FF0;
+        // the exponent byte is not unique
+        version(LittleEndian)
+        {
+            enum EXPPOS_SHORT = 7; // [3] is also an exp short
+            enum SIGNPOS_BYTE = 15;
+        }
+        else
+        {
+            enum EXPPOS_SHORT = 0; // [4] is also an exp short
+            enum SIGNPOS_BYTE = 0;
+        }
+    }
+}
+
+// These apply to all floating-point types
+version(LittleEndian)
+{
+    enum MANTISSA_LSB = 0;
+    enum MANTISSA_MSB = 1;
+}
+else
+{
+    enum MANTISSA_LSB = 1;
+    enum MANTISSA_MSB = 0;
+}
 
 public import std.path
     : absolutePath, dirSeparator, buildNormalizedPath;

@@ -91,3 +91,9 @@ public import std.typetuple
 
 public import std.variant
     : Variant;
+
+version (Windows)
+{
+    public import std.windows.charset
+        : fromMBSz;
+}
