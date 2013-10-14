@@ -217,8 +217,10 @@ version (Posix)
         : stat, stat_t, S_IFMT, S_IFREG, S_IFDIR;
 }
 
-private import std.utf
-    : toUTF16z;
+wchar* toUTF16z(in char[] input)
+{
+    return cast(wchar*)(phobosTo!wstring(input) ~ "\0").ptr;
+}
 
 /++
     Returns whether the given file (or directory) exists.
