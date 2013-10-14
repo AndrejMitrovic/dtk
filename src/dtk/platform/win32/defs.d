@@ -6,6 +6,8 @@
  */
 module dtk.platform.win32.defs;
 
+import dtk.imports;
+
 /**
     This module contains a minimal set of the
     Win32 API to avoid huge build times.
@@ -800,3 +802,458 @@ alias MEMORYSTATUS* LPMEMORYSTATUS;
 extern(Windows) void CoTaskMemFree(PVOID);
 extern(Windows) int MultiByteToWideChar(UINT, DWORD, LPCSTR, int, LPWSTR, int);
 extern(Windows) DWORD GetCurrentProcessId();
+extern(Windows) DWORD GetFileAttributesW(LPCWSTR);
+
+enum FILE_ATTRIBUTE_DIRECTORY = 0x00000010;
+
+alias void va_list;
+
+extern(Windows) DWORD FormatMessageA(DWORD, PCVOID, DWORD, DWORD, LPSTR, DWORD, va_list*);
+extern(Windows) DWORD FormatMessageW(DWORD, PCVOID, DWORD, DWORD, LPWSTR, DWORD, va_list*);
+
+const DWORD
+	FORMAT_MESSAGE_ALLOCATE_BUFFER = 0x0100,
+	FORMAT_MESSAGE_IGNORE_INSERTS  = 0x0200,
+	FORMAT_MESSAGE_FROM_STRING     = 0x0400,
+	FORMAT_MESSAGE_FROM_HMODULE    = 0x0800,
+	FORMAT_MESSAGE_FROM_SYSTEM     = 0x1000,
+	FORMAT_MESSAGE_ARGUMENT_ARRAY  = 0x2000;
+
+
+string sysErrorString(uint errcode) @trusted
+{
+    char[] result;
+    char* buffer;
+    DWORD r;
+
+    r = FormatMessageA(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER |
+            FORMAT_MESSAGE_FROM_SYSTEM |
+            FORMAT_MESSAGE_IGNORE_INSERTS,
+            null,
+            errcode,
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+            cast(LPTSTR)&buffer,
+            0,
+            null);
+
+    /* Remove \r\n from error string */
+    if (r >= 2)
+        r -= 2;
+
+    /* Create 0 terminated copy on GC heap because fromMBSz()
+     * may return it.
+     */
+    result = new char[r + 1];
+    result[0 .. r] = buffer[0 .. r];
+    result[r] = 0;
+
+    LocalFree(cast(HLOCAL)buffer);
+
+    auto res = fromMBSz(cast(immutable)result.ptr);
+
+    return res;
+}
+
+// Primary language identifiers
+enum : USHORT {
+	LANG_NEUTRAL,
+	LANG_ARABIC,
+	LANG_BULGARIAN,
+	LANG_CATALAN,
+	LANG_CHINESE,
+	LANG_CZECH,
+	LANG_DANISH,
+	LANG_GERMAN,
+	LANG_GREEK,
+	LANG_ENGLISH,
+	LANG_SPANISH,
+	LANG_FINNISH,
+	LANG_FRENCH,
+	LANG_HEBREW,
+	LANG_HUNGARIAN,
+	LANG_ICELANDIC,
+	LANG_ITALIAN,
+	LANG_JAPANESE,
+	LANG_KOREAN,
+	LANG_DUTCH,
+	LANG_NORWEGIAN,
+	LANG_POLISH,
+	LANG_PORTUGUESE,    // = 0x16
+	LANG_ROMANIAN          = 0x18,
+	LANG_RUSSIAN,
+	LANG_CROATIAN,      // = 0x1A
+	LANG_SERBIAN           = 0x1A,
+	LANG_BOSNIAN           = 0x1A,
+	LANG_SLOVAK,
+	LANG_ALBANIAN,
+	LANG_SWEDISH,
+	LANG_THAI,
+	LANG_TURKISH,
+	LANG_URDU,
+	LANG_INDONESIAN,
+	LANG_UKRAINIAN,
+	LANG_BELARUSIAN,
+	LANG_SLOVENIAN,
+	LANG_ESTONIAN,
+	LANG_LATVIAN,
+	LANG_LITHUANIAN,    // = 0x27
+	LANG_FARSI             = 0x29,
+	LANG_PERSIAN           = 0x29,
+	LANG_VIETNAMESE,
+	LANG_ARMENIAN,
+	LANG_AZERI,
+	LANG_BASQUE,
+	LANG_LOWER_SORBIAN, // = 0x2E
+	LANG_UPPER_SORBIAN     = 0x2E,
+	LANG_MACEDONIAN,    // = 0x2F
+	LANG_TSWANA            = 0x32,
+	LANG_XHOSA             = 0x34,
+	LANG_ZULU,
+	LANG_AFRIKAANS,
+	LANG_GEORGIAN,
+	LANG_FAEROESE,
+	LANG_HINDI,
+	LANG_MALTESE,
+	LANG_SAMI,
+	LANG_IRISH,         // = 0x3C
+	LANG_MALAY             = 0x3E,
+	LANG_KAZAK,
+	LANG_KYRGYZ,
+	LANG_SWAHILI,       // = 0x41
+	LANG_UZBEK             = 0x43,
+	LANG_TATAR,
+	LANG_BENGALI,
+	LANG_PUNJABI,
+	LANG_GUJARATI,
+	LANG_ORIYA,
+	LANG_TAMIL,
+	LANG_TELUGU,
+	LANG_KANNADA,
+	LANG_MALAYALAM,
+	LANG_ASSAMESE,
+	LANG_MARATHI,
+	LANG_SANSKRIT,
+	LANG_MONGOLIAN,
+	LANG_TIBETAN,
+	LANG_WELSH,
+	LANG_KHMER,
+	LANG_LAO,           // = 0x54
+	LANG_GALICIAN          = 0x56,
+	LANG_KONKANI,
+	LANG_MANIPURI,
+	LANG_SINDHI,
+	LANG_SYRIAC,
+	LANG_SINHALESE,     // = 0x5B
+	LANG_INUKTITUT         = 0x5D,
+	LANG_AMHARIC,
+	LANG_TAMAZIGHT,
+	LANG_KASHMIRI,
+	LANG_NEPALI,
+	LANG_FRISIAN,
+	LANG_PASHTO,
+	LANG_FILIPINO,
+	LANG_DIVEHI,        // = 0x65
+	LANG_HAUSA             = 0x68,
+	LANG_YORUBA            = 0x6A,
+	LANG_QUECHUA,
+	LANG_SOTHO,
+	LANG_BASHKIR,
+	LANG_LUXEMBOURGISH,
+	LANG_GREENLANDIC,
+	LANG_IGBO,          // = 0x70
+	LANG_TIGRIGNA          = 0x73,
+	LANG_YI                = 0x78,
+	LANG_MAPUDUNGUN        = 0x7A,
+	LANG_MOHAWK            = 0x7C,
+	LANG_BRETON            = 0x7E,
+	LANG_UIGHUR            = 0x80,
+	LANG_MAORI,
+	LANG_OCCITAN,
+	LANG_CORSICAN,
+	LANG_ALSATIAN,
+	LANG_YAKUT,
+	LANG_KICHE,
+	LANG_KINYARWANDA,
+	LANG_WOLOF,         // = 0x88
+	LANG_DARI              = 0x8C,
+	LANG_MALAGASY,      // = 0x8D
+
+	LANG_SERBIAN_NEUTRAL   = 0x7C1A,
+	LANG_BOSNIAN_NEUTRAL   = 0x781A,
+
+	LANG_INVARIANT         = 0x7F
+}
+
+WORD MAKELANGID(USHORT p, USHORT s) { return cast(WORD)((s << 10) | p); }
+
+
+// Sublanguage identifiers
+enum : USHORT {
+	SUBLANG_NEUTRAL,
+	SUBLANG_DEFAULT,
+	SUBLANG_SYS_DEFAULT,
+	SUBLANG_CUSTOM_DEFAULT,                  // =  3
+	SUBLANG_UI_CUSTOM_DEFAULT                   =  3,
+	SUBLANG_CUSTOM_UNSPECIFIED,              // =  4
+
+	SUBLANG_AFRIKAANS_SOUTH_AFRICA              =  1,
+	SUBLANG_ALBANIAN_ALBANIA                    =  1,
+	SUBLANG_ALSATIAN_FRANCE                     =  1,
+	SUBLANG_AMHARIC_ETHIOPIA                    =  1,
+
+	SUBLANG_ARABIC_SAUDI_ARABIA                 =  1,
+	SUBLANG_ARABIC_IRAQ,
+	SUBLANG_ARABIC_EGYPT,
+	SUBLANG_ARABIC_LIBYA,
+	SUBLANG_ARABIC_ALGERIA,
+	SUBLANG_ARABIC_MOROCCO,
+	SUBLANG_ARABIC_TUNISIA,
+	SUBLANG_ARABIC_OMAN,
+	SUBLANG_ARABIC_YEMEN,
+	SUBLANG_ARABIC_SYRIA,
+	SUBLANG_ARABIC_JORDAN,
+	SUBLANG_ARABIC_LEBANON,
+	SUBLANG_ARABIC_KUWAIT,
+	SUBLANG_ARABIC_UAE,
+	SUBLANG_ARABIC_BAHRAIN,
+	SUBLANG_ARABIC_QATAR,                    // = 16
+
+	SUBLANG_ARMENIAN_ARMENIA                    =  1,
+	SUBLANG_ASSAMESE_INDIA                      =  1,
+
+	SUBLANG_AZERI_LATIN                         =  1,
+	SUBLANG_AZERI_CYRILLIC,                  // =  2
+
+	SUBLANG_BASHKIR_RUSSIA                      =  1,
+	SUBLANG_BASQUE_BASQUE                       =  1,
+	SUBLANG_BELARUSIAN_BELARUS                  =  1,
+	SUBLANG_BENGALI_INDIA                       =  1,
+
+	SUBLANG_BOSNIAN_BOSNIA_HERZEGOVINA_LATIN    =  5,
+	SUBLANG_BOSNIAN_BOSNIA_HERZEGOVINA_CYRILLIC =  8,
+
+	SUBLANG_BRETON_FRANCE                       =  1,
+	SUBLANG_BULGARIAN_BULGARIA                  =  1,
+	SUBLANG_CATALAN_CATALAN                     =  1,
+
+	SUBLANG_CHINESE_TRADITIONAL                 =  1,
+	SUBLANG_CHINESE_SIMPLIFIED,
+	SUBLANG_CHINESE_HONGKONG,
+	SUBLANG_CHINESE_SINGAPORE,
+	SUBLANG_CHINESE_MACAU,                   // =  5
+
+	SUBLANG_CORSICAN_FRANCE                     =  1,
+
+	SUBLANG_CROATIAN_CROATIA                    =  1,
+	SUBLANG_CROATIAN_BOSNIA_HERZEGOVINA_LATIN   =  4,
+
+	SUBLANG_CZECH_CZECH_REPUBLIC                =  1,
+	SUBLANG_DANISH_DENMARK                      =  1,
+	SUBLANG_DIVEHI_MALDIVES                     =  1,
+
+	SUBLANG_DUTCH                               =  1,
+	SUBLANG_DUTCH_BELGIAN,                   // =  2
+
+	SUBLANG_ENGLISH_US                          =  1,
+	SUBLANG_ENGLISH_UK,
+	SUBLANG_ENGLISH_AUS,
+	SUBLANG_ENGLISH_CAN,
+	SUBLANG_ENGLISH_NZ,
+	SUBLANG_ENGLISH_EIRE,                    // =  6
+	SUBLANG_ENGLISH_IRELAND                     =  6,
+	SUBLANG_ENGLISH_SOUTH_AFRICA,
+	SUBLANG_ENGLISH_JAMAICA,
+	SUBLANG_ENGLISH_CARIBBEAN,
+	SUBLANG_ENGLISH_BELIZE,
+	SUBLANG_ENGLISH_TRINIDAD,
+	SUBLANG_ENGLISH_ZIMBABWE,
+	SUBLANG_ENGLISH_PHILIPPINES,             // = 13
+	SUBLANG_ENGLISH_INDIA                       = 16,
+	SUBLANG_ENGLISH_MALAYSIA,
+	SUBLANG_ENGLISH_SINGAPORE,               // = 18
+
+	SUBLANG_ESTONIAN_ESTONIA                    =  1,
+	SUBLANG_FAEROESE_FAROE_ISLANDS              =  1,
+	SUBLANG_FILIPINO_PHILIPPINES                =  1,
+	SUBLANG_FINNISH_FINLAND                     =  1,
+
+	SUBLANG_FRENCH                              =  1,
+	SUBLANG_FRENCH_BELGIAN,
+	SUBLANG_FRENCH_CANADIAN,
+	SUBLANG_FRENCH_SWISS,
+	SUBLANG_FRENCH_LUXEMBOURG,
+	SUBLANG_FRENCH_MONACO,                   // =  6
+
+	SUBLANG_FRISIAN_NETHERLANDS                 =  1,
+	SUBLANG_GALICIAN_GALICIAN                   =  1,
+	SUBLANG_GEORGIAN_GEORGIA                    =  1,
+
+	SUBLANG_GERMAN                              =  1,
+	SUBLANG_GERMAN_SWISS,
+	SUBLANG_GERMAN_AUSTRIAN,
+	SUBLANG_GERMAN_LUXEMBOURG,
+	SUBLANG_GERMAN_LIECHTENSTEIN,            // =  5
+
+	SUBLANG_GREEK_GREECE                        =  1,
+	SUBLANG_GREENLANDIC_GREENLAND               =  1,
+	SUBLANG_GUJARATI_INDIA                      =  1,
+	SUBLANG_HAUSA_NIGERIA                       =  1,
+	SUBLANG_HEBREW_ISRAEL                       =  1,
+	SUBLANG_HINDI_INDIA                         =  1,
+	SUBLANG_HUNGARIAN_HUNGARY                   =  1,
+	SUBLANG_ICELANDIC_ICELAND                   =  1,
+	SUBLANG_IGBO_NIGERIA                        =  1,
+	SUBLANG_INDONESIAN_INDONESIA                =  1,
+
+	SUBLANG_INUKTITUT_CANADA                    =  1,
+	SUBLANG_INUKTITUT_CANADA_LATIN              =  1,
+
+	SUBLANG_IRISH_IRELAND                       =  1,
+
+	SUBLANG_ITALIAN                             =  1,
+	SUBLANG_ITALIAN_SWISS,                   // =  2
+
+	SUBLANG_JAPANESE_JAPAN                      =  1,
+
+	SUBLANG_KASHMIRI_INDIA                      =  2,
+	SUBLANG_KASHMIRI_SASIA                      =  2,
+
+	SUBLANG_KAZAK_KAZAKHSTAN                    =  1,
+	SUBLANG_KHMER_CAMBODIA                      =  1,
+	SUBLANG_KICHE_GUATEMALA                     =  1,
+	SUBLANG_KINYARWANDA_RWANDA                  =  1,
+	SUBLANG_KONKANI_INDIA                       =  1,
+	SUBLANG_KOREAN                              =  1,
+	SUBLANG_KYRGYZ_KYRGYZSTAN                   =  1,
+	SUBLANG_LAO_LAO_PDR                         =  1,
+	SUBLANG_LATVIAN_LATVIA                      =  1,
+
+	SUBLANG_LITHUANIAN                          =  1,
+	SUBLANG_LITHUANIAN_LITHUANIA                =  1,
+
+	SUBLANG_LOWER_SORBIAN_GERMANY               =  1,
+	SUBLANG_LUXEMBOURGISH_LUXEMBOURG            =  1,
+	SUBLANG_MACEDONIAN_MACEDONIA                =  1,
+	SUBLANG_MALAYALAM_INDIA                     =  1,
+	SUBLANG_MALTESE_MALTA                       =  1,
+	SUBLANG_MAORI_NEW_ZEALAND                   =  1,
+	SUBLANG_MAPUDUNGUN_CHILE                    =  1,
+	SUBLANG_MARATHI_INDIA                       =  1,
+	SUBLANG_MOHAWK_MOHAWK                       =  1,
+
+	SUBLANG_MONGOLIAN_CYRILLIC_MONGOLIA         =  1,
+	SUBLANG_MONGOLIAN_PRC,                   // =  2
+
+	SUBLANG_MALAY_MALAYSIA                      =  1,
+	SUBLANG_MALAY_BRUNEI_DARUSSALAM,         // =  2
+
+	SUBLANG_NEPALI_NEPAL                        =  1,
+	SUBLANG_NEPALI_INDIA,                    // =  2
+
+	SUBLANG_NORWEGIAN_BOKMAL                    =  1,
+	SUBLANG_NORWEGIAN_NYNORSK,               // =  2
+
+	SUBLANG_OCCITAN_FRANCE                      =  1,
+	SUBLANG_ORIYA_INDIA                         =  1,
+	SUBLANG_PASHTO_AFGHANISTAN                  =  1,
+	SUBLANG_PERSIAN_IRAN                        =  1,
+	SUBLANG_POLISH_POLAND                       =  1,
+
+	SUBLANG_PORTUGUESE_BRAZILIAN                =  1,
+	SUBLANG_PORTUGUESE                          =  2,
+	SUBLANG_PORTUGUESE_PORTUGAL,             // =  2
+
+	SUBLANG_PUNJABI_INDIA                       =  1,
+
+	SUBLANG_QUECHUA_BOLIVIA                     =  1,
+	SUBLANG_QUECHUA_ECUADOR,
+	SUBLANG_QUECHUA_PERU,                    // =  3
+
+	SUBLANG_ROMANIAN_ROMANIA                    =  1,
+	SUBLANG_ROMANSH_SWITZERLAND                 =  1,
+	SUBLANG_RUSSIAN_RUSSIA                      =  1,
+
+	SUBLANG_SAMI_NORTHERN_NORWAY                =  1,
+	SUBLANG_SAMI_NORTHERN_SWEDEN,
+	SUBLANG_SAMI_NORTHERN_FINLAND,           // =  3
+	SUBLANG_SAMI_SKOLT_FINLAND                  =  3,
+	SUBLANG_SAMI_INARI_FINLAND                  =  3,
+	SUBLANG_SAMI_LULE_NORWAY,
+	SUBLANG_SAMI_LULE_SWEDEN,
+	SUBLANG_SAMI_SOUTHERN_NORWAY,
+	SUBLANG_SAMI_SOUTHERN_SWEDEN,            // =  7
+
+	SUBLANG_SANSKRIT_INDIA                      =  1,
+
+	SUBLANG_SERBIAN_LATIN                       =  2,
+	SUBLANG_SERBIAN_CYRILLIC,                // =  3
+	SUBLANG_SERBIAN_BOSNIA_HERZEGOVINA_LATIN    =  6,
+	SUBLANG_SERBIAN_BOSNIA_HERZEGOVINA_CYRILLIC =  7,
+
+	SUBLANG_SINDHI_AFGHANISTAN                  =  2,
+	SUBLANG_SINHALESE_SRI_LANKA                 =  1,
+	SUBLANG_SOTHO_NORTHERN_SOUTH_AFRICA         =  1,
+	SUBLANG_SLOVAK_SLOVAKIA                     =  1,
+	SUBLANG_SLOVENIAN_SLOVENIA                  =  1,
+
+	SUBLANG_SPANISH                             =  1,
+	SUBLANG_SPANISH_MEXICAN,
+	SUBLANG_SPANISH_MODERN,
+	SUBLANG_SPANISH_GUATEMALA,
+	SUBLANG_SPANISH_COSTA_RICA,
+	SUBLANG_SPANISH_PANAMA,
+	SUBLANG_SPANISH_DOMINICAN_REPUBLIC,
+	SUBLANG_SPANISH_VENEZUELA,
+	SUBLANG_SPANISH_COLOMBIA,
+	SUBLANG_SPANISH_PERU,
+	SUBLANG_SPANISH_ARGENTINA,
+	SUBLANG_SPANISH_ECUADOR,
+	SUBLANG_SPANISH_CHILE,
+	SUBLANG_SPANISH_URUGUAY,
+	SUBLANG_SPANISH_PARAGUAY,
+	SUBLANG_SPANISH_BOLIVIA,
+	SUBLANG_SPANISH_EL_SALVADOR,
+	SUBLANG_SPANISH_HONDURAS,
+	SUBLANG_SPANISH_NICARAGUA,
+	SUBLANG_SPANISH_PUERTO_RICO,
+	SUBLANG_SPANISH_US,                      // = 21
+
+	SUBLANG_SWEDISH                             =  1,
+	SUBLANG_SWEDISH_SWEDEN                      =  1,
+	SUBLANG_SWEDISH_FINLAND,                 // =  2
+
+	SUBLANG_SYRIAC                              =  1,
+	SUBLANG_TAJIK_TAJIKISTAN                    =  1,
+	SUBLANG_TAMAZIGHT_ALGERIA_LATIN             =  2,
+	SUBLANG_TAMIL_INDIA                         =  1,
+	SUBLANG_TATAR_RUSSIA                        =  1,
+	SUBLANG_TELUGU_INDIA                        =  1,
+	SUBLANG_THAI_THAILAND                       =  1,
+	SUBLANG_TIBETAN_PRC                         =  1,
+	SUBLANG_TIBETAN_BHUTAN                      =  2,
+	SUBLANG_TIGRIGNA_ERITREA                    =  1,
+	SUBLANG_TSWANA_SOUTH_AFRICA                 =  1,
+	SUBLANG_TURKISH_TURKEY                      =  1,
+	SUBLANG_TURKMEN_TURKMENISTAN                =  1,
+	SUBLANG_UIGHUR_PRC                          =  1,
+	SUBLANG_UKRAINIAN_UKRAINE                   =  1,
+	SUBLANG_UPPER_SORBIAN_GERMANY               =  1,
+
+	SUBLANG_URDU_PAKISTAN                       =  1,
+	SUBLANG_URDU_INDIA,                      // =  2
+
+	SUBLANG_UZBEK_LATIN                         =  1,
+	SUBLANG_UZBEK_CYRILLIC,                  // =  2
+
+	SUBLANG_VIETNAMESE_VIETNAM                  =  1,
+	SUBLANG_WELSH_UNITED_KINGDOM                =  1,
+	SUBLANG_WOLOF_SENEGAL                       =  1,
+	SUBLANG_YORUBA_NIGERIA                      =  1,
+	SUBLANG_XHOSA_SOUTH_AFRICA                  =  1,
+	SUBLANG_YAKUT_RUSSIA                        =  1,
+	SUBLANG_YI_PRC                              =  1,
+	SUBLANG_ZULU_SOUTH_AFRICA                   =  1
+}
+
+extern(Windows) HLOCAL LocalFree(HLOCAL);
