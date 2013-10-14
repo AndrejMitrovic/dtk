@@ -6,17 +6,8 @@
  */
 module dtk.interpreter;
 
-import std.algorithm;
-import std.array;
-import std.stdio;
-import std.traits;
-import std.c.stdlib;
-
-import std.exception;
-import std.string : translate, toStringz;
-import std.path;
-
 import dtk.event;
+import dtk.imports;
 import dtk.loader;
 import dtk.types;
 import dtk.utils;

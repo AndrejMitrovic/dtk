@@ -6,13 +6,8 @@
  */
 module dtk.event;
 
-import std.array;
-import std.exception;
-import std.traits;
-import std.typecons;
-import std.typetuple;
-
 import dtk.geometry;
+import dtk.imports;
 import dtk.keymap;
 import dtk.signals;
 import dtk.types;

@@ -6,12 +6,8 @@
  */
 module dtk.layout;
 
-import std.algorithm;
-import std.array;
-
-private alias splitter = std.algorithm.splitter;
-
 import dtk.geometry;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.utils;
 

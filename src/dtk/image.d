@@ -6,10 +6,7 @@
  */
 module dtk.image;
 
-import std.exception;
-import std.file;
-import std.path;
-
+import dtk.imports;
 import dtk.interpreter;
 import dtk.utils;
 

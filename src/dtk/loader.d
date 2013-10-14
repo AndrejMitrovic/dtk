@@ -6,9 +6,8 @@
  */
 module dtk.loader;
 
-import std.exception;
-
 import dtk.dispatch;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;

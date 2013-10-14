@@ -6,13 +6,7 @@
  */
 module dtk.geometry;
 
-import core.exception;
-
-import std.algorithm;
-import std.exception;
-import std.traits;
-import std.typetuple;
-
+import dtk.imports;
 import dtk.utils;
 
 ///
