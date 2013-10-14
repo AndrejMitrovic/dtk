@@ -70,7 +70,7 @@ if [%run_tests%]==[] echo Success: dtk tests built.
 
 if [%run_tests%]==[] goto :BUILD
 
-rem %binPath%\dtk_test.exe
+%binPath%\dtk_test.exe
 if errorlevel 1 GOTO :ERROR
 
 type %stdout_log%

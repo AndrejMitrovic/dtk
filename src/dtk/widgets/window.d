@@ -50,6 +50,12 @@ class Window : Widget
     this(Tk_Window window)
     {
         super(CreateToplevel.init, WidgetType.window);
+
+        version(unittest)
+        version(DTK_UNITTEST)
+        {
+            tclEvalFmt("tkwait visibility %s", _name);
+        }
     }
 
     /** Return the current window title. */

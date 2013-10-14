@@ -55,8 +55,6 @@ class App
 
             bool hasEvents = false;
 
-            tclEvalFmt("tkwait visibility %s", _window._name);
-
             do
             {
                 hasEvents = Tcl_DoOneEvent(TCL_DONT_WAIT) != 0;
