@@ -6,17 +6,8 @@
  */
 module dtk.app;
 
-import core.thread;
-import core.time;
-
-import std.c.stdlib;
-
-import std.exception;
-import std.datetime;
-import std.path;
-import std.stdio;
-
 import dtk.event;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.loader;
 import dtk.types;
@@ -39,8 +30,6 @@ class App
     version(unittest)
     version(DTK_UNITTEST)
     {
-        import std.datetime;
-
         static string _file;
         static size_t _line;
 

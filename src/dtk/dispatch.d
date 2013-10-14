@@ -6,13 +6,9 @@
  */
 module dtk.dispatch;
 
-import std.exception;
-import std.range;
-import std.stdio;
-import std.typecons;
-
 import dtk.event;
 import dtk.geometry;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.keymap;
 import dtk.types;

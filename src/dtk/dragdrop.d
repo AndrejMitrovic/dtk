@@ -6,7 +6,7 @@
  */
 module dtk.dragdrop;
 
-import std.variant;
+import dtk.imports;
 
 import dtk.platform;
 
