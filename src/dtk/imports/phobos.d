@@ -58,9 +58,6 @@ public import std.exception
 public import std.file
     : exists, isFile;
 
-public import std.getopt
-    : getoptConfig = config, getopt;
-
 public import std.math
     : isFinite, isNaN;
 
