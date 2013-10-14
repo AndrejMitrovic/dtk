@@ -32,7 +32,7 @@ private
     import dtk.tests.labelframe;
     import dtk.tests.listbox;
     import dtk.tests.notebook;
-    import dtk.tests.panedwindow;
+    import dtk.tests.pane;
     import dtk.tests.progressbar;
     import dtk.tests.radiobutton;
     import dtk.tests.separator;

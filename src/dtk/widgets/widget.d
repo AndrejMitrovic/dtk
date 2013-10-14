@@ -935,7 +935,7 @@ enum WidgetType
     menubar,             ///
     menuitem,            ///
     notebook,            ///
-    panedwindow,         ///
+    pane,                ///
     progressbar,         ///
     radiogroup_menu,     ///
     radiogroup,          ///
@@ -964,7 +964,7 @@ enum WidgetType
         Entry, Frame, GenericDialog, SelectDirDialog,
         SelectColorDialog, Image, Label, LabelFrame,
         Listbox, ListSpinbox, MessageBox, Menu,
-        MenuBar, MenuItem, Notebook, PanedWindow,
+        MenuBar, MenuItem, Notebook, Pane,
         Progressbar, RadioGroupMenu, RadioGroup,
         RadioButton, RadioMenuItem, ScalarSpinbox, Scrollbar,
         Separator, Sizegrip, Slider, Text, Tree,

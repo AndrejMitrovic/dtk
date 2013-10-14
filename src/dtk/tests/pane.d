@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.tests.panedwindow;
+module dtk.tests.pane;
 
 version(unittest):
 version(DTK_UNITTEST):
@@ -18,7 +18,7 @@ unittest
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
-    auto pane = new PanedWindow(testWindow, Angle.vertical);
+    auto pane = new Pane(testWindow, Angle.vertical);
 
     auto badButton = new Button(testWindow, "Flash");
     assertThrown(pane.add(badButton));  // cannot add a widget which isn't parented to the pane

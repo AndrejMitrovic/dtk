@@ -20,7 +20,7 @@ public
     import dtk.widgets.menu;
     import dtk.widgets.notebook;
     import dtk.widgets.options;
-    import dtk.widgets.panedwindow;
+    import dtk.widgets.pane;
     import dtk.widgets.progressbar;
     import dtk.widgets.radiobutton;
     import dtk.widgets.separator;

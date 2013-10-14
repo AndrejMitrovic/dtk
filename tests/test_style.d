@@ -40,8 +40,8 @@ unittest
     auto notebook = new Notebook(testWindow);
     assert(notebook.style == DefaultStyle.notebook);
 
-    auto panedWindow = new PanedWindow(testWindow, Angle.vertical);
-    assert(panedWindow.style == DefaultStyle.panedWindow);
+    auto pane = new Pane(testWindow, Angle.vertical);
+    assert(pane.style == DefaultStyle.pane);
 
     auto vProg = new Progressbar(testWindow, ProgressMode.init, Angle.vertical, 100);
     assert(vProg.style == DefaultStyle.vProgressbar);

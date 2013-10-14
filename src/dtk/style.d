@@ -42,7 +42,7 @@ enum DefaultStyle : Style
     menu         = Style(""),             // todo: test when menu API is stabilized
     menuButton   = Style("TMenubutton"),  // todo: test when menuButton is ported
     notebook     = Style("TNotebook"),
-    panedWindow  = Style("TPanedwindow"),
+    pane         = Style("TPanedwindow"),
     vProgressbar = Style("Vertical.TProgressbar"),
     hProgressbar = Style("Horizontal.TProgressbar"),
     radioButton  = Style("TRadiobutton"),

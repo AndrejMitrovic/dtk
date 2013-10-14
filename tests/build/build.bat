@@ -26,4 +26,4 @@ goto :eof
 set FileName=%1
 set SourceFile=%2
 
-rdmd -w -g -L/SUBSYSTEM:WINDOWS:5.01 %versions% -unittest -I%srcDir% %import_libs% -of%binPath%\%FileName%.exe %SourceFile%
+rdmd --compiler=dmd_msc.exe -w -g -L/SUBSYSTEM:WINDOWS:5.01 %versions% -unittest -I%srcDir% %import_libs% -of%binPath%\%FileName%.exe %SourceFile%

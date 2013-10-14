@@ -4,7 +4,7 @@
  *     (See accompanying file LICENSE_1_0.txt or copy at
  *           http://www.boost.org/LICENSE_1_0.txt)
  */
-module dtk.widgets.panedwindow;
+module dtk.widgets.pane;
 
 import dtk.geometry;
 import dtk.imports;
@@ -15,13 +15,13 @@ import dtk.utils;
 import dtk.widgets.widget;
 
 ///
-class PanedWindow : Widget
+class Pane : Widget
 {
     ///
     this(Widget parent, Angle angle)
     {
         string extraOpts = format("-orient %s", to!string(angle));
-        super(parent, TkType.panedwindow, WidgetType.panedwindow, extraOpts);
+        super(parent, TkType.panedwindow, WidgetType.pane, extraOpts);
     }
 
     /**
