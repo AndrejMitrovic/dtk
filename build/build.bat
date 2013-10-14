@@ -45,14 +45,14 @@ rem Only use this during DTK development.
 rem
 set build_flags=-unittest
 
-set compiler=dmd.exe
-rem set compiler=dmd_msc.exe
+rem set compiler=dmd.exe
+set compiler=dmd_msc.exe
 rem set compiler=ldmd2.exe
 
 set main_file=dtk\package.d
 rem set main_file=dtk\all.d
 
-set cmd_build_tests=rdmd --build-only -w -of%binPath%\dtk_test.exe --main -L/SUBSYSTEM:WINDOWS:5.01 -unittest -g --compiler=%compiler% %flags% %main_file%
+set cmd_build_tests=rdmd --force --build-only -w -of%binPath%\dtk_test.exe --main -L/SUBSYSTEM:WINDOWS:5.01 -unittest -g --compiler=%compiler% %flags% %main_file%
 
 set stdout_log=%buildPath%\dtktest_stdout.log
 set stderr_log=%buildPath%\dtktest_stderr.log
@@ -64,13 +64,13 @@ if [%build_tests%]==[] goto :BUILD
 
 :TEST
 
-%cmd_build_tests%
+timeit %cmd_build_tests%
 if errorlevel 1 GOTO :ERROR
 if [%run_tests%]==[] echo Success: dtk tests built.
 
 if [%run_tests%]==[] goto :BUILD
 
-%binPath%\dtk_test.exe
+rem %binPath%\dtk_test.exe
 if errorlevel 1 GOTO :ERROR
 
 type %stdout_log%

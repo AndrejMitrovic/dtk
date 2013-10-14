@@ -22,8 +22,8 @@ set import_libs=comctl32.lib ole32.lib uuid.lib
 rem Note: -w removed due to msgpack warnings, see https://github.com/msgpack/msgpack-d/issues/15
 set flags=%includes% %versions% %import_libs% -g -unittest
 
-set compiler=dmd.exe
-rem set compiler=dmd_msc.exe
+rem set compiler=dmd.exe
+set compiler=dmd_msc.exe
 rem set compiler=ldmd2.exe
 
 set main_file=designer\main.d
