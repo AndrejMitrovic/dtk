@@ -2130,7 +2130,12 @@ struct Unpacker
             return unpackNil(object);
 
         if (object is null)
-            object = new T(args);
+        {
+            static if (is(typeof( new T(args) )))
+                object = new T(args);
+            else
+                assert(0, "Don't know how to construct class type '" ~ Unqual!T.stringof ~ "' with argument types '" ~ Args.stringof ~ "'.");
+        }
 
         static if (hasMember!(T, "fromMsgpack"))
         {

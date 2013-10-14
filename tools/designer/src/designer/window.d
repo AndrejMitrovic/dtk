@@ -11,8 +11,6 @@ import std.path;
 import std.stdio;
 import std.string;
 
-import msgpack;
-
 import dtk;
 
 import designer.settings;
@@ -22,49 +20,33 @@ class DesignerWindow
     this(Window window)
     {
         _window = window;
-        _settings = new Settings();
-        _settingsFile = format(r"%s\%s", thisExePath.dirName, "designer.dat");
 
-        _window.onDestroyEvent ~= &this.onClose;
-        this.onLoad();
+        string settingsFile = format(r"%s\%s", thisExePath.dirName, "designer.dat");
+        _settings = new Settings(settingsFile);
+
+        _window.onDestroyEvent ~= &release;
+        initialize();
     }
 
-    private void onLoad()
+    private void initialize()
     {
-        this.loadSettings();
+        _settings.load();
         _window.geometry = _settings.mainWindowRect;
     }
 
     /**
-        When the window is closed:
+        Called after the window is closed.
 
         - Save the window geometry to disk so its loaded in the
         same position when the app is started again.
     */
-    private void onClose()
+    private void release()
     {
         _settings.mainWindowRect = _window.geometry;
-        stderr.writefln("Window geometry: %s.", _settings.mainWindowRect);
-        this.saveSettings();
-    }
-
-    private void loadSettings()
-    {
-        if (_settingsFile.exists)
-        {
-            ubyte[] data = cast(ubyte[])read(_settingsFile);
-            msgpack.unpack(data, _settings);
-        }
-    }
-
-    private void saveSettings()
-    {
-        ubyte[] data = msgpack.pack(_settings);
-        std.file.write(_settingsFile, data);
+        _settings.save();
     }
 
 private:
     Window _window;
     Settings _settings;
-    const(string) _settingsFile;
 }
