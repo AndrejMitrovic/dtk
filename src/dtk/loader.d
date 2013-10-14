@@ -19,7 +19,6 @@ string[dchar] _tclTransTable;
 
 version (Windows)
 {
-    import core.runtime;
     import dtk.platform.win32.defs;
     import dtk.platform.win32.dragdrop;
 

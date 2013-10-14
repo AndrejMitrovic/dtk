@@ -6,22 +6,12 @@
  */
 module dtk.platform.win32.dragdrop;
 
-import core.atomic;
-import core.memory;
-import core.time;
-
-import std.exception;
-import std.stdio;
-import std.range;
-import std.traits;
-import std.typecons;
-import std.variant;
-
 import dtk.app;
 import dtk.dispatch;
 import dtk.dragdrop;
 import dtk.event;
 import dtk.geometry;
+import dtk.imports;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;

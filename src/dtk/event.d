@@ -157,9 +157,8 @@ class Event
         The returned type is a $(D core.time.Duration) type.
         The time is relative to when the system started.
     */
-    @property auto time()()
+    @property Duration time()
     {
-        import core.time;
         return timeMsec.dur!"msecs";
     }
 

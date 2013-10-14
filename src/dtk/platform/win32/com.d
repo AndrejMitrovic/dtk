@@ -6,10 +6,7 @@
  */
 module dtk.platform.win32.com;
 
-import core.atomic;
-import core.memory;
-import core.stdc.string;
-
+import dtk.imports;
 import dtk.utils;
 
 import dtk.platform.win32.defs;

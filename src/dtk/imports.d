@@ -7,14 +7,29 @@
 module dtk.imports;
 
 /** Druntime imports. */
+public import core.atomic
+    : atomicOp;
+
 public import core.exception
     : AssertError;
+
+public import core.memory
+    : GC;
+
+public import core.runtime
+    : Runtime;
+
+public import core.time
+    : dur, Duration, TickDuration;
 
 public import core.thread
     : Thread;
 
 public import core.stdc.config
     : c_long, c_ulong;
+
+public import core.stdc.string
+    : memcpy;
 
 /** Phobos imports. */
 public import std.algorithm
@@ -31,7 +46,7 @@ public import std.conv
     : phobosTo = to, ConvException, text;
 
 public import std.datetime
-    : Duration, TickDuration, StopWatch, AutoStart, seconds, msecs;
+    : StopWatch, AutoStart, seconds, msecs;
 
 public import std.exception
     : assertThrown, enforce;
@@ -58,7 +73,7 @@ public import std.traits
     : isArray, isSomeString, FieldTypeTuple, functionAttributes, FunctionAttribute,
       ParameterStorageClass, ParameterStorageClassTuple, ReturnType, pointerTarget,
       isPointer, isSomeFunction, isDelegate, isFunctionPointer, ParameterTypeTuple,
-      Unqual, isSomeChar, isStaticArray;
+      Unqual, isSomeChar, isStaticArray, EnumMembers;
 
 public import std.typecons
     : scoped;
