@@ -87,6 +87,10 @@ grid columnconfigure .selector.proj_frame_1 1 -weight 1
 
 # Inspector frame
 set inspector [ttk::frame $right_pane.inspector_frame]
+
+ttk::style configure WhiteFrame.TFrame -background white
+$inspector configure -style WhiteFrame.TFrame
+
 grid $inspector -row 0 -column 2 -sticky nsew
 $inspector configure -borderwidth 10 -width 150
 

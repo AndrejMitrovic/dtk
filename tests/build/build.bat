@@ -9,7 +9,7 @@ cd %thisPath%\..
 
 set import_libs=comctl32.lib ole32.lib uuid.lib
 
-rem set versions=-version=DTK_LOG_EVAL
+set versions=-version=DTK_LOG_EVAL
 rem set versions=-version=DTK_LOG_EVENTS
 rem set versions=-version=DTK_LOG_COM
 

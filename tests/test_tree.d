@@ -172,8 +172,8 @@ unittest
     tree.column.text = "Root tree";
     assert(tree.column.text == "Root tree");
 
-    tree.column.anchor = Anchor.east;
-    assert(tree.column.anchor == Anchor.east);
+    tree.column.anchor = Anchor.e;
+    assert(tree.column.anchor == Anchor.e);
 
     tree.column.minWidth = 100;
     assert(tree.column.minWidth == 100);
