@@ -38,7 +38,9 @@ public import std.algorithm
       chompPrefix;
 
 public import std.array
-    : Appender, array, replace, empty, split;
+    : Appender, array, replace, empty, split,
+      // Issue 11701 workaround: https://d.puremagic.com/issues/show_bug.cgi?id=11701
+      arr_splitter = splitter;
 
 public import std.ascii
     : isDigit;

@@ -271,7 +271,7 @@ class Window : Widget
     @property auto walkChildWidgets()
     {
         string paths = tclEvalFmt("winfo children %s", _name);
-        return map!(a => Widget.lookupWidgetPath(a))(paths.splitter);
+        return map!(a => Widget.lookupWidgetPath(a))(paths.arr_splitter);
     }
 
     /** Return the parent window of this window, or $(D null) if this window is the main window. */

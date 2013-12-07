@@ -3,7 +3,7 @@ setlocal EnableDelayedExpansion
 
 set thisPath=%~dp0
 set dtkRoot=%thisPath%\..\..
-set binPath=%thisPath%\..\bin
+set bin_path=%thisPath%\..\bin
 set srcDir=%dtkRoot%\src
 cd %thisPath%\..
 
@@ -26,4 +26,4 @@ goto :eof
 set FileName=%1
 set SourceFile=%2
 
-rdmd --compiler=dmd_msc.exe -w -g -L/SUBSYSTEM:WINDOWS:5.01 %versions% -unittest -I%srcDir% %import_libs% -of%binPath%\%FileName%.exe %SourceFile%
+rdmd --compiler=dmd_msc.exe -w -g -L/SUBSYSTEM:WINDOWS:5.01 %versions% -unittest -I%srcDir% %import_libs% -of%bin_path%\%FileName%.exe %SourceFile%

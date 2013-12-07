@@ -11,4 +11,6 @@ puts "current value is [.name get]"
 .name insert 0 "your name"   ; # insert new text at a given index
 
 # Use password-style characters
-.name configure -show *
+#~ .name configure -show *
+focus .name
+.name selection range 2 5
