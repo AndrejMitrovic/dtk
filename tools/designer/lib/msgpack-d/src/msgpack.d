@@ -314,7 +314,7 @@ struct nonPacked {}
 
 template isPackedField(alias field)
 {
-    enum isPackedField = staticIndexOf!(nonPacked, __traits(getAttributes, field)) == -1;
+    enum isPackedField = (staticIndexOf!(nonPacked, __traits(getAttributes, field)) == -1) && (!isSomeFunction!(typeof(field)));
 }
 
 
@@ -824,14 +824,14 @@ struct Packer(Stream) if (isOutputRange!(Stream, ubyte) && isOutputRange!(Stream
                 Class obj = cast(Class)object;
                 if (withFieldName_) {
                     foreach (i, f ; obj.tupleof) {
-                        if (isPackedField!(Class.tupleof[i])) {
+                        static if (isPackedField!(Class.tupleof[i])) {
                             pack(getFieldName!(Class, i));
                             pack(f);
                         }
                     }
                 } else {
                     foreach (i, f ; obj.tupleof) {
-                        if (isPackedField!(Class.tupleof[i]))
+                        static if (isPackedField!(Class.tupleof[i]))
                             pack(f);
                     }
                 }
@@ -867,14 +867,15 @@ struct Packer(Stream) if (isOutputRange!(Stream, ubyte) && isOutputRange!(Stream
 
             if (withFieldName_) {
                 foreach (i, f; object.tupleof) {
-                    if (isPackedField!(T.tupleof[i])) {
+                    static if (isPackedField!(T.tupleof[i]))
+                    {
                         pack(getFieldName!(T, i));
                         pack(f);
                     }
                 }
             } else {
                 foreach (i, f; object.tupleof) {
-                    if (isPackedField!(T.tupleof[i]))
+                    static if (isPackedField!(T.tupleof[i]))
                         pack(f);
                 }
             }
@@ -1332,7 +1333,14 @@ unittest
                 uint num = uint.max;
             }
 
-            foreach (Type; TypeTuple!(Simple, SimpleWithNonPacked1, SimpleWithNonPacked2)) {
+            static struct SimpleWithSkippedTypes
+            {
+                int function(int) fn;
+                int delegate(int) dg;
+                uint num = uint.max;
+            }
+
+            foreach (Type; TypeTuple!(Simple, SimpleWithNonPacked1, SimpleWithNonPacked2, SimpleWithSkippedTypes)) {
                 mixin DefinePacker;
 
                 Type test;
@@ -1371,8 +1379,15 @@ unittest
             uint num = uint.max;
         }
 
+        static class SimpleCWithSkippedTypes : SimpleB
+        {
+            uint num = uint.max;
+            int function(int) fn;
+            int delegate(int) dg;
+        }
+
         {  // from derived class
-            foreach (Type; TypeTuple!(SimpleC, SimpleCWithNonPacked1, SimpleCWithNonPacked2)) {
+            foreach (Type; TypeTuple!(SimpleC, SimpleCWithNonPacked1, SimpleCWithNonPacked2, SimpleCWithSkippedTypes)) {
                 mixin DefinePacker;
 
                 Type test = new Type();
@@ -1670,6 +1685,8 @@ struct Unpacker
 
     mixin InternalBuffer;
 
+    bool withFieldName_;
+
 
   public:
     /**
@@ -1679,9 +1696,10 @@ struct Unpacker
      *  target     = byte buffer to deserialize
      *  bufferSize = size limit of buffer size
      */
-    this(in ubyte[] target, in size_t bufferSize = 8192)
+    this(in ubyte[] target, in size_t bufferSize = 8192, bool withFieldName = false)
     {
         initializeBuffer(target, bufferSize);
+        withFieldName_ = withFieldName;
     }
 
 
@@ -2129,17 +2147,19 @@ struct Unpacker
         if (checkNil())
             return unpackNil(object);
 
-        if (object is null)
-        {
-            static if (is(typeof( new T(args) )))
+        if (object is null) {
+            //static if (is(typeof(new T(args))))
+            static if (__traits(compiles, { new T(args); }))
                 object = new T(args);
             else
-                assert(0, "Don't know how to construct class type '" ~ Unqual!T.stringof ~ "' with argument types '" ~ Args.stringof ~ "'.");
+                throw new MessagePackException("Don't know how to construct class type '" ~ Unqual!T.stringof ~ "' with argument types '" ~ Args.stringof ~ "'.");
         }
 
         static if (hasMember!(T, "fromMsgpack"))
         {
-            static if (__traits(compiles, { T t; t.fromMsgpack(this); })) {
+            static if (__traits(compiles, { T t; t.fromMsgpack(this, withFieldName_); })) {
+              object.fromMsgpack(this, withFieldName_);
+            } else static if (__traits(compiles, { T t; t.fromMsgpack(this); })) { // backward compatible
                 object.fromMsgpack(this);
             } else {
                 static assert(0, "Failed to invoke 'fromMsgpack' on type '" ~ Unqual!T.stringof ~ "'");
@@ -2152,18 +2172,44 @@ struct Unpacker
 
             alias SerializingClasses!(T) Classes;
 
-            auto length = beginArray();
+            size_t length = withFieldName_ ? beginMap() : beginArray();
             if (length == 0)
                 return this;
 
             if (length != SerializingMemberNumbers!(Classes))
                 rollback(calculateSize(length));
 
-            foreach (Class; Classes) {
-                Class obj = cast(Class)object;
-                foreach (i, member; obj.tupleof) {
-                    if (isPackedField!(Class.tupleof[i]))
-                        unpack(obj.tupleof[i]);
+            if (withFieldName_) {
+                foreach (_; 0..length) {
+                    string fieldName;
+                    unpack(fieldName);
+
+                    foreach (Class; Classes) {
+                        Class obj = cast(Class)object;
+
+                        foreach (i, member; obj.tupleof) {
+                            static if (isPackedField!(Class.tupleof[i]))
+                            {
+                                if (fieldName == getFieldName!(Class, i)) {
+                                    unpack(obj.tupleof[i]);
+                                    goto endLoop;
+                                }
+                            }
+                        }
+                    }
+                    assert(false, "Invalid field name: '" ~ fieldName~"' ");
+
+                endLoop:
+                    continue;
+                }
+            } else {
+                foreach (Class; Classes) {
+                    Class obj = cast(Class)object;
+
+                    foreach (i, member; obj.tupleof) {
+                        static if (isPackedField!(Class.tupleof[i]))
+                            unpack(obj.tupleof[i]);
+                    }
                 }
             }
         }
@@ -2199,7 +2245,7 @@ struct Unpacker
                     rollback(calculateSize(length));
 
                 foreach (i, member; object.tupleof) {
-                    if (isPackedField!(T.tupleof[i]))
+                    static if (isPackedField!(T.tupleof[i]))
                         unpack(object.tupleof[i]);
                 }
             }
@@ -2732,6 +2778,25 @@ unittest
                 assert(false);
             } catch (Exception e) { }
         }
+        { // https://github.com/msgpack/msgpack-d/issues/16
+            static class Issue16
+            {
+                int i;
+                this(int i) { this.i = i; }
+            }
+
+            Issue16 c1 = new Issue16(10);
+
+            try {
+                Issue16 c2 = null;
+                unpack(pack(c1), c2);
+                assert(false);
+            } catch (Exception e) {}
+
+            Issue16 c3 = new Issue16(20);
+            unpack(pack(c1), c3);
+            assert(c3.i == c1.i);
+        }
     }
     { // variadic
         mixin DefinePacker;
@@ -3064,7 +3129,7 @@ struct Value
             foreach (Class; Classes) {
                 Class obj = cast(Class)object;
                 foreach (i, member; obj.tupleof) {
-                    if (isPackedField!(Class.tupleof[i]))
+                    static if (isPackedField!(Class.tupleof[i]))
                         obj.tupleof[i] = via.array[offset++].as!(typeof(member));
                 }
             }
@@ -3100,7 +3165,7 @@ struct Value
 
                 size_t offset;
                 foreach (i, member; obj.tupleof) {
-                    if (isPackedField!(T.tupleof[i]))
+                    static if (isPackedField!(T.tupleof[i]))
                         obj.tupleof[i] = via.array[offset++].as!(typeof(member));
                 }
             }
@@ -3758,6 +3823,7 @@ struct StreamingUnpacker
 
         bool   ret;
         size_t cur = offset_;
+        size_t base;
         Value obj;
 
         // restores before state
@@ -3765,6 +3831,7 @@ struct StreamingUnpacker
         auto trail =  context_.trail;
         auto top   =  context_.top;
         auto stack = &context_.stack;
+        typeof(&(*stack)[0]) container;
 
         /*
          * Helper for container deserialization
@@ -3862,7 +3929,7 @@ struct StreamingUnpacker
                 if (used_ - cur < trail)
                     goto Labort;
 
-                const base = cur; cur += trail - 1;  // fix current position
+                base = cur; cur += trail - 1;  // fix current position
 
                 final switch (state) {
                 case State.FLOAT:
@@ -3983,7 +4050,7 @@ struct StreamingUnpacker
             if (top == 0)
                 goto Lfinish;
 
-            auto container = &(*stack)[top - 1];
+            container = &(*stack)[top - 1];
 
             final switch (container.type) {
             case ContainerElement.ARRAY_ITEM:
@@ -4337,9 +4404,9 @@ Unpacked unpack(Tdummy = void)(in ubyte[] buffer)
  *  buffer = the buffer to deserialize.
  *  args   = the references of values to assign.
  */
-void unpack(Args...)(in ubyte[] buffer, ref Args args)
+void unpack(bool withFieldName = false, Args...)(in ubyte[] buffer, ref Args args)
 {
-    auto unpacker = Unpacker(buffer);
+    auto unpacker = Unpacker(buffer, 8192, withFieldName);
 
     static if (Args.length == 1)
         unpacker.unpack(args[0]);
@@ -4366,6 +4433,20 @@ unittest
         test.field[1] = "Hey!";
         unpack(pack(test.field[0], test.field[1]), result.field[0], result.field[1]);
         assert(result == test);
+    }
+    { // serialize object as a Map
+        static class C
+        {
+            int num;
+
+            this(int num) { this.num = num; }
+        }
+
+        auto test = new C(10);
+        auto result = new C(100);
+
+        unpack!(true)(pack!(true)(test), result);
+        assert(result.num == 10, "Unpacking with field names failed");
     }
 }
 

@@ -13,7 +13,6 @@ import dtk.utils;
 
 import dtk.widgets.widget;
 
-// todo: this should be moved to a layout module
 void pack(Widget widget)
 {
     tclEvalFmt("pack %s", widget._name);
