@@ -45,8 +45,8 @@ void add(Hash, Key)(ref Hash hash, Key key)
 */
 struct TestMods
 {
-    bool empty;     // special case when no mods were set
-    bool matchAll;  // special case when argument is '*'
+    bool empty = true;      // special case when no mods were set
+    bool matchAll = false;  // special case when argument is '*'
 
     this(string[] mods)
     {
@@ -175,8 +175,8 @@ private:
             {
                 stderr.writeln();
                 stderr.writeln(e);
-                //~ string path = format("\n%s%s%s", absPath("."), dirSep, e.file).normPath;
-                //~ e.msg = format("%s(%s) : %s", path, e.line, e.msg);
+                //~ /+ string path = format("\n%s%s%s", absPath("."), dirSep, e.file).normPath;
+                //~ e.msg = format("%s(%s) : %s", path, e.line, e.msg); +/
                 failCount++;
                 throw e;
             }

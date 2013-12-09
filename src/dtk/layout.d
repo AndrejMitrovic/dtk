@@ -250,6 +250,7 @@ private:
     Widget _widget;
 }
 
+/** Options struct used for both columns and rows. */
 struct ColRowOptions
 {
     @property int minSize()
