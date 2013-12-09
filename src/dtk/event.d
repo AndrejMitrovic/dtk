@@ -18,8 +18,8 @@ import dtk.platform;
 import dtk.widgets;
 
 /**
-    All the possible event types. If the event is a custom user event type,
-    the event type will equal to EventType.user.
+    All the possible event types. If the event is a custom user event type
+    the event type will be EventType.user.
 */
 enum EventType
 {
@@ -49,14 +49,10 @@ enum EventType
     */
     geometry,
 
-    /**
-        The mouse moved in or out of the area of a target widget.
-    */
+    /** The mouse moved in or out of the area of a target widget. */
     hover,
 
-    /**
-        The widget was focused in or focused out.
-    */
+    /** The widget was focused in or out. */
     focus,
 
     /** A widget is about to be destroyed. */
@@ -83,7 +79,7 @@ enum EventType
     /** Text in an entry widget was changed. */
     entry,
 
-    /** Validation event when widget needs to validate some text. */
+    /** Validation event when a widget needs to validate some text. */
     validate,
 
     /** One or more items in a listbox widget were selected. */
@@ -137,8 +133,6 @@ class Event
     /**
         This base class constructor is only called for user-derived events.
         It ensures the event type is initialized as a user event.
-
-        It can optionally take a user event type tag.
     */
     this(Widget targetWidget, TimeMsec timeMsec = 0)
     {
@@ -156,6 +150,8 @@ class Event
         Get the timestamp when the event occured.
         The returned type is a $(D core.time.Duration) type.
         The time is relative to when the system started.
+
+        See also: $(D timeMsec) to get the number of milliseconds.
     */
     @property Duration time()
     {
@@ -165,7 +161,8 @@ class Event
     /**
         The timestamp in milliseconds when the event occurred.
         The time is relative to when the system started.
-        Use $(D time) to get a $(D Duration) type.
+
+        See also: $(D time) to get a $(D Duration) type.
     */
     public const(TimeMsec) timeMsec;
 
@@ -176,15 +173,13 @@ class Event
     public const(EventType) type;
 
     /**
-        Event handlers can set this field to true to  stop the event propagation mechanism.
+        Event handlers can set this field to true to stop the event propagation mechanism.
         An event which is currently sinking or bubbling will stop traveling,
         and other event handlers will not be invoked for this event.
     */
     public bool handled = false;
 
-    /**
-        Get the target widget of this event.
-    */
+    /** Get the target widget of this event. */
     @property Widget widget()
     {
         return _targetWidget;
@@ -200,7 +195,7 @@ class Event
     void toString(scope void delegate(const(char)[]) sink) { }
 
     /**
-        Derived classes should call $(D toStringImpl(sink, this.tupleof) )
+        Derived classes should call $(D toStringImpl(sink, this.tupleof))
         in their $(D toString) implementation.
     */
     protected final void toStringImpl(T...)(scope void delegate(const(char)[]) sink, T args)
@@ -224,8 +219,8 @@ package:
 
     /**
         The target widget for the event. Note that this isn't a const public field, since
-        we want to allow modification to the widget, but disallow modification to the
-        event object itself. Hence the property getter above.
+        we want to allow modification to the widget but disallow modification to the
+        event object itself. Use the $(D widget) property above.
     */
     Widget _targetWidget;
 
@@ -242,11 +237,11 @@ private enum AnyModifier = 1 << 15;
     Examples:
         - When the 'a' key is pressed, the shift keyboard modifier might be present.
         - When the left mouse button is pressed, the right mouse button might already
-          be held down, in that case the right mouse button is the button modifier.
+          be held down, in which case the right mouse button is the button modifier.
 
     Use the equality operator ($(D ==)) to explicitly check for modifier keys.
     It will return true only if the specified set of key modifiers is present
-    and no additional modifiers are present.
+    and $(B no additional) modifiers are present.
 
     Use the $(D isDown) method to check for modifier keys without caring whether
     there are any other additional modifiers present.
@@ -254,27 +249,28 @@ private enum AnyModifier = 1 << 15;
     The binary $(D AND) operator ($(D &)) is a convenience that calls $(D isDown).
 
     Use the $(D isAnyDown) method to check multiple modifier key combinations.
-    If any of them match, the method returns true.
+    If any of them match, this method returns true.
 
     Example:
     -----
-    // test if only the ctrl key is held down (other modifiers may not be present)
+    // test if only the ctrl key is held down (other modifiers may _not_ be present)
     event.keyMod == KeyMod.ctrl;
 
-    // test whether the control key was held (other modifiers can be present)
+    // test whether the control key was held (other modifiers _can_ be present)
     event.keyMod.isDown(KeyMod.ctrl);
 
     // ditto
     event.keyMod & KeyMod.ctrl;
 
-    // test whether both the control and alt key were held
-    // note: this will not return true if only the ctrl or alt key were held.
+    // test whether both the control and alt key were held.
+    // note: this will not return true if only the ctrl key
+    // or only the alt key is held.
     event.keyMod.isDown(KeyMod.ctrl + KeyMod.alt);
 
     // ditto
     event.keyMod & (KeyMod.ctrl + KeyMod.alt);
 
-    // can use binary operators + and - to add or remove modifiers
+    // use binary assignment operators += and -= to add or remove modifiers
     KeyMod keys;
     keys += KeyMod.ctrl;
     keys += KeyMod.alt;
@@ -286,7 +282,7 @@ private enum AnyModifier = 1 << 15;
     // ditto
     event.keyMod & keys;
 
-    // test ctrl + alt
+    // test only ctrl + alt
     event.keyMod.isDown(keys - KeyMod.mouse_left);
 
     // ditto
@@ -297,7 +293,8 @@ private enum AnyModifier = 1 << 15;
     event.keyMod.isAnyDown(KeyMod.ctrl, KeyMod.ctrl + KeyMod.alt);
 
     // Note: The above is different to the following check.
-    // The following will not return true if only ctrl or only alt is held down.
+    // The following will not return true if only the ctrl key or
+    // only the alt key is held down.
     event.keyMod.isDown(KeyMod.ctrl + KeyMod.alt);
 
     // ditto
@@ -306,8 +303,8 @@ private enum AnyModifier = 1 << 15;
     // ditto
     event.keyMod & KeyMod.ctrl || event.keyMod & (KeyMod.ctrl + KeyMod.alt);
 
-    // explicitly check whether whether either ctrl or ctrl+alt is held down.
-    // (other modifiers may not be present)
+    // explicitly check whether whether either ctrl or ctrl+alt are held down.
+    // (other modifiers may _not_ be present)
     event.keyMod == KeyMod.ctrl || event.keyMod == KeyMod.ctrl + KeyMod.alt;
     -----
 */

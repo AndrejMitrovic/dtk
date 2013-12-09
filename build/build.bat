@@ -4,7 +4,7 @@ setlocal EnableDelayedExpansion
 rem Build options
 rem -------------
 set build_tests=1
-rem set run_tests=1
+set run_tests=1
 rem set build_lib=1
 
 set this_path=%~dp0

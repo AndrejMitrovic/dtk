@@ -34,7 +34,7 @@ struct DragData
     /**
         Construct the drag data with $(D data).
         $(D canMoveData) and $(D canCopyData) mark
-        whether the data can be moved or copied.
+        whether the data can be moved and/or copied.
     */
     this(DataType)(DataType data, CanMoveData canMoveData, CanCopyData canCopyData)
     {
