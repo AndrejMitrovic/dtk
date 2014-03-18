@@ -20,9 +20,12 @@ import dtk.widgets.widget;
 class Label : Widget
 {
     ///
-    this(Widget parent)
+    this(Widget parent, in char[] text = null)
     {
         super(parent, TkType.label, WidgetType.label);
+
+        if (text.length)
+            this.setOption("text", text);
     }
 
     /**

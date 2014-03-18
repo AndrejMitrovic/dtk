@@ -20,7 +20,7 @@ import dtk.widgets.widget;
 ///
 class Listbox : Widget
 {
-    // todo: could implelent a listbox with a ttk::treeview rather than tk::listbox
+    // todo: could implement a listbox with a ttk::treeview rather than tk::listbox
 
     ///
     this(Widget parent)

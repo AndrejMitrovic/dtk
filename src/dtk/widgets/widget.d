@@ -536,8 +536,8 @@ abstract class Widget
     /** Destroy this widget. */
     public void destroy()
     {
-        tclEvalFmt("destroy %s", _name);
         _isDestroyed = true;
+        tclEvalFmt("after idle [list destroy %s]", _name);
     }
 
     /** Get the underlying Tcl widget name. Used for debugging and eval calls. */
