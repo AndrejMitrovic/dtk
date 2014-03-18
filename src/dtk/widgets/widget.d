@@ -537,6 +537,8 @@ abstract class Widget
     public void destroy()
     {
         _isDestroyed = true;
+
+        // spawning a destroy event.
         tclEvalFmt("after idle [list destroy %s]", _name);
     }
 
