@@ -34,8 +34,7 @@ public import core.stdc.string
 /** Phobos imports. */
 public import std.algorithm
     : all, startsWith, endsWith, canFind, count, countUntil, find, map, splitter,
-      lastIndexOf, joiner, findSplitBefore, sort, min, walkLength, chomp, max,
-      chompPrefix;
+      joiner, findSplitBefore, sort, min, max;
 
 public import std.array
     : Appender, array, replace, empty, split,
@@ -68,13 +67,13 @@ public import std.path
 
 public import std.range
     : front, take, popFront, popFrontN, join, zip, isInputRange, ElementType,
-      ElementEncodingType, iota;
+      ElementEncodingType, iota, walkLength;
 
 public import std.stdio
     : stdout, stderr, writeln, writefln;
 
 public import std.string
-    : phobosFormat = format, toStringz, translate;
+    : chomp, chompPrefix, lastIndexOf, phobosFormat = format, toStringz, translate;
 
 public import std.traits
     : isArray, isSomeString, FieldTypeTuple, functionAttributes, FunctionAttribute,

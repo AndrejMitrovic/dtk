@@ -14,29 +14,44 @@ void main()
     auto app = new App;
 
     auto testWindow = app.mainWindow;
+    testWindow.position = Point(500, 400);
+    testWindow.size = Size(300, 300);
 
-    auto handler = (scope KeyboardEvent e)
+    testWindow.onKeyboardEvent ~= (scope KeyboardEvent e)
     {
         if (e.keySym == KeySym.Escape)
             testWindow.destroy();
     };
 
-    testWindow.onKeyboardEvent ~= handler;
-
     auto frame = new Frame(testWindow);
+    frame.borderStyle = BorderStyle.raised;
+    frame.borderWidth = 2;
 
     frame.grid.setRow(0).setCol(0);
 
-    //~ auto button1 = new Button(frame, "Ok");
-    //~ auto button2 = new Button(frame, "Cancel");
-    //~ auto button3 = new Button(frame, "Ignore");
+    //~ testWindow.grid.colOptions(0).weight = 1;
+    //~ testWindow.grid.rowOptions(0).weight = 1;
 
-    //~ tclEvalFmt("grid %s -row 0 -column 0", button1.getTclName());
-    //~ tclEvalFmt("grid %s -row 0 -column 1", button2.getTclName());
-    //~ tclEvalFmt("grid %s -row 0 -column 2", button3.getTclName());
+    frame.grid.anchor = Anchor.center;
+    frame.grid.sticky = Sticky.nsew;
 
-    auto label1 = new Label(frame, "Text 1");
+    string text = "First line.\nSecond line.";
+
+    auto label1 = new Label(frame, text);
     label1.grid.setRow(0).setCol(0);
+    label1.fgColor = RGB(255, 0, 0);
+
+    auto label2 = new Label(frame, text);
+    label2.grid.setRow(0).setCol(1);
+    label2.fgColor = RGB(255, 255, 0);
+
+    auto label3 = new Label(frame, text);
+    label3.grid.setRow(1).setCol(0);
+    label3.fgColor = RGB(0, 0, 255);
+
+    auto label4 = new Label(frame, text);
+    label4.grid.setRow(1).setCol(1);
+    label4.fgColor = RGB(0, 255, 64);
 
     //~ button1.onButtonEvent ~= ()
     //~ {

@@ -44,8 +44,8 @@ rem Only use this during DTK development.
 rem
 set build_flags=-unittest
 
-rem set compiler=dmd.exe
-set compiler=dmd_msc.exe
+set compiler=dmd.exe
+rem set compiler=dmd_msc.exe
 rem set compiler=ldmd2.exe
 
 set main_file=dtk\package.d
@@ -56,8 +56,8 @@ set cmd_build_tests=rdmd --force --build-only -w -of%bin_path%\dtk_test.exe --ma
 set stdout_log=%build_path%\dtktest_stdout.log
 set stderr_log=%build_path%\dtktest_stderr.log
 
-echo. > %stdout_log%
-echo. > %stderr_log%
+copy /y NUL %stdout_log% >NUL
+copy /y NUL %stderr_log% >NUL
 
 if [%build_tests%]==[] goto :BUILD
 
