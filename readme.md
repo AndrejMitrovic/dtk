@@ -20,7 +20,7 @@ dub --config=menus
 
 ## Building
 
-Run [dub] to build `dtk` as a static library:
+Run [dub] alone to build `dtk` as a static library:
 
 ```
 dub

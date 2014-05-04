@@ -28,7 +28,7 @@
             "targetName": "simple",
             "targetType": "executable",
             "sourceFiles": ["examples/simple.d"],
-            "sourceFiles-windows": ["lib/comctl32.lib", "lib/ole32.lib"],
+            "sourceFiles-windows": ["implib/comctl32.lib", "implib/ole32.lib"],
             "mainSourceFile": "examples/simple.d",
             "targetPath" : "bin"
         },
@@ -38,8 +38,19 @@
             "targetName": "buttons",
             "targetType": "executable",
             "sourceFiles": ["examples/buttons.d"],
-            "sourceFiles-windows": ["lib/comctl32.lib", "lib/ole32.lib"],
+            "sourceFiles-windows": ["implib/comctl32.lib", "implib/ole32.lib"],
             "mainSourceFile": "examples/buttons.d",
+            "targetPath" : "bin"
+        },
+
+
+        {
+            "name": "menus",
+            "targetName": "menus",
+            "targetType": "executable",
+            "sourceFiles": ["examples/menus.d"],
+            "sourceFiles-windows": ["implib/comctl32.lib", "implib/ole32.lib"],
+            "mainSourceFile": "examples/menus.d",
             "targetPath" : "bin"
         },
 
