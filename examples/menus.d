@@ -19,7 +19,7 @@ void main()
     window.title = "Menus example";
     window.size = Size(500, 200);
 
-    // The menu bar contains Menus such as File / Edit / Search, etc.
+    // The menu bar will contain Menus such as File / Edit / Help, etc.
     auto menuBar = window.createMenuBar();
 
     // We will display some text based on the menu actions here.
