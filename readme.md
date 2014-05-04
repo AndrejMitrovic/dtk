@@ -2,7 +2,7 @@
 
 This is a D wrapper of the Tcl/Tk graphics library. It's based on Tcl/Tk v8.6.0.0.
 
-**Note: The project is a work-in-progress.**
+**Note: This project is a work-in-progress.**
 
 Currently `dtk` has only been tested on Windows 7.
 
@@ -10,7 +10,7 @@ Homepage: https://github.com/AndrejMitrovic/dtk
 
 ## Examples
 
-Use [dub] to build and run any of the examples:
+Use [dub] to run any of the examples:
 
 ```
 dub --config=buttons
