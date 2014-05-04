@@ -14,6 +14,8 @@ Use [dub] to run any of the examples:
 
 ```
 dub --config=buttons
+
+dub --config=menus
 ```
 
 ## Building

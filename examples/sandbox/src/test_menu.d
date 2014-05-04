@@ -67,7 +67,7 @@ unittest
 
     menuBar.onMenuEvent ~= (scope MenuEvent e)
     {
-        stderr.writefln("Menu event: %s", e);
+        stderr.writefln("Menu event:\n%s", e);
     };
 
     app.run();
