@@ -15,7 +15,7 @@ import dtk.tests.globals;
 
 unittest
 {
-    auto testWindow = new Window(app.mainWindow, 200, 200);
+    /+ auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
     assert(testWindow.menubar is null);
@@ -138,5 +138,5 @@ unittest
     fileMenu.insertSeparator(7);
     fileMenu.insertItem(n_radioMenuGroup, 8);
 
-    app.testRun();
+    app.testRun(); +/
 }

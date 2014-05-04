@@ -288,6 +288,12 @@ class Window : Widget
         return cast(MenuBar)Widget.lookupWidgetPath(menubar);
     }
 
+    /** Set a menu bar for this window. */
+    @property void menubar(MenuBar newMenuBar)
+    {
+        this.setOption("menu", newMenuBar._name);
+    }
+
     /**
         Create the menu bar for this window, and return it.
     */

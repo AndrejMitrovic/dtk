@@ -36,7 +36,7 @@ rem     - Logs log/logf calls, for use with unittesting.
 
 set includes=-I%cd%
 set debug_versions=-version=DTK_UNITTEST -version=DTK_LOG_TESTS
-set import_libs=comctl32.lib ole32.lib uuid.lib
+set import_libs=%lib_path%\comctl32.lib %lib_path%\ole32.lib
 set flags=%includes% -g %debug_versions% %import_libs%
 
 rem Set this to enforce building with unittests even for the static library.

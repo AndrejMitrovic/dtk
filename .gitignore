@@ -13,6 +13,7 @@
 *.dat
 *.log
 *.lib
+!lib/*.lib
 *.dll
 *.exe
 *.map

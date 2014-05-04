@@ -232,9 +232,14 @@ enum RPC_E_CHANGED_MODE = 0x80010106;
 alias const(GUID) IID;
 alias const(GUID) CLSID;
 
-extern (C)
+export extern (C)
 {
-    extern IID IID_IUnknown;
+    const IID IID_IDropSource = {0x00000121, 0x0000, 0x0000, [0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46]};
+    const IID IID_IDataObject = {0x0000010E, 0x0000, 0x0000, [0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46]};
+    const IID IID_IDropTarget = {0x00000122, 0x0000, 0x0000, [0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46]};
+    const IID IID_IUnknown = {0x00000000, 0x0000, 0x0000, [0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46]};
+
+    //~ extern IID IID_IUnknown;
     extern IID IID_IClassFactory;
     extern IID IID_IMarshal;
     extern IID IID_IMallocSpy;
@@ -263,7 +268,7 @@ extern (C)
     extern IID IID_IRootStorage;
     extern IID IID_IAdviseSink;
     extern IID IID_IAdviseSink2;
-    extern IID IID_IDataObject;
+    //~ extern IID IID_IDataObject;
     extern IID IID_IDataAdviseHolder;
     extern IID IID_IMessageFilter;
     extern IID IID_IRpcChannelBuffer;
@@ -332,8 +337,8 @@ extern (C)
     extern IID IID_IContinue;
     extern IID IID_IViewObject;
     extern IID IID_IViewObject2;
-    extern IID IID_IDropSource;
-    extern IID IID_IDropTarget;
+    //~ extern IID IID_IDropSource;
+    //~ extern IID IID_IDropTarget;
     extern IID IID_IEnumOLEVERB;
 }
 

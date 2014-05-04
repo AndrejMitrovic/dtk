@@ -12,6 +12,8 @@ A previous porting attempt was lysevi's [dkinter](https://github.com/lysevi/dkin
 
 Currently `dtk` is only tested on Windows 7.
 
+Homepage: https://github.com/AndrejMitrovic/dtk
+
 ## Building
 
 Make sure you're using the latest compiler. Sometimes that even means using the latest git-head version
