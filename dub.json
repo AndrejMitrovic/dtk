@@ -1,0 +1,26 @@
+{
+	"name": "dtk",
+
+    "targetName": "dtk",
+
+    "description": "dtk is a D wrapper of the Tcl/Tk graphics library, based on Tcl/Tk v8.6.0.0",
+
+    "authors": [
+		"Tcl Core Team",
+		"Andrej Mitrovic"
+	],
+
+    "homepage": "https://github.com/AndrejMitrovic/dtk",
+
+    "copyright": "Copyright © 2013-2014, Andrej Mitrovic",
+
+    "license": "BSL-1.0",
+
+    "configurations": [
+		{
+			"name": "dtk",
+			"targetType": "staticLibrary",
+			"targetPath": "bin",
+		},
+	]
+}

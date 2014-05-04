@@ -2,8 +2,8 @@
 setlocal EnableDelayedExpansion
 
 set thisPath=%~dp0
-set dtkRoot=%thisPath%\..\..
-set bin_path=%thisPath%\..\bin
+set dtkRoot=%thisPath%\..\..\..
+set bin_path=%thisPath%\..\..\bin
 set srcDir=%dtkRoot%\src
 cd %thisPath%\..
 
