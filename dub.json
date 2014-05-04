@@ -6,7 +6,7 @@
     "description": "dtk is a D wrapper of the Tcl/Tk graphics library, based on Tcl/Tk v8.6.0.0",
 
     "authors": [
-		"Tcl Core Team",
+		"The Tcl/Tk Core Team",
 		"Andrej Mitrovic"
 	],
 
@@ -22,5 +22,27 @@
 			"targetType": "staticLibrary",
 			"targetPath": "bin",
 		},
+
+        {
+            "name": "simple",
+            "targetName": "simple",
+            "targetType": "executable",
+            "sourceFiles": ["examples/simple.d"],
+            "sourceFiles-windows": ["lib/comctl32.lib", "lib/ole32.lib"],
+            "mainSourceFile": "examples/simple.d",
+            "targetPath" : "bin"
+        },
+
+        {
+            "name": "buttons",
+            "targetName": "buttons",
+            "targetType": "executable",
+            "sourceFiles": ["examples/buttons.d"],
+            "sourceFiles-windows": ["lib/comctl32.lib", "lib/ole32.lib"],
+            "mainSourceFile": "examples/buttons.d",
+            "targetPath" : "bin"
+        },
+
+
 	]
 }
