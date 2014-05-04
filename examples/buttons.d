@@ -13,8 +13,9 @@ import dtk;
 void main()
 {
     auto app = new App();
-    auto window = app.mainWindow;
 
+    // Get the reference to the implicitly created main window.
+    auto window = app.mainWindow;
     window.title = "Buttons example";
     window.size = Size(180, 80);
 

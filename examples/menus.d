@@ -13,8 +13,9 @@ import dtk;
 void main()
 {
     auto app = new App();
-    auto window = app.mainWindow;
 
+    // Get the reference to the implicitly created main window.
+    auto window = app.mainWindow;
     window.title = "Menus example";
     window.size = Size(500, 200);
 
