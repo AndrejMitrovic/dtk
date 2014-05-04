@@ -16,7 +16,7 @@ void main()
     auto window = app.mainWindow;
 
     window.title = "Buttons example";
-    window.size = Size(180, 100);
+    window.size = Size(180, 80);
 
     auto blueButton = new Button(window, "blue");
     blueButton.pack();
@@ -27,7 +27,7 @@ void main()
     auto status = new Label(window, "Clicked button is shown here.");
     status.pack();
 
-    // a generic button event handler
+    // A generic button event handler.
     auto handler = (scope ButtonEvent event)
     {
         if (event.action == ButtonAction.push

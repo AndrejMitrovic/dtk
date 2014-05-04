@@ -18,10 +18,10 @@ dub --config=buttons
 
 ## Building
 
-Use [dub] to build `dtk` as a static library:
+Run [dub] to build `dtk` as a static library:
 
 ```
-dub --config=dtk
+dub
 ```
 
 ## Links
