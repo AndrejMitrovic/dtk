@@ -37,9 +37,9 @@ dub
 
 ## License
 
-Distributed under the Boost Software License, Version 1.0.
+Distributed under the [Boost Software License][BoostLicense], Version 1.0.
 
-See accompanying file **license.txt** or copy [here][BoostLicense].
+See the accompanying file [license.txt](https://raw.github.com/AndrejMitrovic/dtk/master/license.txt) or an online copy [here][BoostLicense].
 
 [BoostLicense]: http://www.boost.org/LICENSE_1_0.txt
 [dub]: http://code.dlang.org/download
