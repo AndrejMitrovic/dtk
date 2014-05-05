@@ -20,13 +20,13 @@ import dtk.utils;
 enum Compound
 {
     none,   /// Display the image if present, otherwise the text.
-    text,   /// Display text only.
+    text,   /// Display the text only.
     image,  /// Display the image only.
-    center, /// Display the text centered on top of the image.
-    top,    /// Display the text above of the text.
-    bottom, /// Display the text below of the text.
-    left,   /// Display the text to the left of the text.
-    right,  /// Display the text to the right of the text.
+    center, /// Position the image and the text centered.
+    top,    /// Position the image above the text.
+    bottom, /// Position the image below the text.
+    left,   /// Position the image to the left of the text.
+    right,  /// Position the image to the right of the text.
 }
 
 /**

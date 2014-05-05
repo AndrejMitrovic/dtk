@@ -347,6 +347,15 @@ private:
     Sizegrip _sizegrip;
 }
 
+/** Position the window to the center of the desktop. */
+void centerWindow(Window window)
+{
+    auto winSize = window.size;
+    auto scrSize = window.screenSize;
+    window.position = Point((scrSize.width - winSize.width) / 2,
+                            (scrSize.height - winSize.height) / 2);
+}
+
 private string toEvalString(Rect geometry)
 {
     string width = to!string(geometry.width);
@@ -358,7 +367,7 @@ private string toEvalString(Rect geometry)
     return format("%sx%s%s%s", width, height, xOffset, yOffset);
 }
 
-///
+//
 unittest
 {
     assert(Rect(88, -88, 200, 200).toEvalString == "200x200+88+-88");

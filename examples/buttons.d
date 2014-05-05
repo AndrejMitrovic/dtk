@@ -19,6 +19,9 @@ void main()
     window.title = "Buttons example";
     window.size = Size(180, 80);
 
+    // Position it in the center.
+    window.centerWindow();
+
     auto blueButton = new Button(window, "blue");
     blueButton.pack();
 

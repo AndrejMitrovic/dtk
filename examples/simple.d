@@ -17,6 +17,9 @@ void main()
     window.title = "Your DTK App";
     window.size = Size(180, 100);
 
+    // Position it in the center.
+    window.centerWindow();
+
     auto label = new Label(window, "Hello world!");
     label.pack();
 

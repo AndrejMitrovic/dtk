@@ -43,7 +43,6 @@
             "targetPath" : "bin"
         },
 
-
         {
             "name": "menus",
             "targetName": "menus",
@@ -54,6 +53,15 @@
             "targetPath" : "bin"
         },
 
+        {
+            "name": "images",
+            "targetName": "images",
+            "targetType": "executable",
+            "sourceFiles": ["examples/images.d"],
+            "sourceFiles-windows": ["implib/comctl32.lib", "implib/ole32.lib"],
+            "mainSourceFile": "examples/images.d",
+            "targetPath" : "bin"
+        },
 
 	]
 }

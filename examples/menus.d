@@ -19,6 +19,9 @@ void main()
     window.title = "Menus example";
     window.size = Size(500, 200);
 
+    // Position it in the center.
+    window.centerWindow();
+
     // The menu bar will contain Menus such as File / Edit / Help, etc.
     auto menuBar = window.createMenuBar();
 
