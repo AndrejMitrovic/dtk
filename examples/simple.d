@@ -23,5 +23,13 @@ void main()
     auto label = new Label(window, "Hello world!");
     label.pack();
 
+    // Destroy the window when Escape is hit.
+    window.onKeyboardEvent ~=
+        (scope KeyboardEvent event)
+        {
+            if (event.keySym == KeySym.Escape)
+                window.destroy();
+        };
+
     app.run();
 }

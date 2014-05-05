@@ -42,8 +42,17 @@ void main()
         }
     };
 
+    // Connect the event handler to both buttons.
     blueButton.onButtonEvent ~= handler;
     redButton.onButtonEvent ~= handler;
+
+    // Destroy the window when Escape is hit.
+    window.onKeyboardEvent ~=
+        (scope KeyboardEvent event)
+        {
+            if (event.keySym == KeySym.Escape)
+                window.destroy();
+        };
 
     app.run();
 }

@@ -98,5 +98,13 @@ void main()
                           RadioItem("UTF-16"),
                           RadioItem("UTF-32"));
 
+    // Destroy the window when Escape is hit.
+    window.onKeyboardEvent ~=
+        (scope KeyboardEvent event)
+        {
+            if (event.keySym == KeySym.Escape)
+                window.destroy();
+        };
+
     app.run();
 }

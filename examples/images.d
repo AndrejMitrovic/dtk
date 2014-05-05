@@ -45,12 +45,20 @@ void main()
     label.image = new Image("rss-icon.png".imagePath);
     label.text = "RSS Feed";
 
-    // Position the image above the text
+    // Position the image above the text.
     label.compound = Compound.top;
 
     // Position the button and the label next to each other in a grid.
     button.grid.setRow(0).setCol(0);
     label.grid.setRow(0).setCol(1);
+
+    // Destroy the window when Escape is hit.
+    window.onKeyboardEvent ~=
+        (scope KeyboardEvent event)
+        {
+            if (event.keySym == KeySym.Escape)
+                window.destroy();
+        };
 
     app.run();
 }

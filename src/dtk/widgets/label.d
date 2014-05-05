@@ -62,6 +62,9 @@ class Label : Widget
         this.setOption("background", newRGB.toString());
     }
 
+    /// Convenience alias.
+    alias backColor = bgColor;
+
     /**
         Reset the background color to the theme default background color.
         Note that calls to bgColor will return RGB(0, 0, 0) after this call.
@@ -70,6 +73,9 @@ class Label : Widget
     {
         this.setOption("background", "");
     }
+
+    /// Convenience alias.
+    alias backColorReset = bgColorReset;
 
     /**
         Get the current foreground color.
@@ -88,6 +94,9 @@ class Label : Widget
     {
         this.setOption("foreground", newRGB.toString());
     }
+
+    /// Convenience alias.
+    alias foreColor = fgColor;
 
     /**
         Reset the foreground color to the theme default foreground color.
