@@ -6,7 +6,18 @@
  */
 module images;
 
+import std.file : thisExePath;
+import std.path : buildPath, dirName;
+
 import dtk;
+
+/// Get the path to an image resource.
+@property string imagePath(string fileName)
+{
+    return thisExePath().dirName
+        .buildPath("../examples/images")
+        .buildPath(fileName);
+}
 
 void main()
 {
@@ -15,13 +26,13 @@ void main()
     // Get the reference to the implicitly created main window.
     auto window = app.mainWindow;
     window.title = "Images example";
-    window.size = Size(200, 80);
+    window.size = Size(150, 100);
 
     // Position it in the center.
     window.centerWindow();
 
     // Load an image.
-    auto image = new Image("images/mail-icon.png");
+    auto image = new Image("mail-icon.png".imagePath);
 
     // Create a button.
     auto button = new Button(window);
@@ -31,7 +42,7 @@ void main()
 
     // Create a label that combines an image with some text.
     auto label = new Label(window);
-    label.image = new Image("images/rss-icon.png");
+    label.image = new Image("rss-icon.png".imagePath);
     label.text = "RSS Feed";
 
     // Position the image above the text

@@ -15,7 +15,7 @@ Homepage: https://github.com/AndrejMitrovic/dtk
 Use [dub] to run any of the examples:
 
 ```
-# Also try: menus, images, and other samples found in the "examples" folder.
+# Also try: menus, images, and other samples found in the 'examples' folder.
 dub --config=buttons
 ```
 
