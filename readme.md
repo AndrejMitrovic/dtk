@@ -1,12 +1,14 @@
 # dtk
 
+![dtk](https://raw.github.com/AndrejMitrovic/rtaudiod/master/screenshots/work_in_progress.png)
+
+**Note: This project is a work-in-progress.**
+
 This is a D wrapper of the Tcl/Tk graphics library. It is based on Tcl/Tk v8.6.0.0.
 
 Currently `dtk` has only been tested on Windows 7.
 
 Homepage: https://github.com/AndrejMitrovic/dtk
-
-**Note: This project is a work-in-progress.**
 
 ## Examples
 
