@@ -32,8 +32,8 @@ void main()
     link.text = "www.dlang.org";
     link.cursor = Cursor.hand2;
 
-    // Open a link to dlang.org when the label is
-    // clicked, and change the link text color.
+    // Open a link to dlang.org when the label is clicked,
+    // and change the link text color.
     link.onMouseEvent ~=
         (scope MouseEvent event)
         {
@@ -45,8 +45,8 @@ void main()
         };
 
     // Lay out the two labels in a grid.
-    busy.grid.setRow(0).setCol(0);
-    link.grid.setRow(0).setCol(1);
+    busy.grid.setRow(0).setColumn(0);
+    link.grid.setRow(0).setColumn(1);
 
     // Destroy the window when Escape is hit.
     window.onKeyboardEvent ~=

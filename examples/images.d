@@ -49,8 +49,8 @@ void main()
     label.compound = Compound.top;
 
     // Position the button and the label next to each other in a grid.
-    button.grid.setRow(0).setCol(0);
-    label.grid.setRow(0).setCol(1);
+    button.grid.setRow(0).setColumn(0);
+    label.grid.setRow(0).setColumn(1);
 
     // Destroy the window when Escape is hit.
     window.onKeyboardEvent ~=

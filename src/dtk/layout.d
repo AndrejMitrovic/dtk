@@ -225,11 +225,17 @@ struct Grid
     /// ditto
     alias setCol = _chainerFunc!col;
 
+    /// convenience alias.
+    alias setColumn = setCol;
+
     /// ditto
     alias setRowSpan = _chainerFunc!rowSpan;
 
     /// ditto
     alias setColSpan = _chainerFunc!colSpan;
+
+    /// convenience alias.
+    alias setColumnSpan = setColSpan;
 
     /// ditto
     alias setInterPadX = _chainerFunc!interPadX;
