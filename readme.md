@@ -4,9 +4,10 @@
 
 This is a D wrapper of the Tcl/Tk graphics library. It is based on Tcl/Tk v8.6.0.0.
 
-Currently `dtk` has been tested on Windows 7 x64 and Linux Manjaro XFCE 0.8.9 x64.
+Currently `dtk` has been tested on **Windows 7 x64** and **Linux Manjaro XFCE 0.8.9 x64**.
 
 However, drag & drop has currently only been implemented on Windows.
+
 Drag & drop is not a built-in feature of Tk but is provided in the D wrapper.
 
 Homepage: https://github.com/AndrejMitrovic/dtk
