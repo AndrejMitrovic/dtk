@@ -4,9 +4,27 @@
 
 This is a D wrapper of the Tcl/Tk graphics library. It is based on Tcl/Tk v8.6.0.0.
 
-Currently `dtk` has only been tested on Windows 7.
+Currently `dtk` has been tested on Windows 7 x64 and Linux Manjaro XFCE 0.8.9 x64,
+however drag & drop has currently only been implemented on Windows
+Drag & drop is not a built-in feature of Tk but is provided in the D wrapper.
 
 Homepage: https://github.com/AndrejMitrovic/dtk
+
+## Requirements
+
+Before using `dtk` you will need to install the `Tcl` and `Tk` shared libraries,
+versioned `8.6.0.0` or newer.
+
+### Installing Tcl/Tk on Windows
+
+You can download and install the [ActiveTcl] distribution.
+
+You may need to log off in Windows and then log in again to update your `PATH`
+environment variable. Otherwise `dtk` will not find the `Tk` and `Tcl` DLLs.
+
+### Installing Tcl/Tk on Posix
+
+Use your package manager to install the `Tk` and `Tcl` shared libraries.
 
 ## Examples
 
@@ -46,3 +64,4 @@ See the accompanying file [license.txt](https://raw.github.com/AndrejMitrovic/dt
 
 [BoostLicense]: http://www.boost.org/LICENSE_1_0.txt
 [dub]: http://code.dlang.org/download
+[ActiveTcl]: http://www.activestate.com/activetcl
