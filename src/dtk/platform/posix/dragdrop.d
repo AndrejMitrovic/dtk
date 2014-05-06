@@ -6,6 +6,8 @@
  */
 module dtk.platform.posix.dragdrop;
 
+version (Posix):
+
 import dtk.app;
 import dtk.dispatch;
 import dtk.dragdrop;

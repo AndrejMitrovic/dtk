@@ -6,6 +6,8 @@
  */
 module dtk.platform.win32.defs;
 
+version (Windows):
+
 import dtk.imports;
 
 /**

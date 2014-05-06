@@ -6,6 +6,8 @@
  */
 module dtk.platform.win32.dragdrop;
 
+version (Windows):
+
 import dtk.app;
 import dtk.dispatch;
 import dtk.dragdrop;

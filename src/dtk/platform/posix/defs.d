@@ -6,4 +6,6 @@
  */
 module dtk.platform.posix.defs;
 
+version (Posix):
+
 alias HWND = void*;
