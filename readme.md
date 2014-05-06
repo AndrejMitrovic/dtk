@@ -14,14 +14,16 @@ Homepage: https://github.com/AndrejMitrovic/dtk
 ## Requirements
 
 Before using `dtk` you will need to install the `Tcl` and `Tk` shared libraries,
-versioned `8.6.0.0` or newer.
+versioned at `v8.6.0.0` or newer.
 
 ### Installing Tcl/Tk on Windows
 
 You can download and install the [ActiveTcl] distribution.
 
-You may need to log off in Windows and then log in again to update your `PATH`
-environment variable. Otherwise `dtk` will not find the `Tk` and `Tcl` DLLs.
+**Note:** You may need to log off in Windows and then log in again to update your `PATH`
+environment variable.
+
+Otherwise `dtk` will not find the `Tk` and `Tcl` DLLs.
 
 ### Installing Tcl/Tk on Posix
 
