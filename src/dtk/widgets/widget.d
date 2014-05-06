@@ -761,25 +761,35 @@ package:
     /** Register the widget to accept drag & drop operations. */
     private void _registerDragDrop()
     {
-        if (_dropTarget !is null)
-            return;
-
-        _winHandle = getWinHandle(this);
-
-        version (DTK_LOG_COM)
-            stderr.writefln("+ Registering d&d  : %X", _winHandle);
-
-        _dropTarget = createDropTarget(this);
-        scope (failure)
+        version (Windows)
         {
-            _dropTarget = null;
-            _winHandle = null;
+            if (_dropTarget !is null)
+                return;
+
+            _winHandle = getWinHandle(this);
+
+            version (DTK_LOG_COM)
+                stderr.writefln("+ Registering d&d  : %X", _winHandle);
+
+            _dropTarget = createDropTarget(this);
+            scope (failure)
+            {
+                _dropTarget = null;
+                _winHandle = null;
+            }
+
+            registerDragDrop(_winHandle, _dropTarget);
+
+            // widget must be unregistered before Tk's WinHandle (HWND on win32) becomes invalid.
+            _onAPIDestroyEvent ~= &_unregisterDragDrop;
         }
-
-        registerDragDrop(_winHandle, _dropTarget);
-
-        // widget must be unregistered before Tk's WinHandle (HWND on win32) becomes invalid.
-        _onAPIDestroyEvent ~= &_unregisterDragDrop;
+        else
+        version (Posix)
+        {
+            // todo: implement
+        }
+        else
+        static assert(0);
     }
 
     /** Unregister the widget from accepting drag & drop operations. */

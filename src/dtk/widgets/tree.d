@@ -148,7 +148,8 @@ class Tree : Widget
             "Cannot reattach tree because its parent tree was destroyed.");
 
         // todo: provide a better implementation
-        auto treeCount = tclEvalFmt("%s children %s", _name, _detachInfo.parentTree._treeID).splitter(" ").walkLength;
+        auto treeCount = to!int(tclEvalFmt("%s children %s", _name, _detachInfo.parentTree._treeID)
+                                           .splitter(" ").walkLength);
 
         // readjust index if it's out of bounds
         if (_detachInfo.index >= treeCount)
