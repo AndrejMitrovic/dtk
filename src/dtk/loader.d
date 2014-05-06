@@ -134,9 +134,9 @@ shared static ~this()
         OleUninitialize();
     }
 
-    freeLib(tclLib);
-    freeLib(tkLib);
-
     /** Release DTK classes. */
     Interpreter.releaseClass();
+
+    freeLib(tclLib);
+    freeLib(tkLib);
 }
