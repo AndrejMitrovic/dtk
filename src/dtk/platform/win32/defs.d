@@ -730,6 +730,7 @@ alias STGMEDIUM* LPSTGMEDIUM;
 
 extern(Windows) HMODULE LoadLibraryA(LPCSTR lpLibFileName);
 extern(Windows) HMODULE LoadLibraryW(LPCWSTR lpLibFileName);
+extern(Windows) BOOL FreeLibrary(HMODULE);
 extern(Windows) FARPROC GetProcAddress(HMODULE hModule, LPCSTR lpProcName);
 extern(Windows) BOOL GlobalUnlock(HGLOBAL hMem);
 
