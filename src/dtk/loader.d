@@ -39,8 +39,8 @@ version (Posix)
 
     alias LibHandle = void*;
 
-    enum tclDll = "tcl86.so";
-    enum tkDll = "tk86.so";
+    enum tclDll = "libtcl8.6.so";
+    enum tkDll = "libtk8.6.so";
 
     auto loadLib(string libName)
     {
