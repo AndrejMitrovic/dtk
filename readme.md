@@ -35,16 +35,20 @@ Use your package manager to install the `Tk` and `Tcl` shared libraries.
 Use [dub] to run any of the examples:
 
 ```
-# Also try: menus, images, and other samples found in the 'examples' folder.
-dub --config=buttons
+$ dub --config=buttons
+
+# Also try the configs: menus, images, and other examples found in the 'examples' folder.
 ```
 
-## Building
+## Building dtk as a static library
 
 Run [dub] alone to build `dtk` as a static library:
 
 ```
-dub
+$ dub
+
+# Alternatively:
+$ dub --config=dtk
 ```
 
 ## Documentation
