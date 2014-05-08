@@ -8,7 +8,7 @@ Currently `dtk` has been tested on **Windows 7 x64** and **Linux Manjaro XFCE 0.
 
 However, drag & drop has currently only been implemented on Windows.
 
-Drag & drop is not a built-in feature of Tk but is provided in the D wrapper.
+Drag & drop is not a built-in feature of Tk but is provided by the D wrapper.
 
 Homepage: https://github.com/AndrejMitrovic/dtk
 
@@ -35,7 +35,7 @@ Use your package manager to install the `Tk` and `Tcl` shared libraries.
 Use [dub] to run any of the examples:
 
 ```
-$ dub --config=buttons
+$ dub -c buttons
 
 # Also try the configs: menus, images, and other examples found in the 'examples' folder.
 ```
@@ -48,7 +48,7 @@ Run [dub] alone to build `dtk` as a static library:
 $ dub
 
 # Alternatively:
-$ dub --config=dtk
+$ dub -c dtk
 ```
 
 ## Documentation
