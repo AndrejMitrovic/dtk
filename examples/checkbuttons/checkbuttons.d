@@ -29,10 +29,6 @@ void main()
     button.onValue = "blue";
     button.offValue = "red";
 
-    // set the button to initially be in an indeterminate state.
-    button.unset();
-    assert(button.isUnset());
-
     // Create a label next to the button.
     auto label = new Label(window, "This label will display the state");
 

@@ -31,7 +31,7 @@ class CheckButton : Widget
             this.setOption("text", text);
 
         _toggleVarName = makeVar();
-        _setVar();
+        this.setOption("variable", _toggleVarName);
 
         this.toggleOff();
 
@@ -56,7 +56,6 @@ class CheckButton : Widget
     */
     void toggleOn()
     {
-        _verifyVarSet();
         tclEvalFmt("set %s %s", _toggleVarName, onValue()._tclEscape);
         this.callDtkCallback();
     }
@@ -67,12 +66,12 @@ class CheckButton : Widget
     */
     void toggleOff()
     {
-        _verifyVarSet();
         tclEvalFmt("set %s %s", _toggleVarName, offValue()._tclEscape);
         this.callDtkCallback();
     }
 
-    /**
+    // todo: not yet implemented
+    /+ /**
         Check whether the checkbutton is in an alternate indeterminate state.
     */
     bool isUnset()
@@ -86,14 +85,13 @@ class CheckButton : Widget
     void unset()
     {
         _unsetVar();
-    }
+    } +/
 
     /**
         Toggle the checkbutton.
     */
     void toggle()
     {
-        _verifyVarSet();
         tclEvalFmt("%s invoke", _name);  // callback is called automatically
     }
 
@@ -198,24 +196,6 @@ class CheckButton : Widget
     private void callDtkCallback()
     {
         tclEvalFmt("%s %s %s", _dtkCallbackIdent, EventType.check_button, _name);
-    }
-
-    /* Needs to be called before any other call to verify the variable is set. */
-    private void _verifyVarSet()
-    {
-        if (isUnset())
-            _setVar();
-    }
-
-    /* Needs to be called to remove the indeterminate mode. */
-    private void _setVar()
-    {
-        this.setOption("variable", _toggleVarName);
-    }
-
-    private void _unsetVar()
-    {
-        this.setOption("variable", "");
     }
 
 private:
