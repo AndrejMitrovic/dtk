@@ -21,8 +21,6 @@
 
     "mainSourceFile": "buttons.d",
 
-    "sourceFiles-windows": ["../../implib/comctl32.lib", "../../implib/ole32.lib"],
-
     "homepage": "https://github.com/AndrejMitrovic/dtk",
 
     "copyright": "Copyright © 2014, Andrej Mitrovic",

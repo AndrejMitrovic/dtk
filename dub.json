@@ -26,6 +26,8 @@
         "src"
     ],
 
+    "sourceFiles-windows": ["implib/comctl32.lib", "implib/ole32.lib"],
+
     "subPackages": [
         "examples/buttons",
         "examples/checkbuttons",
