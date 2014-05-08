@@ -1,17 +1,5 @@
 Todo:
 
-- font create, to create underlined fonts. Create a font module.
-
-- Speedup builds:
-    DMD:     12611 msecs
-    DMD_MSC:  7482 msecs
-
-- Removing main window:
-    TkCreateMainWindow
-    Tk_Init
-
-    We need to implement our own Tk_Init function which does not call TkCreateFrame.
-
 - tk style map states:
 static const char *const stateNames[] =
 {
@@ -46,22 +34,9 @@ assert(sizegrip.style == GenericStyle.sizegrip);
 
 - Port menuButton
 
-- Add clipboard support.
-
-- Add a clipboard module, and also add an onClipboardEvent signal via:
-http://msdn.microsoft.com/en-us/library/windows/desktop/ms649033%28v=vs.85%29.aspx
-
-- Standard clipboard formats:
-http://msdn.microsoft.com/en-us/library/windows/desktop/ff729168%28v=vs.85%29.aspx
-
 - Maybe add a rootMenu call to menus.
 
 - Add rootTree as well.
-
-- Drag and Drop:
-
-- Some info on using OpenGL in Tk:
-http://stackoverflow.com/questions/17367089/non-top-level-opengl-widget-in-tkinter
 
 - Instead of using fake widgets, we should use a frame type as the Tk type.
 
@@ -79,8 +54,6 @@ callFunc((cast(DynamicType)object).tupleof);
 functions into account.
 
 - Work on menus again. Menus and their items can also be configured in many ways, we have to export this.
-
-- Make library const-correct.
 
 - Add a status bar option to a Window.
 
