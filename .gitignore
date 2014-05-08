@@ -23,5 +23,4 @@
 *.xml
 *.deps
 *.modTime
-SciTEDirectory.properties
 .sandbox
