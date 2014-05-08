@@ -4,7 +4,7 @@
 
 This is a D wrapper of the Tcl/Tk graphics library. It is based on Tcl/Tk v8.6.0.0.
 
-Currently `dtk` has been tested on **Windows 7 x64** and **Linux Manjaro XFCE 0.8.9 x64**.
+Currently **dtk** has been tested on **Windows 7 x64** and **Linux Manjaro XFCE 0.8.9 x64**.
 
 However, drag & drop has currently only been implemented on Windows.
 
@@ -14,8 +14,8 @@ Homepage: https://github.com/AndrejMitrovic/dtk
 
 ## Requirements
 
-Before using `dtk` you will need to install the `Tcl` and `Tk` shared libraries,
-versioned at `v8.6.0.0` or newer.
+Before using **dtk** you will need to install the **Tcl** and **Tk** shared libraries,
+versioned at **v8.6.0.0** or newer.
 
 ### Installing Tcl/Tk on Windows
 
@@ -24,29 +24,27 @@ You can download and install the [ActiveTcl] distribution.
 **Note:** You may need to log off in Windows and then log in again to update your `PATH`
 environment variable.
 
-Otherwise `dtk` will not find the `Tk` and `Tcl` DLLs.
+Otherwise **dtk** will not find the **Tk** and **Tcl** DLLs.
 
 ### Installing Tcl/Tk on Posix
 
-Use your package manager to install the `Tk` and `Tcl` shared libraries.
+Use your package manager to install the **Tk** and **Tcl** shared libraries.
 
 ## Examples
 
-Use [dub] to run any of the examples.
-
-Simply prepend `dub run dtk:` before the example name when running [dub]:
+Use [dub] to run any of the examples. Simply prepend `dub run dtk:` before the example name when calling [dub]:
 
 ```
 $ dub run dtk:buttons
 ```
 
-Also try `menus`, `images`, and other examples found in the `examples` folder.
+Also try **menus**, **images**, and other examples found in the **examples** folder.
 
-You can also `cd` into an example's directory and run `dub` to run that example.
+You can also `cd` into an example's directory and call `dub` to run that example.
 
 ## Building dtk as a static library
 
-Run [dub] alone in the root project directory to build `dtk` as a static library:
+Run [dub] alone in the root project directory to build **dtk** as a static library:
 
 ```
 $ dub
