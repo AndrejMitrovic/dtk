@@ -38,8 +38,6 @@ assert(sizegrip.style == GenericStyle.sizegrip);
 
 - Add rootTree as well.
 
-- Instead of using fake widgets, we should use a frame type as the Tk type.
-
 - Replace this:
 override void toString(scope void delegate(const(char)[]) sink)
 
@@ -66,18 +64,6 @@ tcl scripts via string imports or dynamically.
 - Port cursors
 
 - The geometry module needs to have more methods and operators, e.g. +, +=, etc.
-
-- Use the 'when' option for sendEvent/postEvent:
-    -when when
-        When determines when the event will be processed; it must have one of the following values:
-        now
-            Process the event immediately, before the command returns. This also happens if the -when option is omitted.
-        tail
-            Place the event on Tcl's event queue behind any events already queued for this application.
-        head
-            Place the event at the front of Tcl's event queue, so that it will be handled before any other events already queued.
-        mark
-            Place the event at the front of Tcl's event queue but behind any other events already queued with -when mark. This option is useful when generating a series of events that should be processed in order but at the front of the queue.
 
 - Find all valid substitutions for each event type.
 
@@ -165,20 +151,4 @@ Docs todo:
 - You can only send key events to the focused window. If we add support for manually creating events, we should
   make sure we focus a window, or only allow sending the keyboard event to the focused window.
 
-- Make a note about having to use either -L/SUBSYSTEM:WINDOWS:5.01 (32bit) or -L/SUBSYSTEM:WINDOWS:5.02 (64bit) when compiling DTK apps on windows, or alternatively using WinMain. Otherwise some weird resizing behavior happens with windows instantiated by Tk. See also:
-https://github.com/aldacron/Derelict3/issues/143
 
-- Document how multi-click events are delivered:
-
-```
-event button: button1 action press
-event button: button1 action release
-event button: button1 action double_click
-event button: button1 action release
-event button: button1 action triple_click
-event button: button1 action release
-event button: button1 action quadruple_click
-event button: button1 action release
-```
-
-- Add note about using (scope BaseClass event) for event handlers.
