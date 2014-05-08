@@ -1,0 +1,31 @@
+{
+    "name": "simple",
+
+    "description": "dtk simple example",
+
+    "authors": [
+        "Andrej Mitrovic"
+    ],
+
+    "dependencies": {
+        "dtk": {"path": "../../", "version": "~master"}
+    },
+
+    "targetName" : "simple",
+
+    "targetPath" : "../../bin",
+
+    "targetType": "executable",
+
+    "sourceFiles": ["simple.d"],
+
+    "mainSourceFile": "simple.d",
+
+    "sourceFiles-windows": ["../../implib/comctl32.lib", "../../implib/ole32.lib"],
+
+    "homepage": "https://github.com/AndrejMitrovic/dtk",
+
+    "copyright": "Copyright © 2014, Andrej Mitrovic",
+
+    "license": "BSL-1.0",
+}

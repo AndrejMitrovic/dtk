@@ -3,6 +3,10 @@
 
     "targetName": "dtk",
 
+    "targetType": "staticLibrary",
+
+    "targetPath" : "bin",
+
     "description": "dtk is a D wrapper of the Tcl/Tk graphics library, based on Tcl/Tk v8.6.0.0",
 
     "libs-posix": ["dl"],
@@ -18,62 +22,16 @@
 
     "license": "BSL-1.0",
 
-    "configurations": [
-        {
-            "name": "dtk",
-            "targetType": "staticLibrary",
-            "targetPath": "bin",
-        },
+    "sourcePaths": [
+        "src"
+    ],
 
-        {
-            "name": "simple",
-            "targetName": "simple",
-            "targetType": "executable",
-            "sourceFiles": ["examples/simple.d"],
-            "sourceFiles-windows": ["implib/comctl32.lib", "implib/ole32.lib"],
-            "mainSourceFile": "examples/simple.d",
-            "targetPath" : "bin"
-        },
-
-        {
-            "name": "buttons",
-            "targetName": "buttons",
-            "targetType": "executable",
-            "sourceFiles": ["examples/buttons.d"],
-            "sourceFiles-windows": ["implib/comctl32.lib", "implib/ole32.lib"],
-            "mainSourceFile": "examples/buttons.d",
-            "targetPath" : "bin"
-        },
-
-        {
-            "name": "menus",
-            "targetName": "menus",
-            "targetType": "executable",
-            "sourceFiles": ["examples/menus.d"],
-            "sourceFiles-windows": ["implib/comctl32.lib", "implib/ole32.lib"],
-            "mainSourceFile": "examples/menus.d",
-            "targetPath" : "bin"
-        },
-
-        {
-            "name": "images",
-            "targetName": "images",
-            "targetType": "executable",
-            "sourceFiles": ["examples/images.d"],
-            "sourceFiles-windows": ["implib/comctl32.lib", "implib/ole32.lib"],
-            "mainSourceFile": "examples/images.d",
-            "targetPath" : "bin"
-        },
-
-        {
-            "name": "cursors",
-            "targetName": "cursors",
-            "targetType": "executable",
-            "sourceFiles": ["examples/cursors.d"],
-            "sourceFiles-windows": ["implib/comctl32.lib", "implib/ole32.lib"],
-            "mainSourceFile": "examples/cursors.d",
-            "targetPath" : "bin"
-        },
-
-    ]
+    "subPackages": [
+        "examples/buttons",
+        "examples/checkbuttons",
+        "examples/cursors",
+        "examples/images",
+        "examples/menus",
+        "examples/simple",
+    ],
 }

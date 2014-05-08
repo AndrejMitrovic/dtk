@@ -1,0 +1,31 @@
+{
+    "name": "menus",
+
+    "description": "dtk menus example",
+
+    "authors": [
+        "Andrej Mitrovic"
+    ],
+
+    "dependencies": {
+        "dtk": {"path": "../../", "version": "~master"}
+    },
+
+    "targetName" : "menus",
+
+    "targetPath" : "../../bin",
+
+    "targetType": "executable",
+
+    "sourceFiles": ["menus.d"],
+
+    "mainSourceFile": "menus.d",
+
+    "sourceFiles-windows": ["../../implib/comctl32.lib", "../../implib/ole32.lib"],
+
+    "homepage": "https://github.com/AndrejMitrovic/dtk",
+
+    "copyright": "Copyright © 2014, Andrej Mitrovic",
+
+    "license": "BSL-1.0",
+}

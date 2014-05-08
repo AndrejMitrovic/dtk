@@ -1,0 +1,31 @@
+{
+    "name": "images",
+
+    "description": "dtk images example",
+
+    "authors": [
+        "Andrej Mitrovic"
+    ],
+
+    "dependencies": {
+        "dtk": {"path": "../../", "version": "~master"}
+    },
+
+    "targetName" : "images",
+
+    "targetPath" : "../../bin",
+
+    "targetType": "executable",
+
+    "sourceFiles": ["images.d"],
+
+    "mainSourceFile": "images.d",
+
+    "sourceFiles-windows": ["../../implib/comctl32.lib", "../../implib/ole32.lib"],
+
+    "homepage": "https://github.com/AndrejMitrovic/dtk",
+
+    "copyright": "Copyright © 2014, Andrej Mitrovic",
+
+    "license": "BSL-1.0",
+}

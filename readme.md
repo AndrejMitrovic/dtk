@@ -32,23 +32,24 @@ Use your package manager to install the `Tk` and `Tcl` shared libraries.
 
 ## Examples
 
-Use [dub] to run any of the examples:
+Use [dub] to run any of the examples.
+
+Simply prepend `dub run dtk:` before the example name when running [dub]:
 
 ```
-$ dub -c buttons
-
-# Also try the configs: menus, images, and other examples found in the 'examples' folder.
+$ dub run dtk:buttons
 ```
+
+Also try `menus`, `images`, and other examples found in the `examples` folder.
+
+You can also `cd` into an example's directory and run `dub` to run that example.
 
 ## Building dtk as a static library
 
-Run [dub] alone to build `dtk` as a static library:
+Run [dub] alone in the root project directory to build `dtk` as a static library:
 
 ```
 $ dub
-
-# Alternatively:
-$ dub -c dtk
 ```
 
 ## Documentation
