@@ -28,6 +28,9 @@
 
     "sourceFiles-windows": ["implib/comctl32.lib", "implib/ole32.lib"],
 
+    "dflags-windows-x86": ["-L/SUBSYSTEM:WINDOWS:5.01"],
+    "dflags-windows-x86_64": ["-L/SUBSYSTEM:WINDOWS:5.02"],
+
     "subPackages": [
         "examples/buttons",
         "examples/checkbuttons",
