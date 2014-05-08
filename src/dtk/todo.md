@@ -57,22 +57,6 @@ functions into account.
 
 - Add a status bar option to a Window.
 
-- Implement a Maya-style spinbox, which increases-decreases when you click and hold the up/down buttons.
-    -> Implemented one in tests as a tcl script. Port it to D.
-
-- Scale widget doesn't respond to up/down properly when it has an opposite orientation.
-Bugfix patch:
-https://core.tcl.tk/tk/ci/57f9af7736?sbs=1
-    - Check if tcl functions can be overwritten, it would make the above easily fixable.
-
-    - Otherwise check if we can copy an entire style (there's a copy command used in ttk button.tcl
-    where they copy the behavior of buttons and checkbuttons):
-    ttk::copyBindings TButton TCheckbutton
-
-        - This would also allow us to set custom repeat delays and to provide custom widget features.
-
-        - We could use string imports to import a tcl script.
-
 - We could provide a set of helper functions with which to build custom widgets, e.g. see
 functions in ttk's utils.tcl. We should also provide the user to source their own
 tcl scripts via string imports or dynamically.
@@ -80,10 +64,6 @@ tcl scripts via string imports or dynamically.
 - We can override the ttk::button behavior and add button release events.
 
 - Port cursors
-
-- Port styles
-
-- Port takefocus (keyboard focus traversal)
 
 - The geometry module needs to have more methods and operators, e.g. +, +=, etc.
 
@@ -98,23 +78,6 @@ tcl scripts via string imports or dynamically.
             Place the event at the front of Tcl's event queue, so that it will be handled before any other events already queued.
         mark
             Place the event at the front of Tcl's event queue but behind any other events already queued with -when mark. This option is useful when generating a series of events that should be processed in order but at the front of the queue.
-
-- Add a .dup property for events.
-
-- When can use virtual events, added with 'event add' to hook directly to key sequences, we should provide
-an API for this. E.g.:
-
-    auto seq = KeySeq(KeyMod.control | KeyMod.alt, KeySym.a);
-    widget.onKeySequence[seq] = (scope KeySequence event) { ... }
-
-    Perhaps we could make KeySeq a subclass of an Event, so a user can dynamically cast an event
-    to a key sequence event.
-
-    - Although maybe a better idea is to simply make this a helper function which does:
-
-    auto handler = makeKeySeqHandler(KeySeq(KeyMod.control | KeyMod.alt, KeySym.a),
-                                    (scope KeySequence event) { ... } ));
-    widget.onEvent.connect(handler);
 
 - Find all valid substitutions for each event type.
 
@@ -146,8 +109,6 @@ so maybe it's better if we avoid delay-initializing widgets except those which w
 for example menus and menu items should not take parents since they can be inserted at arbitrary places.
 Todo: See which other Tk widget types have an insert method, which would require delay initialization.
 
-- Add mnemonic support to menu items via "&", e.g. "&File". But make sure we allow escaping via "&&File", which would produce "&File" in the menu.
-
 - Check all 'todo' sections in the codebase.
 
 - Instead of returning .init for canceled operations, return a struct with an ok/cancel value
@@ -158,11 +119,6 @@ and the field with the result. (also see RGB struct).
 - Fix up signals so removal while iterating is handled properly:
 http://d.puremagic.com/issues/show_bug.cgi?id=10821
 Also make sure to document these issues.
-
-- Add typed equivalents to most widgets which can have options set. E.g. we could have:
-
-auto button = new TypedCheckButton!float("label", 0.0, 1.0);
-auto button = new TypedCheckButton!char("label", 'a', 'z');
 
 - The .#widget issue has been resolved, see the reply on SO:
 http://stackoverflow.com/questions/18290171/strange-result-when-calling-winfo-children-on-implicitly-generated-toplevel-wi
@@ -177,19 +133,8 @@ See all the options for each widget type in the Tk command manual.
 
 - Implement toString for widget classes. Could use the text option which most widgets have.
 
-- Find a way to get the win32 cursor blinking time, and then use insertOffTime in the text widget
-to modify the blinking. Try to see if other widgets support this option, otherwise ask in the
-Tcl newsgroups whether these widgets should support this option, or whether they should follow
-system-default settings. Finally, we could try finding how insertOffTime is set in Tcl and apply
-this to other input widgets and distribute these new widgets.
-
 - The _isDestroyed bool we added should likely be checked in most function calls, but this might be
 expensive. Maybe we should use an invariant.
-
-- Replace all boolean parameters and fields with enums, except where the usage is clear.
-
-- Once the toolkit is in place we should port the widget demo from Tcl:
-C:\Program Files (x86)\Tcl\demos\Tk8.6
 
 - ttk::menubutton is not ported yet. See also which other ttk widgets we have to port that are not listed
 on tkdocs.com.
@@ -211,10 +156,6 @@ Tk info (move this to an info.md file):
 - Percent substitution is made in ExpandPercents in tk/generic/tkBind.c
 
 - Cairo support should be added somehow.
-
-- Slider should become templated, and we should allow a limited range slider as well, e.g.:
-new Slider!int(0, 10, 2);  // from 0 to 10, stepping 2
-new Slider!int([0, 1, 2, 3, 4]);  // only allow these items.
 
 - Try to wrap more virtual events of each widget type.
 
