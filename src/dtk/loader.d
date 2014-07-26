@@ -32,7 +32,7 @@ version (Windows)
     alias freeLib = FreeLibrary;
 }
 else
-version (Posix)
+version (Linux)
 {
     import std.c.linux.linux;
     import dtk.platform.posix.dragdrop;
@@ -41,6 +41,25 @@ version (Posix)
 
     enum tclDll = "libtcl8.6.so";
     enum tkDll = "libtk8.6.so";
+
+    auto loadLib(string libName)
+    {
+        return dlopen(libName.toStringz, RTLD_NOW);
+    }
+
+    alias loadProc = dlsym;
+    alias freeLib = dlclose;
+}
+else
+version (OSX)
+{
+    import core.sys.posix.dlfcn;
+    import dtk.platform.posix.dragdrop;
+
+    alias LibHandle = void*;
+
+    enum tclDll = "libtcl8.6.dylib";
+    enum tkDll = "libtk8.6.dylib";
 
     auto loadLib(string libName)
     {
