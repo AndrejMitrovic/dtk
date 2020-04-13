@@ -1,6 +1,6 @@
 # dtk
 
-![dtk](https://raw.github.com/AndrejMitrovic/rtaudiod/master/screenshots/work_in_progress.png)
+![dtk](https://raw.github.com/AndrejMitrovic/dtk/master/screenshots/work-in-progress.png)
 
 # NOTE: This project is currently being updated to work with the latest compilers. Please have patience.
 
