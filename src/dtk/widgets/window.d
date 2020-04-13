@@ -70,7 +70,7 @@ class Window : Widget
         tclEvalFmt("wm title %s %s", _name, newTitle._tclEscape);
     }
 
-    alias position = super.position;
+    alias position = typeof(super).position;
 
     /**
         Set a new window position, relative to its parent.
@@ -84,7 +84,7 @@ class Window : Widget
         this.geometry = rect;
     }
 
-    alias size = super.size;
+    alias size = typeof(super).size;
 
     /**
         Set a new window size.
@@ -97,7 +97,7 @@ class Window : Widget
         this.geometry = rect;
     }
 
-    alias geometry = super.geometry;
+    alias geometry = typeof(super).geometry;
 
     /**
         Set a new window geometry.
@@ -271,7 +271,7 @@ class Window : Widget
     @property auto walkChildWidgets()
     {
         string paths = tclEvalFmt("winfo children %s", _name);
-        return map!(a => Widget.lookupWidgetPath(a))(paths.arr_splitter);
+        return map!(a => Widget.lookupWidgetPath(a))(paths.splitter);
     }
 
     /** Return the parent window of this window, or $(D null) if this window is the main window. */

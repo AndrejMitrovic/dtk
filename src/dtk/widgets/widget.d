@@ -1002,6 +1002,7 @@ unittest
     static assert(toWidgetType!A == WidgetType.user);
 } +/
 
-package struct InitLater { }
-package struct CreateFakeWidget { }
-package struct CreateToplevel { }
+/// drey todo: use package again, but make dtk.* package be able to access it
+public struct InitLater { }
+public struct CreateFakeWidget { }
+public struct CreateToplevel { }

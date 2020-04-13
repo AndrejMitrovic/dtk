@@ -123,7 +123,7 @@ struct Grid
     auto walkSlaves()
     {
         string paths = tclEvalFmt("grid slaves %s", _widget._name);
-        return map!(a => Widget.lookupWidgetPath(a))(paths.arr_splitter);
+        return map!(a => Widget.lookupWidgetPath(a))(paths.splitter);
     }
 
     Widget[] rowSlaves(int row)
@@ -134,7 +134,7 @@ struct Grid
     auto walkRowSlaves(int row)
     {
         string paths = tclEvalFmt("grid slaves %s -row %s", _widget._name, row);
-        return map!(a => Widget.lookupWidgetPath(a))(paths.arr_splitter);
+        return map!(a => Widget.lookupWidgetPath(a))(paths.splitter);
     }
 
     Widget[] colSlaves(int col)
@@ -145,7 +145,7 @@ struct Grid
     auto walkColSlaves(int col)
     {
         string paths = tclEvalFmt("grid slaves %s -column %s", _widget._name, col);
-        return map!(a => Widget.lookupWidgetPath(a))(paths.arr_splitter);
+        return map!(a => Widget.lookupWidgetPath(a))(paths.splitter);
     }
 
     /** Lay out this widget into a grid row. */

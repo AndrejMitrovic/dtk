@@ -32,9 +32,9 @@ version (Windows)
     alias freeLib = FreeLibrary;
 }
 else
-version (Linux)
+version (linux)
 {
-    import std.c.linux.linux;
+    import core.sys.posix.dlfcn;
     import dtk.platform.posix.dragdrop;
 
     alias LibHandle = void*;

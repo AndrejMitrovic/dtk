@@ -55,7 +55,7 @@ Padding toPadding(string input)
     static assert(typeof(result).sizeof == (int[4]).sizeof);
 
     // .tupleof won't work due to idx being a runtime value
-    foreach (value; input.arr_splitter)
+    foreach (value; input.splitter)
     {
         assert(idx < FieldTypeTuple!(typeof(result)).length);
         (*(cast(int[4]*)&result))[idx++] = to!int(value);
