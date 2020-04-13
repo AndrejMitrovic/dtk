@@ -160,7 +160,7 @@ class Tree : Widget
     }
 
     ///
-    alias super.destroy destroy;
+    alias typeof(super).destroy destroy;
 
     /** Destroy this tree. */
     override void destroy()

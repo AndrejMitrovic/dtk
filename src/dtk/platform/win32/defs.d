@@ -460,7 +460,7 @@ struct DVTARGETDEVICE
     WORD tdDeviceNameOffset;
     WORD tdPortNameOffset;
     WORD tdExtDevmodeOffset;
-    BYTE tdData[1];
+    BYTE[1] tdData;
 }
 
 

@@ -153,7 +153,7 @@ class App
 
             checkExceptions();
 
-            if (!hasEvents && eventTimer.peek > cast(TickDuration)(1.msecs))
+            if (!hasEvents && eventTimer.peek > 1.msecs)
                 Thread.sleep(1.msecs);
         }
     }

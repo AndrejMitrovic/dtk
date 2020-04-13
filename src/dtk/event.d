@@ -211,7 +211,7 @@ class Event
 
         sink(to!string(widget));
         sink(", ");
-        sink(format("%sm%ss", time.minutes, time.seconds));
+        //sink(format("%sm%ss", time.minutes, time.seconds));  // drey todo
         sink(")");
     }
 

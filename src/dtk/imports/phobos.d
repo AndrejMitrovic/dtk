@@ -37,9 +37,7 @@ public import std.algorithm
       joiner, findSplitBefore, sort, min, max;
 
 public import std.array
-    : Appender, array, replace, empty, split,
-      // Issue 11701 workaround: https://d.puremagic.com/issues/show_bug.cgi?id=11701
-      arr_splitter = splitter;
+    : Appender, array, replace, empty, split;
 
 public import std.ascii
     : isDigit;
@@ -50,8 +48,11 @@ public import std.container
 public import std.conv
     : phobosTo = to, ConvException, text;
 
+public import std.datetime.stopwatch
+    : StopWatch, AutoStart;
+
 public import std.datetime
-    : StopWatch, AutoStart, seconds, msecs;
+    : seconds, msecs;
 
 public import std.exception
     : assertThrown, enforce;
@@ -75,9 +76,11 @@ public import std.stdio
 public import std.string
     : chomp, chompPrefix, lastIndexOf, phobosFormat = format, toStringz, translate;
 
+public alias pointerTarget (T : T*) = T;
+
 public import std.traits
     : isArray, isSomeString, FieldTypeTuple, functionAttributes, FunctionAttribute,
-      ParameterStorageClass, ParameterStorageClassTuple, ReturnType, pointerTarget,
+      ParameterStorageClass, ParameterStorageClassTuple, ReturnType,
       isPointer, isSomeFunction, isDelegate, isFunctionPointer, ParameterTypeTuple,
       Unqual, isSomeChar, isStaticArray, EnumMembers, isDynamicArray, hasIndirections;
 
