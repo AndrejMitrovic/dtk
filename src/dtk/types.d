@@ -199,7 +199,7 @@ __gshared extern(C):
     const(char*) function() Tcl_GetNameOfExecutable;
     int function(Tcl_Interp* interp, char* str) Tcl_Eval;
     Tcl_Interp* function() Tcl_CreateInterp;
-    char* function(Tcl_Obj * objPtr, int* lengthPtr) Tcl_GetStringFromObj;
+    char* function(const Tcl_Obj * objPtr, int* lengthPtr) Tcl_GetStringFromObj;
     char* function(const Tcl_Obj * objPtr) Tcl_GetString;
     char* function(Tcl_Interp* interp, char* str, int flags) Tcl_GetVar;
     Tcl_Obj* function(Tcl_Interp* interp, char* name1, char* name2, int flags) Tcl_GetVar2Ex;
