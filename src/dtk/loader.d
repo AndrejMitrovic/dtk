@@ -24,8 +24,8 @@ version (Windows)
 
     alias LibHandle = HANDLE;
 
-    enum tclDll = "tcl86.dll";
-    enum tkDll = "tk86.dll";
+    enum tclDll = "tcl86t.dll";
+    enum tkDll = "tk86t.dll";
 
     alias loadLib = LoadLibraryA;
     alias loadProc = GetProcAddress;
