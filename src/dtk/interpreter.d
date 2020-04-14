@@ -163,7 +163,9 @@ package string tclGetString(const Tcl_Obj* tclObj)
 */
 package const(char)[] tclPeekString(const Tcl_Obj* tclObj)
 {
-    return tclObj.Tcl_GetString().peekCString();
+    int length;
+    auto value = Tcl_GetStringFromObj(tclObj, &length);
+    return value[0 .. length];
 }
 
 version (Windows)
