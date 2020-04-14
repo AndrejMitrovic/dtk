@@ -69,7 +69,7 @@ Documentation and tutorials are planned to be written soon. Stay tuned!
 
 Distributed under the [Boost Software License][BoostLicense], Version 1.0.
 
-See the accompanying file [license.txt](https://raw.github.com/AndrejMitrovic/dtk/master/license.txt) or an online copy [here][BoostLicense].
+See the accompanying file [license](https://raw.github.com/AndrejMitrovic/dtk/master/LICENSE) or an online copy [here][BoostLicense].
 
 [BoostLicense]: http://www.boost.org/LICENSE_1_0.txt
 [dub]: http://code.dlang.org/download
