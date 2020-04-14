@@ -23,19 +23,21 @@ C newCom(C, T...)(T arguments) if(is(C : ComObject) && T.length > 0)
 	return _newCom!C();
 }
 
+extern(C) void* gc_malloc(size_t sz, uint ba = 0, const TypeInfo ti=null);
+
 private C _newCom(C, T...)(T arguments)
 {
-	// avoid special casing in _d_newclass, where COM objects are not garbage collected
-	size_t size = C.classinfo.init.length;
-    void* p = GC.malloc(size, GC.BlkAttr.FINALIZE);
+    static assert(!__traits(isAbstractClass,C));
 
-	memcpy(p, C.classinfo.init.ptr, size);
-	C c = cast(C)p;
-
-	static if(arguments.length || __traits(compiles,c.__ctor(arguments)))
-		c.__ctor(arguments);
-
-	return c;
+    // avoid special casing in _d_newclass, where COM objects are not garbage collected
+    auto ini = typeid(C).initializer;
+    size_t size = ini.length;
+    void* p = gc_malloc(size, 1, typeid(C)); // BlkAttr.FINALIZE
+    memcpy(p, ini.ptr, size);
+    C c = cast(C) p;
+    static if(arguments.length || __traits(compiles,c.__ctor(arguments)))
+        c.__ctor(arguments);
+    return c;
 }
 
 class ComObject : IUnknown

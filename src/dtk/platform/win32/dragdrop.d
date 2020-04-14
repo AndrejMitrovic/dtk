@@ -436,7 +436,7 @@ private:
     {
         immutable bytes = text.memSizeOf;
 
-        HGLOBAL hMem = GlobalAlloc(GHND, bytes + char.sizeof);  // null terminator
+        HGLOBAL hMem = GlobalAlloc(GHND, cast(uint)(bytes + char.sizeof));  // null terminator
         auto ptr = cast(char*)GlobalLock(hMem);
         scope(exit) GlobalUnlock(hMem);
 
@@ -452,7 +452,7 @@ private:
         auto data = text.toWideString();
         immutable bytes = data.memSizeOf;
 
-        HGLOBAL hMem = GlobalAlloc(GHND, bytes + wchar.sizeof);  // null terminator
+        HGLOBAL hMem = GlobalAlloc(GHND, cast(uint)(bytes + wchar.sizeof));  // null terminator
         auto ptr = cast(wchar*)GlobalLock(hMem);
         scope(exit) GlobalUnlock(hMem);
 

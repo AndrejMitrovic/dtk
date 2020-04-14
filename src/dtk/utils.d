@@ -402,9 +402,9 @@ bool isAsciiString(string input)
 }
 
 /** Return the memory size needed to store the elements of the array. */
-size_t memSizeOf(E)(E[] arr)
+uint memSizeOf(E)(E[] arr)
 {
-    return E.sizeof * arr.length;
+    return cast(uint)(E.sizeof * arr.length);
 }
 
 ///
