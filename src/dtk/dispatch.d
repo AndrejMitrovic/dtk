@@ -60,7 +60,7 @@ static:
 
         // Note: We're retrieving a keysym, not a keycode
         static immutable keyboardArgs =
-            [TkSubs.keysym_decimal, TkSubs.uni_char, TkSubs.state, TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.abs_x_pos, TkSubs.abs_y_pos, TkSubs.timestamp].map!(arg => arg.phobosTo!string).join(" ");
+            [TkSubs.keysym_decimal, TkSubs.uni_char, TkSubs.state, TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.abs_x_pos, TkSubs.abs_y_pos, TkSubs.timestamp].map!(arg => cast(string)arg).join(" ");
 
         tclEvalFmt("bind %s <KeyPress> { %s %s %s %s }",
             _dtkInterceptTag, _dtkCallbackIdent, EventType.keyboard, KeyboardAction.press, keyboardArgs);
@@ -104,7 +104,7 @@ static:
         /** Hook geometry. */
 
         static immutable geometryArgs = [TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.width, TkSubs.height, TkSubs.border_width]
-            .map!(arg => arg.phobosTo!string).join(" ");
+            .map!(arg => cast(string)arg).join(" ");
 
         tclEvalFmt("bind %s <Configure> { %s %s %s }",
                     _dtkInterceptTag,
@@ -112,7 +112,7 @@ static:
 
         /** Hook hover. */
 
-        static immutable hoverArgs = [TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.state, TkSubs.timestamp].map!(arg => arg.phobosTo!string).join(" ");
+        static immutable hoverArgs = [TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.state, TkSubs.timestamp].map!(arg => cast(string)arg).join(" ");
 
         tclEvalFmt("bind %s <Enter> { %s %s %s %s }",
                     _dtkInterceptTag,
