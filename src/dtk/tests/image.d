@@ -17,7 +17,7 @@ unittest
     auto testWindow = new Window(app.mainWindow, 200, 200);
     testWindow.position = Point(500, 500);
 
-    auto image = new Image("../tests/small_button.png");
+    auto image = new Image("src/dtk/tests/data/small_button.png");
 
     // button
     auto button = new Button(testWindow, "Flash");
@@ -48,8 +48,8 @@ unittest
     auto radio1 = radioGroup.addButton("Set On", "on");
     auto radio2 = radioGroup.addButton("Set Off", "off");
 
-    auto diskRed = new Image("../tests/disk_red.png");
-    auto diskBlue = new Image("../tests/disk_blue.png");
+    auto diskRed = new Image("src/dtk/tests/data/disk_red.png");
+    auto diskBlue = new Image("src/dtk/tests/data/disk_blue.png");
 
     radio1.image = diskRed;
     radio2.image = diskBlue;
