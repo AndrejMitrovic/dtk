@@ -129,17 +129,6 @@ package template EnumBaseType(E) if (is(E == enum))
         alias EnumBaseType = B;
 }
 
-/// frequent typo
-alias BaseEnumType = EnumBaseType;
-
-unittest
-{
-    enum EI : int { x = 0 }
-    enum EF : float { x = 1.5 }
-    static assert(is(BaseEnumType!EI == int));
-    static assert(is(BaseEnumType!EF == float));
-}
-
 /// required due to Issue 10814 - Formatting string-based enum prints its name instead of its value
 package EnumBaseType!E toBaseType(E)(E val)
 {
