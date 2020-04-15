@@ -28,7 +28,6 @@ class App
     }
 
     version(unittest)
-    version(DTK_UNITTEST)
     {
         static string _file;
         static size_t _line;
@@ -201,7 +200,6 @@ private:
 }
 
 version(unittest)
-version(DTK_UNITTEST)
 {
     /**
         Some test-cases create a lot of idle events (e.g. an indeterminate progress bar).

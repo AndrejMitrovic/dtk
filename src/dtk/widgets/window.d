@@ -52,7 +52,6 @@ class Window : Widget
         super(CreateToplevel.init, WidgetType.window);
 
         version(unittest)
-        version(DTK_UNITTEST)
         {
             tclEvalFmt("tkwait visibility %s", _name);
         }

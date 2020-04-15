@@ -28,7 +28,6 @@ public
 }
 
 version(unittest)
-version(DTK_UNITTEST)
 {
     import dtk.tests;
 }
