@@ -177,7 +177,7 @@ static:
             stderr.writeln("--                --");
             foreach (idx; 0 .. objc)
             {
-                stderr.writefln("-- received #%s: %s", idx + 1, argArr[idx].tclGetString());
+                stderr.writefln("-- received #%s: %s", idx + 1, argArr[idx].tclPeekString());
             }
             stderr.writeln("--                --");
         }
@@ -606,11 +606,9 @@ static:
 
         sizediff_t charIndex = to!sizediff_t(tclArr[2].tclPeekString());
 
-        string newValue = tclArr[3].tclGetString();
-
-        string oldValue = tclArr[4].tclGetString();
-
-        string editValue = tclArr[5].tclGetString();
+        auto newValue = tclArr[3].tclPeekString().idup;
+        auto oldValue = tclArr[4].tclPeekString().idup;
+        auto editValue = tclArr[5].tclPeekString().idup;
 
         ValidateMode validateMode = getTclValidateMode(tclArr[6]);
 

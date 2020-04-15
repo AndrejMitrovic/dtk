@@ -19,8 +19,8 @@ void print(string input)
 extern(C)
 int dtkCallbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
 {
-    string a = to!string(Tcl_GetString(objv[1]));
-    string b = to!string(Tcl_GetString(objv[2]));
+    const a = tclPeekString(objv[1]);
+    const b = tclPeekString(objv[2]);
 
     stderr.writefln("objv[1] = %s", a);  // updated_var
     stderr.writefln("objv[2] = %s", b);  // foo

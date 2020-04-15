@@ -100,7 +100,7 @@ T tclGetArray(T)(const(Tcl_Obj)* tclObj)
 
         foreach (index; 0 .. arrCount)
         {
-            ex.msg ~= array[index].tclGetString();
+            ex.msg ~= array[index].tclPeekString().idup;
             ex.msg ~= "\n";
         }
 
