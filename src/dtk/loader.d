@@ -190,7 +190,7 @@ private void loadSharedLibs ()
     }
 
     enforce(tclLib !is null && tkLib !is null,
-        "Could not load Tcl/Tk shared libs in any paths found in PATH");
+        "Could not load Tcl/Tk shared libs in any paths");
 
     foreach (string member; __traits(allMembers, TclProcs))
         tclLib.loadSymbol!(__traits(getMember, TclProcs, member));
