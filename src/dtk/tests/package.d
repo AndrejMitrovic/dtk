@@ -7,7 +7,6 @@
 module dtk.tests;
 
 version(unittest):
-version(DTK_UNITTEST):
 
 private
 {

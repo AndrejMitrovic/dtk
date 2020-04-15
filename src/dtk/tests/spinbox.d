@@ -7,7 +7,6 @@
 module dtk.tests.spinbox;
 
 version(unittest):
-version(DTK_UNITTEST):
 
 import dtk;
 import dtk.imports;
