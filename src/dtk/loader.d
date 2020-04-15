@@ -14,9 +14,6 @@ import dtk.utils;
 
 import dtk.widgets.widget;
 
-/** Used for Tcl string literal escape rules. */
-__gshared string[dchar] _tclTransTable;
-
 version (Windows)
 {
     import dtk.platform.win32.defs;
@@ -210,14 +207,6 @@ shared static this()
 
     // This call is apparently required before all other Tcl/Tk calls on some systems.
     Tcl_FindExecutable(appName.toStringz);
-
-    _tclTransTable['"'] = `\"`;
-    _tclTransTable['$'] = r"\$";
-    _tclTransTable['['] = r"\[";
-    _tclTransTable[']'] = r"\]";
-    _tclTransTable['\\'] = r"\\";
-    _tclTransTable['{'] = r"\{";
-    _tclTransTable['}'] = r"\}";
 
     version (Windows)
     {

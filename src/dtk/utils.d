@@ -6,10 +6,22 @@
  */
 module dtk.utils;
 
-import dtk.app;
 import dtk.imports;
-import dtk.loader;
 import dtk.types;
+
+/** Used for Tcl string literal escape rules. */
+private __gshared string[dchar] _tclTransTable;
+
+shared static this ()
+{
+    _tclTransTable['"'] = `\"`;
+    _tclTransTable['$'] = r"\$";
+    _tclTransTable['['] = r"\[";
+    _tclTransTable[']'] = r"\]";
+    _tclTransTable['\\'] = r"\\";
+    _tclTransTable['{'] = r"\{";
+    _tclTransTable['}'] = r"\}";
+}
 
 private template isRawStaticArray(T, A...)
 {
@@ -316,7 +328,7 @@ unittest
     static assert(is(ElementTypeOf!(int**) == int*));
 }
 
-template ThrowWrapper(alias func)
+template ThrowWrapper(App, alias func)
 {
     static extern(C) ReturnType!func ThrowWrapper(ParameterTypeTuple!func args)
     {

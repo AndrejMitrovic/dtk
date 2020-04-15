@@ -6,6 +6,7 @@
  */
 module dtk.dispatch;
 
+import dtk.app;
 import dtk.event;
 import dtk.geometry;
 import dtk.imports;
@@ -157,7 +158,7 @@ static:
             _dtkInterceptTag, _dtkCallbackIdent, EventType.listbox, "%W", ListboxAction.select);
     }
 
-    package alias dtkCallbackHandler = ThrowWrapper!dtkCallbackHandlerImpl;
+    package alias dtkCallbackHandler = ThrowWrapper!(App, dtkCallbackHandlerImpl);
 
     package static int dtkCallbackHandlerImpl(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** argArr)
     {
