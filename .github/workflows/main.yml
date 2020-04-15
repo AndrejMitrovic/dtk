@@ -1,0 +1,88 @@
+# Github CI configuration
+#
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  main:
+    name: Run
+    strategy:
+      # We want all the systems to proceed with testing even if one fails
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-18.04 ]
+        # note: Windows disabled for now. We should distribute IronTcl package.
+        # note: MacOS disabled. Need to find where brew install Tcl/Tk to load it.
+        # os: [ ubuntu-18.04, macOS-10.15, windows-2019 ]
+        dc: [ dmd-2.091.0, ldc-1.20.1 ]
+
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+
+    # Checkout the repo and any submodules
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+        persist-credentials: false
+
+    # Install the D compiler
+    - name: Prepare compiler
+      uses: mihails-strasuns/setup-dlang@v0.5.0
+      with:
+          compiler: ${{ matrix.dc }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+
+    # Install Tcl/Tk dependencies
+    # On Windows we can distribute IronTcl package (todo)
+    # brew install tcl-tk
+    - name: '[MacOS] Install dependencies'
+      if: runner.os == 'macOS'
+      run: |
+        brew install tcl-tk
+        ln -s /usr/local/Cellar/tcl-tk/8.6.1/lib/libtcl8.6.dylib /usr/local/lib/libtcl8.6.dylib
+        ln -s /usr/local/Cellar/tcl-tk/8.6.1/lib/libtk8.6.dylib /usr/local/lib/libtk8.6.dylib
+        brew cask install xquartz
+
+    - name: '[Linux] Install dependencies'
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y tk8.6
+        sudo apt-get install -y xvfb
+
+    - name: '[Windows] Install dependencies'
+      if: runner.os == 'Windows'
+      run: |
+        echo "Don't know how to install Tk & dependencies yet"
+
+    # Useful for debugging
+    - name: Debugging info
+      shell: bash
+      run: |
+        ${DC} --version
+        dub --version
+
+    # [Linux] Build static lib & Run the tests (only x86_64 supported)
+    - name: '[Linux] Run tests'
+      if: runner.os == 'Linux'
+      run: |
+        ./ci/linux.sh
+
+    # [MacOS] Build static lib & Run the tests (only x86_64 supported)
+    - name: '[MacOS] Run tests'
+      if: runner.os == 'macOS'
+      run: |
+        ./ci/mac.sh
+
+    # [Windows] Build static lib & Run the tests
+    # On Windows we have the luxury of being able to test x86 & x86_64 (yay!)
+    - name: '[Windows] Run tests'
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: |
+        dub build --arch=x86
+        dub build --arch=x86_64
+        dub test --arch=x86
+        dub test --arch=x86_64
