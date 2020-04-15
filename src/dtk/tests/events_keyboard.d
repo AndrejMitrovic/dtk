@@ -119,8 +119,7 @@ unittest
         }
     }
 
-    // todo: fix #33
-    //assert(callCount == expectedCallCount, text(callCount, " != ", expectedCallCount));
+    assert(callCount == expectedCallCount, text(callCount, " != ", expectedCallCount));
 
     app.testRun();
 }
