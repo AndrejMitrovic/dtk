@@ -1,6 +1,6 @@
 # dtk
 
-![dtk](https://raw.github.com/AndrejMitrovic/dtk/master/screenshots/work-in-progress.png)
+![dtk](https://raw.github.com/AndrejMitrovic/dtk/v0.x.x/screenshots/work-in-progress.png)
 
 # NOTE: This project is currently being updated to work with the latest compilers. Please have patience.
 
@@ -68,7 +68,7 @@ Documentation and tutorials are planned to be written soon. Stay tuned!
 
 Distributed under the [Boost Software License][BoostLicense], Version 1.0.
 
-See the accompanying file [license](https://raw.github.com/AndrejMitrovic/dtk/master/LICENSE) or an online copy [here][BoostLicense].
+See the accompanying file [license](https://raw.github.com/AndrejMitrovic/dtk/v0.x.x/LICENSE) or an online copy [here][BoostLicense].
 
 [BoostLicense]: http://www.boost.org/LICENSE_1_0.txt
 [dub]: http://code.dlang.org/download
