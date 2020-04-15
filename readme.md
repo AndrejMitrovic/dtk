@@ -21,12 +21,11 @@ versioned at **v8.6.0.0** or newer.
 
 ### Installing Tcl/Tk on Windows
 
-You can download and install the [ActiveTcl] distribution.
+You can download and extract the [IronTcl] distribution.
 
-**Note:** You may need to log off in Windows and then log in again to update your `PATH`
-environment variable.
-
-Otherwise **dtk** will not find the **Tk** and **Tcl** DLLs.
+**Note:** You need to add the path to the IronTcl Tcl/Tk DLLs into your `PATH`
+environment variable, or alternatively copy the Tcl/Tk DLLs into the current
+path of your executable.
 
 ### Installing Tcl/Tk on Posix
 
@@ -58,7 +57,7 @@ Documentation and tutorials are planned to be written soon. Stay tuned!
 
 ## Links
 
-- ActiveTcl Tcl/Tk distribution: http://www.activestate.com/activetcl/downloads
+- IronTcl Tcl/Tk distribution: https://www.irontcl.com/
 - Tcl v8.6 reference links: http://www.tcl.tk/man/tcl8.6/
 - Tcl v8.6 Tcl commands: http://www.tcl.tk/man/tcl8.6/TclCmd/contents.htm
 - Tcl v8.6 Tk commands: http://www.tcl.tk/man/tcl8.6/TkCmd/contents.htm
@@ -73,4 +72,4 @@ See the accompanying file [license](https://raw.github.com/AndrejMitrovic/dtk/ma
 
 [BoostLicense]: http://www.boost.org/LICENSE_1_0.txt
 [dub]: http://code.dlang.org/download
-[ActiveTcl]: http://www.activestate.com/activetcl
+[IronTcl]: https://www.irontcl.com/
