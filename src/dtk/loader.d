@@ -24,8 +24,8 @@ version (Windows)
 
     alias LibHandle = HANDLE;
 
-    enum tclDll = "tcl86t.dll";
-    enum tkDll = "tk86t.dll";
+    enum tclSharedLibName = "tcl86t.dll";
+    enum tkSharedLibName = "tk86t.dll";
 
     alias loadLib = LoadLibraryA;
     alias loadProc = GetProcAddress;
@@ -39,12 +39,12 @@ version (linux)
 
     alias LibHandle = void*;
 
-    enum tclDll = "libtcl8.6.so";
-    enum tkDll = "libtk8.6.so";
+    enum tclSharedLibName = "libtcl8.6.so";
+    enum tkSharedLibName = "libtk8.6.so";
 
-    auto loadLib(string libName)
+    auto loadLib(const(char)* libName)
     {
-        return dlopen(libName.toStringz, RTLD_NOW);
+        return dlopen(libName, RTLD_NOW);
     }
 
     alias loadProc = dlsym;
@@ -58,12 +58,12 @@ version (OSX)
 
     alias LibHandle = void*;
 
-    enum tclDll = "libtcl8.6.dylib";
-    enum tkDll = "libtk8.6.dylib";
+    enum tclSharedLibName = "libtcl8.6.dylib";
+    enum tkSharedLibName = "libtk8.6.dylib";
 
-    auto loadLib(string libName)
+    auto loadLib(const(char)* libName)
     {
-        return dlopen(libName.toStringz, RTLD_NOW);
+        return dlopen(libName, RTLD_NOW);
     }
 
     alias loadProc = dlsym;
@@ -82,17 +82,126 @@ private void loadSymbol(alias field)(LibHandle handle)
 private __gshared LibHandle tclLib;
 private __gshared LibHandle tkLib;
 
-shared static this()
+version (Windows)
+    private enum PathSep = ';';
+else version (Posix)
+    private enum PathSep = ':';
+else
+    static assert("Unsupported platform");
+
+version (Windows)
+    private enum SharedLibExt = ".dll";
+else version (Posix)
+    private enum SharedLibExt = ".so";
+else
+    static assert("Unsupported platform");
+
+/// See below
+private struct Pair
 {
-    tclLib = enforce(loadLib(tclDll), format("'%s' not found in PATH.", tclDll));
+    string tcl_path;
+    string tk_path;
+}
+
+/// For each path in the provided environment variable,
+/// try to find the pair of Tcl86*.dll / Tk86*.dll.
+/// Return a range of (Tcl*.dll / Tk*.dll) tuples
+/// It's a little bit hardcoded for the version string,
+/// will be improved later.
+version (Windows)
+private auto getValidPairPaths ()
+{
+    import std.algorithm;
+    import std.array;
+    import std.file;
+    import std.string;
+    import std.typecons;
+
+    const tcl_glob = format("tcl86*%s", SharedLibExt);
+    const tk_glob = format("tk86*%s", SharedLibExt);
+
+    // may throw
+    auto path_env = environment["PATH"];
+
+    // linker issue: https://issues.dlang.org/show_bug.cgi?id=20738
+    version (none)
+    {
+        return path_env.splitter(PathSep)
+            .map!(path => path.strip)
+            .filter!(path => path.length > 0 && path.exists)
+            .map!(path =>
+                .zip(dirEntries(path, tcl_glob, SpanMode.shallow),
+                     dirEntries(path, tk_glob, SpanMode.shallow)));
+    }
+    else
+    {
+        Pair[] result;
+
+        foreach (path; path_env.splitter(PathSep)
+            .map!(path => path.strip)
+            .filter!(path => path.length > 0 && path.exists))
+        {
+            auto tcl_paths = dirEntries(path, tcl_glob, SpanMode.shallow);
+            auto tk_paths = dirEntries(path, tk_glob, SpanMode.shallow);
+
+            foreach (string tcl_path, string tk_path; zip(tcl_paths, tk_paths))
+                result ~= Pair(tcl_path, tk_path);
+        }
+
+        return result;
+    }
+}
+
+/// Load the Tcl & Tk shared libs as found in PATH (Windows),
+/// or whatever ld loader was configured with (Posix)
+private void loadSharedLibs ()
+{
+    import std.process;
+
+    version (Windows)
+    {
+        auto paths = getValidPairPaths();
+        enforce(!paths.empty,
+            "Could not find any Tcl & Tk shared libs in any paths found in PATH");
+    }
+    version (Posix)
+    {
+        // this will need to be improved. On Posix the path
+        // where the SOs are located may be set in /etc/ld.so.conf,
+        // which itself can "include" other .conf files that specify the paths.
+        // we could alternatively just try to load tk8.6.so/libtk8.6.so.
+        // for now we just try to load the hardcoded SO name and hope LD finds it.
+        auto paths = [Pair(tclSharedLibName, tkSharedLibName)];
+    }
+    else
+    {
+        static assert("Unsupported platform");
+    }
+
+    foreach (pair; paths)
+    {
+        tclLib = loadLib(pair.tcl_path.toStringz);
+        tkLib = loadLib(pair.tk_path.toStringz);
+
+        // just load the first pair match (can be improved later)
+        if (tclLib !is null && tkLib !is null)
+            break;
+    }
+
+    enforce(tclLib !is null && tkLib !is null,
+        "Could not load Tcl/Tk shared libs in any paths found in PATH");
 
     foreach (string member; __traits(allMembers, TclProcs))
         tclLib.loadSymbol!(__traits(getMember, TclProcs, member));
 
-    tkLib = enforce(loadLib(tkDll), format("'%s' not found in PATH.", tkDll));
-
     foreach (string member; __traits(allMembers, TkProcs))
         tkLib.loadSymbol!(__traits(getMember, TkProcs, member));
+}
+
+/// shared lib initialization
+shared static this()
+{
+    loadSharedLibs();
 
     // Since we might need the app name we do it here instead of asking
     // the user to pass it via main(string[] args).
