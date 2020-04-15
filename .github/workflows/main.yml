@@ -45,12 +45,16 @@ jobs:
         ln -s /usr/local/Cellar/tcl-tk/8.6.1/lib/libtk8.6.dylib /usr/local/lib/libtk8.6.dylib
         brew cask install xquartz
 
+    # We need XVFB for a virtual framebuffer (headless CI mode),
+    # and also a light window manager (otherwise some windowing tests will fail)
     - name: '[Linux] Install dependencies'
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
         sudo apt-get install -y tk8.6
         sudo apt-get install -y xvfb
+        sudo apt-get install -y x11vnc
+        sudo apt-get install -y fluxbox
 
     - name: '[Windows] Install dependencies'
       if: runner.os == 'Windows'
