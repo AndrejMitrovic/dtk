@@ -9,10 +9,13 @@ module dtk.utils;
 import dtk.imports;
 import dtk.types;
 
+import core.runtime;
+
 /** Used for Tcl string literal escape rules. */
 private __gshared string[dchar] _tclTransTable;
 
-shared static this ()
+/// Initialize a custom unittest runner
+shared static this()
 {
     _tclTransTable['"'] = `\"`;
     _tclTransTable['$'] = r"\$";
@@ -21,6 +24,89 @@ shared static this ()
     _tclTransTable['\\'] = r"\\";
     _tclTransTable['{'] = r"\{";
     _tclTransTable['}'] = r"\}";
+
+    Runtime.extendedModuleUnitTester = &customModuleUnitTester;
+}
+
+/// Enables filtering tests via the 'dtest' environment variable
+private UnitTestResult customModuleUnitTester ()
+{
+    import std.algorithm;
+    import std.parallelism;
+    import std.process;
+    import std.range;
+    import std.stdio;
+    import std.string;
+    import std.uni;
+    import core.atomic;
+    import core.sync.mutex;
+
+    auto filter = environment.get("dtest").toLower();
+    size_t filtered;
+
+    struct ModTest
+    {
+        string name;
+        void function() test;
+    }
+
+    ModTest[] mod_tests;
+    foreach (ModuleInfo* mod; ModuleInfo)
+    {
+        if (mod is null)
+            continue;
+
+        auto fp = mod.unitTest;
+        if (fp is null)
+            continue;
+
+        // only run this repo's tests, not any dependencies
+        if (mod.name.startsWith("dtk"))
+        {
+            if (filter.length > 0 &&
+                !canFind(mod.name.toLower(), filter.save))
+            {
+                filtered++;
+                continue;
+            }
+
+            mod_tests ~= ModTest(mod.name, fp);
+        }
+    }
+
+    shared size_t executed;
+    shared size_t passed;
+    shared Mutex print_lock = new shared Mutex();
+
+    void runTest (ModTest mod)
+    {
+        atomicOp!"+="(executed, 1);
+        try
+        {
+            //writefln("Unittesting %s..", mod.name);
+            mod.test();
+            atomicOp!"+="(passed, 1);
+        }
+        catch (Throwable ex)
+        {
+            synchronized (print_lock)
+            {
+                writefln("Module tests failed: %s", mod.name);
+                writeln(ex);
+            }
+        }
+    }
+
+    foreach (mod; mod_tests)
+        runTest(mod);
+
+    UnitTestResult result = { executed : executed, passed : passed };
+    if (filtered > 0)
+        writefln("Ran %s/%s tests (%s filtered)", result.executed,
+            result.executed + filtered, filtered);
+
+    result.runMain = false;
+    return result;
 }
 
 private template isRawStaticArray(T, A...)

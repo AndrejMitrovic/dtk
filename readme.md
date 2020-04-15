@@ -57,6 +57,12 @@ Run [dub] alone in the root project directory to build **dtk** as a static libra
 $ dub
 ```
 
+## Testing
+
+You can test individual modules with:
+
+$ dtest=dtk.tests.events_keyboard dub test
+
 ## Documentation
 
 Documentation and tutorials are planned to be written soon. Stay tuned!
