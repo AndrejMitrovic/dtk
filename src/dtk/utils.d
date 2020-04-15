@@ -41,7 +41,8 @@ private UnitTestResult customModuleUnitTester ()
     import core.atomic;
     import core.sync.mutex;
 
-    auto filter = environment.get("dtest").toLower();
+    string[] skip_mods = environment.get("dskip").toLower().split(",");
+    string filter = environment.get("dtest").toLower();
     size_t filtered;
 
     struct ModTest
@@ -51,7 +52,7 @@ private UnitTestResult customModuleUnitTester ()
     }
 
     ModTest[] mod_tests;
-    foreach (ModuleInfo* mod; ModuleInfo)
+    LForeach: foreach (ModuleInfo* mod; ModuleInfo)
     {
         if (mod is null)
             continue;
@@ -64,10 +65,19 @@ private UnitTestResult customModuleUnitTester ()
         if (mod.name.startsWith("dtk"))
         {
             if (filter.length > 0 &&
-                !canFind(mod.name.toLower(), filter.save))
+                !canFind(mod.name.toLower(), filter))
             {
                 filtered++;
                 continue;
+            }
+
+            foreach (skip_mod; skip_mods)
+            {
+                if (canFind(mod.name.toLower(), skip_mod))
+                {
+                    filtered++;
+                    continue LForeach;
+                }
             }
 
             mod_tests ~= ModTest(mod.name, fp);
