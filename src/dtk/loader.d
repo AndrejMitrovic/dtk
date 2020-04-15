@@ -15,7 +15,7 @@ import dtk.utils;
 import dtk.widgets.widget;
 
 /** Used for Tcl string literal escape rules. */
-string[dchar] _tclTransTable;
+__gshared string[dchar] _tclTransTable;
 
 version (Windows)
 {
