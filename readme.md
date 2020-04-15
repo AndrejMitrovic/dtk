@@ -31,6 +31,12 @@ path of your executable.
 
 Use your package manager to install the **Tk** and **Tcl** shared libraries.
 
+For example:
+
+```
+$ sudo apt-get install -y tk8.6
+```
+
 ## Examples
 
 Use [dub] to run any of the examples. Simply prepend `dub run dtk:` before the example name when calling [dub]:
