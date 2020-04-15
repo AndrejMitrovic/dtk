@@ -7,7 +7,6 @@
 module dtk.tests.globals;
 
 version(unittest):
-version(DTK_UNITTEST):
 
 // Symbol conflict, issue: http://d.puremagic.com/issues/show_bug.cgi?id=11065
 /* package: */  // should only be used in the test-suite

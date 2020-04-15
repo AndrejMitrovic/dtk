@@ -7,7 +7,6 @@
 module dtk.tests.progressbar;
 
 version(unittest):
-version(DTK_UNITTEST):
 
 import dtk;
 import dtk.imports;

@@ -7,7 +7,6 @@
 module dtk.tests.labelframe;
 
 version(unittest):
-version(DTK_UNITTEST):
 
 import dtk;
 import dtk.imports;
