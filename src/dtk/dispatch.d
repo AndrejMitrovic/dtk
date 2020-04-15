@@ -60,7 +60,7 @@ static:
 
         // Note: We're retrieving a keysym, not a keycode
         static immutable keyboardArgs =
-            [TkSubs.keysym_decimal, TkSubs.uni_char, TkSubs.state, TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.abs_x_pos, TkSubs.abs_y_pos, TkSubs.timestamp].map!(arg => cast(string)arg).join(" ");
+            [TkSubs.keysym_decimal, TkSubs.uni_char, TkSubs.state, TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.abs_x_pos, TkSubs.abs_y_pos, TkSubs.timestamp].map!toBaseType.join(" ");
 
         tclEvalFmt("bind %s <KeyPress> { %s %s %s %s }",
             _dtkInterceptTag, _dtkCallbackIdent, EventType.keyboard, KeyboardAction.press, keyboardArgs);
@@ -70,7 +70,7 @@ static:
 
         /** Hook mouse. */
 
-        static immutable mouseArgs = [cast(string)TkSubs.mouse_wheel_delta, TkSubs.state, TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.abs_x_pos, TkSubs.abs_y_pos, TkSubs.timestamp].join(" ");
+        static immutable mouseArgs = [TkSubs.mouse_wheel_delta, TkSubs.state, TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.abs_x_pos, TkSubs.abs_y_pos, TkSubs.timestamp].map!toBaseType.join(" ");
 
         static mouseButtons = [MouseButton.button1, MouseButton.button2, MouseButton.button3, MouseButton.button4, MouseButton.button5];
 
@@ -95,16 +95,16 @@ static:
 
         tclEvalFmt("bind %s <Motion> { %s %s %s %s %s }",
                     _dtkInterceptTag,
-                    _dtkCallbackIdent, EventType.mouse, MouseAction.motion, cast(string)TkSubs.mouse_button, mouseArgs);
+                    _dtkCallbackIdent, EventType.mouse, MouseAction.motion, TkSubs.mouse_button.toBaseType, mouseArgs);
 
         tclEvalFmt("bind %s <MouseWheel> { %s %s %s %s %s }",
                     _dtkInterceptTag,
-                    _dtkCallbackIdent, EventType.mouse, MouseAction.wheel, cast(string)TkSubs.mouse_button, mouseArgs);
+                    _dtkCallbackIdent, EventType.mouse, MouseAction.wheel, TkSubs.mouse_button.toBaseType, mouseArgs);
 
         /** Hook geometry. */
 
         static immutable geometryArgs = [TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.width, TkSubs.height, TkSubs.border_width]
-            .map!(arg => cast(string)arg).join(" ");
+            .map!toBaseType.join(" ");
 
         tclEvalFmt("bind %s <Configure> { %s %s %s }",
                     _dtkInterceptTag,
@@ -112,7 +112,7 @@ static:
 
         /** Hook hover. */
 
-        static immutable hoverArgs = [TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.state, TkSubs.timestamp].map!(arg => cast(string)arg).join(" ");
+        static immutable hoverArgs = [TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.state, TkSubs.timestamp].map!toBaseType.join(" ");
 
         tclEvalFmt("bind %s <Enter> { %s %s %s %s }",
                     _dtkInterceptTag,
@@ -126,11 +126,11 @@ static:
 
         tclEvalFmt("bind %s <FocusIn> { %s %s %s %s }",
                     _dtkInterceptTag,
-                    _dtkCallbackIdent, EventType.focus, FocusAction.focus, cast(string)TkSubs.widget_path);
+                    _dtkCallbackIdent, EventType.focus, FocusAction.focus, TkSubs.widget_path.toBaseType);
 
         tclEvalFmt("bind %s <FocusOut> { %s %s %s %s }",
                     _dtkInterceptTag,
-                    _dtkCallbackIdent, EventType.focus, FocusAction.unfocus, cast(string)TkSubs.widget_path);
+                    _dtkCallbackIdent, EventType.focus, FocusAction.unfocus, TkSubs.widget_path.toBaseType);
 
         //~ /** Inject procedure for focus requests. */
         tclEvalFmt("
@@ -150,7 +150,7 @@ static:
         /** Hook user destroy event by appending. */
         tclEvalFmt("bind %s <Destroy> { %s %s %s }",
                     _dtkInterceptTag,
-                    _dtkCallbackIdent, EventType.destroy, cast(string)TkSubs.widget_path);
+                    _dtkCallbackIdent, EventType.destroy, TkSubs.widget_path.toBaseType);
 
         /** Hook listbox select virtual event. */
         tclEvalFmt("bind %s <<ListboxSelect>> { %s %s %s %s}",
