@@ -34,7 +34,7 @@ unittest
 
     assert(!book.walkTabs.empty);
 
-    size_t idx;
+    uint idx;
     foreach (tab; book.walkTabs)
     {
         assert(tab == book[idx], text(tab, " != ", book[idx]));

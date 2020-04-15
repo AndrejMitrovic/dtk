@@ -39,7 +39,7 @@ class App
             _line = line;
             auto displayTimer = StopWatch(AutoStart.yes);
 
-            auto runTimeDur = cast(TickDuration)runTime;
+            auto runTimeDur = runTime;
             auto runTimeWatch = StopWatch(AutoStart.yes);
 
             bool idleDurChanged = false;
@@ -62,23 +62,21 @@ class App
                 if (skipIdleTime == skipIdleTime.no && hasEvents)
                 {
                     runTime += 100.msecs;
-                    runTimeDur = cast(TickDuration)runTime;
+                    runTimeDur = runTime;
                     idleDurChanged = true;
                 }
 
-                if (displayTimer.peek > cast(TickDuration)(1.seconds))
+                if (displayTimer.peek > 1.seconds)
                 {
                     if (idleDurChanged)
                     {
                         idleDurChanged = false;
-                        auto durSecs = runTimeDur.seconds;
-                        auto durMsecs = runTimeDur.msecs - (durSecs * 1000);
-                        stderr.writefln("-- Idle time increased to: %s seconds, %s msecs.", durSecs, durMsecs);
+                        stderr.writefln("-- Idle time increased to: %s.", runTimeDur);
                     }
 
                     displayTimer.reset();
                     auto timeLeft = runTimeDur - runTimeWatch.peek;
-                    stderr.writefln("-- Time left: %s seconds.", (runTimeDur - runTimeWatch.peek).seconds);
+                    stderr.writefln("-- Time left: %s.", runTimeDur - runTimeWatch.peek);
                 }
 
             } while (hasEvents || runTimeWatch.peek < runTimeDur);
