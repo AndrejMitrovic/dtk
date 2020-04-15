@@ -22,9 +22,8 @@ package abstract final class Interpreter
     package static void initClass()
     {
         _interp = enforce(Tcl_CreateInterp(), "Couldn't create the Tcl interpreter.");
-
-        enforce(Tcl_Init(_interp) == TCL_OK, to!string(_interp.result));
-        enforce(Tk_Init(_interp) == TCL_OK, to!string(_interp.result));
+        enforce(Tcl_Init(_interp) == TCL_OK, Tcl_GetStringResult(_interp).to!string);
+        enforce(Tk_Init(_interp) == TCL_OK, Tcl_GetStringResult(_interp).to!string);
     }
 
     /** Release the interpreter resources. */
