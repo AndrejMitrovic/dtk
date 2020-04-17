@@ -55,8 +55,8 @@ version (OSX)
 
     alias LibHandle = void*;
 
-    enum tclSharedLibName = "libtcl8.6.dylib";
-    enum tkSharedLibName = "libtk8.6.dylib";
+    enum tclSharedLibName = "/usr/local/Cellar/tcl-tk/8.6.10/lib/libtcl8.6.dylib";
+    enum tkSharedLibName = "/usr/local/Cellar/tcl-tk/8.6.10/lib/libtk8.6.dylib";
 
     auto loadLib(const(char)* libName)
     {
