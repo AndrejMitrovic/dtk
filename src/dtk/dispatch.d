@@ -61,7 +61,7 @@ static:
 
         // Note: We're retrieving a keysym, not a keycode
         static immutable keyboardArgs =
-            [TkSubs.keysym_decimal, TkSubs.uni_char, TkSubs.state, TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.abs_x_pos, TkSubs.abs_y_pos, TkSubs.timestamp].map!toBaseType.join(" ");
+            [TkSubs.keysym_decimal, TkSubs.uni_char, TkSubs.state, TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.abs_x_pos, TkSubs.abs_y_pos].map!toBaseType.join(" ");
 
         tclEvalFmt("bind %s <KeyPress> { %s %s %s %s }",
             _dtkInterceptTag, _dtkCallbackIdent, EventType.keyboard, KeyboardAction.press, keyboardArgs);
@@ -71,7 +71,7 @@ static:
 
         /** Hook mouse. */
 
-        static immutable mouseArgs = [TkSubs.mouse_wheel_delta, TkSubs.state, TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.abs_x_pos, TkSubs.abs_y_pos, TkSubs.timestamp].map!toBaseType.join(" ");
+        static immutable mouseArgs = [TkSubs.mouse_wheel_delta, TkSubs.state, TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.abs_x_pos, TkSubs.abs_y_pos].map!toBaseType.join(" ");
 
         static mouseButtons = [MouseButton.button1, MouseButton.button2, MouseButton.button3, MouseButton.button4, MouseButton.button5];
 
@@ -113,7 +113,7 @@ static:
 
         /** Hook hover. */
 
-        static immutable hoverArgs = [TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.state, TkSubs.timestamp].map!toBaseType.join(" ");
+        static immutable hoverArgs = [TkSubs.widget_path, TkSubs.rel_x_pos, TkSubs.rel_y_pos, TkSubs.state].map!toBaseType.join(" ");
 
         tclEvalFmt("bind %s <Enter> { %s %s %s %s }",
                     _dtkInterceptTag,
@@ -268,7 +268,7 @@ static:
     /// create and populate a mouse event and dispatch it.
     private static TkEventFlag _handleMouseEvent(const Tcl_Obj*[] tclArr)
     {
-        assert(tclArr.length == 10, tclArr.length.text);
+        assert(tclArr.length == 9, tclArr.length.text);
 
         /**
             Indices:
@@ -281,7 +281,6 @@ static:
                 6 => Widget mouse X position
                 7 => Desktop mouse X position
                 8 => Desktop mouse Y position
-                9 => Timestamp
         */
 
         MouseAction action = getTclMouseAction(tclArr[0]);
@@ -294,7 +293,7 @@ static:
 
         Point widgetMousePos = getTclPoint(tclArr[5 .. 7]);
         Point desktopMousePos = getTclPoint(tclArr[7 .. 9]);
-        TimeMsec timeMsec = getTclTimestamp(tclArr[9]);
+        TimeMsec timeMsec = getTclTime();
 
         auto event = scoped!MouseEvent(widget, action, button, wheel, keyMod, widgetMousePos, desktopMousePos, timeMsec);
         return _dispatchEvent(widget, event);
@@ -303,7 +302,7 @@ static:
     /// create and populate a keyboard event and dispatch it.
     private static TkEventFlag _handleKeyboardEvent(const Tcl_Obj*[] tclArr)
     {
-        assert(tclArr.length == 10, tclArr.length.text);
+        assert(tclArr.length == 9, tclArr.length.text);
 
         /**
             Indices:
@@ -316,7 +315,6 @@ static:
                 6  => Widget mouse X position
                 7  => Desktop mouse X position
                 8  => Desktop mouse Y position
-                9  => Timestamp
         */
 
         KeyboardAction action = getTclKeyboardAction(tclArr[0]);
@@ -329,7 +327,7 @@ static:
 
         Point widgetMousePos = getTclPoint(tclArr[5 .. 7]);
         Point desktopMousePos = getTclPoint(tclArr[7 .. 9]);
-        TimeMsec timeMsec = getTclTimestamp(tclArr[9]);
+        TimeMsec timeMsec = getTclTime();
 
         auto event = scoped!KeyboardEvent(widget, action, keySym, unichar, keyMod, widgetMousePos, desktopMousePos, timeMsec);
         return _dispatchEvent(widget, event);
@@ -367,7 +365,7 @@ static:
     /// create and populate a hover event and dispatch it.
     private static TkEventFlag _handleHoverEvent(const Tcl_Obj*[] tclArr)
     {
-        assert(tclArr.length == 6, tclArr.length.text);
+        assert(tclArr.length == 5, tclArr.length.text);
 
         /**
             Indices:
@@ -376,7 +374,6 @@ static:
                 2  => Mouse x position
                 3  => Mouse y position
                 4  => Key modifier
-                5  => Timestamp
         */
 
         HoverAction hoverAction = to!HoverAction(tclArr[0].tclPeekString());
@@ -388,8 +385,7 @@ static:
 
         KeyMod keyMod = getTclKeyMod(tclArr[4]);
 
-        // note: timestamp missing since <Configure> event doesn't support timestamps
-        TimeMsec timeMsec = getTclTimestamp(tclArr[5]);
+        TimeMsec timeMsec = getTclTime();
 
         auto event = scoped!HoverEvent(widget, hoverAction, position, keyMod, timeMsec);
         return _dispatchEvent(widget, event);
@@ -1087,12 +1083,6 @@ private dchar getTclUnichar(const(Tcl_Obj)* tclObj)
 private Widget getTclWidget(const(Tcl_Obj)* tclObj)
 {
     return Widget.lookupWidgetPath(tclObj.tclPeekString());
-}
-
-/** Extract the timestamp from the tcl_Obj object. */
-private TimeMsec getTclTimestamp(const(Tcl_Obj)* tclObj)
-{
-    return to!TimeMsec(tclObj.tclPeekString());
 }
 
 /** Extract the keyboard action from the tcl_Obj object. */

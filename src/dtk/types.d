@@ -473,7 +473,6 @@ package enum TkSubs : string
     override_redirect = "%o",
     place = "%p",
     state = "%s",
-    timestamp = "%t",
     width = "%w",
     rel_x_pos = "%x",
     rel_y_pos = "%y",
