@@ -25,7 +25,8 @@ shared static this()
     _tclTransTable['{'] = r"\{";
     _tclTransTable['}'] = r"\}";
 
-    Runtime.extendedModuleUnitTester = &customModuleUnitTester;
+    version (unittest)
+        Runtime.extendedModuleUnitTester = &customModuleUnitTester;
 }
 
 /// Enables filtering tests via the 'dtest' environment variable
