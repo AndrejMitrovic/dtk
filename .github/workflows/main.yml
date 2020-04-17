@@ -41,8 +41,8 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         brew install tcl-tk
-        ln -s /usr/local/Cellar/tcl-tk/8.6.1/lib/libtcl8.6.dylib /usr/local/lib/libtcl8.6.dylib
-        ln -s /usr/local/Cellar/tcl-tk/8.6.1/lib/libtk8.6.dylib /usr/local/lib/libtk8.6.dylib
+        ln -s /usr/local/Cellar/tcl-tk/8.6.10/lib/libtcl8.6.dylib /usr/local/lib/libtcl8.6.dylib
+        ln -s /usr/local/Cellar/tcl-tk/8.6.10/lib/libtk8.6.dylib /usr/local/lib/libtk8.6.dylib
         brew cask install xquartz
 
     # We need XVFB for a virtual framebuffer (headless CI mode),
