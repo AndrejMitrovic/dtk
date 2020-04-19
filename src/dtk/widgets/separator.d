@@ -9,11 +9,11 @@ module dtk.widgets.separator;
 import dtk.app;
 import dtk.event;
 import dtk.geometry;
-import dtk.imports;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.widget;
+
+import std.conv;
 
 ///
 class Separator : Widget

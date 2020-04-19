@@ -7,13 +7,18 @@
 module dtk.interpreter;
 
 import dtk.event;
-import dtk.imports;
 import dtk.loader;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.widget;
 import dtk.widgets.window;
+
+import std.array;
+import std.conv;
+import std.exception;
+import std.format;
+import std.string;
+import std.traits;
 
 /** The single Tcl interpreter. */
 package abstract final class Interpreter

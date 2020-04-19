@@ -9,9 +9,12 @@ module dtk.tests.combobox;
 version(unittest):
 
 import dtk;
-import dtk.imports;
 import dtk.utils;
 import dtk.tests.globals;
+
+import std.conv;
+import std.format;
+import std.range;
 
 unittest
 {

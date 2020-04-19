@@ -14,11 +14,8 @@ version(unittest):
 /** One app and one main window for testing. */
 import dtk.app;
 import dtk.geometry;
-import dtk.imports;
-
-import dtk.widgets.window;
-
 import dtk.tests.runner;
+import dtk.widgets.window;
 
 __gshared App app;
 

@@ -7,12 +7,16 @@
 module dtk.widgets.scrollbar;
 
 import dtk.event;
-import dtk.imports;
 import dtk.geometry;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.widget;
+
+import std.array;
+import std.algorithm;
+import std.conv;
+import std.exception;
+import std.format;
 
 /**
     $(B Note): The list of supported target widget types for which a scrollbar can be set:

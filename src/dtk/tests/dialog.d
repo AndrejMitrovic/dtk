@@ -9,8 +9,9 @@ module dtk.tests.dialog;
 version(unittest):
 
 import dtk;
-import dtk.imports;
 import dtk.tests.globals;
+
+import std.range;
 
 unittest
 {

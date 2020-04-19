@@ -6,8 +6,9 @@
  */
 module dtk.widgets.options;
 
-import dtk.imports;
 import dtk.utils;
+
+import std.format;
 
 /**
     Holds various options that are used in multiple widget types.

@@ -9,9 +9,12 @@ module dtk.types;
 /**
     This module contains just a small portion of the Tcl/Tk declarations.
 */
-
-import dtk.imports;
 import dtk.utils;
+
+import std.array;
+import std.conv;
+
+import core.stdc.config;
 
 enum uint TCL_OK = 0;
 enum uint TCL_ERROR = 1;

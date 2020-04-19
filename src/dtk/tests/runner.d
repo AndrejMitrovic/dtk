@@ -8,7 +8,12 @@ module dtk.tests.runner;
 
 version(unittest):
 
-import dtk.imports;
+import std.algorithm;
+import std.path;
+import std.range;
+import std.stdio;
+
+import core.runtime;
 
 alias absPath = absolutePath;
 alias dirSep = dirSeparator;

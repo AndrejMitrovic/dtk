@@ -9,9 +9,10 @@ module dtk.tests.events_generic;
 version(unittest):
 
 import dtk;
-import dtk.imports;
 import dtk.utils;
 import dtk.tests.globals;
+
+import std.format;
 
 unittest
 {

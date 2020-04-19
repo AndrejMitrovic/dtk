@@ -10,13 +10,15 @@ import dtk.dispatch;
 import dtk.event;
 import dtk.geometry;
 import dtk.image;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.widget;
+
+import std.conv;
+import std.format;
+import std.range;
 
 /**
     The default mode setting for a button.

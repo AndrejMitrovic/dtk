@@ -14,15 +14,12 @@ import dtk.dispatch;
 import dtk.event;
 import dtk.geometry;
 import dtk.keymap;
-import dtk.imports;
 import dtk.interpreter;
+import dtk.platform;
 import dtk.signals;
 import dtk.style;
 import dtk.types;
 import dtk.utils;
-
-import dtk.platform;
-
 import dtk.widgets.button;
 import dtk.widgets.entry;
 import dtk.widgets.options;
@@ -30,6 +27,13 @@ import dtk.widgets.progressbar;
 import dtk.widgets.scrollbar;
 import dtk.widgets.slider;
 import dtk.widgets.window;
+
+import std.algorithm;
+import std.conv;
+import std.exception;
+import std.traits;
+import std.format;
+import std.range;
 
 /** The main class of all Dtk widgets. */
 abstract class Widget

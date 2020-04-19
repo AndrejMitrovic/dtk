@@ -9,7 +9,6 @@ module dtk.tests.events_geometry;
 version(unittest):
 
 import dtk;
-import dtk.imports;
 import dtk.tests.globals;
 
 unittest

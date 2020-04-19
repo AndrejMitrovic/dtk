@@ -6,11 +6,10 @@
  */
 module dtk.dragdrop;
 
-import dtk.imports;
-
 import dtk.platform;
-
 import dtk.widgets.widget;
+
+import std.variant;
 
 /** Specifies whether data can be moved. */
 enum CanMoveData

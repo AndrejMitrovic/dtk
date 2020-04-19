@@ -7,8 +7,15 @@
 module dtk.signals;
 
 import dtk.event;
-import dtk.imports;
 import dtk.utils;
+
+import std.algorithm;
+import std.container.slist;
+import std.exception;
+import std.range;
+import std.traits;
+
+private alias pointerTarget (T : T*) = T;
 
 /**
     Some of the Signal code is based off of Johannes Pfau's signals module,
@@ -178,6 +185,9 @@ private:
 ///
 unittest
 {
+    import core.exception;
+    import std.typecons;
+
     static class MyEvent
     {
         this(int x, int y)

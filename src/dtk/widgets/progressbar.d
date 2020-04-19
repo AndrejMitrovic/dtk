@@ -9,12 +9,13 @@ module dtk.widgets.progressbar;
 import dtk.app;
 import dtk.event;
 import dtk.geometry;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.widget;
+
+import std.conv;
+import std.range;
 
 ///
 enum ProgressMode

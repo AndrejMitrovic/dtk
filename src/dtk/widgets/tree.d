@@ -8,13 +8,18 @@ module dtk.widgets.tree;
 
 import dtk.geometry;
 import dtk.image;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.options;
 import dtk.widgets.widget;
+
+import std.algorithm;
+import std.conv;
+import std.exception;
+import std.format;
+import std.range;
+import std.string;
 
 ///
 enum IsOpened

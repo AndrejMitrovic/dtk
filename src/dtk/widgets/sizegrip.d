@@ -9,7 +9,6 @@ module dtk.widgets.sizegrip;
 import dtk.app;
 import dtk.interpreter;
 import dtk.event;
-import dtk.imports;
 import dtk.types;
 
 import dtk.widgets.widget;

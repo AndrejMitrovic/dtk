@@ -7,14 +7,17 @@
 module dtk.app;
 
 import dtk.event;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.loader;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.widget;
 import dtk.widgets.window;
+
+import std.datetime.stopwatch;
+import std.exception;
+
+import core.thread;
 
 /** The main dtk application. Once instantiated a main window will be created. */
 class App
@@ -29,6 +32,9 @@ class App
 
     version(unittest)
     {
+        import std.format;
+        import std.stdio;
+
         private struct UnitTestData
         {
             // file + line of where testRun() was invoked

@@ -8,13 +8,14 @@ module dtk.widgets.label;
 
 import dtk.color;
 import dtk.image;
-import dtk.imports;
 import dtk.geometry;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.options;
 import dtk.widgets.widget;
+
+import std.conv;
+import std.range;
 
 ///
 class Label : Widget

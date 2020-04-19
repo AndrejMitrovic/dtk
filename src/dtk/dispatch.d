@@ -9,13 +9,18 @@ module dtk.dispatch;
 import dtk.app;
 import dtk.event;
 import dtk.geometry;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.keymap;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets;
+
+import std.algorithm;
+import std.conv;
+import std.exception;
+import std.range;
+import std.string;
+import std.typecons;
 
 /** Name of the D event callback. */
 package enum _dtkCallbackIdent = "dtk::callback_handler";
