@@ -13,7 +13,7 @@
 
     "targetName" : "simple",
 
-    "targetPath" : "../../bin",
+    "targetPath" : "../../build",
 
     "targetType": "executable",
 
