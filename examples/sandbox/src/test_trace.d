@@ -43,7 +43,7 @@ void main()
     enum _dtkCallbackIdent = "my_c_callback";
 
     Tcl_CreateObjCommand(App._interp,
-                         cast(char*)_dtkCallbackIdent.toStringz,
+                         _dtkCallbackIdent.toStringz,
                          &dtkCallbackHandler,
                          null,  // no extra client data
                          &dtkCallbackDeleter);

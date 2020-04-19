@@ -208,7 +208,7 @@ __gshared extern(C):
     char* function(Tcl_Interp* interp, char* str, char* newValue, int flags) Tcl_SetVar;
     char* function(Tcl_Interp* interp, char* name1, char* name2, char* newValue, int flags) Tcl_SetVar2;
     void function(Tcl_Interp* interp, char* str, Tcl_FreeProc* freeProc) Tcl_SetResult;
-    Tcl_Command function(Tcl_Interp* interp, char* cmdName,
+    Tcl_Command function(Tcl_Interp* interp, const(char)* cmdName,
                                       Tcl_ObjCmdProc proc, ClientData clientData,
                                       Tcl_CmdDeleteProc deleteProc) Tcl_CreateObjCommand;
 
