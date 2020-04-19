@@ -13,7 +13,7 @@
 
     "targetName" : "checkbuttons",
 
-    "targetPath" : "../../bin",
+    "targetPath" : "../../build",
 
     "targetType": "executable",
 

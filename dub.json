@@ -5,7 +5,7 @@
 
     "targetType": "staticLibrary",
 
-    "targetPath" : "bin",
+    "targetPath" : "build",
 
     "description": "dtk is a D wrapper of the Tcl/Tk graphics library, based on Tcl/Tk v8.6.0.0",
 

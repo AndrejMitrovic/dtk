@@ -13,7 +13,7 @@
 
     "targetName" : "buttons",
 
-    "targetPath" : "../../bin",
+    "targetPath" : "../../build",
 
     "targetType": "executable",
 
