@@ -9,14 +9,14 @@ module dtk.widgets.menu;
 import dtk.app;
 import dtk.dispatch;
 import dtk.event;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.widget;
 import dtk.widgets.window;
+
+import std.format;
 
 class CommonMenu : Widget
 {

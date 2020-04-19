@@ -6,8 +6,13 @@
  */
 module dtk.color;
 
-import dtk.imports;
 import dtk.utils;
+
+import std.algorithm;
+import std.conv;
+import std.exception;
+import std.format;
+import std.range;
 
 ///
 struct RGB

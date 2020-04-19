@@ -6,12 +6,12 @@
  */
 module dtk.widgets.frame;
 
-import dtk.imports;
 import dtk.geometry;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.widget;
+
+import std.conv;
 
 ///
 class Frame : Widget

@@ -7,12 +7,17 @@
 module dtk.widgets.pane;
 
 import dtk.geometry;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.widget;
+
+import std.algorithm;
+import std.array;
+import std.conv;
+import std.exception;
+import std.format;
+import std.range;
 
 ///
 class Pane : Widget

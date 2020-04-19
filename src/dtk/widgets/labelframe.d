@@ -6,12 +6,13 @@
  */
 module dtk.widgets.labelframe;
 
-import dtk.imports;
 import dtk.geometry;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.widget;
+
+import std.conv;
+import std.range;
 
 ///
 class LabelFrame : Widget

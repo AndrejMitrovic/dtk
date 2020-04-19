@@ -9,7 +9,6 @@ module dtk.widgets.combobox;
 import dtk.app;
 import dtk.dispatch;
 import dtk.event;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.types;

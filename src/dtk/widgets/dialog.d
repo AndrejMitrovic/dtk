@@ -9,7 +9,6 @@ module dtk.widgets.dialog;
 import dtk.app;
 import dtk.color;
 import dtk.event;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.types;
@@ -18,6 +17,11 @@ import dtk.utils;
 import dtk.widgets.button;
 import dtk.widgets.widget;
 import dtk.widgets.window;
+
+import std.conv;
+import std.format;
+import std.path;
+import std.range;
 
 /** A file type marker for use with dialogs. */
 struct FileType

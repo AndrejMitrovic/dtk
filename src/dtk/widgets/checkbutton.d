@@ -10,14 +10,16 @@ import dtk.app;
 import dtk.dispatch;
 import dtk.event;
 import dtk.image;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.utils;
 import dtk.types;
-
 import dtk.widgets.button;
 import dtk.widgets.widget;
+
+import std.conv;
+import std.format;
+import std.range;
 
 ///
 class CheckButton : Widget

@@ -9,9 +9,13 @@ module dtk.tests.entry;
 version(unittest):
 
 import dtk;
-import dtk.imports;
 import dtk.utils;
 import dtk.tests.globals;
+
+import std.ascii;
+import std.algorithm;
+import std.format;
+import std.range;
 
 unittest
 {

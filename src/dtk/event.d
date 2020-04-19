@@ -7,15 +7,22 @@
 module dtk.event;
 
 import dtk.geometry;
-import dtk.imports;
+
 import dtk.keymap;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
-
 import dtk.platform;
-
 import dtk.widgets;
+
+import std.conv;
+import std.exception;
+import std.format;
+import std.range;
+import std.traits;
+import std.typetuple;
+
+import core.time;
 
 /**
     All the possible event types. If the event is a custom user event type

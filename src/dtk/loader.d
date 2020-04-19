@@ -7,12 +7,16 @@
 module dtk.loader;
 
 import dtk.dispatch;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.widget;
+
+import std.conv;
+import std.exception;
+import std.string;
+
+import core.runtime;
 
 version (Windows)
 {

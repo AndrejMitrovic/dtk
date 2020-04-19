@@ -10,13 +10,14 @@ import dtk.app;
 import dtk.dispatch;
 import dtk.event;
 import dtk.geometry;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.signals;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.widget;
+
+import std.conv;
+import std.range;
 
 ///
 abstract class SpinboxBase : Widget

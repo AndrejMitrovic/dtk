@@ -9,8 +9,10 @@ module dtk.tests.layout;
 version(unittest):
 
 import dtk;
-import dtk.imports;
 import dtk.tests.globals;
+
+import std.conv;
+import std.range;
 
 unittest
 {
@@ -31,10 +33,10 @@ unittest
     {
         with (frame.grid)
         {
-            stderr.writeln(boundBox());
-            stderr.writeln(boundBox(0, 0));
-            stderr.writeln(boundBox(0, 0, 1, 1));
-            stderr.writeln(boundBox(1, 1, 2, 2));
+            //stderr.writeln(boundBox());
+            //stderr.writeln(boundBox(0, 0));
+            //stderr.writeln(boundBox(0, 0, 1, 1));
+            //stderr.writeln(boundBox(1, 1, 2, 2));
 
             anchor = Anchor.n;
             assert(anchor == Anchor.n);

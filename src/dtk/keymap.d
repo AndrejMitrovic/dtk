@@ -6,7 +6,10 @@
  */
 module dtk.keymap;
 
-import dtk.imports;
+version (unittest)
+{
+    import std.conv;
+}
 
 /**
     All possible key codes recognized by DTK.

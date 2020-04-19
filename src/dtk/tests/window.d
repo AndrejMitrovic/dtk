@@ -9,8 +9,11 @@ module dtk.tests.window;
 version(unittest):
 
 import dtk;
-import dtk.imports;
 import dtk.tests.globals;
+
+import std.algorithm;
+import std.range;
+import std.traits;
 
 /**
     Philippe Sigaud's Permutations from dranges.

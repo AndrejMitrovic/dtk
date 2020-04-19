@@ -9,9 +9,13 @@ module dtk.tests.spinbox;
 version(unittest):
 
 import dtk;
-import dtk.imports;
 import dtk.utils;
 import dtk.tests.globals;
+
+import std.conv;
+import std.format;
+import std.math;
+import std.range;
 
 unittest
 {

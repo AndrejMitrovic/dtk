@@ -8,14 +8,17 @@ module dtk.widgets.window;
 
 import dtk.event;
 import dtk.geometry;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.menu;
 import dtk.widgets.sizegrip;
 import dtk.widgets.widget;
+
+import std.array;
+import std.algorithm;
+import std.conv;
+import std.format;
 
 ///
 enum CanResizeWidth

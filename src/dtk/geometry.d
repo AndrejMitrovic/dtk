@@ -6,8 +6,18 @@
  */
 module dtk.geometry;
 
-import dtk.imports;
 import dtk.utils;
+
+import std.algorithm;
+import std.conv;
+import std.format;
+import std.traits;
+import std.typetuple;
+
+version (unittest)
+{
+    import std.exception;
+}
 
 ///
 struct Point
@@ -67,6 +77,7 @@ Padding toPadding(string input)
 ///
 unittest
 {
+    import core.exception;
     Padding padding;
 
     padding = Padding(10);

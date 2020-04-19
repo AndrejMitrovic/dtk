@@ -8,7 +8,6 @@ module dtk.platform.win32.com;
 
 version (Windows):
 
-import dtk.imports;
 import dtk.utils;
 
 import dtk.platform.win32.defs;

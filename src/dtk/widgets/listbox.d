@@ -9,13 +9,14 @@ module dtk.widgets.listbox;
 import dtk.dispatch;
 import dtk.event;
 import dtk.signals;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;
-
 import dtk.widgets.options;
 import dtk.widgets.widget;
+
+import std.conv;
+import std.range;
 
 ///
 class Listbox : Widget

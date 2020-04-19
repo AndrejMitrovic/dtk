@@ -6,11 +6,14 @@
  */
 module dtk.image;
 
-import dtk.imports;
 import dtk.interpreter;
 import dtk.utils;
-
 import dtk.widgets.widget;
+
+import std.exception;
+import std.file;
+import std.format;
+import std.path;
 
 ///
 class Image : Widget

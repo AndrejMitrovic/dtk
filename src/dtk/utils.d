@@ -6,10 +6,19 @@
  */
 module dtk.utils;
 
-import dtk.imports;
 import dtk.types;
 
 import core.runtime;
+
+import std.algorithm;
+import std.array;
+import std.conv;
+import std.exception;
+import std.format;
+import std.math;
+import std.string;
+import std.range;
+import std.traits;
 
 /** Used for Tcl string literal escape rules. */
 private __gshared string[dchar] _tclTransTable;
@@ -118,67 +127,6 @@ private UnitTestResult customModuleUnitTester ()
 
     result.runMain = false;
     return result;
-}
-
-private template isRawStaticArray(T, A...)
-{
-    enum isRawStaticArray =
-        A.length == 0 &&
-        isStaticArray!T &&
-        !is(T == class) &&
-        !is(T == interface) &&
-        !is(T == struct) &&
-        !is(T == union);
-}
-
-/** Workaround for bad exception file and line info. */
-template to(T)
-{
-    T to(string file = __FILE__, size_t line = __LINE__, A...)(A input)
-        if (!isRawStaticArray!A)
-    {
-        try
-        {
-            return phobosTo!T(input);
-        }
-        catch (dtk.imports.ConvException ex)
-        {
-            ex.file = file;
-            ex.line = line;
-            throw ex;
-        }
-    }
-
-    // Issue 6175
-    T to(S)(ref S input, string file = __FILE__, size_t line = __LINE__)
-        if (isRawStaticArray!S)
-    {
-        try
-        {
-            return phobosTo!T(input);
-        }
-        catch (dtk.imports.ConvException ex)
-        {
-            ex.file = file;
-            ex.line = line;
-            throw ex;
-        }
-    }
-}
-
-/** Wrapper around format which sets the file and line of any exception to the call site. */
-string format(string file = __FILE__, size_t line = __LINE__, Args...)(string fmtStr, Args args)
-{
-    try
-    {
-        return phobosFormat(fmtStr, args);
-    }
-    catch (Exception exc)
-    {
-        exc.file = file;
-        exc.line = line;
-        throw exc;
-    }
 }
 
 /** Convert a Tcl string value into a D type. */
@@ -310,6 +258,7 @@ T StaticCast(T, S)(S source)
 ///
 unittest
 {
+    import std.typecons;
     class A { int x; }
     class B : A { int y; this(int y) { this.y = y; } }
 

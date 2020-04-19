@@ -6,8 +6,10 @@
  */
 module dtk.cursor;
 
-import dtk.imports;
 import dtk.utils;
+
+import std.conv;
+import std.range;
 
 /** The list of cursors. */
 enum Cursor

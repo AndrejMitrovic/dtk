@@ -8,8 +8,9 @@ module dtk.busy;
 
 import dtk.interpreter;
 import dtk.utils;
-
 import dtk.widgets.widget;
+
+import std.format;
 
 // todo: doesn't seem to work properly, wait for tk NG post.
 @disable Busy busy(Widget widget)

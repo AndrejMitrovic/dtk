@@ -9,8 +9,9 @@ module dtk.tests.label;
 version(unittest):
 
 import dtk;
-import dtk.imports;
 import dtk.tests.globals;
+
+import std.conv;
 
 unittest
 {

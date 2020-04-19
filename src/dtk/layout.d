@@ -7,11 +7,15 @@
 module dtk.layout;
 
 import dtk.geometry;
-import dtk.imports;
 import dtk.interpreter;
 import dtk.utils;
-
 import dtk.widgets.widget;
+
+import std.algorithm;
+import std.array;
+import std.conv;
+import std.exception;
+import std.traits;
 
 void pack(Widget widget)
 {

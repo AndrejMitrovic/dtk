@@ -9,7 +9,6 @@ module dtk.tests.frame;
 version(unittest):
 
 import dtk;
-import dtk.imports;
 import dtk.tests.globals;
 
 unittest
