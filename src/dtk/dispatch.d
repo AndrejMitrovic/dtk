@@ -47,7 +47,7 @@ static:
         enforce(!_dtkCallbackInitialized, "dtk callback already initialized.");
 
         Tcl_CreateObjCommand(tclInterp,
-                             cast(char*)_dtkCallbackIdent.toStringz,
+                             _dtkCallbackIdent.toStringz,
                              &dtkCallbackHandler,
                              null,  // no extra client data
                              &dtkCallbackDeleter);

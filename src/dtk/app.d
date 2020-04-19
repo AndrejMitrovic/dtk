@@ -96,7 +96,7 @@ class App
         private void setupExitHandler()
         {
             Tcl_CreateObjCommand(tclInterp,
-                                 cast(char*)"::dtk_early_exit",
+                                 "::dtk_early_exit",
                                  &callbackHandler,
                                  null,
                                  &callbackDeleter);
