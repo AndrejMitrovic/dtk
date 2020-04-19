@@ -33,7 +33,7 @@ class App
         static size_t _line;
 
         /// Run an event loop for the test-suite
-        void testRun(Duration runTime = 0.seconds, SkipIdleTime skipIdleTime = SkipIdleTime.yes, string file = __FILE__, size_t line = __LINE__)
+        void testRun(Duration runTime = 0.seconds, string file = __FILE__, size_t line = __LINE__)
         {
             _isAppRunning = true;
             _file = file;
@@ -58,14 +58,6 @@ class App
             do
             {
                 hasEvents = Tcl_DoOneEvent(TCL_DONT_WAIT) != 0;
-
-                // event found, add some idle time to allow processing
-                if (skipIdleTime == skipIdleTime.no && hasEvents)
-                {
-                    runTime += 100.msecs;
-                    runTimeDur = runTime;
-                    idleDurChanged = true;
-                }
 
                 if (displayTimer.peek > 1.seconds)
                 {
@@ -198,15 +190,3 @@ private:
     __gshared bool _isAppInited;
 }
 
-version(unittest)
-{
-    /**
-        Some test-cases create a lot of idle events (e.g. an indeterminate progress bar).
-        In such cases an event should not increase the waiting time before the app is closed.
-    */
-    enum SkipIdleTime
-    {
-        no,
-        yes
-    }
-}
