@@ -83,66 +83,66 @@ alias Tk_Uid = const(char)*;
  */
 //~ struct XSetWindowAttributes
 //~ {
-    //~ Pixmap background_pixmap;	/* background or None or ParentRelative */
-    //~ unsigned long background_pixel;	/* background pixel */
-    //~ Pixmap border_pixmap;	/* border of the window */
-    //~ unsigned long border_pixel;	/* border pixel value */
-    //~ int bit_gravity;		/* one of bit gravity values */
-    //~ int win_gravity;		/* one of the window gravity values */
-    //~ int backing_store;		/* NotUseful, WhenMapped, Always */
+    //~ Pixmap background_pixmap;   /* background or None or ParentRelative */
+    //~ unsigned long background_pixel; /* background pixel */
+    //~ Pixmap border_pixmap;   /* border of the window */
+    //~ unsigned long border_pixel; /* border pixel value */
+    //~ int bit_gravity;        /* one of bit gravity values */
+    //~ int win_gravity;        /* one of the window gravity values */
+    //~ int backing_store;      /* NotUseful, WhenMapped, Always */
     //~ unsigned long backing_planes;/* planes to be preseved if possible */
     //~ unsigned long backing_pixel;/* value to use in restoring planes */
-    //~ Bool save_under;		/* should bits under be saved? (popups) */
-    //~ long event_mask;		/* set of events that should be saved */
-    //~ long do_not_propagate_mask;	/* set of events that should not propagate */
-    //~ Bool override_redirect;	/* boolean value for override-redirect */
-    //~ Colormap colormap;		/* color map to be associated with window */
-    //~ Cursor cursor;		/* cursor to be displayed (or None) */
+    //~ Bool save_under;        /* should bits under be saved? (popups) */
+    //~ long event_mask;        /* set of events that should be saved */
+    //~ long do_not_propagate_mask; /* set of events that should not propagate */
+    //~ Bool override_redirect; /* boolean value for override-redirect */
+    //~ Colormap colormap;      /* color map to be associated with window */
+    //~ Cursor cursor;      /* cursor to be displayed (or None) */
 //~ };
 
 struct Tk_FakeWin
 {
     /* Display */ void *display;
-    char *dummy1;		/* dispPtr */
+    char *dummy1;       /* dispPtr */
     int screenNum;
     /* Visual */ void *visual;
     int depth;
     Tk_Window_XID window;
-    //~ char *dummy2;		/* childList */
-    //~ char *dummy3;		/* lastChildPtr */
-    //~ Tk_Window parentPtr;	/* parentPtr */
-    //~ char *dummy4;		/* nextPtr */
-    //~ char *dummy5;		/* mainPtr */
+    //~ char *dummy2;       /* childList */
+    //~ char *dummy3;       /* lastChildPtr */
+    //~ Tk_Window parentPtr;    /* parentPtr */
+    //~ char *dummy4;       /* nextPtr */
+    //~ char *dummy5;       /* mainPtr */
     //~ char *pathName;
     //~ Tk_Uid nameUid;
     //~ Tk_Uid classUid;
     //~ XWindowChanges changes;
-    //~ uint dummy6;	/* dirtyChanges */
+    //~ uint dummy6;    /* dirtyChanges */
     //~ XSetWindowAttributes atts;
-    //~ c_ulong dummy7;	/* dirtyAtts */
+    //~ c_ulong dummy7; /* dirtyAtts */
     //~ uing flags;
-    //~ char *dummy8;		/* handlerList */
+    //~ char *dummy8;       /* handlerList */
 //~ #ifdef TK_USE_INPUT_METHODS
-    //~ XIC dummy9;			/* inputContext */
+    //~ XIC dummy9;         /* inputContext */
 //~ #endif /* TK_USE_INPUT_METHODS */
-    //~ ClientData *dummy10;	/* tagPtr */
-    //~ int dummy11;		/* numTags */
-    //~ int dummy12;		/* optionLevel */
-    //~ char *dummy13;		/* selHandlerList */
-    //~ char *dummy14;		/* geomMgrPtr */
-    //~ ClientData dummy15;		/* geomData */
+    //~ ClientData *dummy10;    /* tagPtr */
+    //~ int dummy11;        /* numTags */
+    //~ int dummy12;        /* optionLevel */
+    //~ char *dummy13;      /* selHandlerList */
+    //~ char *dummy14;      /* geomMgrPtr */
+    //~ ClientData dummy15;     /* geomData */
     //~ int reqWidth, reqHeight;
     //~ int internalBorderLeft;
-    //~ char *dummy16;		/* wmInfoPtr */
-    //~ char *dummy17;		/* classProcPtr */
-    //~ ClientData dummy18;		/* instanceData */
-    //~ char *dummy19;		/* privatePtr */
+    //~ char *dummy16;      /* wmInfoPtr */
+    //~ char *dummy17;      /* classProcPtr */
+    //~ ClientData dummy18;     /* instanceData */
+    //~ char *dummy19;      /* privatePtr */
     //~ int internalBorderRight;
     //~ int internalBorderTop;
     //~ int internalBorderBottom;
     //~ int minReqWidth;
     //~ int minReqHeight;
-    //~ char *dummy20;		/* geometryMaster */
+    //~ char *dummy20;      /* geometryMaster */
 }
 
 struct Tcl_Command_
@@ -220,11 +220,11 @@ __gshared extern(C):
     void function(Tcl_Time* timeBuf) Tcl_GetTime;
 
     const(char)* function(
-        Tcl_Interp* interp,		/* Interpreter in which package is now * available. */
-        const(char)* name,		/* Name of desired package. */
-        const(char)* version_,	/* Version string for desired version; NULL
+        Tcl_Interp* interp,     /* Interpreter in which package is now * available. */
+        const(char)* name,      /* Name of desired package. */
+        const(char)* version_,  /* Version string for desired version; NULL
                                  * means use the latest version available. */
-        int exact)			/* Non-zero means that only the particular
+        int exact)          /* Non-zero means that only the particular
                              * version given is acceptable. Zero means use
                              * the latest compatible version. */
     Tcl_PkgRequire;
@@ -242,31 +242,31 @@ version(Windows)
  */
 //~ struct XGCValues
 //~ {
-	//~ int function;		/* logical operation */
-	//~ unsigned long plane_mask;/* plane mask */
-	//~ unsigned long foreground;/* foreground pixel */
-	//~ unsigned long background;/* background pixel */
-	//~ int line_width;		/* line width */
-	//~ int line_style;	 	/* LineSolid, LineOnOffDash, LineDoubleDash */
-	//~ int cap_style;	  	/* CapNotLast, CapButt,
-				   //~ CapRound, CapProjecting */
-	//~ int join_style;	 	/* JoinMiter, JoinRound, JoinBevel */
-	//~ int fill_style;	 	/* FillSolid, FillTiled,
-				   //~ FillStippled, FillOpaeueStippled */
-	//~ int fill_rule;	  	/* EvenOddRule, WindingRule */
-	//~ int arc_mode;		/* ArcChord, ArcPieSlice */
-	//~ Pixmap tile;		/* tile pixmap for tiling operations */
-	//~ Pixmap stipple;		/* stipple 1 plane pixmap for stipping */
-	//~ int ts_x_origin;	/* offset for tile or stipple operations */
-	//~ int ts_y_origin;
-        //~ Font font;	        /* default text font for text operations */
-	//~ int subwindow_mode;     /* ClipByChildren, IncludeInferiors */
-	//~ Bool graphics_exposures;/* boolean, should exposures be generated */
-	//~ int clip_x_origin;	/* origin for clipping */
-	//~ int clip_y_origin;
-	//~ Pixmap clip_mask;	/* bitmap clipping; other calls for rects */
-	//~ int dash_offset;	/* patterned/dashed line information */
-	//~ char dashes;
+    //~ int function;       /* logical operation */
+    //~ unsigned long plane_mask;/* plane mask */
+    //~ unsigned long foreground;/* foreground pixel */
+    //~ unsigned long background;/* background pixel */
+    //~ int line_width;     /* line width */
+    //~ int line_style;     /* LineSolid, LineOnOffDash, LineDoubleDash */
+    //~ int cap_style;      /* CapNotLast, CapButt,
+                   //~ CapRound, CapProjecting */
+    //~ int join_style;     /* JoinMiter, JoinRound, JoinBevel */
+    //~ int fill_style;     /* FillSolid, FillTiled,
+                   //~ FillStippled, FillOpaeueStippled */
+    //~ int fill_rule;      /* EvenOddRule, WindingRule */
+    //~ int arc_mode;       /* ArcChord, ArcPieSlice */
+    //~ Pixmap tile;        /* tile pixmap for tiling operations */
+    //~ Pixmap stipple;     /* stipple 1 plane pixmap for stipping */
+    //~ int ts_x_origin;    /* offset for tile or stipple operations */
+    //~ int ts_y_origin;
+        //~ Font font;          /* default text font for text operations */
+    //~ int subwindow_mode;     /* ClipByChildren, IncludeInferiors */
+    //~ Bool graphics_exposures;/* boolean, should exposures be generated */
+    //~ int clip_x_origin;  /* origin for clipping */
+    //~ int clip_y_origin;
+    //~ Pixmap clip_mask;   /* bitmap clipping; other calls for rects */
+    //~ int dash_offset;    /* patterned/dashed line information */
+    //~ char dashes;
 //~ }
 
 /*
