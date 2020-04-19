@@ -29,15 +29,17 @@ class App
 
     version(unittest)
     {
-        static string _file;
-        static size_t _line;
+        private struct UnitTestData
+        {
+            // file + line of where testRun() was invoked
+            string file;
+            size_t line;
+        }
 
         /// Run an event loop for the test-suite
         void testRun(Duration runTime = 0.seconds, string file = __FILE__, size_t line = __LINE__)
         {
             _isAppRunning = true;
-            _file = file;
-            _line = line;
             auto displayTimer = StopWatch(AutoStart.yes);
 
             auto runTimeDur = runTime;
@@ -45,7 +47,12 @@ class App
 
             bool idleDurChanged = false;
 
-            this.setupExitHandler();
+            UnitTestData ut_data = { file : file, line : line };
+            Tcl_CreateObjCommand(tclInterp,
+                                 "::dtk_early_exit",
+                                 &callbackHandler,
+                                 cast(ClientData)&ut_data,
+                                 &callbackDeleter);
 
             // if the user explicitly closes the window while testing, we break out of the whole test-suite.
             tclEval("
@@ -93,23 +100,15 @@ class App
             } +/
         }
 
-        private void setupExitHandler()
-        {
-            Tcl_CreateObjCommand(tclInterp,
-                                 "::dtk_early_exit",
-                                 &callbackHandler,
-                                 null,
-                                 &callbackDeleter);
-        }
-
-
         static extern(C)
         void callbackDeleter(ClientData clientData) nothrow { }
 
         static extern(C)
         int callbackHandler(ClientData clientData, Tcl_Interp* interp, int objc, const Tcl_Obj** objv)
         {
-            assert(0, format("\nError: User invoked early exit, test-case in %s(%s) failed.", _file, _line));
+            auto ud = cast(UnitTestData*)clientData;
+            assert(0, format("\nError: User invoked early exit, test-case in %s(%s) failed.",
+                ud.file, ud.line));
         }
     }
 
