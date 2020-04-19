@@ -63,7 +63,7 @@ struct TestMods
         }
     }
 
-    bool opIn_r(string mod)
+    bool opBinaryRight(string op)(string mod) if (op == "in")
     {
         if (matchAll)
             return true;
