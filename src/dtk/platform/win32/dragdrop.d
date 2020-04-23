@@ -16,12 +16,18 @@ import dtk.geometry;
 import dtk.interpreter;
 import dtk.types;
 import dtk.utils;
-
 import dtk.platform.win32.defs;
 import dtk.platform.win32.com;
-
 import dtk.widgets.widget;
 import dtk.widgets.window;
+
+import std.conv;
+import std.exception;
+import std.format;
+import std.traits;
+import std.typecons;
+
+import core.stdc.string;
 
 private static FORMATETC _fmtText = { CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
 private static FORMATETC _fmtUniText = { CF_UNICODETEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL };
