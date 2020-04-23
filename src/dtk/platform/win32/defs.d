@@ -8,6 +8,8 @@ module dtk.platform.win32.defs;
 
 version (Windows):
 
+import std.windows.charset;
+
 /**
     This module contains a minimal set of the
     Win32 API to avoid huge build times.

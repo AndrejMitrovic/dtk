@@ -11,8 +11,9 @@ jobs:
       # We want all the systems to proceed with testing even if one fails
       fail-fast: false
       matrix:
-        os: [ ubuntu-18.04 ]
-        # note: Windows disabled for now. We should distribute IronTcl package.
+        os: [ ubuntu-18.04, windows-2019 ]
+        # note: Windows build only tests compiling, not linking.
+        # We need to distribute the IronTcl package for it to work.
         # note: MacOS disabled. Need to find where brew install Tcl/Tk to load it.
         # os: [ ubuntu-18.04, macOS-10.15, windows-2019 ]
         dc: [ dmd-2.091.0, ldc-1.20.1 ]
@@ -80,13 +81,9 @@ jobs:
       run: |
         ./ci/mac.sh
 
-    # [Windows] Build static lib & Run the tests
-    # On Windows we have the luxury of being able to test x86 & x86_64 (yay!)
+    # [Windows] Build static lib & Run the tests (x86 and x64)
     - name: '[Windows] Run tests'
       if: runner.os == 'Windows'
       shell: cmd
       run: |
-        dub build --arch=x86
-        dub build --arch=x86_64
-        dub test --arch=x86
-        dub test --arch=x86_64
+        ci\win.bat

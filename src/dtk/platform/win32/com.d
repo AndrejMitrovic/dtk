@@ -9,8 +9,11 @@ module dtk.platform.win32.com;
 version (Windows):
 
 import dtk.utils;
-
 import dtk.platform.win32.defs;
+
+import core.atomic;
+import core.memory;
+import core.stdc.string;
 
 C newCom(C, T...)(T arguments) if(is(C : ComObject) && T.length > 0)
 {

@@ -116,6 +116,7 @@ private auto getValidPairPaths ()
     import std.array;
     import std.file;
     import std.process;
+    import std.range;
     import std.string;
     import std.typecons;
 
