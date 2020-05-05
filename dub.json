@@ -25,7 +25,7 @@
         "src"
     ],
 
-    "sourceFiles-windows": ["comctl32.lib", "ole32.lib", "user32.lib"],
+    "libs-windows": ["comctl32", "ole32", "user32"],
 
     "dflags-windows-x86": ["-L/SUBSYSTEM:WINDOWS:5.01"],
     "dflags-windows-x86_64": ["-L/SUBSYSTEM:WINDOWS:5.02"],
